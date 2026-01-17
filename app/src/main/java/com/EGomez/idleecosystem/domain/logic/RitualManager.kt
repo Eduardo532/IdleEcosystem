@@ -27,7 +27,7 @@ class RitualManager @Inject constructor() {
                 id = "rit_blood_frenzy",
                 name = "Frenesí de Sangre",
                 description = "Tus clicks vibran con violencia. Potencia manual extrema.",
-                baseCost = BigDecimal("500"),
+                baseCost = BigDecimal("5"),
                 durationSeconds = 15,
                 cooldownSeconds = 60,
                 effectType = RitualEffectType.CLICK_MULTIPLIER,
@@ -37,7 +37,7 @@ class RitualManager @Inject constructor() {
                 id = "rit_void_chant",
                 name = "Cántico del Vacío",
                 description = "La producción se acelera mientras la realidad se rompe.",
-                baseCost = BigDecimal("2500"),
+                baseCost = BigDecimal("15"),
                 durationSeconds = 30,
                 cooldownSeconds = 120,
                 effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
@@ -47,7 +47,7 @@ class RitualManager @Inject constructor() {
                 id = "rit_temporal_rift",
                 name = "Grieta Temporal",
                 description = "Un breve instante de eficiencia infinita.",
-                baseCost = BigDecimal("15000"),
+                baseCost = BigDecimal("50"),
                 durationSeconds = 5,
                 cooldownSeconds = 300,
                 effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
@@ -64,7 +64,6 @@ class RitualManager @Inject constructor() {
                     RitualState.ACTIVE -> {
                         val newTime = ritual.timeRemaining - deltaSeconds
                         if (newTime <= 0) {
-                            // Transición: ACTIVE -> COOLDOWN
                             ritual.copy(
                                 state = RitualState.COOLDOWN,
                                 timeRemaining = ritual.cooldownSeconds,
@@ -77,11 +76,10 @@ class RitualManager @Inject constructor() {
                     RitualState.COOLDOWN -> {
                         val newTime = ritual.timeRemaining - deltaSeconds
                         if (newTime <= 0) {
-                            // Transición: COOLDOWN -> READY
                             ritual.copy(
                                 state = RitualState.READY,
                                 timeRemaining = 0,
-                                totalTimeForProgress = ritual.durationSeconds // Prepara para el próximo uso
+                                totalTimeForProgress = ritual.durationSeconds
                             )
                         } else {
                             ritual.copy(timeRemaining = newTime)

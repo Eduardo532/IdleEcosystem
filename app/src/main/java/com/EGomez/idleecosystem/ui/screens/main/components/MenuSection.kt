@@ -17,11 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.model.Building
+import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
+import com.EGomez.idleecosystem.domain.model.RitualEffectType
+import com.EGomez.idleecosystem.domain.model.RitualState
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
@@ -42,13 +47,14 @@ fun MenuSection(
     onToggleShowPurchased: () -> Unit,
     buildings: List<Building>,
     upgrades: List<Upgrade>,
-    rituals: List<Ritual>, // NUEVO PARÁMETRO
+    rituals: List<Ritual>,
     currentKnowledge: BigDecimal,
+    currentEchoes: BigDecimal,
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
-    onActivateRitual: (String) -> Unit, // NUEVO PARÁMETRO
+    onActivateRitual: (String) -> Unit,
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
@@ -56,14 +62,12 @@ fun MenuSection(
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // AÑADIMOS LA TERCERA PESTAÑA
     val tabs = listOf("Investigación", "Grimorio", "Rituales")
 
     Column(
         modifier = modifier
             .background(Color(0xFF161616), RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
     ) {
-        // Toggle Handle
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -80,7 +84,6 @@ fun MenuSection(
         }
 
         if (menuWeight > 0.2f) {
-            // Multiplier Chips (Solo visible en la pestaña de Edificios - Index 0)
             if (selectedTabIndex == 0) {
                 Row(
                     modifier = Modifier
@@ -106,7 +109,6 @@ fun MenuSection(
                 }
             }
 
-            // Tab Row
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 containerColor = Color.Transparent,
@@ -131,13 +133,12 @@ fun MenuSection(
                 }
             }
 
-            // List Content
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             ) {
                 when (selectedTabIndex) {
-                    0 -> { // Buildings
+                    0 -> {
                         items(buildings) { building ->
                             BuildingItem(
                                 building = building,
@@ -150,7 +151,7 @@ fun MenuSection(
                         }
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
-                    1 -> { // Upgrades
+                    1 -> {
                         item {
                             Row(
                                 modifier = Modifier
@@ -203,11 +204,31 @@ fun MenuSection(
                             }
                         }
                     }
-                    2 -> { // RITUALES (NUEVA PESTAÑA)
+                    2 -> {
+                        // --- CONTADOR DE ECOS ---
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .background(Color(0xFF2A2A2A), RoundedCornerShape(8.dp))
+                                    .padding(12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Ecos Disponibles: ${currentEchoes.toBeautifulString()}",
+                                    color = Color(0xFF00E5FF),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                        // ------------------------
+
                         items(rituals) { ritual ->
                             RitualItem(
                                 ritual = ritual,
-                                currentFunds = currentKnowledge,
+                                currentFunds = currentEchoes,
                                 onActivate = { onActivateRitual(ritual.id) }
                             )
                         }
@@ -216,7 +237,6 @@ fun MenuSection(
                 }
             }
 
-            // Prestige / Bottom Bar
             if (isMenuExpanded) {
                 HorizontalDivider(color = Color(0xFF333333))
                 Row(
@@ -291,4 +311,66 @@ fun MenuSection(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MenuSectionPreview() {
+    val dummyBuildings = listOf(
+        Building(
+            id = "1",
+            name = "Nexo",
+            description = "Genera energía",
+            baseCost = BigDecimal("10"),
+            baseProduction = BigDecimal("1"),
+            growthFactor = BigDecimal("1.15"),
+            amountOwned = 0,
+            isVisible = true,
+            type = BuildingType.PASSIVE,
+            currentMultiplier = BigDecimal.ONE
+        )
+    )
+
+    val dummyRituals = listOf(
+        Ritual(
+            id = "r1",
+            name = "Ritual de Sangre",
+            description = "Poderoso",
+            baseCost = BigDecimal("5"),
+            durationSeconds = 10,
+            cooldownSeconds = 60,
+            effectType = RitualEffectType.CLICK_MULTIPLIER,
+            effectValue = 2.0,
+            state = RitualState.READY,
+            timeRemaining = 0,
+            totalTimeForProgress = 10
+        )
+    )
+
+    MenuSection(
+        isMenuExpanded = true,
+        onToggleMenu = {},
+        menuWeight = 0.6f,
+        selectedTabIndex = 2,
+        onTabSelected = {},
+        buyMultiplier = 1,
+        onBuyMultiplierChanged = {},
+        showPurchased = false,
+        onToggleShowPurchased = {},
+        buildings = dummyBuildings,
+        upgrades = emptyList(),
+        rituals = dummyRituals,
+        currentKnowledge = BigDecimal("1000"),
+        currentEchoes = BigDecimal("10"),
+        globalMultiplier = BigDecimal.ONE,
+        buildingCalculator = BuildingCalculator(),
+        onBuyBuilding = {},
+        onBuyUpgrade = {},
+        onActivateRitual = {},
+        prestigeCurrencyFormatted = "0",
+        canPrestige = false,
+        potentialPrestigeFormatted = "0",
+        onAscendClicked = {},
+        onShowPrestigeShop = {}
+    )
 }

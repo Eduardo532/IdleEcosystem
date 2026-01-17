@@ -11,24 +11,26 @@ class GameRepository @Inject constructor(
     private val gameDao: GameDao
 ) {
     val gameState: Flow<GameStateEntity?> = gameDao.getGameState()
-
-    // NUEVO FLOW DE ESTADÍSTICAS
     val gameStatistics: Flow<GameStatisticsEntity?> = gameDao.getGameStatistics()
 
     suspend fun createNewGame() {
         val initialGame = GameStateEntity(
-            money = "0", premiumCurrency = "0", prestigeCurrency = "0",
-            lastLoginTime = System.currentTimeMillis(), totalPlayTime = 0
+            id = 1, // IMPORTANTE: ID FIJO
+            money = "0",
+            premiumCurrency = "0",
+            prestigeCurrency = "0",
+            echoes = "0",
+            lastLoginTime = System.currentTimeMillis(),
+            totalPlayTime = 0
         )
         gameDao.saveGame(initialGame)
 
-        // Inicializar estadísticas vacías
         val initialStats = GameStatisticsEntity(
-            id = 1,
+            id = 1, // ID Fijo para stats también
             totalPlayTimeSeconds = 0,
             startTime = System.currentTimeMillis(),
             runTimeSeconds = 0,
-            totalOfflineSeconds = 0, // <--- ¡AQUÍ ESTABA EL ERROR! (Faltaba este campo)
+            totalOfflineSeconds = 0,
             lifetimeKnowledge = "0",
             runKnowledge = "0",
             maxKnowledgePerSecond = "0",
@@ -42,65 +44,50 @@ class GameRepository @Inject constructor(
         gameDao.saveGameStatistics(initialStats)
     }
 
-    suspend fun saveGame(currentKnowledge: BigDecimal, premium: BigDecimal, prestige: BigDecimal) {
+    suspend fun saveGame(
+        currentKnowledge: BigDecimal,
+        premium: BigDecimal,
+        prestige: BigDecimal,
+        currentEchoes: BigDecimal
+    ) {
         val currentState = GameStateEntity(
+            id = 1, // SIEMPRE 1
             money = currentKnowledge.toString(),
             premiumCurrency = premium.toString(),
             prestigeCurrency = prestige.toString(),
+            echoes = currentEchoes.toString(),
             lastLoginTime = System.currentTimeMillis(),
-            totalPlayTime = 0
+            totalPlayTime = 0 // Podrías querer conectar esto con el stats manager más adelante
         )
         gameDao.saveGame(currentState)
     }
 
-    // Guardar Estadísticas
     suspend fun saveStatistics(stats: GameStatisticsEntity) {
         gameDao.saveGameStatistics(stats)
     }
 
-    // --- EDIFICIOS ---
-    suspend fun loadBuildings(): List<BuildingEntity> = gameDao.getAllBuildings()
-
-    suspend fun saveBuilding(id: String, amount: Int, isVisible: Boolean) {
-        gameDao.insertBuilding(BuildingEntity(buildingId = id, amountOwned = amount, isUnlocked = isVisible))
-    }
-
-    suspend fun wipeBuildingsAndUpgrades() {
-        gameDao.deleteAllBuildings()
-        gameDao.deleteAllUpgrades()
-    }
-
-    // --- MEJORAS ---
-    suspend fun loadUpgrades(): List<UpgradeEntity> = gameDao.getAllUpgrades()
-
+    // --- El resto de funciones se mantienen igual ---
+    suspend fun loadBuildings() = gameDao.getAllBuildings()
+    suspend fun saveBuilding(id: String, amount: Int, isVisible: Boolean) = gameDao.insertBuilding(BuildingEntity(id, amount, isVisible))
+    suspend fun wipeBuildingsAndUpgrades() { gameDao.deleteAllBuildings(); gameDao.deleteAllUpgrades() }
+    suspend fun loadUpgrades() = gameDao.getAllUpgrades()
     suspend fun saveUpgrade(id: String, isBought: Boolean) = gameDao.insertUpgrade(UpgradeEntity(id, isBought))
+    suspend fun loadAchievements() = gameDao.getAllAchievements()
+    suspend fun saveAchievement(id: String, isUnlocked: Boolean) = gameDao.insertAchievement(AchievementEntity(id, isUnlocked))
+    suspend fun clearAllAchievements() = gameDao.deleteAllAchievements()
+    suspend fun loadPrestigeUpgrades() = gameDao.getAllPrestigeUpgrades()
+    suspend fun savePrestigeUpgrade(id: String, level: Int) = gameDao.insertPrestigeUpgrade(PrestigeUpgradeEntity(id, level))
+    suspend fun clearAllPrestigeUpgrades() = gameDao.deleteAllPrestigeUpgrades()
 
-    // --- LOGROS ---
-    suspend fun loadAchievements(): List<AchievementEntity> = gameDao.getAllAchievements()
-
-    suspend fun saveAchievement(id: String, isUnlocked: Boolean) {
-        gameDao.insertAchievement(AchievementEntity(id, isUnlocked))
-    }
-
-    suspend fun clearAllAchievements() {
-        gameDao.deleteAllAchievements()
-    }
-
-    // --- PRESTIGIO ---
-    suspend fun loadPrestigeUpgrades(): List<PrestigeUpgradeEntity> = gameDao.getAllPrestigeUpgrades()
-
-    suspend fun savePrestigeUpgrade(id: String, level: Int) {
-        gameDao.insertPrestigeUpgrade(PrestigeUpgradeEntity(id, level))
-    }
-
-    suspend fun clearAllPrestigeUpgrades() {
-        gameDao.deleteAllPrestigeUpgrades()
-    }
-
-    suspend fun performPrestigeReset(newPrestigeBalance: BigDecimal) {
+    suspend fun performPrestigeReset(newPrestigeBalance: BigDecimal, currentEchoes: BigDecimal) {
         val resetState = GameStateEntity(
-            money = "0", premiumCurrency = "0", prestigeCurrency = newPrestigeBalance.toString(),
-            lastLoginTime = System.currentTimeMillis(), totalPlayTime = 0
+            id = 1,
+            money = "0",
+            premiumCurrency = "0",
+            prestigeCurrency = newPrestigeBalance.toString(),
+            echoes = currentEchoes.toString(),
+            lastLoginTime = System.currentTimeMillis(),
+            totalPlayTime = 0
         )
         gameDao.saveGame(resetState)
     }

@@ -110,6 +110,7 @@ fun StatisticsScreen(
 
                     StatSection("Misterios") {
                         StatRow("Eventos Encontrados", statisticsManager.totalEventsFound.toString())
+                        StatRow("Ecos Hallados", statisticsManager.totalEchoes.toBeautifulString())
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

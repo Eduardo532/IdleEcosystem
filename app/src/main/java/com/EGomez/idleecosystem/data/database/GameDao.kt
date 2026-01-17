@@ -5,14 +5,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GameDao {
-    // --- JUEGO GENERAL ---
-    @Query("SELECT * FROM game_save WHERE id = 0")
+    // CAMBIO: Buscamos explícitamente el ID 1 en game_save
+    @Query("SELECT * FROM game_save WHERE id = 1")
     fun getGameState(): Flow<GameStateEntity?>
 
+    // OnConflictStrategy.REPLACE asegura que si ya existe el ID 1, lo actualiza (no crea uno nuevo)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveGame(gameState: GameStateEntity)
 
-    // --- EDIFICIOS ---
+    // --- Tablas secundarias (Mantenlas igual) ---
     @Query("SELECT * FROM buildings_save")
     suspend fun getAllBuildings(): List<BuildingEntity>
 
@@ -22,7 +23,6 @@ interface GameDao {
     @Query("DELETE FROM buildings_save")
     suspend fun deleteAllBuildings()
 
-    // --- MEJORAS ---
     @Query("SELECT * FROM upgrades_save")
     suspend fun getAllUpgrades(): List<UpgradeEntity>
 
@@ -32,7 +32,6 @@ interface GameDao {
     @Query("DELETE FROM upgrades_save")
     suspend fun deleteAllUpgrades()
 
-    // --- LOGROS ---
     @Query("SELECT * FROM achievements_save")
     suspend fun getAllAchievements(): List<AchievementEntity>
 
@@ -42,7 +41,6 @@ interface GameDao {
     @Query("DELETE FROM achievements_save")
     suspend fun deleteAllAchievements()
 
-    // --- PRESTIGIO SHOP ---
     @Query("SELECT * FROM prestige_upgrades")
     suspend fun getAllPrestigeUpgrades(): List<PrestigeUpgradeEntity>
 
@@ -52,8 +50,6 @@ interface GameDao {
     @Query("DELETE FROM prestige_upgrades")
     suspend fun deleteAllPrestigeUpgrades()
 
-    // --- ESTADÍSTICAS ---
-    // Usamos ID = 1 como definimos en la migración
     @Query("SELECT * FROM game_statistics WHERE id = 1")
     fun getGameStatistics(): Flow<GameStatisticsEntity?>
 

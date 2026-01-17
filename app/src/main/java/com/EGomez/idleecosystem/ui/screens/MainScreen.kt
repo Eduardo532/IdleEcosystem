@@ -32,11 +32,11 @@ import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.*
+import com.EGomez.idleecosystem.ui.screens.StatisticsScreen
 import com.EGomez.idleecosystem.ui.theme.VoidBlack
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-// Estructura de datos para textos flotantes
 data class FloatingText(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
@@ -50,7 +50,6 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
     buildingCalculator: BuildingCalculator = BuildingCalculator()
 ) {
-    // --- Configuración de Pantalla y Densidad ---
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val currentDensity = LocalDensity.current
@@ -59,25 +58,19 @@ fun MainScreen(
     CompositionLocalProvider(
         LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)
     ) {
-        // --- Estado del ViewModel ---
         val uiState by viewModel.uiState.collectAsState()
         val buildings by viewModel.buildingsState.collectAsState()
         val upgrades by viewModel.upgradesState.collectAsState()
         val achievements by viewModel.achievementsState.collectAsState()
-
-        // NUEVO: Estado de Rituales
         val rituals by viewModel.ritualsState.collectAsState()
-
         val showPurchased by viewModel.showPurchasedState.collectAsState()
 
-        // --- Estados Locales de UI (Control de Diálogos) ---
         var showAchievementsDialog by remember { mutableStateOf(false) }
         var showPrestigeShopDialog by remember { mutableStateOf(false) }
         var showSettingsDialog by remember { mutableStateOf(false) }
         var showHardResetConfirmation by remember { mutableStateOf(false) }
         var showStatisticsDialog by remember { mutableStateOf(false) }
 
-        // --- Animación del Menú Inferior ---
         var isMenuExpanded by remember { mutableStateOf(true) }
         val menuWeight by animateFloatAsState(
             targetValue = if (isMenuExpanded) 0.65f else 0.15f,
@@ -86,7 +79,6 @@ fun MainScreen(
 
         var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-        // --- Lógica de Textos Flotantes (Clicker Visual) ---
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
         val scope = rememberCoroutineScope()
 
@@ -122,7 +114,6 @@ fun MainScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // ZONA 1: INFO Y CLICKER
                         InfoSection(
                             knowledgeFormatted = uiState.knowledgeFormatted,
                             knowledgePerSecond = uiState.knowledgePerSecond,
@@ -137,7 +128,7 @@ fun MainScreen(
                             modifier = Modifier.weight(1f - menuWeight)
                         )
 
-                        // ZONA 2: MENÚ DESPLEGABLE
+                        // AQUÍ CONECTAMOS LA UI
                         MenuSection(
                             isMenuExpanded = isMenuExpanded,
                             onToggleMenu = { isMenuExpanded = !isMenuExpanded },
@@ -150,13 +141,17 @@ fun MainScreen(
                             onToggleShowPurchased = { viewModel.toggleShowPurchased() },
                             buildings = buildings,
                             upgrades = upgrades,
-                            rituals = rituals, // CONEXIÓN NUEVA
+                            rituals = rituals,
                             currentKnowledge = uiState.rawKnowledge,
+
+                            // --- CONEXIÓN DE ECOS ---
+                            currentEchoes = uiState.echoes,
+
                             globalMultiplier = uiState.globalMultiplier,
                             buildingCalculator = buildingCalculator,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) },
                             onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
-                            onActivateRitual = { viewModel.onActivateRitual(it) }, // CONEXIÓN NUEVA
+                            onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted,
                             canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
@@ -166,7 +161,6 @@ fun MainScreen(
                         )
                     }
 
-                    // Renderizado de Textos Flotantes
                     floatingTexts.forEach { item ->
                         Text(
                             text = item.text,
@@ -185,7 +179,6 @@ fun MainScreen(
                 }
             }
 
-            // POPUP DE LOGRO DESBLOQUEADO
             AnimatedVisibility(
                 visible = uiState.lastUnlockedAchievement != null,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
@@ -199,8 +192,6 @@ fun MainScreen(
                     AchievementPopup(achievement = achievement)
                 }
             }
-
-            // --- GESTIÓN DE DIÁLOGOS MODULARIZADOS ---
 
             if (showStatisticsDialog) {
                 StatisticsScreen(

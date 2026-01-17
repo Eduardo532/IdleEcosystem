@@ -1,0 +1,45 @@
+package com.EGomez.idleecosystem.domain.logic
+
+import java.math.BigDecimal
+import java.math.MathContext
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class PrestigeManager @Inject constructor() {
+
+    // Moneda de prestigio: "Cordura Residual"
+    var residualSanity = BigDecimal.ZERO
+
+    // Configuración
+    private val PRESTIGE_THRESHOLD = BigDecimal("1000000") // Mínimo 1M para ascender
+    private val BONUS_PER_POINT = BigDecimal("0.10")       // 10% de bono por punto
+
+    // Calcula cuánta Cordura ganarías si reinicias ahora
+    fun calculatePotentialPrestige(currentKnowledge: BigDecimal): BigDecimal {
+        if (currentKnowledge < PRESTIGE_THRESHOLD) return BigDecimal.ZERO
+
+        val ratio = currentKnowledge.divide(PRESTIGE_THRESHOLD, MathContext.DECIMAL64)
+        val sqrtValue = Math.sqrt(ratio.toDouble())
+
+        return BigDecimal(sqrtValue).setScale(0, java.math.RoundingMode.FLOOR)
+    }
+
+    // Calcula el multiplicador global actual basado en tu Cordura
+    fun getPrestigeMultiplier(): BigDecimal {
+        val bonus = residualSanity.multiply(BONUS_PER_POINT)
+        return BigDecimal.ONE.add(bonus)
+    }
+
+    fun isPrestigeUnlocked(currentKnowledge: BigDecimal): Boolean {
+        return residualSanity > BigDecimal.ZERO || currentKnowledge >= PRESTIGE_THRESHOLD
+    }
+
+    fun loadFromSave(savedAmount: String) {
+        residualSanity = BigDecimal(savedAmount)
+    }
+
+    fun addPrestige(amount: BigDecimal) {
+        residualSanity = residualSanity.add(amount)
+    }
+}

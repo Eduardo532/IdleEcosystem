@@ -78,7 +78,8 @@ class MainViewModel @Inject constructor(
     private val saveManager: SaveManager,
     private val randomEventManager: RandomEventManager,
     private val soundManager: SoundManager,
-    private val statisticsManager: StatisticsManager // --- STATS: Inyección ---
+    private val statisticsManager: StatisticsManager,
+    private val ritualManager: RitualManager // <--- NUEVA INYECCIÓN
 ) : ViewModel() {
 
     private var arcaneKnowledge = BigDecimal.ZERO
@@ -105,7 +106,10 @@ class MainViewModel @Inject constructor(
     private val _showPurchasedState = MutableStateFlow(false)
     val showPurchasedState: StateFlow<Boolean> = _showPurchasedState.asStateFlow()
 
-    // --- STATS: Exponer el Manager para la UI (IMPORTANTE PARA StatisticsScreen) ---
+    // --- RITUALES: Exponer Estado ---
+    val ritualsState = ritualManager.rituals
+
+    // --- STATS: Exponer el Manager para la UI ---
     val statsManager: StatisticsManager get() = statisticsManager
 
     init {
@@ -227,6 +231,10 @@ class MainViewModel @Inject constructor(
                     statisticsManager.trackPlayTime(1)
                     // --- STATS: Rastrear Pico de Producción ---
                     statisticsManager.trackProductionPeak(productionPerSecond)
+
+                    // --- RITUALES: Tick de 1 segundo ---
+                    ritualManager.tick(1)
+
                     oneSecondAccumulator -= 1000
                 }
 
@@ -348,18 +356,27 @@ class MainViewModel @Inject constructor(
         val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
         val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
 
+        // --- RITUALES: Multiplicador Global ---
+        val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
+
         val finalGlobalMult = upgradesGlobal
             .multiply(prestigeGlobal)
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
             .multiply(buffMult)
+            .multiply(ritualProdMult) // APLICADO AQUÍ
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
+
+        // --- RITUALES: Multiplicador de Click ---
+        val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
 
         buildingManager.availableBuildings.forEachIndexed { index, building ->
             val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
             val specificMult = if (building.type == BuildingType.CLICK) {
-                upgradeManager.getRawClickMultiplier().multiply(shopClickBonus)
+                upgradeManager.getRawClickMultiplier()
+                    .multiply(shopClickBonus)
+                    .multiply(ritualClickMult) // APLICADO AQUÍ PARA CLICKS
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
             }
@@ -417,6 +434,21 @@ class MainViewModel @Inject constructor(
             addKnowledgeInternal(finalPower, isManual = true)
         }
         return finalPower
+    }
+
+    // --- RITUALES: Acción de Activación ---
+    fun onActivateRitual(ritualId: String) {
+        viewModelScope.launch {
+            transactionMutex.withLock {
+                val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return@withLock
+                if (ritualManager.tryActivateRitual(ritualId, arcaneKnowledge)) {
+                    soundManager.playSound(SoundType.BUY)
+                    arcaneKnowledge = arcaneKnowledge.subtract(ritual.baseCost)
+                    recalculateState() // Actualiza multiplicadores inmediatamente
+                    updateUi()
+                }
+            }
+        }
     }
 
     fun onBuyBuilding(buildingId: String) {

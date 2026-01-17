@@ -31,7 +31,7 @@ import com.EGomez.idleecosystem.ui.components.AchievementPopup
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.* // Importa todos los diálogos refactorizados
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.*
 import com.EGomez.idleecosystem.ui.theme.VoidBlack
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -64,6 +64,10 @@ fun MainScreen(
         val buildings by viewModel.buildingsState.collectAsState()
         val upgrades by viewModel.upgradesState.collectAsState()
         val achievements by viewModel.achievementsState.collectAsState()
+
+        // NUEVO: Estado de Rituales
+        val rituals by viewModel.ritualsState.collectAsState()
+
         val showPurchased by viewModel.showPurchasedState.collectAsState()
 
         // --- Estados Locales de UI (Control de Diálogos) ---
@@ -146,11 +150,13 @@ fun MainScreen(
                             onToggleShowPurchased = { viewModel.toggleShowPurchased() },
                             buildings = buildings,
                             upgrades = upgrades,
+                            rituals = rituals, // CONEXIÓN NUEVA
                             currentKnowledge = uiState.rawKnowledge,
                             globalMultiplier = uiState.globalMultiplier,
                             buildingCalculator = buildingCalculator,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) },
                             onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
+                            onActivateRitual = { viewModel.onActivateRitual(it) }, // CONEXIÓN NUEVA
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted,
                             canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,

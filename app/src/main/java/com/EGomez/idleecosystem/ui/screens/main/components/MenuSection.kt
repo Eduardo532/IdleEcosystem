@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.model.Building
+import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
@@ -41,11 +42,13 @@ fun MenuSection(
     onToggleShowPurchased: () -> Unit,
     buildings: List<Building>,
     upgrades: List<Upgrade>,
+    rituals: List<Ritual>, // NUEVO PARÁMETRO
     currentKnowledge: BigDecimal,
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
+    onActivateRitual: (String) -> Unit, // NUEVO PARÁMETRO
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
@@ -53,7 +56,8 @@ fun MenuSection(
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Investigación", "Grimorio")
+    // AÑADIMOS LA TERCERA PESTAÑA
+    val tabs = listOf("Investigación", "Grimorio", "Rituales")
 
     Column(
         modifier = modifier
@@ -76,7 +80,7 @@ fun MenuSection(
         }
 
         if (menuWeight > 0.2f) {
-            // Multiplier Chips (Only for Building Tab - Index 0)
+            // Multiplier Chips (Solo visible en la pestaña de Edificios - Index 0)
             if (selectedTabIndex == 0) {
                 Row(
                     modifier = Modifier
@@ -186,7 +190,6 @@ fun MenuSection(
                             }
                         } else {
                             items(upgrades) { upgrade ->
-                                // Calculate target info text
                                 val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) "Tu Mente"
                                 else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) "Todo"
                                 else buildings.find { it.id == upgrade.targetBuildingId }?.name ?: "?"
@@ -200,10 +203,20 @@ fun MenuSection(
                             }
                         }
                     }
+                    2 -> { // RITUALES (NUEVA PESTAÑA)
+                        items(rituals) { ritual ->
+                            RitualItem(
+                                ritual = ritual,
+                                currentFunds = currentKnowledge,
+                                onActivate = { onActivateRitual(ritual.id) }
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(16.dp)) }
+                    }
                 }
             }
 
-            // Prestige / Bottom Bar (Only when expanded)
+            // Prestige / Bottom Bar
             if (isMenuExpanded) {
                 HorizontalDivider(color = Color(0xFF333333))
                 Row(

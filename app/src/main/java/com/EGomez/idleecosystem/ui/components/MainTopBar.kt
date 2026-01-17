@@ -1,0 +1,90 @@
+package com.EGomez.idleecosystem.ui.screens.main.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.EGomez.idleecosystem.domain.model.Achievement
+import com.EGomez.idleecosystem.ui.theme.AncientGold
+import com.EGomez.idleecosystem.ui.theme.ArcanePurple
+import com.EGomez.idleecosystem.ui.theme.VoidBlack
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainTopBar(
+    isMenuExpanded: Boolean,
+    menuWeight: Float,
+    achievements: List<Achievement>,
+    achievementsProgress: String,
+    onSettingsClick: () -> Unit,
+    onStatsClick: () -> Unit,
+    onAchievementsClick: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            // Solo mostramos el título si el menú no ocupa casi toda la pantalla
+            if (!isMenuExpanded || menuWeight < 0.8f) {
+                Text(
+                    "Ecosistema Arcano",
+                    color = ArcanePurple,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = VoidBlack),
+        navigationIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(Icons.Default.Settings, "Configuración", tint = Color.Gray)
+                }
+                IconButton(onClick = onStatsClick) {
+                    Icon(Icons.Default.Assessment, "Estadísticas", tint = AncientGold)
+                }
+            }
+        },
+        actions = {
+            val hasUnlocked = achievements.any { it.isUnlocked }
+            val iconColor = if (hasUnlocked) AncientGold else Color.Gray
+
+            Surface(
+                color = Color.Transparent,
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, iconColor),
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .clickable { onAchievementsClick() }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        "Logros",
+                        tint = iconColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = achievementsProgress,
+                        color = iconColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    )
+}

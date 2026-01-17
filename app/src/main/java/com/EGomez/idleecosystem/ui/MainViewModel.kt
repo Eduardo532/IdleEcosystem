@@ -129,7 +129,7 @@ class MainViewModel @Inject constructor(
                 val savedAchievements = repository.loadAchievements()
                 val savedPrestigeShop = repository.loadPrestigeUpgrades()
 
-                // --- STATS: Cargar estadísticas ---
+                // --- Cargar estadísticas ---
                 val savedStats = repository.gameStatistics.firstOrNull()
                 statisticsManager.loadFromEntity(savedStats)
 
@@ -202,8 +202,6 @@ class MainViewModel @Inject constructor(
         if (gains > BigDecimal.ZERO) {
             addKnowledgeInternal(gains, isManual = false) // Offline cuenta como pasivo
 
-            // --- STATS: Sumar tiempo offline al total ---
-            // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: Usamos trackOfflineTime
             statisticsManager.trackOfflineTime(diffSeconds)
 
             val timeFormatted = com.EGomez.idleecosystem.core.math.formatSecondsToTime(diffSeconds)
@@ -291,7 +289,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun scheduleNextEvent() {
-        val delayMs = kotlin.random.Random.nextLong(120_000, 300_000)
+        val delayMs = kotlin.random.Random.nextLong(90_000, 240_000)
         timeUntilNextEvent = System.currentTimeMillis() + delayMs
     }
 

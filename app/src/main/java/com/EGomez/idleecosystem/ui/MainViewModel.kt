@@ -20,52 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.random.Random
 
-data class ExportPreview(val money: String, val achievements: String, val date: String)
-
-data class GameUiState(
-    val knowledgeFormatted: String = "0",
-    val knowledgePerSecond: String = "0",
-    val rawKnowledge: BigDecimal = BigDecimal.ZERO,
-    val clickMultiplier: String = "1.0",
-    val globalMultiplier: BigDecimal = BigDecimal.ONE,
-    val buyMultiplier: Int = 1,
-    val prestigeCurrencyFormatted: String = "0",
-    val potentialPrestigeFormatted: String = "0",
-    val canPrestige: Boolean = false,
-    val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),
-
-    // --- ESTADÍSTICAS DE LOGROS ---
-    val achievementsProgress: String = "0 / 100",
-    val secretsProgress: String? = null,
-
-    // Offline / Reembolso
-    val showOfflineDialog: Boolean = false,
-    val offlineGains: String = "0",
-    val offlineTimeFormatted: String = "0s",
-    val showRefundDialog: Boolean = false,
-    val refundAmountString: String = "0",
-
-    // Notificación de Logros
-    val lastUnlockedAchievement: Achievement? = null,
-
-    // Guardado / Configuración
-    val saveStringExport: String = "",
-    val exportPreview: ExportPreview? = null,
-    val importPreview: ExportPreview? = null,
-    val pendingImportString: String = "",
-    val importError: String? = null,
-
-    // Audio
-    val isMusicEnabled: Boolean = true,
-    val isSfxEnabled: Boolean = true,
-
-    // Eventos
-    val currentEvent: RandomEvent? = null,
-    val eventResultText: String? = null,
-    val activeBuffMultiplier: Double = 1.0,
-    val buffTimeRemaining: Int = 0
-)
+// NOTA: No definimos ExportPreview aquí porque usamos SavePreview de GameUiState
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -78,16 +35,17 @@ class MainViewModel @Inject constructor(
     private val saveManager: SaveManager,
     private val randomEventManager: RandomEventManager,
     private val soundManager: SoundManager,
-    private val statisticsManager: StatisticsManager // --- STATS: Inyección ---
+    private val statisticsManager: StatisticsManager,
+    private val ritualManager: RitualManager
 ) : ViewModel() {
 
     private var arcaneKnowledge = BigDecimal.ZERO
     private var productionPerSecond = BigDecimal.ZERO
+    private var echoesBalance = BigDecimal.ZERO
+
     private val transactionMutex = Mutex()
     private var timeUntilNextEvent = 0L
     private var activeBuffExpiration = 0L
-
-    // --- STATS: Acumulador de tiempo ---
     private var oneSecondAccumulator = 0L
 
     private val _uiState = MutableStateFlow(GameUiState())
@@ -105,11 +63,10 @@ class MainViewModel @Inject constructor(
     private val _showPurchasedState = MutableStateFlow(false)
     val showPurchasedState: StateFlow<Boolean> = _showPurchasedState.asStateFlow()
 
-    // --- STATS: Exponer el Manager para la UI (IMPORTANTE PARA StatisticsScreen) ---
+    val ritualsState = ritualManager.rituals
     val statsManager: StatisticsManager get() = statisticsManager
 
     init {
-        // Sincronizar estado inicial de audio
         _uiState.value = _uiState.value.copy(
             isMusicEnabled = soundManager.isMusicEnabled,
             isSfxEnabled = soundManager.isSfxEnabled
@@ -122,29 +79,25 @@ class MainViewModel @Inject constructor(
     private fun loadGameDataAndStart() {
         viewModelScope.launch {
             transactionMutex.withLock {
-                // 1. Cargar datos crudos
                 val entity = repository.gameState.firstOrNull()
                 val savedBuildings = repository.loadBuildings()
                 val savedUpgrades = repository.loadUpgrades()
                 val savedAchievements = repository.loadAchievements()
                 val savedPrestigeShop = repository.loadPrestigeUpgrades()
 
-                // --- STATS: Cargar estadísticas ---
                 val savedStats = repository.gameStatistics.firstOrNull()
                 statisticsManager.loadFromEntity(savedStats)
 
-                // 2. Calcular Reembolso (Legacy)
+                // Lógica de migración legacy
                 val refundAmount = prestigeShopManager.calculateLegacyRefund(savedPrestigeShop)
                 var initialSanity = if (entity != null) BigDecimal(entity.prestigeCurrency) else BigDecimal.ZERO
                 var showRefund = false
 
-                // 3. LIMPIEZA DE MEMORIA OBLIGATORIA
                 buildingManager.resetForPrestige()
                 upgradeManager.resetForPrestige()
                 achievementManager.resetAchievements()
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
 
-                // 4. Lógica de Carga / Reembolso
                 if (refundAmount > BigDecimal.ZERO) {
                     initialSanity = initialSanity.add(refundAmount)
                     prestigeManager.residualSanity = initialSanity
@@ -152,7 +105,14 @@ class MainViewModel @Inject constructor(
 
                     repository.clearAllPrestigeUpgrades()
                     prestigeShopManager.upgrades.forEach { repository.savePrestigeUpgrade(it.id, 0) }
-                    repository.saveGame(if (entity != null) BigDecimal(entity.money) else BigDecimal.ZERO, BigDecimal.ZERO, initialSanity)
+
+                    // Al migrar, asumimos 0 ecos
+                    repository.saveGame(
+                        if (entity != null) BigDecimal(entity.money) else BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        initialSanity,
+                        BigDecimal.ZERO
+                    )
                 } else {
                     if (savedPrestigeShop.isNotEmpty()) prestigeShopManager.loadFromSave(savedPrestigeShop)
                     if (savedBuildings.isNotEmpty()) buildingManager.loadFromSave(savedBuildings)
@@ -162,9 +122,12 @@ class MainViewModel @Inject constructor(
                     prestigeManager.residualSanity = initialSanity
                 }
 
-                // 5. Offline / Nueva Partida
                 if (entity != null) {
                     arcaneKnowledge = BigDecimal(entity.money)
+                    echoesBalance = try {
+                        if (entity.echoes.isNullOrEmpty()) BigDecimal.ZERO else BigDecimal(entity.echoes)
+                    } catch (e: Exception) { BigDecimal.ZERO }
+
                     val currentTime = System.currentTimeMillis()
                     val lastTime = entity.lastLoginTime
                     if (lastTime > 0) {
@@ -174,6 +137,7 @@ class MainViewModel @Inject constructor(
                 } else {
                     repository.createNewGame()
                     arcaneKnowledge = BigDecimal.ZERO.add(prestigeShopManager.getStartingKnowledgeBonus())
+                    echoesBalance = BigDecimal.ZERO
                 }
 
                 recalculateState()
@@ -200,10 +164,7 @@ class MainViewModel @Inject constructor(
         val gains = finalOfflineProd.multiply(secondsBD)
 
         if (gains > BigDecimal.ZERO) {
-            addKnowledgeInternal(gains, isManual = false) // Offline cuenta como pasivo
-
-            // --- STATS: Sumar tiempo offline al total ---
-            // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: Usamos trackOfflineTime
+            addKnowledgeInternal(gains, isManual = false)
             statisticsManager.trackOfflineTime(diffSeconds)
 
             val timeFormatted = com.EGomez.idleecosystem.core.math.formatSecondsToTime(diffSeconds)
@@ -222,19 +183,15 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 delay(100)
-
-                // --- STATS: Rastrear Tiempo (1 segundo cada 10 ciclos de 100ms) ---
                 oneSecondAccumulator += 100
                 if (oneSecondAccumulator >= 1000) {
                     statisticsManager.trackPlayTime(1)
-                    // --- STATS: Rastrear Pico de Producción ---
                     statisticsManager.trackProductionPeak(productionPerSecond)
+                    ritualManager.tick(1)
                     oneSecondAccumulator -= 1000
                 }
 
                 buildingManager.checkUnlocks(arcaneKnowledge)
-
-                // Chequeo de logros
                 val newUnlockList = achievementManager.checkAchievements(arcaneKnowledge, buildingManager.availableBuildings)
 
                 if (newUnlockList.isNotEmpty()) {
@@ -253,7 +210,6 @@ class MainViewModel @Inject constructor(
                 recalculateState()
                 val productionTick = productionPerSecond.divide(BigDecimal.TEN)
                 if (productionTick > BigDecimal.ZERO) {
-                    // --- STATS: Pasamos false porque es producción automática ---
                     addKnowledgeInternal(productionTick, isManual = false)
                 }
             }
@@ -269,7 +225,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // --- EVENTOS ---
     private fun startEventSystem() {
         scheduleNextEvent()
         viewModelScope.launch {
@@ -291,18 +246,15 @@ class MainViewModel @Inject constructor(
     }
 
     private fun scheduleNextEvent() {
-        val delayMs = kotlin.random.Random.nextLong(120_000, 300_000)
+        val delayMs = kotlin.random.Random.nextLong(90_000, 240_000)
         timeUntilNextEvent = System.currentTimeMillis() + delayMs
     }
 
     private fun triggerRandomEvent() {
         val event = randomEventManager.getRandomEvent(arcaneKnowledge, prestigeManager.residualSanity)
-
         if (event != null) {
             soundManager.playSound(SoundType.EVENT_APPEAR)
-            // --- STATS: Rastrear Evento Encontrado ---
             statisticsManager.trackEventFound()
-
             _uiState.value = _uiState.value.copy(currentEvent = event, eventResultText = null)
         } else {
             scheduleNextEvent()
@@ -349,19 +301,24 @@ class MainViewModel @Inject constructor(
         val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
         val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
         val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
+        val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
 
         val finalGlobalMult = upgradesGlobal
             .multiply(prestigeGlobal)
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
             .multiply(buffMult)
+            .multiply(ritualProdMult)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
+        val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
 
         buildingManager.availableBuildings.forEachIndexed { index, building ->
             val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
             val specificMult = if (building.type == BuildingType.CLICK) {
-                upgradeManager.getRawClickMultiplier().multiply(shopClickBonus)
+                upgradeManager.getRawClickMultiplier()
+                    .multiply(shopClickBonus)
+                    .multiply(ritualClickMult)
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
             }
@@ -377,30 +334,26 @@ class MainViewModel @Inject constructor(
         _buildingsState.value = buildingManager.availableBuildings.filter { it.isVisible }
         _upgradesState.value = upgradeManager.availableUpgrades.filter { if (_showPurchasedState.value) true else !it.isBought }.sortedBy { it.cost }
 
-        // LÓGICA DE FILTRADO Y CONTEO DE LOGROS
         val allAchievements = achievementManager.availableAchievements
         val unlockedTotal = allAchievements.count { it.isUnlocked }
-
         val secretsFound = allAchievements.count { it.isSecret && it.isUnlocked }
         val secretsTotal = 13
-
-        val visibleAchievements = allAchievements
-            .filter { !it.isSecret || it.isUnlocked }
-            .sortedBy { it.order }
+        val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }
 
         _achievementsState.value = visibleAchievements
 
         val progressText = "$unlockedTotal / 100"
         val secretsText = if (secretsFound > 0) "Secretos: $secretsFound / $secretsTotal" else null
 
-        val currentUi = _uiState.value
-        _uiState.value = currentUi.copy(
+        _uiState.value = _uiState.value.copy(
             potentialPrestigeFormatted = finalPotential.toBeautifulString(),
             canPrestige = canAscend,
             globalMultiplier = finalGlobalMult,
             prestigeUpgrades = prestigeShopManager.upgrades.toList(),
             achievementsProgress = progressText,
-            secretsProgress = secretsText
+            secretsProgress = secretsText,
+            echoes = echoesBalance,
+            echoesFormatted = echoesBalance.toBeautifulString()
         )
     }
 
@@ -413,12 +366,32 @@ class MainViewModel @Inject constructor(
         val finalPower = totalClickPower
         if (finalPower > BigDecimal.ZERO) {
             soundManager.playSound(SoundType.CLICK, 250)
-
-            // --- STATS: Registrar Click y ganancia manual ---
             statisticsManager.trackClick()
             addKnowledgeInternal(finalPower, isManual = true)
+
+            if (Random.nextFloat() < 0.01) {
+                echoesBalance = echoesBalance.add(BigDecimal.ONE)
+                statisticsManager.trackEchoesFound(BigDecimal.ONE) // <--- AGREGADO AQUÍ
+                updateUi()
+            }
         }
         return finalPower
+    }
+
+    fun onActivateRitual(ritualId: String) {
+        viewModelScope.launch {
+            transactionMutex.withLock {
+                if (ritualManager.tryActivateRitual(ritualId, echoesBalance)) {
+                    val ritual = ritualManager.rituals.value.find { it.id == ritualId }
+                    if (ritual != null) {
+                        soundManager.playSound(SoundType.BUY)
+                        echoesBalance = echoesBalance.subtract(ritual.baseCost)
+                        recalculateState()
+                        updateUi()
+                    }
+                }
+            }
+        }
     }
 
     fun onBuyBuilding(buildingId: String) {
@@ -465,10 +438,7 @@ class MainViewModel @Inject constructor(
                     if (success) {
                         soundManager.playSound(SoundType.BUY)
                         prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
-
-                        // --- STATS: Registrar Gasto de Cordura ---
                         statisticsManager.trackSanitySpent(cost)
-
                         val upgrade = prestigeShopManager.upgrades.find { it.id == id }
                         if (upgrade != null) repository.savePrestigeUpgrade(id, upgrade.level)
                         recalculateState()
@@ -495,24 +465,21 @@ class MainViewModel @Inject constructor(
                 if (finalPotential > BigDecimal.ZERO) {
                     soundManager.playSound(SoundType.BUY)
                     prestigeManager.addPrestige(finalPotential)
-
-                    // --- STATS: Registrar Ascensión ---
-                    // IMPORTANTE: Llamar antes de reiniciar las variables locales
                     statisticsManager.trackPrestige(finalPotential)
 
                     buildingManager.resetForPrestige()
                     upgradeManager.resetForPrestige()
 
                     repository.wipeBuildingsAndUpgrades()
-                    repository.performPrestigeReset(prestigeManager.residualSanity)
+                    repository.performPrestigeReset(prestigeManager.residualSanity, echoesBalance)
                     buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
 
                     arcaneKnowledge = prestigeShopManager.getStartingKnowledgeBonus()
+
                     _uiState.value = _uiState.value.copy(activeBuffMultiplier = 1.0, buffTimeRemaining = 0)
                     recalculateState()
                     updateUi()
 
-                    // Guardamos inmediatamente para actualizar las estadísticas de "nuevo run"
                     saveProgressInternal()
                 }
             }
@@ -524,13 +491,12 @@ class MainViewModel @Inject constructor(
             transactionMutex.withLock {
                 arcaneKnowledge = BigDecimal.ZERO
                 prestigeManager.residualSanity = BigDecimal.ZERO
+                echoesBalance = BigDecimal.ZERO
 
                 buildingManager.resetForPrestige()
                 upgradeManager.resetForPrestige()
                 achievementManager.resetAchievements()
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
-
-                // --- STATS: Reinicio Total ---
                 statisticsManager.hardReset()
 
                 repository.clearAllAchievements()
@@ -547,7 +513,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // --- AUDIO & CONFIG ---
     fun toggleMusic() {
         val newState = !soundManager.isMusicEnabled
         soundManager.toggleMusic(newState)
@@ -561,22 +526,28 @@ class MainViewModel @Inject constructor(
     }
 
     fun onExportSaveClicked() {
-        // Obtenemos la entidad actual de estadísticas
         val currentStats = statisticsManager.getEntityForSave()
-
+        // Pasa los argumentos exactos que SaveManager.exportSave espera
         val code = saveManager.exportSave(
             arcaneKnowledge,
             prestigeManager.residualSanity,
+            echoesBalance,
             buildingManager.availableBuildings,
             upgradeManager.availableUpgrades,
             achievementManager.availableAchievements,
             prestigeShopManager.upgrades,
-            currentStats // <--- PASAMOS LAS ESTADÍSTICAS
+            currentStats
         )
 
         val unlockedAch = achievementManager.availableAchievements.count { it.isUnlocked }
         val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
-        val preview = ExportPreview(arcaneKnowledge.toBeautifulString(), "$unlockedAch / ${achievementManager.availableAchievements.size}", date)
+
+        // Usamos SavePreview del paquete UI
+        val preview = SavePreview(
+            date = date,
+            money = arcaneKnowledge.toBeautifulString(),
+            achievements = "$unlockedAch / ${achievementManager.availableAchievements.size}"
+        )
 
         _uiState.value = _uiState.value.copy(
             saveStringExport = code,
@@ -590,7 +561,11 @@ class MainViewModel @Inject constructor(
             val data = saveManager.importSave(saveString)
             if (data != null) {
                 val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(data.timestamp))
-                val preview = ExportPreview(data.knowledge.toBeautifulString(), "${data.achievements.size} / ${achievementManager.availableAchievements.size}", date)
+                val preview = SavePreview(
+                    date = date,
+                    money = data.knowledge.toBeautifulString(),
+                    achievements = "${data.achievements.size} / ${achievementManager.availableAchievements.size}"
+                )
                 _uiState.value = _uiState.value.copy(importPreview = preview, pendingImportString = saveString, importError = null)
             } else {
                 _uiState.value = _uiState.value.copy(importError = "Código inválido o corrupto.", importPreview = null, pendingImportString = "")
@@ -606,15 +581,13 @@ class MainViewModel @Inject constructor(
             val data = saveManager.importSave(saveString)
             if (data != null) {
                 transactionMutex.withLock {
-                    // 1. Limpieza previa
                     repository.clearAllAchievements()
                     achievementManager.resetAchievements()
 
-                    // 2. Carga de datos básicos
                     arcaneKnowledge = data.knowledge
                     prestigeManager.residualSanity = data.sanity
+                    echoesBalance = data.echoes
 
-                    // 3. Restaurar Edificios, Mejoras y Logros
                     data.buildings.forEach { b ->
                         buildingManager.availableBuildings.find { it.id == b.id }?.let {
                             it.amountOwned = b.amount
@@ -624,19 +597,14 @@ class MainViewModel @Inject constructor(
                     upgradeManager.availableUpgrades.forEach { u -> u.isBought = data.upgrades.contains(u.id) }
                     achievementManager.availableAchievements.forEach { a -> a.isUnlocked = data.achievements.contains(a.id) }
 
-                    // 4. Restaurar Tienda de Prestigio
                     prestigeShopManager.upgrades.forEach { it.level = 0 }
                     prestigeShopManager.upgrades.forEach { p ->
                         p.level = data.prestigeUpgrades.find { it.id == p.id }?.level ?: 0
                     }
 
-                    // 5. --- RESTAURAR ESTADÍSTICAS (NUEVO) ---
-                    // Cargamos en memoria
                     statisticsManager.loadFromEntity(data.statistics)
-                    // Guardamos en base de datos inmediatamente
                     repository.saveStatistics(data.statistics)
 
-                    // 6. Guardado final y actualización de UI
                     saveProgressInternal()
                     prestigeShopManager.upgrades.forEach { repository.savePrestigeUpgrade(it.id, it.level) }
 
@@ -652,13 +620,9 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(saveStringExport = "", exportPreview = null, importPreview = null, pendingImportString = "", importError = null)
     }
 
-    // --- MODIFICADO: Acepta flag isManual ---
     private fun addKnowledgeInternal(amount: BigDecimal, isManual: Boolean) {
         arcaneKnowledge = arcaneKnowledge.add(amount)
-
-        // --- STATS: Rastrear ganancia ---
         statisticsManager.trackKnowledgeGenerated(amount, isManual)
-
         updateUi()
     }
 
@@ -670,7 +634,9 @@ class MainViewModel @Inject constructor(
             rawKnowledge = arcaneKnowledge,
             clickMultiplier = finalClick.toBeautifulString(),
             prestigeCurrencyFormatted = prestigeManager.residualSanity.toBeautifulString(),
-            globalMultiplier = _uiState.value.globalMultiplier
+            globalMultiplier = _uiState.value.globalMultiplier,
+            echoes = echoesBalance,
+            echoesFormatted = echoesBalance.toBeautifulString()
         )
     }
 
@@ -696,11 +662,9 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun saveProgressInternal() {
-        repository.saveGame(arcaneKnowledge, BigDecimal.ZERO, prestigeManager.residualSanity)
+        repository.saveGame(arcaneKnowledge, BigDecimal.ZERO, prestigeManager.residualSanity, echoesBalance)
         buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
         achievementManager.availableAchievements.forEach { if (it.isUnlocked) repository.saveAchievement(it.id, true) }
-
-        // --- STATS: Guardar Estadísticas ---
         repository.saveStatistics(statisticsManager.getEntityForSave())
     }
 }

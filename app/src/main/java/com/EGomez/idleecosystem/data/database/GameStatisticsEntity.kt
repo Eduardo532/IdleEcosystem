@@ -28,5 +28,6 @@ data class GameStatisticsEntity(
     val spentSanity: String,
 
     // OTROS
-    val totalEventsFound: Int
+    val totalEventsFound: Int,
+    val totalEchoes: String = "0"
 )

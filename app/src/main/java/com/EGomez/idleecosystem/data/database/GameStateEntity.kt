@@ -5,10 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "game_save")
 data class GameStateEntity(
-    @PrimaryKey val id: Int = 0, // Siempre será 0, solo hay un "save file" activo
-    val money: String,           // String para soportar BigNumber/BigDecimal
+    @PrimaryKey val id: Int = 1,
+    val money: String,
     val premiumCurrency: String,
     val prestigeCurrency: String,
-    val lastLoginTime: Long,     // Para calcular progreso offline [cite: 133]
+    val echoes: String,
+    val lastLoginTime: Long,
     val totalPlayTime: Long
 )

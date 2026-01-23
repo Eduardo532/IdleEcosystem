@@ -14,13 +14,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PrestigeUpgradeEntity::class,
         GameStatisticsEntity::class
     ],
-    version = 7 // <--- SUBIMOS VERSIÓN
+    version = 8 // <--- CAMBIO: SUBIMOS VERSIÓN DE 7 A 8
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
 
     companion object {
-        // --- MIGRACIONES ANTERIORES ---
+        // --- MIGRACIONES ANTERIORES (NO TOCAR) ---
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `achievements_save` (`id` TEXT NOT NULL, `isUnlocked` INTEGER NOT NULL, PRIMARY KEY(`id`))")
@@ -38,15 +38,54 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL("INSERT OR IGNORE INTO `game_statistics` VALUES (1, 0, $now, 0, '0', '0', '0', 0, '0', 0, '0', '0', 0)")
             }
         }
-
-        // --- NUEVA MIGRACIÓN (6 -> 7) ---
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Añadimos la columna totalOfflineSeconds con valor por defecto 0
                 database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `totalOfflineSeconds` INTEGER NOT NULL DEFAULT 0")
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+        // --- NUEVA MIGRACIÓN (7 -> 8) ---
+        // Esta migración arregla el reinicio de partida y añade los Ecos a las estadísticas.
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // 1. Agregar totalEchoes a Estadísticas
+                try {
+                    database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `totalEchoes` TEXT NOT NULL DEFAULT '0'")
+                } catch (e: Exception) {
+                    // Si ya existe por algún motivo, ignoramos el error
+                }
+
+                // 2. Arreglar game_save (Quitar Autoincrement y fijar ID=1)
+                // Paso A: Crear tabla temporal con la estructura CORRECTA (ID fijo)
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `game_save_new` (
+                        `id` INTEGER NOT NULL, 
+                        `money` TEXT NOT NULL, 
+                        `premiumCurrency` TEXT NOT NULL, 
+                        `prestigeCurrency` TEXT NOT NULL, 
+                        `echoes` TEXT NOT NULL, 
+                        `lastLoginTime` INTEGER NOT NULL, 
+                        `totalPlayTime` INTEGER NOT NULL, 
+                        PRIMARY KEY(`id`)
+                    )
+                """)
+
+                // Paso B: Copiar los datos de la última partida guardada a la fila ID=1
+                database.execSQL("""
+                    INSERT INTO game_save_new (id, money, premiumCurrency, prestigeCurrency, echoes, lastLoginTime, totalPlayTime)
+                    SELECT 1, money, premiumCurrency, prestigeCurrency, echoes, lastLoginTime, totalPlayTime 
+                    FROM game_save 
+                    ORDER BY id DESC 
+                    LIMIT 1
+                """)
+
+                // Paso C: Reemplazar la tabla vieja por la nueva
+                database.execSQL("DROP TABLE game_save")
+                database.execSQL("ALTER TABLE game_save_new RENAME TO game_save")
+            }
+        }
+
+        // AGREGAR LA NUEVA MIGRACIÓN A LA LISTA
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
     }
 }

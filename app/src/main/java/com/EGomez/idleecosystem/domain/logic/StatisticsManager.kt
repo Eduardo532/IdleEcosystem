@@ -12,7 +12,7 @@ class StatisticsManager @Inject constructor() {
     var totalPlayTimeSeconds: Long = 0
     var startTime: Long = System.currentTimeMillis()
     var runTimeSeconds: Long = 0
-    var totalOfflineSeconds: Long = 0 // <--- NUEVO
+    var totalOfflineSeconds: Long = 0
 
     // Economía
     var lifetimeKnowledge: BigDecimal = BigDecimal.ZERO
@@ -30,6 +30,7 @@ class StatisticsManager @Inject constructor() {
 
     // Otros
     var totalEventsFound: Int = 0
+    var totalEchoes: BigDecimal = BigDecimal.ZERO // <--- NUEVO
 
     // --- CARGA Y GUARDADO ---
 
@@ -39,7 +40,7 @@ class StatisticsManager @Inject constructor() {
         totalPlayTimeSeconds = entity.totalPlayTimeSeconds
         startTime = entity.startTime
         runTimeSeconds = entity.runTimeSeconds
-        totalOfflineSeconds = entity.totalOfflineSeconds // <--- CARGAR
+        totalOfflineSeconds = entity.totalOfflineSeconds
 
         lifetimeKnowledge = parseBigDecimal(entity.lifetimeKnowledge)
         runKnowledge = parseBigDecimal(entity.runKnowledge)
@@ -53,6 +54,7 @@ class StatisticsManager @Inject constructor() {
         spentSanity = parseBigDecimal(entity.spentSanity)
 
         totalEventsFound = entity.totalEventsFound
+        totalEchoes = parseBigDecimal(entity.totalEchoes) // <--- CARGAR
     }
 
     fun getEntityForSave(): GameStatisticsEntity {
@@ -61,7 +63,7 @@ class StatisticsManager @Inject constructor() {
             totalPlayTimeSeconds = totalPlayTimeSeconds,
             startTime = startTime,
             runTimeSeconds = runTimeSeconds,
-            totalOfflineSeconds = totalOfflineSeconds, // <--- GUARDAR
+            totalOfflineSeconds = totalOfflineSeconds,
             lifetimeKnowledge = lifetimeKnowledge.toString(),
             runKnowledge = runKnowledge.toString(),
             maxKnowledgePerSecond = maxKnowledgePerSecond.toString(),
@@ -70,32 +72,24 @@ class StatisticsManager @Inject constructor() {
             totalPrestiges = totalPrestiges,
             lifetimeSanity = lifetimeSanity.toString(),
             spentSanity = spentSanity.toString(),
-            totalEventsFound = totalEventsFound
+            totalEventsFound = totalEventsFound,
+            totalEchoes = totalEchoes.toString() // <--- GUARDAR
         )
     }
 
     // --- LÓGICA DE SEGUIMIENTO ---
 
     fun trackPlayTime(seconds: Long) {
-        // Esto cuenta como tiempo ONLINE (activo) o TOTAL,
-        // pero para evitar líos, usaremos esto solo para el loop del juego (online).
-        // El tiempo total = Online + Offline.
-        // Así que sumamos al total y al run.
         totalPlayTimeSeconds += seconds
         runTimeSeconds += seconds
     }
 
-    // NUEVA FUNCIÓN ESPECÍFICA PARA OFFLINE
     fun trackOfflineTime(seconds: Long) {
         totalOfflineSeconds += seconds
-
-        // El tiempo offline TAMBIÉN es tiempo de existencia, así que sumamos al total
         totalPlayTimeSeconds += seconds
-        // Y al run actual
         runTimeSeconds += seconds
     }
 
-    // --- GETTERS CALCULADOS ---
     fun getActivePlayTime(): Long {
         return totalPlayTimeSeconds - totalOfflineSeconds
     }
@@ -127,6 +121,11 @@ class StatisticsManager @Inject constructor() {
     fun trackSanitySpent(amount: BigDecimal) { spentSanity = spentSanity.add(amount) }
     fun trackEventFound() { totalEventsFound++ }
 
+    // <--- NUEVA FUNCIÓN ---
+    fun trackEchoesFound(amount: BigDecimal) {
+        totalEchoes = totalEchoes.add(amount)
+    }
+
     private fun parseBigDecimal(value: String): BigDecimal {
         return try { BigDecimal(value) } catch (e: Exception) { BigDecimal.ZERO }
     }
@@ -145,5 +144,6 @@ class StatisticsManager @Inject constructor() {
         lifetimeSanity = BigDecimal.ZERO
         spentSanity = BigDecimal.ZERO
         totalEventsFound = 0
+        totalEchoes = BigDecimal.ZERO // <--- RESET
     }
 }

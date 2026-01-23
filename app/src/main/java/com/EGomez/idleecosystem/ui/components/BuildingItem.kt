@@ -19,6 +19,7 @@ import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.SurfaceGrey
 import java.math.BigDecimal
+import java.math.MathContext
 
 @Composable
 fun BuildingItem(
@@ -49,7 +50,7 @@ fun BuildingItem(
     val canAfford = currentFunds >= displayCost
 
     val specificMult = if (globalMultiplier.compareTo(BigDecimal.ZERO) != 0) {
-        building.currentMultiplier.divide(globalMultiplier, java.math.MathContext.DECIMAL32)
+        building.currentMultiplier.divide(globalMultiplier, MathContext.DECIMAL32)
     } else BigDecimal.ONE
     val hasSpecificMultiplier = specificMult > BigDecimal("1.01")
 

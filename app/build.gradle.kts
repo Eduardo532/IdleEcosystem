@@ -23,8 +23,8 @@ android {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 8 // Actualizado para coincidir con 0.8.0 (opcional, pero recomendado)
+        versionName = "0.8.0" // Actualizado a la versión del Release
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -89,7 +89,6 @@ dependencies {
     // 4. Ciclo de vida y ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
-    implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que tengas
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1") // <--- CAMBIA 'ksp' POR 'kapt' AQUÍ
-
+    implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que uses
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 }

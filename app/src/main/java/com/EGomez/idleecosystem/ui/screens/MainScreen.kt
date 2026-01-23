@@ -28,6 +28,9 @@ import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.ui.MainViewModel
 import com.EGomez.idleecosystem.ui.components.AchievementPopup
+import com.EGomez.idleecosystem.ui.components.ParticleOverlay
+import com.EGomez.idleecosystem.ui.components.ParticleSystem
+import com.EGomez.idleecosystem.ui.components.ParticleType
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
@@ -35,11 +38,13 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.*
 import com.EGomez.idleecosystem.ui.screens.StatisticsScreen
 import com.EGomez.idleecosystem.ui.theme.VoidBlack
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.util.UUID
 
 data class FloatingText(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
+    val color: Color = Color.White, // NUEVO: Soporte para color dinámico
     val x: Float = 0f,
     val y: Float = 0f,
     val animatable: Animatable<Float, androidx.compose.animation.core.AnimationVector1D> = Animatable(0f)
@@ -52,8 +57,14 @@ fun MainScreen(
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp // Necesario para centrar partículas
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
+
+    // Conversión de coordenadas para el Canvas (Pixeles)
+    val density = currentDensity.density
+    val centerXPx = (screenWidth / 2f) * density
+    val centerYPx = (screenHeight * 0.4f) * density // Un poco más arriba del centro geométrico
 
     CompositionLocalProvider(
         LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)
@@ -79,11 +90,13 @@ fun MainScreen(
 
         var selectedTabIndex by remember { mutableIntStateOf(0) }
 
+        // --- SISTEMAS VISUALES ---
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
+        val particleSystem = remember { ParticleSystem() } // Instancia del sistema de partículas
         val scope = rememberCoroutineScope()
 
-        fun spawnFloatingText(value: String) {
-            val newItem = FloatingText(text = "+$value")
+        fun spawnFloatingText(value: String, color: Color = Color.White) {
+            val newItem = FloatingText(text = value, color = color)
             floatingTexts.add(newItem)
             scope.launch {
                 newItem.animatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 800))
@@ -92,6 +105,13 @@ fun MainScreen(
         }
 
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
+
+            // 1. CAPA DE PARTÍCULAS (Fondo dinámico sobre el negro, pero bajo la UI interactiva)
+            ParticleOverlay(
+                system = particleSystem,
+                modifier = Modifier.fillMaxSize().zIndex(1f)
+            )
+
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
@@ -104,7 +124,8 @@ fun MainScreen(
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
                     )
-                }
+                },
+                modifier = Modifier.zIndex(2f) // UI sobre partículas
             ) { paddingValues ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
@@ -122,8 +143,21 @@ fun MainScreen(
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
                             onManualClick = {
-                                val added = viewModel.onManualClick()
-                                spawnFloatingText(added.toBeautifulString())
+                                // --- LÓGICA VISUAL DEL CLICK ---
+                                val result = viewModel.onManualClick()
+
+                                if (result.knowledgeGained > BigDecimal.ZERO) {
+                                    spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White)
+                                    // Explosión suave de conocimiento
+                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.KNOWLEDGE)
+                                }
+
+                                if (result.echoFound) {
+                                    // FEEDBACK ESPECIAL PARA ECOS
+                                    spawnFloatingText("+1 ECO", Color(0xFF00E5FF)) // Cian
+                                    // Explosión fuerte de Eco
+                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.ECHO, count = 25)
+                                }
                             },
                             modifier = Modifier.weight(1f - menuWeight)
                         )
@@ -161,10 +195,11 @@ fun MainScreen(
                         )
                     }
 
+                    // RENDERIZADO DE TEXTO FLOTANTE
                     floatingTexts.forEach { item ->
                         Text(
                             text = item.text,
-                            color = Color.White,
+                            color = item.color, // Usamos el color dinámico
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
                             modifier = Modifier
@@ -173,6 +208,8 @@ fun MainScreen(
                                 .graphicsLayer {
                                     translationY = -150f * item.animatable.value
                                     alpha = 1f - item.animatable.value
+                                    scaleX = 1f + (item.animatable.value * 0.2f) // Ligero zoom al subir
+                                    scaleY = 1f + (item.animatable.value * 0.2f)
                                 }
                         )
                     }

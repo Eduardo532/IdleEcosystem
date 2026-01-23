@@ -22,7 +22,11 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
 
-// NOTA: No definimos ExportPreview aquí porque usamos SavePreview de GameUiState
+// Estructura para comunicar el resultado del click a la UI
+data class ManualClickResult(
+    val knowledgeGained: BigDecimal,
+    val echoFound: Boolean
+)
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -361,21 +365,25 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(buyMultiplier = value)
     }
 
-    fun onManualClick(): BigDecimal {
+    // CAMBIO: Ahora retorna ManualClickResult
+    fun onManualClick(): ManualClickResult {
         val totalClickPower = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
-        val finalPower = totalClickPower
-        if (finalPower > BigDecimal.ZERO) {
+        var echoFound = false
+
+        if (totalClickPower > BigDecimal.ZERO) {
             soundManager.playSound(SoundType.CLICK, 250)
             statisticsManager.trackClick()
-            addKnowledgeInternal(finalPower, isManual = true)
+            addKnowledgeInternal(totalClickPower, isManual = true)
 
             if (Random.nextFloat() < 0.01) {
+                echoFound = true
                 echoesBalance = echoesBalance.add(BigDecimal.ONE)
-                statisticsManager.trackEchoesFound(BigDecimal.ONE) // <--- AGREGADO AQUÍ
+                statisticsManager.trackEchoesFound(BigDecimal.ONE)
+                soundManager.playSound(SoundType.ACHIEVEMENT) // Sonido especial para el hallazgo
                 updateUi()
             }
         }
-        return finalPower
+        return ManualClickResult(totalClickPower, echoFound)
     }
 
     fun onActivateRitual(ritualId: String) {

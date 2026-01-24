@@ -91,7 +91,9 @@ fun MainScreen(
         val scope = rememberCoroutineScope()
 
         fun spawnFloatingText(value: String, color: Color, x: Float, y: Float) {
+            // Doble chequeo de seguridad
             if (!uiState.isFloatingTextEnabled) return
+
             val newItem = FloatingText(text = value, color = color, startX = x, startY = y)
             floatingTexts.add(newItem)
             scope.launch {
@@ -102,7 +104,10 @@ fun MainScreen(
 
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
 
-            // CAPA 0: Partículas (Fondo)
+            // CAPA 0: Partículas
+            // Si está desactivado, el componente ParticleOverlay maneja la detención del loop,
+            // pero aquí evitamos renderizarlo si quisiéramos ser aún más drásticos.
+            // Por ahora, confiamos en la lógica interna de ParticleOverlay para limpiar.
             ParticleOverlay(
                 system = particleSystem,
                 isParticlesEnabled = uiState.areParticlesEnabled,
@@ -140,32 +145,52 @@ fun MainScreen(
                             activeBuffMultiplier = uiState.activeBuffMultiplier,
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
-                            // Callback actualizado con radio
                             onManualClick = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
 
-                                // 1. Partículas de click (Escalan ligeramente con el botón)
+                                // OPTIMIZACIÓN CRÍTICA: Chequeo de flags ANTES de llamar a lógica visual
+
+                                // 1. Feedback Normal
                                 if (result.knowledgeGained > BigDecimal.ZERO) {
-                                    spawnFloatingText(
-                                        "+${result.knowledgeGained.toBeautifulString()}",
-                                        Color.White,
-                                        clickOffset.x,
-                                        clickOffset.y - 80f
-                                    )
-                                    // Pasamos el radio para que escale el tamaño
-                                    particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.KNOWLEDGE, baseRadius = buttonRadius)
+                                    if (uiState.isFloatingTextEnabled) {
+                                        spawnFloatingText(
+                                            "+${result.knowledgeGained.toBeautifulString()}",
+                                            Color.White,
+                                            clickOffset.x,
+                                            clickOffset.y - 80f
+                                        )
+                                    }
+
+                                    if (uiState.areParticlesEnabled) {
+                                        particleSystem.spawnExplosion(
+                                            clickOffset.x,
+                                            clickOffset.y,
+                                            ParticleType.KNOWLEDGE,
+                                            baseRadius = buttonRadius
+                                        )
+                                    }
                                 }
 
-                                // 2. Partículas de Ecos (Nacen en el borde del radio actual)
+                                // 2. Feedback ECO
                                 if (result.echoFound) {
-                                    spawnFloatingText(
-                                        "+1 ECO",
-                                        Color(0xFF00E5FF),
-                                        buttonCenter.x,
-                                        buttonCenter.y - 120f
-                                    )
-                                    // Radio dinámico crítico aquí
-                                    particleSystem.spawnExplosion(buttonCenter.x, buttonCenter.y, ParticleType.ECHO, count = 30, baseRadius = buttonRadius)
+                                    if (uiState.isFloatingTextEnabled) {
+                                        spawnFloatingText(
+                                            "+1 ECO",
+                                            Color(0xFF00E5FF),
+                                            buttonCenter.x,
+                                            buttonCenter.y - 120f
+                                        )
+                                    }
+
+                                    if (uiState.areParticlesEnabled) {
+                                        particleSystem.spawnExplosion(
+                                            buttonCenter.x,
+                                            buttonCenter.y,
+                                            ParticleType.ECHO,
+                                            count = 30,
+                                            baseRadius = buttonRadius
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier.weight(1f - menuWeight)
@@ -200,22 +225,25 @@ fun MainScreen(
                         )
                     }
 
-                    // CAPA 2: Texto Flotante
-                    floatingTexts.forEach { item ->
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Text(
-                                text = item.text,
-                                color = item.color.copy(alpha = 1f - item.animatable.value),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                modifier = Modifier
-                                    .graphicsLayer {
-                                        translationX = item.startX + (item.driftX * item.animatable.value)
-                                        translationY = item.startY - (150f * item.animatable.value)
-                                        scaleX = 1f + (item.animatable.value * 0.3f)
-                                        scaleY = 1f + (item.animatable.value * 0.3f)
-                                    }
-                            )
+                    // CAPA 2: Texto Flotante (Solo renderizamos si la lista tiene elementos)
+                    // Como spawnFloatingText ahora tiene el guardia, esta lista estará vacía si está desactivado.
+                    if (floatingTexts.isNotEmpty()) {
+                        floatingTexts.forEach { item ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    text = item.text,
+                                    color = item.color.copy(alpha = 1f - item.animatable.value),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp,
+                                    modifier = Modifier
+                                        .graphicsLayer {
+                                            translationX = item.startX + (item.driftX * item.animatable.value)
+                                            translationY = item.startY - (150f * item.animatable.value)
+                                            scaleX = 1f + (item.animatable.value * 0.3f)
+                                            scaleY = 1f + (item.animatable.value * 0.3f)
+                                        }
+                                )
+                            }
                         }
                     }
                 }

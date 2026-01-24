@@ -31,7 +31,6 @@ data class Particle(
     val color: Color,
     val size: Float,
     val type: ParticleType,
-    // Física Orbital
     var angle: Float = 0f,
     var radius: Float = 0f,
     var angularVelocity: Float = 0f,
@@ -42,12 +41,7 @@ data class Particle(
 class ParticleSystem {
     val particles = mutableStateListOf<Particle>()
 
-    /**
-     * @param baseRadius El radio actual del botón (para que las partículas nazcan en el borde y escalen)
-     */
     fun spawnExplosion(x: Float, y: Float, type: ParticleType, count: Int = 10, baseRadius: Float = 50f) {
-        // Calculamos un factor de escala basado en un tamaño "estándar" de botón (ej: 150px)
-        // Reducimos ligeramente la influencia del escalado del botón para que no sean gigantes en pantallas grandes
         val scaleFactor = (baseRadius / 85f).coerceAtLeast(0.4f)
 
         repeat(count) {
@@ -61,19 +55,17 @@ class ParticleSystem {
 
             val lifeDecay = if (isEcho) Random.nextFloat() * 0.01f + 0.005f else Random.nextFloat() * 0.02f + 0.015f
 
-            // AJUSTE DE TAMAÑO (Reducido ~50% respecto a la versión anterior)
             val baseSize = if (isEcho) {
-                Random.nextFloat() * 3f + 2f // Antes: 6f + 3f
+                Random.nextFloat() * 3f + 2f
             } else {
-                Random.nextFloat() * 2f + 1f // Antes: 4f + 2f
+                Random.nextFloat() * 2f + 1f
             }
 
             val finalSize = baseSize * scaleFactor
 
             if (isEcho) {
-                // FÍSICA ORBITAL
                 val initialAngle = Random.nextFloat() * 6.28f
-                val spawnRadius = baseRadius + (Random.nextFloat() * 5f * scaleFactor) // Margen reducido también
+                val spawnRadius = baseRadius + (Random.nextFloat() * 5f * scaleFactor)
                 val orbitSpeed = (Random.nextFloat() * 0.05f + 0.02f) * (if (Random.nextBoolean()) 1 else -1)
 
                 particles.add(
@@ -94,9 +86,8 @@ class ParticleSystem {
                     )
                 )
             } else {
-                // CONOCIMIENTO
                 val angle = Random.nextFloat() * 6.28f
-                val speed = (Random.nextFloat() * 2.5f + 0.5f) * scaleFactor // Velocidad ajustada
+                val speed = (Random.nextFloat() * 2.5f + 0.5f) * scaleFactor
 
                 particles.add(
                     Particle(
@@ -127,10 +118,8 @@ class ParticleSystem {
                 p.vy -= 0.15f
                 p.vx *= 0.95f
             } else {
-                // Expansión orbital
                 p.angle += p.angularVelocity
-                p.radius += 1.0f // Expansión del anillo un poco más lenta para elegancia
-
+                p.radius += 1.0f
                 p.x = p.centerX + cos(p.angle) * p.radius
                 p.y = p.centerY + sin(p.angle) * p.radius
             }
@@ -152,11 +141,13 @@ fun ParticleOverlay(
     isParticlesEnabled: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // Si está desactivado, limpiamos y NO renderizamos nada ni iniciamos el loop
     if (!isParticlesEnabled) {
         LaunchedEffect(Unit) { system.clear() }
         return
     }
 
+    // El loop solo corre si isParticlesEnabled es true
     LaunchedEffect(Unit) {
         while (true) {
             withFrameNanos { system.update() }

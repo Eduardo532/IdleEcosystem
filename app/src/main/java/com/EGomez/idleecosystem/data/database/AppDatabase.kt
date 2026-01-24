@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PrestigeUpgradeEntity::class,
         GameStatisticsEntity::class
     ],
-    version = 8 // <--- CAMBIO: SUBIMOS VERSIÓN DE 7 A 8
+    version = 9
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
@@ -44,19 +44,12 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // --- NUEVA MIGRACIÓN (7 -> 8) ---
-        // Esta migración arregla el reinicio de partida y añade los Ecos a las estadísticas.
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // 1. Agregar totalEchoes a Estadísticas
                 try {
                     database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `totalEchoes` TEXT NOT NULL DEFAULT '0'")
-                } catch (e: Exception) {
-                    // Si ya existe por algún motivo, ignoramos el error
-                }
+                } catch (e: Exception) { }
 
-                // 2. Arreglar game_save (Quitar Autoincrement y fijar ID=1)
-                // Paso A: Crear tabla temporal con la estructura CORRECTA (ID fijo)
                 database.execSQL("""
                     CREATE TABLE IF NOT EXISTS `game_save_new` (
                         `id` INTEGER NOT NULL, 
@@ -70,7 +63,6 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                 """)
 
-                // Paso B: Copiar los datos de la última partida guardada a la fila ID=1
                 database.execSQL("""
                     INSERT INTO game_save_new (id, money, premiumCurrency, prestigeCurrency, echoes, lastLoginTime, totalPlayTime)
                     SELECT 1, money, premiumCurrency, prestigeCurrency, echoes, lastLoginTime, totalPlayTime 
@@ -79,13 +71,26 @@ abstract class AppDatabase : RoomDatabase() {
                     LIMIT 1
                 """)
 
-                // Paso C: Reemplazar la tabla vieja por la nueva
                 database.execSQL("DROP TABLE game_save")
                 database.execSQL("ALTER TABLE game_save_new RENAME TO game_save")
             }
         }
 
-        // AGREGAR LA NUEVA MIGRACIÓN A LA LISTA
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `runesSevered` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `runesStabilized` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `runesInscribed` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(
+            MIGRATION_3_4,
+            MIGRATION_4_5,
+            MIGRATION_5_6,
+            MIGRATION_6_7,
+            MIGRATION_7_8,
+            MIGRATION_8_9
+        )
     }
 }

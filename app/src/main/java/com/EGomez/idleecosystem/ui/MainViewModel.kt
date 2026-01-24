@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.EGomez.idleecosystem.core.math.toBeautifulString
@@ -19,10 +20,10 @@ import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
 
-// Estructura para comunicar el resultado del click a la UI
 data class ManualClickResult(
     val knowledgeGained: BigDecimal,
     val echoFound: Boolean
@@ -39,9 +40,17 @@ class MainViewModel @Inject constructor(
     private val saveManager: SaveManager,
     private val randomEventManager: RandomEventManager,
     private val soundManager: SoundManager,
-    private val statisticsManager: StatisticsManager,
-    private val ritualManager: RitualManager
+    val statsManager: StatisticsManager,
+    private val ritualManager: RitualManager,
+    private val runeManager: RuneManager
 ) : ViewModel() {
+
+    // --- ZONA DE PRUEBAS (DEBUG) ---
+    // TRUE: Genera runas falsas cada 5s para probar.
+    // FALSE: Usa el sistema real del juego.
+    private val DEBUG_MODE = false
+    private var debugTierIndex = 0
+    // -------------------------------
 
     private var arcaneKnowledge = BigDecimal.ZERO
     private var productionPerSecond = BigDecimal.ZERO
@@ -68,7 +77,6 @@ class MainViewModel @Inject constructor(
     val showPurchasedState: StateFlow<Boolean> = _showPurchasedState.asStateFlow()
 
     val ritualsState = ritualManager.rituals
-    val statsManager: StatisticsManager get() = statisticsManager
 
     init {
         _uiState.value = _uiState.value.copy(
@@ -78,6 +86,66 @@ class MainViewModel @Inject constructor(
         loadGameDataAndStart()
         startAutoSaveLoop()
         startEventSystem()
+
+        startRuneSystemObservation()
+    }
+
+    private fun startRuneSystemObservation() {
+        if (DEBUG_MODE) {
+            startDebugRuneCycle()
+            return
+        }
+
+        viewModelScope.launch {
+            launch {
+                runeManager.currentRune.collect { rune ->
+                    _uiState.value = _uiState.value.copy(activeRune = rune)
+                }
+            }
+            launch {
+                runeManager.runeState.collect { state ->
+                    _uiState.value = _uiState.value.copy(runeState = state)
+                }
+            }
+            launch {
+                runeManager.activeBuffs.collect { buffs ->
+                    _uiState.value = _uiState.value.copy(activeRuneBuffs = buffs)
+                    recalculateState()
+                }
+            }
+        }
+    }
+
+    // --- CICLO DE PRUEBA CORREGIDO ---
+    private fun startDebugRuneCycle() {
+        viewModelScope.launch {
+            while (true) {
+                delay(5000) // 5 segundos entre runas
+
+                // Rotar Tiers: 1 -> 2 -> 3 -> 1...
+                val tiers = listOf(RuneTier.TIER_1_SWIPE, RuneTier.TIER_2_HOLD, RuneTier.TIER_3_TRACE)
+                val nextTier = tiers[debugTierIndex % tiers.size]
+                debugTierIndex++
+
+                // CRITICAL FIX: Constructor exacto según tu Data Class
+                val debugRune = RuneVariant(
+                    id = UUID.randomUUID().toString(),
+                    name = "Runa Debug ${debugTierIndex}",
+                    tier = nextTier,
+                    weight = 100,
+                    color = Color.Cyan, // Color seguro para evitar crash
+                    description = "Runa generada por modo Debug"
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    activeRune = debugRune,
+                    runeState = RuneState.APPEARING
+                )
+
+                delay(500) // Tiempo de aparición
+                _uiState.value = _uiState.value.copy(runeState = RuneState.ACTIVE)
+            }
+        }
     }
 
     private fun loadGameDataAndStart() {
@@ -90,9 +158,8 @@ class MainViewModel @Inject constructor(
                 val savedPrestigeShop = repository.loadPrestigeUpgrades()
 
                 val savedStats = repository.gameStatistics.firstOrNull()
-                statisticsManager.loadFromEntity(savedStats)
+                statsManager.loadFromEntity(savedStats)
 
-                // Lógica de migración legacy
                 val refundAmount = prestigeShopManager.calculateLegacyRefund(savedPrestigeShop)
                 var initialSanity = if (entity != null) BigDecimal(entity.prestigeCurrency) else BigDecimal.ZERO
                 var showRefund = false
@@ -110,7 +177,6 @@ class MainViewModel @Inject constructor(
                     repository.clearAllPrestigeUpgrades()
                     prestigeShopManager.upgrades.forEach { repository.savePrestigeUpgrade(it.id, 0) }
 
-                    // Al migrar, asumimos 0 ecos
                     repository.saveGame(
                         if (entity != null) BigDecimal(entity.money) else BigDecimal.ZERO,
                         BigDecimal.ZERO,
@@ -169,7 +235,7 @@ class MainViewModel @Inject constructor(
 
         if (gains > BigDecimal.ZERO) {
             addKnowledgeInternal(gains, isManual = false)
-            statisticsManager.trackOfflineTime(diffSeconds)
+            statsManager.trackOfflineTime(diffSeconds)
 
             val timeFormatted = com.EGomez.idleecosystem.core.math.formatSecondsToTime(diffSeconds)
             _uiState.value = _uiState.value.copy(
@@ -187,10 +253,19 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 delay(100)
+
+                if (!DEBUG_MODE) {
+                    runeManager.tick(100)
+                }
+
+                if (_uiState.value.activeRuneBuffs.any { it.isAutoClick }) {
+                    onManualClick()
+                }
+
                 oneSecondAccumulator += 100
                 if (oneSecondAccumulator >= 1000) {
-                    statisticsManager.trackPlayTime(1)
-                    statisticsManager.trackProductionPeak(productionPerSecond)
+                    statsManager.trackPlayTime(1)
+                    statsManager.trackProductionPeak(productionPerSecond)
                     ritualManager.tick(1)
                     oneSecondAccumulator -= 1000
                 }
@@ -217,6 +292,21 @@ class MainViewModel @Inject constructor(
                     addKnowledgeInternal(productionTick, isManual = false)
                 }
             }
+        }
+    }
+
+    fun onRuneInteractionSuccess() {
+        if (DEBUG_MODE) {
+            _uiState.value = _uiState.value.copy(runeState = RuneState.SUCCESS)
+            soundManager.playSound(SoundType.BUY)
+            addKnowledgeInternal(BigDecimal("10000"), isManual = false)
+
+            viewModelScope.launch {
+                delay(1500)
+                _uiState.value = _uiState.value.copy(runeState = RuneState.HIDDEN, activeRune = null)
+            }
+        } else {
+            runeManager.completeRuneInteraction()
         }
     }
 
@@ -258,7 +348,7 @@ class MainViewModel @Inject constructor(
         val event = randomEventManager.getRandomEvent(arcaneKnowledge, prestigeManager.residualSanity)
         if (event != null) {
             soundManager.playSound(SoundType.EVENT_APPEAR)
-            statisticsManager.trackEventFound()
+            statsManager.trackEventFound()
             _uiState.value = _uiState.value.copy(currentEvent = event, eventResultText = null)
         } else {
             scheduleNextEvent()
@@ -307,12 +397,15 @@ class MainViewModel @Inject constructor(
         val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
         val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
 
+        val runeMult = runeManager.getTotalRuneMultiplier()
+
         val finalGlobalMult = upgradesGlobal
             .multiply(prestigeGlobal)
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
             .multiply(buffMult)
             .multiply(ritualProdMult)
+            .multiply(runeMult)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
         val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
@@ -370,14 +463,17 @@ class MainViewModel @Inject constructor(
         var echoFound = false
 
         if (totalClickPower > BigDecimal.ZERO) {
-            soundManager.playSound(SoundType.CLICK, 250)
-            statisticsManager.trackClick()
+            if (_uiState.value.activeRuneBuffs.none { it.isAutoClick }) {
+                soundManager.playSound(SoundType.CLICK, 250)
+            }
+
+            statsManager.trackClick()
             addKnowledgeInternal(totalClickPower, isManual = true)
 
             if (Random.nextFloat() < 0.01) {
                 echoFound = true
                 echoesBalance = echoesBalance.add(BigDecimal.ONE)
-                statisticsManager.trackEchoesFound(BigDecimal.ONE)
+                statsManager.trackEchoesFound(BigDecimal.ONE)
                 soundManager.playSound(SoundType.ECHO_FOUND)
                 updateUi()
             }
@@ -445,7 +541,7 @@ class MainViewModel @Inject constructor(
                     if (success) {
                         soundManager.playSound(SoundType.BUY)
                         prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
-                        statisticsManager.trackSanitySpent(cost)
+                        statsManager.trackSanitySpent(cost)
                         val upgrade = prestigeShopManager.upgrades.find { it.id == id }
                         if (upgrade != null) repository.savePrestigeUpgrade(id, upgrade.level)
                         recalculateState()
@@ -495,7 +591,7 @@ class MainViewModel @Inject constructor(
                 if (finalPotential > BigDecimal.ZERO) {
                     soundManager.playSound(SoundType.BUY)
                     prestigeManager.addPrestige(finalPotential)
-                    statisticsManager.trackPrestige(finalPotential)
+                    statsManager.trackPrestige(finalPotential)
 
                     buildingManager.resetForPrestige()
                     upgradeManager.resetForPrestige()
@@ -527,7 +623,11 @@ class MainViewModel @Inject constructor(
                 upgradeManager.resetForPrestige()
                 achievementManager.resetAchievements()
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
-                statisticsManager.hardReset()
+                statsManager.hardReset()
+
+                // NUEVO: Resetear runas también
+                runeManager.hideRune()
+                // --------------------------
 
                 repository.clearAllAchievements()
                 repository.clearAllPrestigeUpgrades()
@@ -544,7 +644,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun onExportSaveClicked() {
-        val currentStats = statisticsManager.getEntityForSave()
+        val currentStats = statsManager.getEntityForSave()
         val code = saveManager.exportSave(
             arcaneKnowledge,
             prestigeManager.residualSanity,
@@ -618,7 +718,7 @@ class MainViewModel @Inject constructor(
                         p.level = data.prestigeUpgrades.find { it.id == p.id }?.level ?: 0
                     }
 
-                    statisticsManager.loadFromEntity(data.statistics)
+                    statsManager.loadFromEntity(data.statistics)
                     repository.saveStatistics(data.statistics)
 
                     saveProgressInternal()
@@ -638,7 +738,7 @@ class MainViewModel @Inject constructor(
 
     private fun addKnowledgeInternal(amount: BigDecimal, isManual: Boolean) {
         arcaneKnowledge = arcaneKnowledge.add(amount)
-        statisticsManager.trackKnowledgeGenerated(amount, isManual)
+        statsManager.trackKnowledgeGenerated(amount, isManual)
         updateUi()
     }
 
@@ -681,6 +781,6 @@ class MainViewModel @Inject constructor(
         repository.saveGame(arcaneKnowledge, BigDecimal.ZERO, prestigeManager.residualSanity, echoesBalance)
         buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
         achievementManager.availableAchievements.forEach { if (it.isUnlocked) repository.saveAchievement(it.id, true) }
-        repository.saveStatistics(statisticsManager.getEntityForSave())
+        repository.saveStatistics(statsManager.getEntityForSave())
     }
 }

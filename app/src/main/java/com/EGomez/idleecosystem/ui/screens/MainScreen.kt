@@ -40,13 +40,15 @@ import com.EGomez.idleecosystem.ui.theme.VoidBlack
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.util.UUID
+import kotlin.random.Random
 
 data class FloatingText(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
-    val color: Color = Color.White, // NUEVO: Soporte para color dinámico
-    val x: Float = 0f,
-    val y: Float = 0f,
+    val color: Color = Color.White,
+    val startX: Float = 0f,
+    val startY: Float = 0f,
+    val driftX: Float = Random.nextFloat() * 80f - 40f,
     val animatable: Animatable<Float, androidx.compose.animation.core.AnimationVector1D> = Animatable(0f)
 )
 
@@ -57,14 +59,8 @@ fun MainScreen(
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
-    val screenHeight = configuration.screenHeightDp // Necesario para centrar partículas
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
-
-    // Conversión de coordenadas para el Canvas (Pixeles)
-    val density = currentDensity.density
-    val centerXPx = (screenWidth / 2f) * density
-    val centerYPx = (screenHeight * 0.4f) * density // Un poco más arriba del centro geométrico
 
     CompositionLocalProvider(
         LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)
@@ -90,28 +86,35 @@ fun MainScreen(
 
         var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-        // --- SISTEMAS VISUALES ---
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
-        val particleSystem = remember { ParticleSystem() } // Instancia del sistema de partículas
+        val particleSystem = remember { ParticleSystem() }
         val scope = rememberCoroutineScope()
 
-        fun spawnFloatingText(value: String, color: Color = Color.White) {
-            val newItem = FloatingText(text = value, color = color)
+        fun spawnFloatingText(value: String, color: Color, x: Float, y: Float) {
+            // Doble chequeo de seguridad
+            if (!uiState.isFloatingTextEnabled) return
+
+            val newItem = FloatingText(text = value, color = color, startX = x, startY = y)
             floatingTexts.add(newItem)
             scope.launch {
-                newItem.animatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 800))
+                newItem.animatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 1000))
                 floatingTexts.remove(newItem)
             }
         }
 
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
 
-            // 1. CAPA DE PARTÍCULAS (Fondo dinámico sobre el negro, pero bajo la UI interactiva)
+            // CAPA 0: Partículas
+            // Si está desactivado, el componente ParticleOverlay maneja la detención del loop,
+            // pero aquí evitamos renderizarlo si quisiéramos ser aún más drásticos.
+            // Por ahora, confiamos en la lógica interna de ParticleOverlay para limpiar.
             ParticleOverlay(
                 system = particleSystem,
-                modifier = Modifier.fillMaxSize().zIndex(1f)
+                isParticlesEnabled = uiState.areParticlesEnabled,
+                modifier = Modifier.fillMaxSize().zIndex(0f)
             )
 
+            // CAPA 1: Interfaz
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
@@ -125,7 +128,7 @@ fun MainScreen(
                         onAchievementsClick = { showAchievementsDialog = true }
                     )
                 },
-                modifier = Modifier.zIndex(2f) // UI sobre partículas
+                modifier = Modifier.zIndex(1f)
             ) { paddingValues ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
@@ -142,27 +145,57 @@ fun MainScreen(
                             activeBuffMultiplier = uiState.activeBuffMultiplier,
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
-                            onManualClick = {
-                                // --- LÓGICA VISUAL DEL CLICK ---
+                            onManualClick = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
 
+                                // OPTIMIZACIÓN CRÍTICA: Chequeo de flags ANTES de llamar a lógica visual
+
+                                // 1. Feedback Normal
                                 if (result.knowledgeGained > BigDecimal.ZERO) {
-                                    spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White)
-                                    // Explosión suave de conocimiento
-                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.KNOWLEDGE)
+                                    if (uiState.isFloatingTextEnabled) {
+                                        spawnFloatingText(
+                                            "+${result.knowledgeGained.toBeautifulString()}",
+                                            Color.White,
+                                            clickOffset.x,
+                                            clickOffset.y - 80f
+                                        )
+                                    }
+
+                                    if (uiState.areParticlesEnabled) {
+                                        particleSystem.spawnExplosion(
+                                            clickOffset.x,
+                                            clickOffset.y,
+                                            ParticleType.KNOWLEDGE,
+                                            baseRadius = buttonRadius
+                                        )
+                                    }
                                 }
 
+                                // 2. Feedback ECO
                                 if (result.echoFound) {
-                                    // FEEDBACK ESPECIAL PARA ECOS
-                                    spawnFloatingText("+1 ECO", Color(0xFF00E5FF)) // Cian
-                                    // Explosión fuerte de Eco
-                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.ECHO, count = 25)
+                                    if (uiState.isFloatingTextEnabled) {
+                                        spawnFloatingText(
+                                            "+1 ECO",
+                                            Color(0xFF00E5FF),
+                                            buttonCenter.x,
+                                            buttonCenter.y - 120f
+                                        )
+                                    }
+
+                                    if (uiState.areParticlesEnabled) {
+                                        particleSystem.spawnExplosion(
+                                            buttonCenter.x,
+                                            buttonCenter.y,
+                                            ParticleType.ECHO,
+                                            count = 30,
+                                            baseRadius = buttonRadius
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier.weight(1f - menuWeight)
                         )
 
-                        // AQUÍ CONECTAMOS LA UI
                         MenuSection(
                             isMenuExpanded = isMenuExpanded,
                             onToggleMenu = { isMenuExpanded = !isMenuExpanded },
@@ -177,10 +210,7 @@ fun MainScreen(
                             upgrades = upgrades,
                             rituals = rituals,
                             currentKnowledge = uiState.rawKnowledge,
-
-                            // --- CONEXIÓN DE ECOS ---
                             currentEchoes = uiState.echoes,
-
                             globalMultiplier = uiState.globalMultiplier,
                             buildingCalculator = buildingCalculator,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) },
@@ -195,23 +225,26 @@ fun MainScreen(
                         )
                     }
 
-                    // RENDERIZADO DE TEXTO FLOTANTE
-                    floatingTexts.forEach { item ->
-                        Text(
-                            text = item.text,
-                            color = item.color, // Usamos el color dinámico
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp,
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 220.dp)
-                                .graphicsLayer {
-                                    translationY = -150f * item.animatable.value
-                                    alpha = 1f - item.animatable.value
-                                    scaleX = 1f + (item.animatable.value * 0.2f) // Ligero zoom al subir
-                                    scaleY = 1f + (item.animatable.value * 0.2f)
-                                }
-                        )
+                    // CAPA 2: Texto Flotante (Solo renderizamos si la lista tiene elementos)
+                    // Como spawnFloatingText ahora tiene el guardia, esta lista estará vacía si está desactivado.
+                    if (floatingTexts.isNotEmpty()) {
+                        floatingTexts.forEach { item ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(
+                                    text = item.text,
+                                    color = item.color.copy(alpha = 1f - item.animatable.value),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp,
+                                    modifier = Modifier
+                                        .graphicsLayer {
+                                            translationX = item.startX + (item.driftX * item.animatable.value)
+                                            translationY = item.startY - (150f * item.animatable.value)
+                                            scaleX = 1f + (item.animatable.value * 0.3f)
+                                            scaleY = 1f + (item.animatable.value * 0.3f)
+                                        }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -258,6 +291,8 @@ fun MainScreen(
                     onStatsClick = { showStatisticsDialog = true },
                     onToggleMusic = { viewModel.toggleMusic() },
                     onToggleSfx = { viewModel.toggleSfx() },
+                    onToggleParticles = { viewModel.toggleParticles() },
+                    onToggleFloatingText = { viewModel.toggleFloatingText() },
                     onExportClick = { viewModel.onExportSaveClicked() },
                     onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
                     onCancelImport = { viewModel.clearExportString() },

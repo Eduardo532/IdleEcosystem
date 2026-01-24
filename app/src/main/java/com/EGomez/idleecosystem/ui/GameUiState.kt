@@ -6,54 +6,54 @@ import com.EGomez.idleecosystem.domain.model.RandomEvent
 import java.math.BigDecimal
 
 data class GameUiState(
-    // Recursos Principales
-    val rawKnowledge: BigDecimal = BigDecimal.ZERO,
+    // Economía
     val knowledgeFormatted: String = "0",
-    val knowledgePerSecond: String = "0",
+    val knowledgePerSecond: String = "0/s",
+    val rawKnowledge: BigDecimal = BigDecimal.ZERO,
+    val clickMultiplier: String = "1.0",
+    val prestigeCurrencyFormatted: String = "0",
+    val potentialPrestigeFormatted: String = "0",
+    val globalMultiplier: BigDecimal = BigDecimal.ONE,
 
-    // NUEVO: Moneda "Ecos" (Echoes)
+    // Ecos
     val echoes: BigDecimal = BigDecimal.ZERO,
     val echoesFormatted: String = "0",
 
-    // Multiplicadores y Buffs
-    val globalMultiplier: BigDecimal = BigDecimal.ONE,
+    // Lógica de Juego
+    val canPrestige: Boolean = false,
+    val buyMultiplier: Int = 1,
     val activeBuffMultiplier: Double = 1.0,
     val buffTimeRemaining: Int = 0,
-    val clickMultiplier: String = "1", // Potencia de click visual
 
-    // Preferencias de UI / Compra
-    val buyMultiplier: Int = 1,
-    val isMusicEnabled: Boolean = true,
-    val isSfxEnabled: Boolean = true,
-
-    // Prestigio / Ascensión
-    val prestigeCurrency: BigDecimal = BigDecimal.ZERO, // Cordura (Sanity)
-    val prestigeCurrencyFormatted: String = "0",
-    val canPrestige: Boolean = false,
-    val potentialPrestige: BigDecimal = BigDecimal.ZERO,
-    val potentialPrestigeFormatted: String = "0",
-    val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),
-
-    // Logros
-    val achievementsProgress: String = "0/0",
-    val secretsProgress: String? = null,
-    val lastUnlockedAchievement: Achievement? = null,
-
-    // Eventos y Diálogos
+    // Eventos y Logros
     val currentEvent: RandomEvent? = null,
     val eventResultText: String? = null,
+    val lastUnlockedAchievement: Achievement? = null,
+    val achievementsProgress: String = "0 / 0",
+    val secretsProgress: String? = null,
+
+    // Tienda de Prestigio
+    val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),
+
+    // Diálogos y UI
     val showOfflineDialog: Boolean = false,
-    val offlineTimeFormatted: String = "",
     val offlineGains: String = "",
+    val offlineTimeFormatted: String = "",
     val showRefundDialog: Boolean = false,
     val refundAmountString: String = "",
 
-    // Importar / Exportar
+    // Sistema de Guardado
     val saveStringExport: String = "",
+    val pendingImportString: String = "",
+    val importError: String? = null,
     val exportPreview: SavePreview? = null,
     val importPreview: SavePreview? = null,
-    val pendingImportString: String = "",
-    val importError: String? = null
+
+    // Configuración
+    val isMusicEnabled: Boolean = true,
+    val isSfxEnabled: Boolean = true,
+    val areParticlesEnabled: Boolean = true,
+    val isFloatingTextEnabled: Boolean = true
 )
 
 data class SavePreview(

@@ -365,7 +365,6 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(buyMultiplier = value)
     }
 
-    // CAMBIO: Ahora retorna ManualClickResult
     fun onManualClick(): ManualClickResult {
         val totalClickPower = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
         var echoFound = false
@@ -379,7 +378,7 @@ class MainViewModel @Inject constructor(
                 echoFound = true
                 echoesBalance = echoesBalance.add(BigDecimal.ONE)
                 statisticsManager.trackEchoesFound(BigDecimal.ONE)
-                soundManager.playSound(SoundType.ACHIEVEMENT) // Sonido especial para el hallazgo
+                soundManager.playSound(SoundType.ECHO_FOUND)
                 updateUi()
             }
         }
@@ -463,6 +462,29 @@ class MainViewModel @Inject constructor(
         recalculateState()
     }
 
+    fun toggleMusic() {
+        val newState = !soundManager.isMusicEnabled
+        soundManager.toggleMusic(newState)
+        _uiState.value = _uiState.value.copy(isMusicEnabled = newState)
+    }
+
+    fun toggleSfx() {
+        val newState = !soundManager.isSfxEnabled
+        soundManager.toggleSfx(newState)
+        _uiState.value = _uiState.value.copy(isSfxEnabled = newState)
+    }
+
+    fun toggleParticles() {
+        val newState = !_uiState.value.areParticlesEnabled
+        _uiState.value = _uiState.value.copy(areParticlesEnabled = newState)
+    }
+
+    fun toggleFloatingText() {
+        val newState = !_uiState.value.isFloatingTextEnabled
+        _uiState.value = _uiState.value.copy(isFloatingTextEnabled = newState)
+    }
+
+
     fun onAscendClicked() {
         viewModelScope.launch {
             transactionMutex.withLock {
@@ -521,21 +543,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun toggleMusic() {
-        val newState = !soundManager.isMusicEnabled
-        soundManager.toggleMusic(newState)
-        _uiState.value = _uiState.value.copy(isMusicEnabled = newState)
-    }
-
-    fun toggleSfx() {
-        val newState = !soundManager.isSfxEnabled
-        soundManager.toggleSfx(newState)
-        _uiState.value = _uiState.value.copy(isSfxEnabled = newState)
-    }
-
     fun onExportSaveClicked() {
         val currentStats = statisticsManager.getEntityForSave()
-        // Pasa los argumentos exactos que SaveManager.exportSave espera
         val code = saveManager.exportSave(
             arcaneKnowledge,
             prestigeManager.residualSanity,
@@ -550,7 +559,6 @@ class MainViewModel @Inject constructor(
         val unlockedAch = achievementManager.availableAchievements.count { it.isUnlocked }
         val date = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
 
-        // Usamos SavePreview del paquete UI
         val preview = SavePreview(
             date = date,
             money = arcaneKnowledge.toBeautifulString(),

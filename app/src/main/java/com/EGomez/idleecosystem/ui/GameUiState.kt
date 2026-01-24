@@ -1,8 +1,11 @@
 package com.EGomez.idleecosystem.ui
 
+import com.EGomez.idleecosystem.domain.logic.RuneBuff
+import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.RandomEvent
+import com.EGomez.idleecosystem.domain.model.RuneVariant
 import java.math.BigDecimal
 
 data class GameUiState(
@@ -24,6 +27,11 @@ data class GameUiState(
     val buyMultiplier: Int = 1,
     val activeBuffMultiplier: Double = 1.0,
     val buffTimeRemaining: Int = 0,
+
+    // SISTEMA DE RUNAS
+    val activeRune: RuneVariant? = null,
+    val runeState: RuneState = RuneState.HIDDEN,
+    val activeRuneBuffs: List<RuneBuff> = emptyList(),
 
     // Eventos y Logros
     val currentEvent: RandomEvent? = null,

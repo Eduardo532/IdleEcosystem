@@ -31,6 +31,7 @@ import com.EGomez.idleecosystem.ui.components.AchievementPopup
 import com.EGomez.idleecosystem.ui.components.ParticleOverlay
 import com.EGomez.idleecosystem.ui.components.ParticleSystem
 import com.EGomez.idleecosystem.ui.components.ParticleType
+import com.EGomez.idleecosystem.ui.components.RuneOverlay
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
@@ -42,12 +43,15 @@ import java.math.BigDecimal
 import java.util.UUID
 import kotlin.random.Random
 
+// Modelo actualizado para soportar duración y tamaño dinámicos
 data class FloatingText(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
     val color: Color = Color.White,
     val startX: Float = 0f,
     val startY: Float = 0f,
+    val fontSize: Float = 24f,
+    val duration: Int = 1000,
     val driftX: Float = Random.nextFloat() * 80f - 40f,
     val animatable: Animatable<Float, androidx.compose.animation.core.AnimationVector1D> = Animatable(0f)
 )
@@ -90,14 +94,30 @@ fun MainScreen(
         val particleSystem = remember { ParticleSystem() }
         val scope = rememberCoroutineScope()
 
-        fun spawnFloatingText(value: String, color: Color, x: Float, y: Float) {
-            // Doble chequeo de seguridad
+        // Función auxiliar actualizada para soportar personalización
+        fun spawnFloatingText(
+            value: String,
+            color: Color,
+            x: Float,
+            y: Float,
+            duration: Int = 1000,
+            fontSize: Float = 24f
+        ) {
             if (!uiState.isFloatingTextEnabled) return
-
-            val newItem = FloatingText(text = value, color = color, startX = x, startY = y)
+            val newItem = FloatingText(
+                text = value,
+                color = color,
+                startX = x,
+                startY = y,
+                duration = duration,
+                fontSize = fontSize
+            )
             floatingTexts.add(newItem)
             scope.launch {
-                newItem.animatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 1000))
+                newItem.animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = duration)
+                )
                 floatingTexts.remove(newItem)
             }
         }
@@ -105,16 +125,13 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
 
             // CAPA 0: Partículas
-            // Si está desactivado, el componente ParticleOverlay maneja la detención del loop,
-            // pero aquí evitamos renderizarlo si quisiéramos ser aún más drásticos.
-            // Por ahora, confiamos en la lógica interna de ParticleOverlay para limpiar.
             ParticleOverlay(
                 system = particleSystem,
                 isParticlesEnabled = uiState.areParticlesEnabled,
                 modifier = Modifier.fillMaxSize().zIndex(0f)
             )
 
-            // CAPA 1: Interfaz
+            // CAPA 1: Interfaz Principal
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
@@ -147,20 +164,13 @@ fun MainScreen(
                             clickMultiplier = uiState.clickMultiplier,
                             onManualClick = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
-
-                                // OPTIMIZACIÓN CRÍTICA: Chequeo de flags ANTES de llamar a lógica visual
-
-                                // 1. Feedback Normal
                                 if (result.knowledgeGained > BigDecimal.ZERO) {
-                                    if (uiState.isFloatingTextEnabled) {
-                                        spawnFloatingText(
-                                            "+${result.knowledgeGained.toBeautifulString()}",
-                                            Color.White,
-                                            clickOffset.x,
-                                            clickOffset.y - 80f
-                                        )
-                                    }
-
+                                    spawnFloatingText(
+                                        "+${result.knowledgeGained.toBeautifulString()}",
+                                        Color.White,
+                                        clickOffset.x,
+                                        clickOffset.y - 80f
+                                    )
                                     if (uiState.areParticlesEnabled) {
                                         particleSystem.spawnExplosion(
                                             clickOffset.x,
@@ -170,18 +180,13 @@ fun MainScreen(
                                         )
                                     }
                                 }
-
-                                // 2. Feedback ECO
                                 if (result.echoFound) {
-                                    if (uiState.isFloatingTextEnabled) {
-                                        spawnFloatingText(
-                                            "+1 ECO",
-                                            Color(0xFF00E5FF),
-                                            buttonCenter.x,
-                                            buttonCenter.y - 120f
-                                        )
-                                    }
-
+                                    spawnFloatingText(
+                                        "+1 ECO",
+                                        Color(0xFF00E5FF),
+                                        buttonCenter.x,
+                                        buttonCenter.y - 120f
+                                    )
                                     if (uiState.areParticlesEnabled) {
                                         particleSystem.spawnExplosion(
                                             buttonCenter.x,
@@ -225,8 +230,7 @@ fun MainScreen(
                         )
                     }
 
-                    // CAPA 2: Texto Flotante (Solo renderizamos si la lista tiene elementos)
-                    // Como spawnFloatingText ahora tiene el guardia, esta lista estará vacía si está desactivado.
+                    // Renderizado de Texto Flotante
                     if (floatingTexts.isNotEmpty()) {
                         floatingTexts.forEach { item ->
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -234,14 +238,17 @@ fun MainScreen(
                                     text = item.text,
                                     color = item.color.copy(alpha = 1f - item.animatable.value),
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 24.sp,
+                                    fontSize = item.fontSize.sp, // Tamaño dinámico
                                     modifier = Modifier
                                         .graphicsLayer {
                                             translationX = item.startX + (item.driftX * item.animatable.value)
+                                            // Ajuste de velocidad vertical según duración
                                             translationY = item.startY - (150f * item.animatable.value)
-                                            scaleX = 1f + (item.animatable.value * 0.3f)
-                                            scaleY = 1f + (item.animatable.value * 0.3f)
+                                            val scale = 1f + (if(item.animatable.value < 0.2f) 0.5f else 0f)
+                                            scaleX = scale
+                                            scaleY = scale
                                         }
+                                        .zIndex(200f)
                                 )
                             }
                         }
@@ -249,6 +256,38 @@ fun MainScreen(
                 }
             }
 
+            // --- CAPA 2: RUNE OVERLAY (SISTEMA DE OMNIFIC RUNES) ---
+            RuneOverlay(
+                activeRune = uiState.activeRune,
+                runeState = uiState.runeState,
+                onSuccess = {
+                    viewModel.onRuneInteractionSuccess()
+
+                    // FEEDBACK VISUAL MEJORADO
+                    spawnFloatingText(
+                        value = "¡RUNA ACTIVADA!\n+25% PROD (30s)",
+                        color = uiState.activeRune?.color ?: Color.Yellow,
+                        x = screenWidth.toFloat() / 2f - 100f,
+                        y = 500f,
+                        duration = 3000, // 3 segundos
+                        fontSize = 32f   // Letra grande
+                    )
+
+                    if (uiState.areParticlesEnabled) {
+                        particleSystem.spawnExplosion(
+                            x = screenWidth.toFloat() / 2f,
+                            y = 500f,
+                            type = ParticleType.KNOWLEDGE,
+                            count = 60,
+                            baseRadius = 120f
+                        )
+                    }
+                },
+                onFail = { /* Opcional */ },
+                modifier = Modifier.zIndex(50f) // Superposición explícita
+            )
+
+            // CAPA 3: Popups y Dialogos
             AnimatedVisibility(
                 visible = uiState.lastUnlockedAchievement != null,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
@@ -256,7 +295,7 @@ fun MainScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 40.dp)
-                    .zIndex(10f)
+                    .zIndex(100f)
             ) {
                 uiState.lastUnlockedAchievement?.let { achievement ->
                     AchievementPopup(achievement = achievement)
@@ -269,7 +308,6 @@ fun MainScreen(
                     onDismiss = { showStatisticsDialog = false }
                 )
             }
-
             if (showHardResetConfirmation) {
                 HardResetDialog(
                     onConfirm = {
@@ -280,7 +318,6 @@ fun MainScreen(
                     onDismiss = { showHardResetConfirmation = false }
                 )
             }
-
             if (showSettingsDialog) {
                 SettingsDialog(
                     uiState = uiState,
@@ -300,7 +337,6 @@ fun MainScreen(
                     onHardResetClick = { showHardResetConfirmation = true }
                 )
             }
-
             if (showAchievementsDialog) {
                 AchievementsDialog(
                     achievements = achievements,
@@ -309,7 +345,6 @@ fun MainScreen(
                     onDismiss = { showAchievementsDialog = false }
                 )
             }
-
             if (showPrestigeShopDialog) {
                 PrestigeShopDialog(
                     upgrades = uiState.prestigeUpgrades,
@@ -318,7 +353,6 @@ fun MainScreen(
                     onDismiss = { showPrestigeShopDialog = false }
                 )
             }
-
             if (uiState.showOfflineDialog) {
                 OfflineGainsDialog(
                     timeFormatted = uiState.offlineTimeFormatted,
@@ -326,14 +360,12 @@ fun MainScreen(
                     onDismiss = { viewModel.dismissOfflineDialog() }
                 )
             }
-
             if (uiState.showRefundDialog) {
                 RefundDialog(
                     refundAmount = uiState.refundAmountString,
                     onDismiss = { viewModel.dismissRefundDialog() }
                 )
             }
-
             uiState.currentEvent?.let { event ->
                 EventDialog(
                     event = event,

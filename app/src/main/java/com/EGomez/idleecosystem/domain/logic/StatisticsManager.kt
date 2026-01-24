@@ -28,9 +28,15 @@ class StatisticsManager @Inject constructor() {
     var lifetimeSanity: BigDecimal = BigDecimal.ZERO
     var spentSanity: BigDecimal = BigDecimal.ZERO
 
+    // OMNIFIC RUNES
+    var runesSevered: Int = 0     // Tier 1 (Swipe)
+    var runesStabilized: Int = 0  // Tier 2 (Hold)
+    var runesInscribed: Int = 0   // Tier 3 (Trace)
+
     // Otros
     var totalEventsFound: Int = 0
-    var totalEchoes: BigDecimal = BigDecimal.ZERO // <--- NUEVO
+
+    var totalEchoes: BigDecimal = BigDecimal.ZERO
 
     // --- CARGA Y GUARDADO ---
 
@@ -54,7 +60,12 @@ class StatisticsManager @Inject constructor() {
         spentSanity = parseBigDecimal(entity.spentSanity)
 
         totalEventsFound = entity.totalEventsFound
-        totalEchoes = parseBigDecimal(entity.totalEchoes) // <--- CARGAR
+        totalEchoes = parseBigDecimal(entity.totalEchoes)
+
+        // Cargar estadísticas de Runas
+        runesSevered = entity.runesSevered
+        runesStabilized = entity.runesStabilized
+        runesInscribed = entity.runesInscribed
     }
 
     fun getEntityForSave(): GameStatisticsEntity {
@@ -73,7 +84,10 @@ class StatisticsManager @Inject constructor() {
             lifetimeSanity = lifetimeSanity.toString(),
             spentSanity = spentSanity.toString(),
             totalEventsFound = totalEventsFound,
-            totalEchoes = totalEchoes.toString() // <--- GUARDAR
+            totalEchoes = totalEchoes.toString(),
+            runesSevered = runesSevered,
+            runesStabilized = runesStabilized,
+            runesInscribed = runesInscribed
         )
     }
 
@@ -121,9 +135,20 @@ class StatisticsManager @Inject constructor() {
     fun trackSanitySpent(amount: BigDecimal) { spentSanity = spentSanity.add(amount) }
     fun trackEventFound() { totalEventsFound++ }
 
-    // <--- NUEVA FUNCIÓN ---
     fun trackEchoesFound(amount: BigDecimal) {
         totalEchoes = totalEchoes.add(amount)
+    }
+
+    fun trackRuneSevered() {
+        runesSevered++
+    }
+
+    fun trackRuneStabilized() {
+        runesStabilized++
+    }
+
+    fun trackRuneInscribed() {
+        runesInscribed++
     }
 
     private fun parseBigDecimal(value: String): BigDecimal {
@@ -144,6 +169,9 @@ class StatisticsManager @Inject constructor() {
         lifetimeSanity = BigDecimal.ZERO
         spentSanity = BigDecimal.ZERO
         totalEventsFound = 0
-        totalEchoes = BigDecimal.ZERO // <--- RESET
+        totalEchoes = BigDecimal.ZERO
+        runesSevered = 0
+        runesStabilized = 0
+        runesInscribed = 0
     }
 }

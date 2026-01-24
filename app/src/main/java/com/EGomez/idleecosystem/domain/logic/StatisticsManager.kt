@@ -1,6 +1,11 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.data.database.GameStatisticsEntity
+import com.EGomez.idleecosystem.domain.model.GameStatistics
+import com.EGomez.idleecosystem.domain.model.RuneTier
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -8,142 +13,121 @@ import javax.inject.Singleton
 @Singleton
 class StatisticsManager @Inject constructor() {
 
-    // --- MEMORIA RAM ---
-    var totalPlayTimeSeconds: Long = 0
-    var startTime: Long = System.currentTimeMillis()
-    var runTimeSeconds: Long = 0
-    var totalOfflineSeconds: Long = 0
+    private val _stats = MutableStateFlow(GameStatistics())
+    val stats: StateFlow<GameStatistics> = _stats.asStateFlow()
 
-    // Economía
-    var lifetimeKnowledge: BigDecimal = BigDecimal.ZERO
-    var runKnowledge: BigDecimal = BigDecimal.ZERO
-    var maxKnowledgePerSecond: BigDecimal = BigDecimal.ZERO
-
-    // Interacción
-    var totalClicks: Long = 0
-    var manualKnowledgeGenerated: BigDecimal = BigDecimal.ZERO
-
-    // Prestigio
-    var totalPrestiges: Int = 0
-    var lifetimeSanity: BigDecimal = BigDecimal.ZERO
-    var spentSanity: BigDecimal = BigDecimal.ZERO
-
-    // Otros
-    var totalEventsFound: Int = 0
-    var totalEchoes: BigDecimal = BigDecimal.ZERO // <--- NUEVO
-
-    // --- CARGA Y GUARDADO ---
-
+    /**
+     * Carga las estadísticas desde la entidad de base de datos.
+     */
     fun loadFromEntity(entity: GameStatisticsEntity?) {
-        if (entity == null) return
+        if (entity == null) {
+            _stats.value = GameStatistics()
+            return
+        }
 
-        totalPlayTimeSeconds = entity.totalPlayTimeSeconds
-        startTime = entity.startTime
-        runTimeSeconds = entity.runTimeSeconds
-        totalOfflineSeconds = entity.totalOfflineSeconds
+        _stats.value = GameStatistics(
+            playTimeSeconds = entity.playTimeSeconds,
+            clicksManual = entity.clicksManual,
+            totalKnowledgeGenerated = try {
+                if (entity.totalKnowledgeGenerated.isNotEmpty()) BigDecimal(entity.totalKnowledgeGenerated) else BigDecimal.ZERO
+            } catch (e: Exception) { BigDecimal.ZERO },
 
-        lifetimeKnowledge = parseBigDecimal(entity.lifetimeKnowledge)
-        runKnowledge = parseBigDecimal(entity.runKnowledge)
-        maxKnowledgePerSecond = parseBigDecimal(entity.maxKnowledgePerSecond)
+            maxProductionPerSecond = try {
+                if (entity.maxProductionPerSecond.isNotEmpty()) BigDecimal(entity.maxProductionPerSecond) else BigDecimal.ZERO
+            } catch (e: Exception) { BigDecimal.ZERO },
 
-        totalClicks = entity.totalClicks
-        manualKnowledgeGenerated = parseBigDecimal(entity.manualKnowledgeGenerated)
+            totalPrestigeResets = entity.totalPrestigeResets,
 
-        totalPrestiges = entity.totalPrestiges
-        lifetimeSanity = parseBigDecimal(entity.lifetimeSanity)
-        spentSanity = parseBigDecimal(entity.spentSanity)
+            totalSanitySpent = try {
+                if (entity.totalSanitySpent.isNotEmpty()) BigDecimal(entity.totalSanitySpent) else BigDecimal.ZERO
+            } catch (e: Exception) { BigDecimal.ZERO },
 
-        totalEventsFound = entity.totalEventsFound
-        totalEchoes = parseBigDecimal(entity.totalEchoes) // <--- CARGAR
-    }
+            totalEchoesFound = try {
+                if (entity.totalEchoesFound.isNotEmpty()) BigDecimal(entity.totalEchoesFound) else BigDecimal.ZERO
+            } catch (e: Exception) { BigDecimal.ZERO },
 
-    fun getEntityForSave(): GameStatisticsEntity {
-        return GameStatisticsEntity(
-            id = 1,
-            totalPlayTimeSeconds = totalPlayTimeSeconds,
-            startTime = startTime,
-            runTimeSeconds = runTimeSeconds,
-            totalOfflineSeconds = totalOfflineSeconds,
-            lifetimeKnowledge = lifetimeKnowledge.toString(),
-            runKnowledge = runKnowledge.toString(),
-            maxKnowledgePerSecond = maxKnowledgePerSecond.toString(),
-            totalClicks = totalClicks,
-            manualKnowledgeGenerated = manualKnowledgeGenerated.toString(),
-            totalPrestiges = totalPrestiges,
-            lifetimeSanity = lifetimeSanity.toString(),
-            spentSanity = spentSanity.toString(),
-            totalEventsFound = totalEventsFound,
-            totalEchoes = totalEchoes.toString() // <--- GUARDAR
+            eventsFound = entity.eventsFound,
+            offlineTimeSeconds = entity.offlineTimeSeconds,
+
+            // Nuevas estadísticas para el sistema de Runas
+            runesSevered = entity.runesSevered,
+            runesStabilized = entity.runesStabilized,
+            runesInscribed = entity.runesInscribed
         )
     }
 
-    // --- LÓGICA DE SEGUIMIENTO ---
+    /**
+     * Convierte el estado actual en una entidad lista para guardar en Room.
+     */
+    fun getEntityForSave(): GameStatisticsEntity {
+        val s = _stats.value
+        return GameStatisticsEntity(
+            id = 1,
+            playTimeSeconds = s.playTimeSeconds,
+            clicksManual = s.clicksManual,
+            totalKnowledgeGenerated = s.totalKnowledgeGenerated.toString(),
+            maxProductionPerSecond = s.maxProductionPerSecond.toString(),
+            totalPrestigeResets = s.totalPrestigeResets,
+            totalSanitySpent = s.totalSanitySpent.toString(),
+            totalEchoesFound = s.totalEchoesFound.toString(),
+            eventsFound = s.eventsFound,
+            offlineTimeSeconds = s.offlineTimeSeconds,
+            runesSevered = s.runesSevered,
+            runesStabilized = s.runesStabilized,
+            runesInscribed = s.runesInscribed
+        )
+    }
+
+    // --- MÉTODOS DE TRACKING ---
 
     fun trackPlayTime(seconds: Long) {
-        totalPlayTimeSeconds += seconds
-        runTimeSeconds += seconds
+        _stats.value = _stats.value.copy(playTimeSeconds = _stats.value.playTimeSeconds + seconds)
     }
 
-    fun trackOfflineTime(seconds: Long) {
-        totalOfflineSeconds += seconds
-        totalPlayTimeSeconds += seconds
-        runTimeSeconds += seconds
-    }
-
-    fun getActivePlayTime(): Long {
-        return totalPlayTimeSeconds - totalOfflineSeconds
+    fun trackClick() {
+        _stats.value = _stats.value.copy(clicksManual = _stats.value.clicksManual + 1)
     }
 
     fun trackKnowledgeGenerated(amount: BigDecimal, isManual: Boolean) {
-        if (amount <= BigDecimal.ZERO) return
-        lifetimeKnowledge = lifetimeKnowledge.add(amount)
-        runKnowledge = runKnowledge.add(amount)
-        if (isManual) {
-            manualKnowledgeGenerated = manualKnowledgeGenerated.add(amount)
-        }
+        _stats.value = _stats.value.copy(totalKnowledgeGenerated = _stats.value.totalKnowledgeGenerated.add(amount))
     }
 
-    fun trackClick() { totalClicks++ }
-
-    fun trackProductionPeak(currentProduction: BigDecimal) {
-        if (currentProduction > maxKnowledgePerSecond) {
-            maxKnowledgePerSecond = currentProduction
+    fun trackProductionPeak(amount: BigDecimal) {
+        if (amount > _stats.value.maxProductionPerSecond) {
+            _stats.value = _stats.value.copy(maxProductionPerSecond = amount)
         }
     }
 
     fun trackPrestige(sanityGained: BigDecimal) {
-        totalPrestiges++
-        lifetimeSanity = lifetimeSanity.add(sanityGained)
-        runTimeSeconds = 0
-        runKnowledge = BigDecimal.ZERO
+        _stats.value = _stats.value.copy(totalPrestigeResets = _stats.value.totalPrestigeResets + 1)
     }
 
-    fun trackSanitySpent(amount: BigDecimal) { spentSanity = spentSanity.add(amount) }
-    fun trackEventFound() { totalEventsFound++ }
+    fun trackSanitySpent(amount: BigDecimal) {
+        _stats.value = _stats.value.copy(totalSanitySpent = _stats.value.totalSanitySpent.add(amount))
+    }
 
-    // <--- NUEVA FUNCIÓN ---
     fun trackEchoesFound(amount: BigDecimal) {
-        totalEchoes = totalEchoes.add(amount)
+        _stats.value = _stats.value.copy(totalEchoesFound = _stats.value.totalEchoesFound.add(amount))
     }
 
-    private fun parseBigDecimal(value: String): BigDecimal {
-        return try { BigDecimal(value) } catch (e: Exception) { BigDecimal.ZERO }
+    fun trackEventFound() {
+        _stats.value = _stats.value.copy(eventsFound = _stats.value.eventsFound + 1)
+    }
+
+    fun trackOfflineTime(seconds: Long) {
+        _stats.value = _stats.value.copy(offlineTimeSeconds = _stats.value.offlineTimeSeconds + seconds)
     }
 
     fun hardReset() {
-        totalPlayTimeSeconds = 0
-        startTime = System.currentTimeMillis()
-        runTimeSeconds = 0
-        totalOfflineSeconds = 0
-        lifetimeKnowledge = BigDecimal.ZERO
-        runKnowledge = BigDecimal.ZERO
-        maxKnowledgePerSecond = BigDecimal.ZERO
-        totalClicks = 0
-        manualKnowledgeGenerated = BigDecimal.ZERO
-        totalPrestiges = 0
-        lifetimeSanity = BigDecimal.ZERO
-        spentSanity = BigDecimal.ZERO
-        totalEventsFound = 0
-        totalEchoes = BigDecimal.ZERO // <--- RESET
+        _stats.value = GameStatistics()
+    }
+
+    // --- NUEVO: TRACKING DE RUNAS ---
+    fun trackRuneCompleted(tier: RuneTier) {
+        _stats.value = when (tier) {
+            RuneTier.TIER_1_SWIPE -> _stats.value.copy(runesSevered = _stats.value.runesSevered + 1)
+            RuneTier.TIER_2_HOLD -> _stats.value.copy(runesStabilized = _stats.value.runesStabilized + 1)
+            RuneTier.TIER_3_TRACE -> _stats.value.copy(runesInscribed = _stats.value.runesInscribed + 1)
+        }
     }
 }

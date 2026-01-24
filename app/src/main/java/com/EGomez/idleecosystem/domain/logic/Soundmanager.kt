@@ -4,8 +4,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.SoundPool
-import android.os.Handler
-import android.os.Looper
 import com.EGomez.idleecosystem.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -15,96 +13,64 @@ enum class SoundType {
     CLICK,
     BUY,
     ACHIEVEMENT,
-    EVENT_APPEAR
+    EVENT_APPEAR,
+    ECHO_FOUND
 }
 
 @Singleton
 class SoundManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
-    private var mediaPlayer: MediaPlayer? = null
-    private val soundPool: SoundPool
+    private var soundPool: SoundPool
     private val soundMap = mutableMapOf<SoundType, Int>()
+    private var mediaPlayer: MediaPlayer? = null
 
-    // Handler para programar la detención de sonidos
-    private val handler = Handler(Looper.getMainLooper())
-
-    // Configuración de usuario
     var isMusicEnabled: Boolean = true
         private set
     var isSfxEnabled: Boolean = true
         private set
 
     init {
-        // 1. Configurar SoundPool para efectos cortos (SFX)
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
 
         soundPool = SoundPool.Builder()
-            .setMaxStreams(5) // Máximo 5 sonidos a la vez
+            .setMaxStreams(5)
             .setAudioAttributes(audioAttributes)
             .build()
 
-        // 2. Cargar los efectos en memoria
+        // Carga de sonidos
         soundMap[SoundType.CLICK] = soundPool.load(context, R.raw.sfx_click, 1)
         soundMap[SoundType.BUY] = soundPool.load(context, R.raw.sfx_buy, 1)
         soundMap[SoundType.ACHIEVEMENT] = soundPool.load(context, R.raw.sfx_achievement, 1)
         soundMap[SoundType.EVENT_APPEAR] = soundPool.load(context, R.raw.sfx_event, 1)
+        soundMap[SoundType.ECHO_FOUND] = soundPool.load(context, R.raw.sfx_echos, 1)
+
+        startBackgroundMusic()
     }
 
-    // --- MÚSICA DE FONDO (BGM) ---
-    fun playMusic() {
-        if (!isMusicEnabled) return
+    fun playSound(type: SoundType, pitch: Int = 0) {
+        if (!isSfxEnabled) return
 
-        if (mediaPlayer == null) {
-            mediaPlayer = MediaPlayer.create(context, R.raw.bgm_drone).apply {
-                isLooping = true // Bucle infinito
-                setVolume(0.5f, 0.5f) // Volumen al 50% para no molestar
-            }
+        val soundId = soundMap[type] ?: return
+
+        val playbackRate = if (type == SoundType.CLICK) {
+            0.9f + (Math.random().toFloat() * 0.2f)
+        } else {
+            1.0f
         }
 
-        if (mediaPlayer?.isPlaying == false) {
-            mediaPlayer?.start()
-        }
-    }
-
-    fun pauseMusic() {
-        if (mediaPlayer?.isPlaying == true) {
-            mediaPlayer?.pause()
-        }
-    }
-
-    fun resumeMusic() {
-        if (isMusicEnabled && mediaPlayer != null && !mediaPlayer!!.isPlaying) {
-            mediaPlayer?.start()
-        }
+        soundPool.play(soundId, 1f, 1f, 0, 0, playbackRate)
     }
 
     fun toggleMusic(enabled: Boolean) {
         isMusicEnabled = enabled
-        if (enabled) playMusic() else pauseMusic()
-    }
-
-    // --- EFECTOS DE SONIDO (SFX) ---
-    // MODIFICADO: Ahora acepta un 'maxDurationMs' opcional. Si es null, suena completo.
-    fun playSound(type: SoundType, maxDurationMs: Long? = null) {
-        if (!isSfxEnabled) return
-
-        val soundId = soundMap[type] ?: return
-        // Variación de Pitch (0.9f a 1.1f) para que el click no suene robótico
-        val pitch = if (type == SoundType.CLICK) (0.9f + Math.random() * 0.2f).toFloat() else 1f
-
-        // Reproducimos y guardamos el ID del stream
-        val streamId = soundPool.play(soundId, 1f, 1f, 1, 0, pitch)
-
-        // Si definiste una duración, programamos el corte
-        if (maxDurationMs != null) {
-            handler.postDelayed({
-                soundPool.stop(streamId)
-            }, maxDurationMs)
+        if (enabled) {
+            startBackgroundMusic()
+        } else {
+            mediaPlayer?.pause()
         }
     }
 
@@ -112,10 +78,18 @@ class SoundManager @Inject constructor(
         isSfxEnabled = enabled
     }
 
-    // Limpieza de memoria
-    fun release() {
-        mediaPlayer?.release()
-        mediaPlayer = null
-        soundPool.release()
+    private fun startBackgroundMusic() {
+        if (!isMusicEnabled) return
+
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(context, R.raw.bgm_drone).apply {
+                isLooping = true
+                setVolume(0.5f, 0.5f)
+            }
+        }
+
+        if (mediaPlayer?.isPlaying == false) {
+            mediaPlayer?.start()
+        }
     }
 }

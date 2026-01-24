@@ -35,18 +35,21 @@ import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.*
-import com.EGomez.idleecosystem.ui.screens.StatisticsScreen
 import com.EGomez.idleecosystem.ui.theme.VoidBlack
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.util.UUID
+import kotlin.random.Random
 
+// Texto flotante con trayectoria dinámica
 data class FloatingText(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
-    val color: Color = Color.White, // NUEVO: Soporte para color dinámico
-    val x: Float = 0f,
-    val y: Float = 0f,
+    val color: Color = Color.White,
+    val startX: Float = 0f,
+    val startY: Float = 0f,
+    // Factor aleatorio para movimiento horizontal (-50 a +50 px)
+    val driftX: Float = Random.nextFloat() * 100f - 50f,
     val animatable: Animatable<Float, androidx.compose.animation.core.AnimationVector1D> = Animatable(0f)
 )
 
@@ -57,14 +60,8 @@ fun MainScreen(
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
-    val screenHeight = configuration.screenHeightDp // Necesario para centrar partículas
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
-
-    // Conversión de coordenadas para el Canvas (Pixeles)
-    val density = currentDensity.density
-    val centerXPx = (screenWidth / 2f) * density
-    val centerYPx = (screenHeight * 0.4f) * density // Un poco más arriba del centro geométrico
 
     CompositionLocalProvider(
         LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)
@@ -92,11 +89,13 @@ fun MainScreen(
 
         // --- SISTEMAS VISUALES ---
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
-        val particleSystem = remember { ParticleSystem() } // Instancia del sistema de partículas
+        val particleSystem = remember { ParticleSystem() }
         val scope = rememberCoroutineScope()
 
-        fun spawnFloatingText(value: String, color: Color = Color.White) {
-            val newItem = FloatingText(text = value, color = color)
+        fun spawnFloatingText(value: String, color: Color, x: Float, y: Float) {
+            if (!uiState.isFloatingTextEnabled) return // Respetar configuración
+
+            val newItem = FloatingText(text = value, color = color, startX = x, startY = y)
             floatingTexts.add(newItem)
             scope.launch {
                 newItem.animatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 800))
@@ -106,11 +105,31 @@ fun MainScreen(
 
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
 
-            // 1. CAPA DE PARTÍCULAS (Fondo dinámico sobre el negro, pero bajo la UI interactiva)
+            // 1. CAPA DE PARTÍCULAS
             ParticleOverlay(
                 system = particleSystem,
+                isParticlesEnabled = uiState.areParticlesEnabled, // Respetar configuración
                 modifier = Modifier.fillMaxSize().zIndex(1f)
             )
+
+            // 2. CAPA DE TEXTO FLOTANTE (Renderizado manual para control total de posición)
+            floatingTexts.forEach { item ->
+                Text(
+                    text = item.text,
+                    color = item.color.copy(alpha = 1f - item.animatable.value), // Fade out
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    modifier = Modifier
+                        .zIndex(100f) // Siempre encima
+                        .graphicsLayer {
+                            // Convertimos coordenadas del canvas a relativas
+                            translationX = item.startX + (item.driftX * item.animatable.value)
+                            translationY = item.startY - (200f * item.animatable.value) // Sube 200px
+                            scaleX = 1f + (item.animatable.value * 0.5f) // Zoom
+                            scaleY = 1f + (item.animatable.value * 0.5f)
+                        }
+                )
+            }
 
             Scaffold(
                 containerColor = Color.Transparent,
@@ -125,7 +144,7 @@ fun MainScreen(
                         onAchievementsClick = { showAchievementsDialog = true }
                     )
                 },
-                modifier = Modifier.zIndex(2f) // UI sobre partículas
+                modifier = Modifier.zIndex(2f)
             ) { paddingValues ->
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column(
@@ -142,27 +161,36 @@ fun MainScreen(
                             activeBuffMultiplier = uiState.activeBuffMultiplier,
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
-                            onManualClick = {
-                                // --- LÓGICA VISUAL DEL CLICK ---
+                            onManualClick = { clickOffset ->
+                                // --- LÓGICA DE CLICK CON COORDENADAS ---
                                 val result = viewModel.onManualClick()
 
+                                // Usamos las coordenadas recibidas del botón (clickOffset)
                                 if (result.knowledgeGained > BigDecimal.ZERO) {
-                                    spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White)
-                                    // Explosión suave de conocimiento
-                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.KNOWLEDGE)
+                                    spawnFloatingText(
+                                        "+${result.knowledgeGained.toBeautifulString()}",
+                                        Color.White,
+                                        clickOffset.x, // Offset relativo al root usado para traducción
+                                        clickOffset.y - 100f // Un poco más arriba del centro
+                                    )
+                                    // Partículas desde el centro del botón
+                                    particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.KNOWLEDGE)
                                 }
 
                                 if (result.echoFound) {
-                                    // FEEDBACK ESPECIAL PARA ECOS
-                                    spawnFloatingText("+1 ECO", Color(0xFF00E5FF)) // Cian
-                                    // Explosión fuerte de Eco
-                                    particleSystem.spawnExplosion(centerXPx, centerYPx, ParticleType.ECHO, count = 25)
+                                    spawnFloatingText(
+                                        "+1 ECO",
+                                        Color(0xFF00E5FF),
+                                        clickOffset.x,
+                                        clickOffset.y - 150f
+                                    )
+                                    // Explosión masiva desde el centro
+                                    particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.ECHO, count = 30)
                                 }
                             },
                             modifier = Modifier.weight(1f - menuWeight)
                         )
 
-                        // AQUÍ CONECTAMOS LA UI
                         MenuSection(
                             isMenuExpanded = isMenuExpanded,
                             onToggleMenu = { isMenuExpanded = !isMenuExpanded },
@@ -177,10 +205,7 @@ fun MainScreen(
                             upgrades = upgrades,
                             rituals = rituals,
                             currentKnowledge = uiState.rawKnowledge,
-
-                            // --- CONEXIÓN DE ECOS ---
                             currentEchoes = uiState.echoes,
-
                             globalMultiplier = uiState.globalMultiplier,
                             buildingCalculator = buildingCalculator,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) },
@@ -192,25 +217,6 @@ fun MainScreen(
                             onAscendClicked = { viewModel.onAscendClicked() },
                             onShowPrestigeShop = { showPrestigeShopDialog = true },
                             modifier = Modifier.weight(menuWeight)
-                        )
-                    }
-
-                    // RENDERIZADO DE TEXTO FLOTANTE
-                    floatingTexts.forEach { item ->
-                        Text(
-                            text = item.text,
-                            color = item.color, // Usamos el color dinámico
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp,
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 220.dp)
-                                .graphicsLayer {
-                                    translationY = -150f * item.animatable.value
-                                    alpha = 1f - item.animatable.value
-                                    scaleX = 1f + (item.animatable.value * 0.2f) // Ligero zoom al subir
-                                    scaleY = 1f + (item.animatable.value * 0.2f)
-                                }
                         )
                     }
                 }
@@ -258,6 +264,10 @@ fun MainScreen(
                     onStatsClick = { showStatisticsDialog = true },
                     onToggleMusic = { viewModel.toggleMusic() },
                     onToggleSfx = { viewModel.toggleSfx() },
+                    // CONEXIÓN DE TOGGLES VISUALES
+                    onToggleParticles = { viewModel.toggleParticles() },
+                    onToggleFloatingText = { viewModel.toggleFloatingText() },
+                    // ----------------------------
                     onExportClick = { viewModel.onExportSaveClicked() },
                     onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
                     onCancelImport = { viewModel.clearExportString() },

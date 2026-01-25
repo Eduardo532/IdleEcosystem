@@ -17,6 +17,7 @@ data class GameUiState(
     val prestigeCurrencyFormatted: String = "0",
     val potentialPrestigeFormatted: String = "0",
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
+    val buildingCostMultiplier: Double = 1.0,
 
     // Ecos
     val echoes: BigDecimal = BigDecimal.ZERO,

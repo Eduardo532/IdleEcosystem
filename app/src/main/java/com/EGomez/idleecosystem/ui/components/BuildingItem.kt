@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,26 +29,38 @@ fun BuildingItem(
     globalMultiplier: BigDecimal,
     calculator: BuildingCalculator,
     buyMultiplier: Int,
+    costMultiplier: Double = 1.0, // NUEVO PARÁMETRO
     onBuyClick: () -> Unit
 ) {
-    val displayCost: BigDecimal
+    val rawCost: BigDecimal
     val amountToBuyLabel: String
 
+    // 1. Calcular Costo Base (Sin descuento)
     if (buyMultiplier == -1) {
-        val maxAffordable = calculator.calculateMaxAffordable(building, currentFunds)
+        // Para el cálculo de MAX, ajustamos los fondos efectivos según el descuento
+        val effectiveFunds = if (costMultiplier < 1.0)
+            currentFunds.divide(BigDecimal(costMultiplier), MathContext.DECIMAL64)
+        else currentFunds
+
+        val maxAffordable = calculator.calculateMaxAffordable(building, effectiveFunds)
+
         if (maxAffordable > 0) {
-            displayCost = calculator.calculateCostForAmount(building, maxAffordable)
+            rawCost = calculator.calculateCostForAmount(building, maxAffordable)
             amountToBuyLabel = "+$maxAffordable"
         } else {
-            displayCost = calculator.calculateNextCost(building)
+            rawCost = calculator.calculateNextCost(building)
             amountToBuyLabel = "+1"
         }
     } else {
-        displayCost = calculator.calculateCostForAmount(building, buyMultiplier)
+        rawCost = calculator.calculateCostForAmount(building, buyMultiplier)
         amountToBuyLabel = "+$buyMultiplier"
     }
 
-    val canAfford = currentFunds >= displayCost
+    // 2. Aplicar Descuento
+    val finalCost = rawCost.multiply(BigDecimal(costMultiplier))
+    val hasDiscount = costMultiplier < 1.0
+
+    val canAfford = currentFunds >= finalCost
 
     val specificMult = if (globalMultiplier.compareTo(BigDecimal.ZERO) != 0) {
         building.currentMultiplier.divide(globalMultiplier, MathContext.DECIMAL32)
@@ -57,17 +70,12 @@ fun BuildingItem(
     val prodLabel = if (building.type == BuildingType.CLICK) "Clic" else "Prod"
     val prodSuffix = if (building.type == BuildingType.CLICK) "" else "/s"
 
-    // --- LÓGICA DE COLOR POR GRUPO (TIER) ---
-    // 1-6: Básico (Azul) - Mente y Culto temprano
-    // 7-12: Sangre (Rojo) - Sacrificios y Horrores físicos
-    // 13-16: Cósmico (Morado) - Espacio, Sueños y Vacío
     val tierColor = when (building.tier) {
-        in 1..6 -> Color(0xFF1565C0) // Azul
-        in 7..12 -> Color(0xFFC62828) // Rojo Sangre
-        else -> Color(0xFF9C27B0)     // Morado Arcano
+        in 1..6 -> Color(0xFF1565C0)
+        in 7..12 -> Color(0xFFC62828)
+        else -> Color(0xFF9C27B0)
     }
 
-    // Aplicamos el borde con el color correspondiente
     val borderStroke = BorderStroke(1.dp, tierColor.copy(alpha = 0.6f))
 
     Card(
@@ -109,7 +117,6 @@ fun BuildingItem(
                 val productionToShow = if(building.amountOwned > 0) building.totalProduction else building.baseProduction.multiply(building.currentMultiplier)
 
                 Row {
-
                     Text(
                         text = "Posees: ${building.amountOwned} | $prodLabel: ${productionToShow.toBeautifulString()}$prodSuffix",
                         color = if (hasSpecificMultiplier) Color(0xFF81C784) else Color.Gray,
@@ -137,7 +144,26 @@ fun BuildingItem(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "Comprar $amountToBuyLabel", maxLines = 1)
-                    Text(text = displayCost.toBeautifulString(), fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+
+                    if (hasDiscount) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = rawCost.toBeautifulString(),
+                                fontSize = 9.sp,
+                                color = Color.Black.copy(alpha = 0.6f),
+                                textDecoration = TextDecoration.LineThrough,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text(
+                                text = finalCost.toBeautifulString(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFFD50000)
+                            )
+                        }
+                    } else {
+                        Text(text = finalCost.toBeautifulString(), fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    }
                 }
             }
         }

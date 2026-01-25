@@ -45,12 +45,8 @@ class MainViewModel @Inject constructor(
     private val runeManager: RuneManager
 ) : ViewModel() {
 
-    // --- ZONA DE PRUEBAS (DEBUG) ---
-    // TRUE: Genera runas falsas cada 5s para probar.
-    // FALSE: Usa el sistema real del juego.
     private val DEBUG_MODE = false
     private var debugTierIndex = 0
-    // -------------------------------
 
     private var arcaneKnowledge = BigDecimal.ZERO
     private var productionPerSecond = BigDecimal.ZERO
@@ -113,27 +109,53 @@ class MainViewModel @Inject constructor(
                     recalculateState()
                 }
             }
+            launch {
+                runeManager.runeRewards.collect { reward ->
+                    when (reward) {
+                        is RuneReward.TimeWarp -> {
+                            val gain = productionPerSecond.multiply(BigDecimal(reward.seconds))
+                            if (gain > BigDecimal.ZERO) {
+                                addKnowledgeInternal(gain, isManual = false)
+                                statsManager.trackPlayTime(reward.seconds)
+                            }
+                        }
+                        is RuneReward.InstantEchoes -> {
+                            val amount = BigDecimal(reward.amount)
+                            echoesBalance = echoesBalance.add(amount)
+                            statsManager.trackEchoesFound(amount)
+                            soundManager.playSound(SoundType.ECHO_FOUND)
+                            updateUi()
+                        }
+                        is RuneReward.SanityBonus -> {
+                            val bonusPercent = BigDecimal(reward.percent)
+                            val bonusAmount = prestigeManager.residualSanity.multiply(bonusPercent)
+                            prestigeManager.residualSanity = prestigeManager.residualSanity.add(bonusAmount)
+                            updateUi()
+                        }
+                        is RuneReward.TriggerRandomEvent -> {
+                            triggerRandomEvent()
+                        }
+                    }
+                }
+            }
         }
     }
 
-    // --- CICLO DE PRUEBA CORREGIDO ---
     private fun startDebugRuneCycle() {
         viewModelScope.launch {
             while (true) {
-                delay(5000) // 5 segundos entre runas
+                delay(5000)
 
-                // Rotar Tiers: 1 -> 2 -> 3 -> 1...
                 val tiers = listOf(RuneTier.TIER_1_SWIPE, RuneTier.TIER_2_HOLD, RuneTier.TIER_3_TRACE)
                 val nextTier = tiers[debugTierIndex % tiers.size]
                 debugTierIndex++
 
-                // CRITICAL FIX: Constructor exacto según tu Data Class
                 val debugRune = RuneVariant(
                     id = UUID.randomUUID().toString(),
                     name = "Runa Debug ${debugTierIndex}",
                     tier = nextTier,
                     weight = 100,
-                    color = Color.Cyan, // Color seguro para evitar crash
+                    color = Color.Cyan,
                     description = "Runa generada por modo Debug"
                 )
 
@@ -142,7 +164,9 @@ class MainViewModel @Inject constructor(
                     runeState = RuneState.APPEARING
                 )
 
-                delay(500) // Tiempo de aparición
+                soundManager.playSound(SoundType.RUNE_SPAWN, 1400)
+
+                delay(500)
                 _uiState.value = _uiState.value.copy(runeState = RuneState.ACTIVE)
             }
         }
@@ -295,214 +319,19 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onRuneInteractionSuccess() {
-        if (DEBUG_MODE) {
-            _uiState.value = _uiState.value.copy(runeState = RuneState.SUCCESS)
-            soundManager.playSound(SoundType.BUY)
-            addKnowledgeInternal(BigDecimal("10000"), isManual = false)
-
-            viewModelScope.launch {
-                delay(1500)
-                _uiState.value = _uiState.value.copy(runeState = RuneState.HIDDEN, activeRune = null)
-            }
-        } else {
-            runeManager.completeRuneInteraction()
-        }
-    }
-
-    private fun startAutoSaveLoop() {
-        viewModelScope.launch {
-            while (true) {
-                delay(5000)
-                saveProgress()
-            }
-        }
-    }
-
-    private fun startEventSystem() {
-        scheduleNextEvent()
-        viewModelScope.launch {
-            while (true) {
-                delay(1000)
-                val currentTime = System.currentTimeMillis()
-                if (currentTime < activeBuffExpiration) {
-                    val remaining = ((activeBuffExpiration - currentTime) / 1000).toInt()
-                    _uiState.value = _uiState.value.copy(buffTimeRemaining = remaining)
-                } else if (_uiState.value.activeBuffMultiplier > 1.0) {
-                    _uiState.value = _uiState.value.copy(activeBuffMultiplier = 1.0, buffTimeRemaining = 0)
-                    recalculateState()
-                }
-                if (_uiState.value.currentEvent == null && currentTime >= timeUntilNextEvent) {
-                    triggerRandomEvent()
-                }
-            }
-        }
-    }
-
-    private fun scheduleNextEvent() {
-        val delayMs = kotlin.random.Random.nextLong(90_000, 240_000)
-        timeUntilNextEvent = System.currentTimeMillis() + delayMs
-    }
-
-    private fun triggerRandomEvent() {
-        val event = randomEventManager.getRandomEvent(arcaneKnowledge, prestigeManager.residualSanity)
-        if (event != null) {
-            soundManager.playSound(SoundType.EVENT_APPEAR)
-            statsManager.trackEventFound()
-            _uiState.value = _uiState.value.copy(currentEvent = event, eventResultText = null)
-        } else {
-            scheduleNextEvent()
-        }
-    }
-
-    fun onEventOptionSelected(optionIndex: Int) {
-        val event = _uiState.value.currentEvent ?: return
-        val option = event.options.getOrNull(optionIndex) ?: return
-
-        option.effects.forEach { effect ->
-            when (effect.type) {
-                EffectType.ADD_KNOWLEDGE_PERCENT -> {
-                    val percent = BigDecimal.valueOf(effect.value)
-                    val bonus = arcaneKnowledge.multiply(percent)
-                    if (bonus != BigDecimal.ZERO) addKnowledgeInternal(bonus, isManual = false)
-                }
-                EffectType.ADD_SANITY_PERCENT -> {
-                    val percent = BigDecimal.valueOf(effect.value)
-                    val amount = prestigeManager.residualSanity.multiply(percent)
-                    prestigeManager.residualSanity = prestigeManager.residualSanity.add(amount)
-                    if (prestigeManager.residualSanity < BigDecimal.ZERO) prestigeManager.residualSanity = BigDecimal.ZERO
-                }
-                EffectType.GLOBAL_BUFF -> {
-                    _uiState.value = _uiState.value.copy(activeBuffMultiplier = effect.value)
-                    activeBuffExpiration = System.currentTimeMillis() + (effect.durationSeconds * 1000)
-                    recalculateState()
-                }
-                EffectType.NOTHING -> { }
-            }
-        }
-        _uiState.value = _uiState.value.copy(eventResultText = option.flavorResult)
-        viewModelScope.launch {
-            delay(2500)
-            _uiState.value = _uiState.value.copy(currentEvent = null, eventResultText = null)
-            scheduleNextEvent()
-            updateUi()
-        }
-    }
-
-    private fun recalculateState() {
-        val upgradesGlobal = upgradeManager.getGlobalMultiplier()
-        val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
-        val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
-        val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
-        val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
-        val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
-
-        val runeMult = runeManager.getTotalRuneMultiplier()
-
-        val finalGlobalMult = upgradesGlobal
-            .multiply(prestigeGlobal)
-            .multiply(achievementGlobal)
-            .multiply(shopGlobal)
-            .multiply(buffMult)
-            .multiply(ritualProdMult)
-            .multiply(runeMult)
-
-        val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
-        val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
-
-        buildingManager.availableBuildings.forEachIndexed { index, building ->
-            val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
-            val specificMult = if (building.type == BuildingType.CLICK) {
-                upgradeManager.getRawClickMultiplier()
-                    .multiply(shopClickBonus)
-                    .multiply(ritualClickMult)
-            } else {
-                upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
-            }
-            building.currentMultiplier = specificMult.multiply(finalGlobalMult)
-        }
-
-        productionPerSecond = buildingManager.getTotalProductionPerSecond()
-        val basePotential = prestigeManager.calculatePotentialPrestige(arcaneKnowledge)
-        val shopPrestigeBonus = prestigeShopManager.getPrestigeGainMultiplier()
-        val finalPotential = basePotential.multiply(shopPrestigeBonus)
-        val canAscend = finalPotential > BigDecimal.ZERO
-
-        _buildingsState.value = buildingManager.availableBuildings.filter { it.isVisible }
-        _upgradesState.value = upgradeManager.availableUpgrades.filter { if (_showPurchasedState.value) true else !it.isBought }.sortedBy { it.cost }
-
-        val allAchievements = achievementManager.availableAchievements
-        val unlockedTotal = allAchievements.count { it.isUnlocked }
-        val secretsFound = allAchievements.count { it.isSecret && it.isUnlocked }
-        val secretsTotal = 13
-        val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }
-
-        _achievementsState.value = visibleAchievements
-
-        val progressText = "$unlockedTotal / 100"
-        val secretsText = if (secretsFound > 0) "Secretos: $secretsFound / $secretsTotal" else null
-
-        _uiState.value = _uiState.value.copy(
-            potentialPrestigeFormatted = finalPotential.toBeautifulString(),
-            canPrestige = canAscend,
-            globalMultiplier = finalGlobalMult,
-            prestigeUpgrades = prestigeShopManager.upgrades.toList(),
-            achievementsProgress = progressText,
-            secretsProgress = secretsText,
-            echoes = echoesBalance,
-            echoesFormatted = echoesBalance.toBeautifulString()
-        )
-    }
-
     fun setBuyMultiplier(value: Int) {
         _uiState.value = _uiState.value.copy(buyMultiplier = value)
-    }
-
-    fun onManualClick(): ManualClickResult {
-        val totalClickPower = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
-        var echoFound = false
-
-        if (totalClickPower > BigDecimal.ZERO) {
-            if (_uiState.value.activeRuneBuffs.none { it.isAutoClick }) {
-                soundManager.playSound(SoundType.CLICK, 250)
-            }
-
-            statsManager.trackClick()
-            addKnowledgeInternal(totalClickPower, isManual = true)
-
-            if (Random.nextFloat() < 0.01) {
-                echoFound = true
-                echoesBalance = echoesBalance.add(BigDecimal.ONE)
-                statsManager.trackEchoesFound(BigDecimal.ONE)
-                soundManager.playSound(SoundType.ECHO_FOUND)
-                updateUi()
-            }
-        }
-        return ManualClickResult(totalClickPower, echoFound)
-    }
-
-    fun onActivateRitual(ritualId: String) {
-        viewModelScope.launch {
-            transactionMutex.withLock {
-                if (ritualManager.tryActivateRitual(ritualId, echoesBalance)) {
-                    val ritual = ritualManager.rituals.value.find { it.id == ritualId }
-                    if (ritual != null) {
-                        soundManager.playSound(SoundType.BUY)
-                        echoesBalance = echoesBalance.subtract(ritual.baseCost)
-                        recalculateState()
-                        updateUi()
-                    }
-                }
-            }
-        }
     }
 
     fun onBuyBuilding(buildingId: String) {
         viewModelScope.launch {
             transactionMutex.withLock {
                 val multiplier = _uiState.value.buyMultiplier
-                val costBefore = buildingManager.getCost(buildingId, multiplier, arcaneKnowledge)
-                val amountBought = buildingManager.tryBuyBuilding(buildingId, arcaneKnowledge, multiplier)
+                val discountFactor = BigDecimal(runeManager.getCostReductionMultiplier())
+                val costBefore = buildingManager.getCost(buildingId, multiplier, arcaneKnowledge, discountFactor)
+
+                val amountBought = buildingManager.tryBuyBuilding(buildingId, arcaneKnowledge, multiplier, discountFactor)
+
                 if (amountBought > 0) {
                     soundManager.playSound(SoundType.BUY)
                     arcaneKnowledge = arcaneKnowledge.subtract(costBefore)
@@ -532,6 +361,49 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun onManualClick(): ManualClickResult {
+        val totalClickPower = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
+        var echoFound = false
+
+        if (totalClickPower > BigDecimal.ZERO) {
+            if (_uiState.value.activeRuneBuffs.none { it.isAutoClick }) {
+                soundManager.playSound(SoundType.CLICK, 250)
+            }
+
+            statsManager.trackClick()
+            addKnowledgeInternal(totalClickPower, isManual = true)
+
+            val baseChance = 0.01
+            val runeBonus = runeManager.getEchoChanceBonus()
+
+            if (Random.nextFloat() < (baseChance + runeBonus)) {
+                echoFound = true
+                echoesBalance = echoesBalance.add(BigDecimal.ONE)
+                statsManager.trackEchoesFound(BigDecimal.ONE)
+                soundManager.playSound(SoundType.ECHO_FOUND)
+                updateUi()
+            }
+        }
+        return ManualClickResult(totalClickPower, echoFound)
+    }
+
+    fun onRuneInteractionSuccess() {
+        if (DEBUG_MODE) {
+            _uiState.value = _uiState.value.copy(runeState = RuneState.SUCCESS)
+            soundManager.playSound(SoundType.RUNE_SUCCESS)
+            addKnowledgeInternal(BigDecimal("10000"), isManual = false)
+
+            viewModelScope.launch {
+                delay(1500)
+                _uiState.value = _uiState.value.copy(runeState = RuneState.HIDDEN, activeRune = null)
+            }
+        } else {
+            viewModelScope.launch {
+                runeManager.completeRuneInteraction()
+            }
+        }
+    }
+
     fun onBuyPrestigeUpgrade(id: String) {
         viewModelScope.launch {
             transactionMutex.withLock {
@@ -547,6 +419,22 @@ class MainViewModel @Inject constructor(
                         recalculateState()
                         updateUi()
                         saveProgressInternal()
+                    }
+                }
+            }
+        }
+    }
+
+    fun onActivateRitual(ritualId: String) {
+        viewModelScope.launch {
+            transactionMutex.withLock {
+                if (ritualManager.tryActivateRitual(ritualId, echoesBalance)) {
+                    val ritual = ritualManager.rituals.value.find { it.id == ritualId }
+                    if (ritual != null) {
+                        soundManager.playSound(SoundType.BUY)
+                        echoesBalance = echoesBalance.subtract(ritual.baseCost)
+                        recalculateState()
+                        updateUi()
                     }
                 }
             }
@@ -579,7 +467,6 @@ class MainViewModel @Inject constructor(
         val newState = !_uiState.value.isFloatingTextEnabled
         _uiState.value = _uiState.value.copy(isFloatingTextEnabled = newState)
     }
-
 
     fun onAscendClicked() {
         viewModelScope.launch {
@@ -625,9 +512,7 @@ class MainViewModel @Inject constructor(
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
                 statsManager.hardReset()
 
-                // NUEVO: Resetear runas también
                 runeManager.hideRune()
-                // --------------------------
 
                 repository.clearAllAchievements()
                 repository.clearAllPrestigeUpgrades()
@@ -782,5 +667,149 @@ class MainViewModel @Inject constructor(
         buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
         achievementManager.availableAchievements.forEach { if (it.isUnlocked) repository.saveAchievement(it.id, true) }
         repository.saveStatistics(statsManager.getEntityForSave())
+    }
+
+    private fun startEventSystem() {
+        scheduleNextEvent()
+        viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                val currentTime = System.currentTimeMillis()
+                if (currentTime < activeBuffExpiration) {
+                    val remaining = ((activeBuffExpiration - currentTime) / 1000).toInt()
+                    _uiState.value = _uiState.value.copy(buffTimeRemaining = remaining)
+                } else if (_uiState.value.activeBuffMultiplier > 1.0) {
+                    _uiState.value = _uiState.value.copy(activeBuffMultiplier = 1.0, buffTimeRemaining = 0)
+                    recalculateState()
+                }
+                if (_uiState.value.currentEvent == null && currentTime >= timeUntilNextEvent) {
+                    triggerRandomEvent()
+                }
+            }
+        }
+    }
+
+    private fun scheduleNextEvent() {
+        val delayMs = kotlin.random.Random.nextLong(90_000, 240_000)
+        timeUntilNextEvent = System.currentTimeMillis() + delayMs
+    }
+
+    private fun triggerRandomEvent() {
+        val event = randomEventManager.getRandomEvent(arcaneKnowledge, prestigeManager.residualSanity)
+        if (event != null) {
+            soundManager.playSound(SoundType.EVENT_APPEAR)
+            statsManager.trackEventFound()
+            _uiState.value = _uiState.value.copy(currentEvent = event, eventResultText = null)
+        } else {
+            scheduleNextEvent()
+        }
+    }
+
+    fun onEventOptionSelected(optionIndex: Int) {
+        val event = _uiState.value.currentEvent ?: return
+        val option = event.options.getOrNull(optionIndex) ?: return
+
+        option.effects.forEach { effect ->
+            when (effect.type) {
+                EffectType.ADD_KNOWLEDGE_PERCENT -> {
+                    val percent = BigDecimal.valueOf(effect.value)
+                    val bonus = arcaneKnowledge.multiply(percent)
+                    if (bonus != BigDecimal.ZERO) addKnowledgeInternal(bonus, isManual = false)
+                }
+                EffectType.ADD_SANITY_PERCENT -> {
+                    val percent = BigDecimal.valueOf(effect.value)
+                    val amount = prestigeManager.residualSanity.multiply(percent)
+                    prestigeManager.residualSanity = prestigeManager.residualSanity.add(amount)
+                    if (prestigeManager.residualSanity < BigDecimal.ZERO) prestigeManager.residualSanity = BigDecimal.ZERO
+                }
+                EffectType.GLOBAL_BUFF -> {
+                    _uiState.value = _uiState.value.copy(activeBuffMultiplier = effect.value)
+                    activeBuffExpiration = System.currentTimeMillis() + (effect.durationSeconds * 1000)
+                    recalculateState()
+                }
+                EffectType.NOTHING -> { }
+            }
+        }
+        _uiState.value = _uiState.value.copy(eventResultText = option.flavorResult)
+        viewModelScope.launch {
+            delay(2500)
+            _uiState.value = _uiState.value.copy(currentEvent = null, eventResultText = null)
+            scheduleNextEvent()
+            updateUi()
+        }
+    }
+
+    private fun recalculateState() {
+        val upgradesGlobal = upgradeManager.getGlobalMultiplier()
+        val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
+        val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
+        val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
+        val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
+        val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
+
+        val runeMult = runeManager.getTotalRuneMultiplier()
+
+        val finalGlobalMult = upgradesGlobal
+            .multiply(prestigeGlobal)
+            .multiply(achievementGlobal)
+            .multiply(shopGlobal)
+            .multiply(buffMult)
+            .multiply(ritualProdMult)
+            .multiply(runeMult)
+
+        val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
+        val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
+
+        buildingManager.availableBuildings.forEachIndexed { index, building ->
+            val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
+            val specificMult = if (building.type == BuildingType.CLICK) {
+                upgradeManager.getRawClickMultiplier()
+                    .multiply(shopClickBonus)
+                    .multiply(ritualClickMult)
+            } else {
+                upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
+            }
+            building.currentMultiplier = specificMult.multiply(finalGlobalMult)
+        }
+
+        productionPerSecond = buildingManager.getTotalProductionPerSecond()
+        val basePotential = prestigeManager.calculatePotentialPrestige(arcaneKnowledge)
+        val shopPrestigeBonus = prestigeShopManager.getPrestigeGainMultiplier()
+        val finalPotential = basePotential.multiply(shopPrestigeBonus)
+        val canAscend = finalPotential > BigDecimal.ZERO
+
+        _buildingsState.value = buildingManager.availableBuildings.filter { it.isVisible }
+        _upgradesState.value = upgradeManager.availableUpgrades.filter { if (_showPurchasedState.value) true else !it.isBought }.sortedBy { it.cost }
+
+        val allAchievements = achievementManager.availableAchievements
+        val unlockedTotal = allAchievements.count { it.isUnlocked }
+        val secretsFound = allAchievements.count { it.isSecret && it.isUnlocked }
+        val secretsTotal = 13
+        val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }
+
+        _achievementsState.value = visibleAchievements
+
+        val progressText = "$unlockedTotal / 100"
+        val secretsText = if (secretsFound > 0) "Secretos: $secretsFound / $secretsTotal" else null
+
+        _uiState.value = _uiState.value.copy(
+            potentialPrestigeFormatted = finalPotential.toBeautifulString(),
+            canPrestige = canAscend,
+            globalMultiplier = finalGlobalMult,
+            prestigeUpgrades = prestigeShopManager.upgrades.toList(),
+            achievementsProgress = progressText,
+            secretsProgress = secretsText,
+            echoes = echoesBalance,
+            echoesFormatted = echoesBalance.toBeautifulString()
+        )
+    }
+
+    private fun startAutoSaveLoop() {
+        viewModelScope.launch {
+            while (true) {
+                delay(5000)
+                saveProgress()
+            }
+        }
     }
 }

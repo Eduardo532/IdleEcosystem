@@ -6,13 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
@@ -20,8 +18,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
@@ -36,12 +36,8 @@ fun RuneOverlay(
     onFail: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Si no hay runa o está oculta, no renderizamos nada para evitar bloqueos fantasma
     if (activeRune == null || runeState == RuneState.HIDDEN) return
 
-    // La runa solo es interactiva si está en estado ACTIVE.
-    // Si está apareciendo (APPEARING) o explotando (SUCCESS), bloqueamos la interacción
-    // y en el caso de SUCCESS permitimos que los clicks pasen al fondo.
     val isInteractive = runeState == RuneState.ACTIVE
 
     val transition = updateTransition(targetState = runeState, label = "RuneTransition")
@@ -49,23 +45,21 @@ fun RuneOverlay(
         when (state) {
             RuneState.HIDDEN -> 0f
             RuneState.APPEARING, RuneState.ACTIVE -> 1f
-            RuneState.SUCCESS -> 0f // Se desvanece al ganar
+            RuneState.SUCCESS -> 0f
             RuneState.FAILED -> 0f
         }
     }
 
-    // Escala dinámica para feedback visual
     val scale by transition.animateFloat(label = "Scale") { state ->
         when (state) {
             RuneState.HIDDEN -> 0.2f
-            RuneState.APPEARING -> 1.1f // Efecto pop
+            RuneState.APPEARING -> 1.1f
             RuneState.ACTIVE -> 1f
-            RuneState.SUCCESS -> 1.8f // Explosión grande
+            RuneState.SUCCESS -> 1.8f
             RuneState.FAILED -> 0.8f
         }
     }
 
-    // Animaciones continuas de "vida"
     val infiniteTransition = rememberInfiniteTransition(label = "Pulse")
     val pulse by infiniteTransition.animateFloat(
         initialValue = 0.95f,
@@ -87,12 +81,11 @@ fun RuneOverlay(
         modifier = modifier.fillMaxSize()
     ) {
         val density = LocalDensity.current
-        val runeSize = 250.dp
+        val runeSize = 280.dp
         val runeSizePx = with(density) { runeSize.toPx() }
         val maxW = constraints.maxWidth
         val maxH = constraints.maxHeight
 
-        // Calculamos posición aleatoria solo cuando cambia la runa activa
         val positionOffset = remember(activeRune) {
             val randomX = Random.nextInt(0, (maxW - runeSizePx).toInt().coerceAtLeast(1))
             val randomY = Random.nextInt(0, (maxH - runeSizePx).toInt().coerceAtLeast(1))
@@ -108,27 +101,28 @@ fun RuneOverlay(
                     this.scaleX = scale
                     this.scaleY = scale
                 }
-                // --- VISIBILIDAD: HALO DE FONDO ---
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.7f),
-                            Color.Black.copy(alpha = 0.3f),
-                            Color.Transparent
-                        )
+                        colors = listOf(Color.Black.copy(alpha = 0.8f), Color.Transparent)
                     ),
                     shape = CircleShape
                 )
-                // Borde sutil
-                .border(width = 2.dp, color = activeRune.color.copy(alpha = 0.3f), shape = CircleShape)
-
-                // --- INTERACTIVIDAD ---
-                // Solo si es interactiva ponemos el fondo transparente que captura clicks.
-                // Si isInteractive es false, este modificador se ignora y los clicks pasan.
                 .then(
                     if (isInteractive) Modifier.background(Color.Transparent) else Modifier
-                )
+                ),
+            contentAlignment = Alignment.Center
         ) {
+            // Nombre de la Runa (Identidad visual)
+            Text(
+                text = activeRune.name.uppercase(),
+                color = activeRune.color.copy(alpha = 0.8f),
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = 20.dp)
+            )
+
             when (activeRune.tier) {
                 RuneTier.TIER_1_SWIPE -> SwipeRune(activeRune, isInteractive, onSuccess)
                 RuneTier.TIER_2_HOLD -> HoldRune(activeRune, isInteractive, pulse, rotation, onSuccess)
@@ -138,47 +132,59 @@ fun RuneOverlay(
     }
 }
 
-// ============================================================================================
-// COMPONENTES DE RUNAS (Gestos condicionales)
-// ============================================================================================
-
 @Composable
 fun SwipeRune(rune: RuneVariant, isInteractive: Boolean, onSuccess: () -> Unit) {
     var hasSwiped by remember { mutableStateOf(false) }
-    val pathColor = rune.color
+    var dragOffset by remember { mutableStateOf(0f) }
+
+    // Guía visual animada
+    val infiniteTransition = rememberInfiniteTransition(label = "Guide")
+    val guideAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f, targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(tween(800, easing = LinearEasing), RepeatMode.Reverse)
+    )
 
     Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .then(
-                if (isInteractive) {
-                    Modifier.pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragEnd = { hasSwiped = false }
-                        ) { change, dragAmount ->
-                            change.consume()
-                            if (!hasSwiped && dragAmount.x.absoluteValue > 30 && dragAmount.y.absoluteValue < 30) {
-                                hasSwiped = true
-                                onSuccess()
-                            }
-                        }
+            .then(if (isInteractive) Modifier.pointerInput(Unit) {
+                detectDragGestures(
+                    onDragEnd = {
+                        hasSwiped = false
+                        dragOffset = 0f
                     }
-                } else Modifier
-            )
+                ) { change, dragAmount ->
+                    change.consume()
+                    dragOffset += dragAmount.x
+                    if (!hasSwiped && dragAmount.x.absoluteValue > 10 && dragOffset.absoluteValue > 100) {
+                        hasSwiped = true
+                        onSuccess()
+                    }
+                }
+            } else Modifier)
     ) {
-        val width = size.width
-        val height = size.height
-        val cx = width / 2
-        val cy = height / 2
+        val cx = size.width / 2
+        val cy = size.height / 2
 
+        // Color dinámico al arrastrar
+        val activeColor = if (dragOffset.absoluteValue > 20) Color.White else rune.color
+
+        // La "Herida" central
         val path = Path().apply {
-            moveTo(cx - (width * 0.4f), cy)
-            quadraticBezierTo(cx - (width * 0.1f), cy - 20f, cx, cy)
-            quadraticBezierTo(cx + (width * 0.1f), cy + 20f, cx + (width * 0.4f), cy)
+            moveTo(cx - 100f, cy)
+            quadraticTo(cx, cy + 20f, cx + 100f, cy)
         }
+        drawPath(path, activeColor, style = Stroke(width = 15f, cap = StrokeCap.Round))
 
-        drawPath(path, pathColor.copy(alpha = 0.5f), style = Stroke(20f, cap = StrokeCap.Round))
-        drawPath(path, Color.White, style = Stroke(6f, cap = StrokeCap.Round))
+        // Flecha Guía
+        val guidePath = Path().apply {
+            moveTo(cx - 120f, cy - 40f)
+            lineTo(cx + 120f, cy - 40f)
+            lineTo(cx + 100f, cy - 55f)
+            moveTo(cx + 120f, cy - 40f)
+            lineTo(cx + 100f, cy - 25f)
+        }
+        drawPath(guidePath, rune.color.copy(alpha = guideAlpha), style = Stroke(width = 4f, cap = StrokeCap.Round))
     }
 }
 
@@ -188,11 +194,7 @@ fun HoldRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, rotation: 
     var progress by remember { mutableStateOf(0f) }
     val targetDuration = 1000f
 
-    // Si deja de ser interactiva, soltamos
-    LaunchedEffect(isInteractive) {
-        if (!isInteractive) isHolding = false
-    }
-
+    LaunchedEffect(isInteractive) { if (!isInteractive) isHolding = false }
     LaunchedEffect(isHolding) {
         if (isHolding) {
             val startTime = System.currentTimeMillis()
@@ -202,52 +204,55 @@ fun HoldRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, rotation: 
                 if (progress >= 1f) onSuccess()
                 withFrameNanos { }
             }
-        } else {
-            progress = 0f
-        }
+        } else { progress = 0f }
     }
 
     Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .then(
-                if (isInteractive) {
-                    Modifier.pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                isHolding = true
-                                tryAwaitRelease()
-                                isHolding = false
-                            }
-                        )
-                    }
-                } else Modifier
-            )
+            .then(if (isInteractive) Modifier.pointerInput(Unit) {
+                detectTapGestures(onPress = { isHolding = true; tryAwaitRelease(); isHolding = false })
+            } else Modifier)
     ) {
         val cx = size.width / 2
         val cy = size.height / 2
-        val baseRadius = (size.minDimension / 2) * 0.7f * pulse
+        val baseRadius = 80f * pulse
 
         rotate(rotation, pivot = Offset(cx, cy)) {
-            drawCircle(rune.color.copy(alpha = 0.3f), baseRadius + 10f, style = Stroke(4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(20f, 10f))))
-            val trianglePath = Path().apply {
-                val r = baseRadius
-                moveTo(cx, cy - r); lineTo(cx + r * 0.866f, cy + r * 0.5f); lineTo(cx - r * 0.866f, cy + r * 0.5f); close()
-            }
-            drawPath(trianglePath, rune.color.copy(alpha = 0.5f), style = Stroke(3f))
+            drawCircle(rune.color.copy(alpha = 0.3f), baseRadius + 30f, style = Stroke(4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f))))
         }
-
-        drawCircle(Color.Black, baseRadius * 0.9f)
-        drawCircle(rune.color, baseRadius * 0.9f, style = Stroke(6f))
-        val pupilRadius = if (isHolding) baseRadius * 0.9f * progress else baseRadius * 0.2f
-        drawCircle(Color.White, pupilRadius)
+        drawCircle(Color.Black, baseRadius)
+        drawCircle(rune.color, baseRadius, style = Stroke(6f))
+        drawCircle(Color.White, if (isHolding) baseRadius * progress else baseRadius * 0.2f)
     }
 }
 
 @Composable
 fun TraceRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, onSuccess: () -> Unit) {
-    val points = remember { listOf(Offset(0f, -0.9f), Offset(0.6f, 0.8f), Offset(-0.9f, -0.3f), Offset(0.9f, -0.3f), Offset(-0.6f, 0.8f)) }
-    val starOrder = listOf(0, 1, 2, 3, 4, 0)
+    // DEFINICIÓN DE FORMAS ÚNICAS SEGÚN ID DE RUNA
+    val (points, starOrder) = remember(rune.id) {
+        when {
+            // Nyarlathotep: ZigZag Caótico
+            rune.id.contains("nyarlathotep") -> {
+                val p = listOf(Offset(-0.8f, -0.8f), Offset(0.8f, -0.8f), Offset(-0.8f, 0f), Offset(0.8f, 0f), Offset(0f, 0.8f))
+                val o = listOf(0, 1, 2, 3, 4)
+                Pair(p, o)
+            }
+            // Azathoth: Círculo/Espiral
+            rune.id.contains("azathoth") -> {
+                val p = listOf(Offset(0f, -0.8f), Offset(0.8f, -0.2f), Offset(0.5f, 0.7f), Offset(-0.5f, 0.7f), Offset(-0.8f, -0.2f))
+                val o = listOf(0, 1, 2, 3, 4, 0)
+                Pair(p, o)
+            }
+            // Cthulhu : Estrella
+            else -> {
+                val p = listOf(Offset(0f, -0.9f), Offset(0.6f, 0.8f), Offset(-0.9f, -0.3f), Offset(0.9f, -0.3f), Offset(-0.6f, 0.8f))
+                val o = listOf(0, 1, 2, 3, 4, 0)
+                Pair(p, o)
+            }
+        }
+    }
+
     var currentTargetIndex by remember { mutableIntStateOf(0) }
     val pathDrawn = remember { Path() }
     var absolutePoints by remember { mutableStateOf<List<Offset>>(emptyList()) }
@@ -255,47 +260,44 @@ fun TraceRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, onSuccess
     Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .then(
-                if (isInteractive) {
-                    Modifier.pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                if (currentTargetIndex < starOrder.size && absolutePoints.isNotEmpty()) {
-                                    val startPoint = absolutePoints[starOrder[0]]
-                                    if ((offset - startPoint).getDistance() < 80f) {
-                                        pathDrawn.reset(); pathDrawn.moveTo(startPoint.x, startPoint.y); currentTargetIndex = 1
-                                    }
-                                }
-                            },
-                            onDragEnd = { if (currentTargetIndex < starOrder.size) { currentTargetIndex = 0; pathDrawn.reset() } }
-                        ) { change, _ ->
-                            change.consume()
-                            val pos = change.position
-                            if (absolutePoints.isNotEmpty() && currentTargetIndex > 0 && currentTargetIndex < starOrder.size) {
-                                pathDrawn.lineTo(pos.x, pos.y)
-                                if ((pos - absolutePoints[starOrder[currentTargetIndex]]).getDistance() < 60f) {
-                                    currentTargetIndex++
-                                    if (currentTargetIndex >= starOrder.size) onSuccess()
-                                }
+            .then(if (isInteractive) Modifier.pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        if (absolutePoints.isNotEmpty()) {
+                            val startPoint = absolutePoints[starOrder[0]]
+                            if ((offset - startPoint).getDistance() < 100f) {
+                                pathDrawn.reset(); pathDrawn.moveTo(startPoint.x, startPoint.y); currentTargetIndex = 1
                             }
                         }
+                    },
+                    onDragEnd = { if (currentTargetIndex < starOrder.size) { currentTargetIndex = 0; pathDrawn.reset() } }
+                ) { change, _ ->
+                    change.consume()
+                    if (absolutePoints.isNotEmpty() && currentTargetIndex > 0 && currentTargetIndex < starOrder.size) {
+                        pathDrawn.lineTo(change.position.x, change.position.y)
+                        if ((change.position - absolutePoints[starOrder[currentTargetIndex]]).getDistance() < 80f) {
+                            currentTargetIndex++
+                            if (currentTargetIndex >= starOrder.size) onSuccess()
+                        }
                     }
-                } else Modifier
-            )
+                }
+            } else Modifier)
     ) {
-        val cx = size.width / 2; val cy = size.height / 2; val radius = size.minDimension * 0.45f
+        val cx = size.width / 2; val cy = size.height / 2; val radius = size.minDimension * 0.4f
         if (absolutePoints.isEmpty()) absolutePoints = points.map { Offset(cx + it.x * radius, cy + it.y * radius) }
 
         val guidePath = Path().apply {
-            if (absolutePoints.isNotEmpty()) { moveTo(absolutePoints[starOrder[0]].x, absolutePoints[starOrder[0]].y); for (i in 1 until starOrder.size) { val p = absolutePoints[starOrder[i]]; lineTo(p.x, p.y) } }
+            if (absolutePoints.isNotEmpty()) {
+                moveTo(absolutePoints[starOrder[0]].x, absolutePoints[starOrder[0]].y)
+                for (i in 1 until starOrder.size) lineTo(absolutePoints[starOrder[i]].x, absolutePoints[starOrder[i]].y)
+            }
         }
-        drawPath(guidePath, rune.color.copy(alpha = 0.2f), style = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        drawPath(guidePath, rune.color.copy(alpha = 0.2f), style = Stroke(10f, cap = StrokeCap.Round, join = StrokeJoin.Round))
 
         starOrder.forEachIndexed { i, idx ->
             val p = absolutePoints[idx]; val isNext = i == currentTargetIndex
-            drawCircle(if (i < currentTargetIndex) rune.color else if (isNext) Color.White else Color.Gray.copy(0.5f), if (isNext) 15f * pulse else 8f, p)
+            drawCircle(if (i < currentTargetIndex) rune.color else if (isNext) Color.White else Color.Gray.copy(0.5f), if (isNext) 20f * pulse else 12f, p)
         }
-        drawPath(pathDrawn, rune.color, style = Stroke(6f, cap = StrokeCap.Round, join = StrokeJoin.Round))
-        drawPath(pathDrawn, Color.White.copy(0.6f), style = Stroke(2f))
+        drawPath(pathDrawn, rune.color, style = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }

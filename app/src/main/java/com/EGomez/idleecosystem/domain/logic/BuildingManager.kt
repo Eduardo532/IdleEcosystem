@@ -4,6 +4,7 @@ import com.EGomez.idleecosystem.data.database.BuildingEntity
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import java.math.BigDecimal
+import java.math.MathContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +14,6 @@ class BuildingManager @Inject constructor(
 ) {
     val availableBuildings = mutableListOf(
         // Tier 1
-        // CAMBIO: amountOwned inicializado en 0 (antes 1)
         Building("b_synapse", "Sinapsis Arcana", "Genera conocimiento básico.", BigDecimal("10"), BigDecimal("1"), BigDecimal("1.15"), tier = 1, type = BuildingType.CLICK, isVisible = true, amountOwned = 0),
         // Tier 2
         Building("b_notes", "Notas Desordenadas", "Garabatos frenéticos.", BigDecimal("15"), BigDecimal("0.5"), BigDecimal("1.15"), tier = 2, isVisible = true),
@@ -48,13 +48,11 @@ class BuildingManager @Inject constructor(
     )
 
     fun loadFromSave(savedBuildings: List<BuildingEntity>) {
-        // Reset inicial
         availableBuildings.forEach {
             it.amountOwned = 0
             it.isVisible = false
         }
 
-        // Restaurar visibilidad básica
         availableBuildings[0].isVisible = true
         availableBuildings[1].isVisible = true
 
@@ -65,32 +63,33 @@ class BuildingManager @Inject constructor(
                 building.isVisible = saved.isUnlocked
             }
         }
-
-        // CAMBIO: Eliminado el bloque de seguridad que forzaba 1 sinapsis si tenías 0.
-        // Ahora respeta exactamente lo que viene del guardado (o 0 si es nueva partida).
     }
 
-    fun getCost(buildingId: String, amountToBuy: Int, currentKnowledge: BigDecimal): BigDecimal {
+    fun getCost(buildingId: String, amountToBuy: Int, currentKnowledge: BigDecimal, discountFactor: BigDecimal = BigDecimal.ONE): BigDecimal {
         val building = availableBuildings.find { it.id == buildingId } ?: return BigDecimal.ZERO
-        if (amountToBuy == -1) {
-            val max = calculator.calculateMaxAffordable(building, currentKnowledge)
-            return if (max > 0) calculator.calculateCostForAmount(building, max) else calculator.calculateNextCost(building)
+        val baseCost = if (amountToBuy == -1) {
+            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL128) else currentKnowledge
+            val max = calculator.calculateMaxAffordable(building, effectiveKnowledge)
+            if (max > 0) calculator.calculateCostForAmount(building, max) else calculator.calculateNextCost(building)
+        } else {
+            calculator.calculateCostForAmount(building, amountToBuy)
         }
-        return calculator.calculateCostForAmount(building, amountToBuy)
+        return baseCost.multiply(discountFactor)
     }
 
-    fun tryBuyBuilding(buildingId: String, currentKnowledge: BigDecimal, multiplier: Int): Int {
+    fun tryBuyBuilding(buildingId: String, currentKnowledge: BigDecimal, multiplier: Int, discountFactor: BigDecimal = BigDecimal.ONE): Int {
         val building = availableBuildings.find { it.id == buildingId } ?: return 0
 
-        val amountToBuy = if (multiplier == -1) {
-            calculator.calculateMaxAffordable(building, currentKnowledge)
-        } else {
-            multiplier
+        var amountToBuy = multiplier
+        if (amountToBuy == -1) {
+            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL128) else currentKnowledge
+            amountToBuy = calculator.calculateMaxAffordable(building, effectiveKnowledge)
         }
 
         if (amountToBuy <= 0) return 0
 
-        val cost = calculator.calculateCostForAmount(building, amountToBuy)
+        val cost = getCost(buildingId, amountToBuy, currentKnowledge, discountFactor)
+
         if (currentKnowledge >= cost) {
             building.amountOwned += amountToBuy
             return amountToBuy

@@ -16,7 +16,9 @@ enum class SoundType {
     BUY,
     ACHIEVEMENT,
     EVENT_APPEAR,
-    ECHO_FOUND
+    ECHO_FOUND,
+    RUNE_SPAWN,
+    RUNE_SUCCESS
 }
 
 @Singleton
@@ -55,6 +57,9 @@ class SoundManager @Inject constructor(
         soundMap[SoundType.ACHIEVEMENT] = soundPool.load(context, R.raw.sfx_achievement, 1)
         soundMap[SoundType.EVENT_APPEAR] = soundPool.load(context, R.raw.sfx_event, 1)
         soundMap[SoundType.ECHO_FOUND] = soundPool.load(context, R.raw.sfx_echos, 1)
+        soundMap[SoundType.RUNE_SPAWN] = soundPool.load(context,R.raw.sfx_rune_spawn,1)
+        soundMap[SoundType.RUNE_SUCCESS] = soundPool.load(context,R.raw.sfx_rune_success,1)
+
 
     }
 

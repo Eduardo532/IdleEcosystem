@@ -3,8 +3,11 @@ package com.EGomez.idleecosystem.domain.logic
 import com.EGomez.idleecosystem.domain.model.RuneCatalog
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.math.BigDecimal
@@ -12,30 +15,34 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
-// Estados posibles de una Runa en pantalla
 enum class RuneState {
-    HIDDEN,
-    APPEARING, // Animación de entrada
-    ACTIVE,    // Esperando interacción del jugador
-    SUCCESS,   // Jugador completó el gesto
-    FAILED     // Tiempo agotado o error
+    HIDDEN, APPEARING, ACTIVE, SUCCESS, FAILED
+}
+
+// Eventos de recompensa instantánea que el ViewModel debe manejar
+sealed class RuneReward {
+    data class TimeWarp(val seconds: Long) : RuneReward()
+    data class InstantEchoes(val amount: Int) : RuneReward()
+    data class SanityBonus(val percent: Double) : RuneReward()
+    object TriggerRandomEvent : RuneReward()
 }
 
 data class RuneBuff(
     val id: String,
-    val multiplier: Double,
+    val multiplier: Double = 1.0,
+    val costReduction: Double = 0.0, // 0.15 = 15% descuento
+    val echoChanceBonus: Double = 0.0, // 0.01 = +1%
     val expirationTime: Long,
     val isAutoClick: Boolean = false,
+    val freezesBuffs: Boolean = false, // Para Runa de Escarcha
     val description: String
 )
 
 @Singleton
 class RuneManager @Inject constructor(
     private val statisticsManager: StatisticsManager,
-    private val soundManager: SoundManager // Para feedback auditivo
+    private val soundManager: SoundManager
 ) {
-
-    // --- ESTADO OBSERVABLE PARA LA UI ---
     private val _currentRune = MutableStateFlow<RuneVariant?>(null)
     val currentRune: StateFlow<RuneVariant?> = _currentRune.asStateFlow()
 
@@ -45,26 +52,38 @@ class RuneManager @Inject constructor(
     private val _activeBuffs = MutableStateFlow<List<RuneBuff>>(emptyList())
     val activeBuffs: StateFlow<List<RuneBuff>> = _activeBuffs.asStateFlow()
 
-    // --- CONFIGURACIÓN ---
+    // Canal para comunicar eventos instantáneos al ViewModel
+    private val _runeRewards = MutableSharedFlow<RuneReward>()
+    val runeRewards: SharedFlow<RuneReward> = _runeRewards.asSharedFlow()
+
     private var timeSinceLastRune = 0L
     private var runeLifeTime = 0f
 
-    // Intervalo mínimo entre runas
-    private val SPAWN_COOLDOWN_SECONDS = 60
-    private val SPAWN_CHANCE_PER_TICK = 0.005f
+    // Balanceo
+    private val SPAWN_COOLDOWN_SECONDS = 20
+    private val SPAWN_CHANCE_PER_TICK = 0.02f
 
     fun tick(deltaMillis: Long) {
         val currentTime = System.currentTimeMillis()
 
-        // 1. Limpieza de Buffs expirados
-        _activeBuffs.update { list ->
-            list.filter { it.expirationTime > currentTime }
+        // 1. Gestión de Buffs (Runa de Escarcha pausa la expiración)
+        val isFrozen = _activeBuffs.value.any { it.freezesBuffs }
+
+        if (!isFrozen) {
+            _activeBuffs.update { list -> list.filter { it.expirationTime > currentTime } }
+        } else {
+            // Si está congelado, extendemos la vida de los otros buffs
+            _activeBuffs.update { list ->
+                list.map {
+                    if (!it.freezesBuffs) it.copy(expirationTime = it.expirationTime + deltaMillis)
+                    else it // La runa de escarcha sí se consume a sí misma
+                }.filter { it.expirationTime > currentTime }
+            }
         }
 
-        // 2. Lógica de Aparición y Vida de la Runa
+        // 2. Ciclo de Vida de la Runa
         if (_runeState.value == RuneState.HIDDEN) {
             timeSinceLastRune += deltaMillis
-
             if (timeSinceLastRune >= SPAWN_COOLDOWN_SECONDS * 1000) {
                 if (Random.nextFloat() < SPAWN_CHANCE_PER_TICK) {
                     spawnRune()
@@ -79,8 +98,6 @@ class RuneManager @Inject constructor(
     }
 
     private fun spawnRune() {
-        // Pesos arbitrarios para balance
-        // 60% Tier 1 | 30% Tier 2 | 10% Tier 3
         val roll = Random.nextFloat()
         val tier = when {
             roll < 0.60f -> RuneTier.TIER_1_SWIPE
@@ -89,48 +106,97 @@ class RuneManager @Inject constructor(
         }
 
         val variants = RuneCatalog.getVariantsForTier(tier)
+        // Selección ponderada
         val totalWeight = variants.sumOf { it.weight }
-        val randomWeight = Random.nextInt(totalWeight)
-        var currentWeight = 0
+        val randomValue = Random.nextInt(totalWeight)
+        var cumulativeWeight = 0
         var selectedRune = variants.first()
 
         for (variant in variants) {
-            currentWeight += variant.weight
-            if (randomWeight < currentWeight) {
+            cumulativeWeight += variant.weight
+            if (randomValue < cumulativeWeight) {
                 selectedRune = variant
                 break
             }
         }
 
-        // Configurar estado
         _currentRune.value = selectedRune
-        _runeState.value = RuneState.ACTIVE
-        runeLifeTime = 10f + (tier.ordinal * 5f)
+        _runeState.value = RuneState.APPEARING
+        runeLifeTime = 15f + (tier.ordinal * 5f)
+        soundManager.playSound(SoundType.RUNE_SPAWN)
 
-        soundManager.playSound(SoundType.EVENT_APPEAR)
+        // Auto-transición visual
+        _runeState.value = RuneState.ACTIVE
     }
 
-    fun completeRuneInteraction() {
+    suspend fun completeRuneInteraction() {
         val rune = _currentRune.value ?: return
         if (_runeState.value != RuneState.ACTIVE) return
 
-        // 1. Efectos visuales/sonoros
-        soundManager.playSound(SoundType.ACHIEVEMENT) // Sonido de éxito
+        soundManager.playSound(SoundType.RUNE_SUCCESS)
         _runeState.value = RuneState.SUCCESS
 
-        // 2. Registrar estadística
+        // Tracking
         when (rune.tier) {
             RuneTier.TIER_1_SWIPE -> statisticsManager.trackRuneSevered()
             RuneTier.TIER_2_HOLD -> statisticsManager.trackRuneStabilized()
             RuneTier.TIER_3_TRACE -> statisticsManager.trackRuneInscribed()
         }
 
-        // 3. Aplicar el Buff específico
         applyRuneEffect(rune)
-
-        // 4. Resetear temporizador para la siguiente runa
         timeSinceLastRune = 0
+    }
 
+    private suspend fun applyRuneEffect(rune: RuneVariant) {
+        var durationMs: Long = 0
+        var multiplier = 1.0
+        var isAutoClick = false
+        var costReduction = 0.0
+        var echoChance = 0.0
+        var freezesBuffs = false
+
+        when (rune.id) {
+            // --- TIER 1 ---
+            "t1_blood" -> { multiplier = 50.0; durationMs = 15_000 }
+            "t1_ash" -> { multiplier = 40.0; durationMs = 20_000 }
+            "t1_salt" -> { multiplier = 60.0; durationMs = 10_000 }
+            "t1_bone" -> { _runeRewards.emit(RuneReward.TimeWarp(120)) } // 2 min
+            "t1_shadow" -> { multiplier = 30.0; durationMs = 30_000 }
+            "t1_whisper" -> { multiplier = 10.0; durationMs = 30_000; isAutoClick = true }
+            "t1_rust" -> { multiplier = 45.0; durationMs = 18_000 }
+            "t1_frost" -> { durationMs = 5_000; freezesBuffs = true } // Pausa otros buffs
+            "t1_vermin" -> { multiplier = 55.0; durationMs = 12_000 }
+            "t1_rift" -> { _runeRewards.emit(RuneReward.TimeWarp(300)) } // 5 min
+            "t1_void_minor" -> { durationMs = 30_000; echoChance = 0.01 } // +1% Ecos
+
+            // --- TIER 2 ---
+            "t2_chronos" -> { durationMs = 20_000; isAutoClick = true }
+            "t2_gravity" -> { multiplier = 200.0; durationMs = 20_000 }
+            "t2_barrier" -> { durationMs = 30_000; costReduction = 0.15 } // -15% Costos
+            "t2_tidal" -> { multiplier = 500.0; durationMs = 10_000 }
+            "t2_psyche" -> { _runeRewards.emit(RuneReward.SanityBonus(0.05)) } // +5% Cordura
+            "t2_vision" -> { _runeRewards.emit(RuneReward.TriggerRandomEvent) }
+            "t2_entropy" -> { timeSinceLastRune = SPAWN_COOLDOWN_SECONDS * 1000L } // Reinicio instantáneo (siguiente tick spawnea)
+
+            // --- TIER 3 ---
+            "t3_cthulhu" -> { multiplier = 777.0; durationMs = 60_000; _runeRewards.emit(RuneReward.InstantEchoes(1)) }
+            "t3_nyarlathotep" -> { multiplier = 666.0; durationMs = 60_000; isAutoClick = true }
+            "t3_azathoth" -> { _runeRewards.emit(RuneReward.InstantEchoes(50)) }
+        }
+
+        if (durationMs > 0) {
+            val buff = RuneBuff(
+                id = rune.id,
+                multiplier = multiplier,
+                costReduction = costReduction,
+                echoChanceBonus = echoChance,
+                expirationTime = System.currentTimeMillis() + durationMs,
+                isAutoClick = isAutoClick,
+                freezesBuffs = freezesBuffs,
+                description = rune.description
+            )
+            _activeBuffs.update { it + buff }
+        }
     }
 
     fun hideRune() {
@@ -143,74 +209,21 @@ class RuneManager @Inject constructor(
         hideRune()
     }
 
-    // --- LÓGICA DE EFECTOS ---
-    private fun applyRuneEffect(rune: RuneVariant) {
-        val durationMs: Long
-        val multiplier: Double
-        var isAutoClick = false
-        var extraDescription = ""
-
-        when (rune.id) {
-            // TIER 1
-            "t1_blood" -> { multiplier = 50.0; durationMs = 15_000 }
-            "t1_ash" -> { multiplier = 40.0; durationMs = 20_000 }
-            "t1_salt" -> { multiplier = 60.0; durationMs = 10_000 }
-            "t1_bone" -> { multiplier = 1.0; durationMs = 0; statisticsManager.trackPlayTime(120) }
-            "t1_shadow" -> { multiplier = 30.0; durationMs = 30_000 }
-            "t1_whisper" -> { multiplier = 10.0; durationMs = 30_000; isAutoClick = true }
-
-            // TIER 2
-            "t2_chronos" -> { multiplier = 1.0; durationMs = 20_000; isAutoClick = true }
-            "t2_gravity" -> { multiplier = 200.0; durationMs = 20_000 }
-            "t2_barrier" -> { multiplier = 1.0; durationMs = 30_000;}
-            "t2_tidal" -> { multiplier = 500.0; durationMs = 10_000 }
-
-            // TIER 3
-            "t3_cthulhu" -> {
-                multiplier = 777.0
-                durationMs = 60_000
-                statisticsManager.trackEchoesFound(BigDecimal.ONE)
-            }
-            "t3_nyarlathotep" -> {
-                multiplier = 666.0
-                durationMs = 60_000
-                isAutoClick = true
-            }
-            "t3_azathoth" -> {
-                multiplier = 1.0
-                durationMs = 0
-                statisticsManager.trackEchoesFound(BigDecimal("50"))
-                extraDescription = "+50 Ecos obtenidos"
-            }
-
-            else -> {
-                when(rune.tier) {
-                    RuneTier.TIER_1_SWIPE -> { multiplier = 20.0; durationMs = 15_000 }
-                    RuneTier.TIER_2_HOLD -> { multiplier = 100.0; durationMs = 20_000 }
-                    RuneTier.TIER_3_TRACE -> { multiplier = 500.0; durationMs = 30_000 }
-                }
-            }
-        }
-
-        if (durationMs > 0) {
-            val buff = RuneBuff(
-                id = rune.id,
-                multiplier = multiplier,
-                expirationTime = System.currentTimeMillis() + durationMs,
-                isAutoClick = isAutoClick,
-                description = if(extraDescription.isNotEmpty()) extraDescription else rune.description
-            )
-            _activeBuffs.update { it + buff }
-        }
-    }
-
+    // --- Helpers de Cálculo ---
     fun getTotalRuneMultiplier(): BigDecimal {
         var total = BigDecimal.ONE
         _activeBuffs.value.forEach {
-            if (it.multiplier > 1.0) {
-                total = total.multiply(BigDecimal.valueOf(it.multiplier))
-            }
+            if (it.multiplier > 1.0) total = total.multiply(BigDecimal.valueOf(it.multiplier))
         }
         return total
+    }
+
+    fun getCostReductionMultiplier(): Double {
+        val reduction = _activeBuffs.value.sumOf { it.costReduction }
+        return (1.0 - reduction).coerceAtLeast(0.1) // Máximo 90% descuento
+    }
+
+    fun getEchoChanceBonus(): Double {
+        return _activeBuffs.value.sumOf { it.echoChanceBonus }
     }
 }

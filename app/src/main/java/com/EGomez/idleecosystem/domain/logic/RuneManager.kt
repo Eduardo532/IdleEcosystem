@@ -59,9 +59,8 @@ class RuneManager @Inject constructor(
     private var timeSinceLastRune = 0L
     private var runeLifeTime = 0f
 
-    // Balanceo
-    private val SPAWN_COOLDOWN_SECONDS = 20
-    private val SPAWN_CHANCE_PER_TICK = 0.02f
+    private val SPAWN_COOLDOWN_SECONDS = 40
+    private val SPAWN_CHANCE_PER_TICK = 0.001f
 
     fun tick(deltaMillis: Long) {
         val currentTime = System.currentTimeMillis()
@@ -99,9 +98,13 @@ class RuneManager @Inject constructor(
 
     private fun spawnRune() {
         val roll = Random.nextFloat()
+        // AJUSTE DE TIERS:
+        // 0% - 80% : Tier 1 (Común)
+        // 80% - 97% : Tier 2 (Raro)
+        // 97% - 100% : Tier 3 (Mítico - Solo 3% chance)
         val tier = when {
-            roll < 0.60f -> RuneTier.TIER_1_SWIPE
-            roll < 0.90f -> RuneTier.TIER_2_HOLD
+            roll < 0.80f -> RuneTier.TIER_1_SWIPE
+            roll < 0.97f -> RuneTier.TIER_2_HOLD
             else -> RuneTier.TIER_3_TRACE
         }
 

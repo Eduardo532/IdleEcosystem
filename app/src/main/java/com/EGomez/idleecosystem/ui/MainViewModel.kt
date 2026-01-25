@@ -45,6 +45,7 @@ class MainViewModel @Inject constructor(
     private val runeManager: RuneManager
 ) : ViewModel() {
 
+    // --- MODO DEBUG ---
     private val DEBUG_MODE = false
     private var debugTierIndex = 0
 
@@ -164,7 +165,7 @@ class MainViewModel @Inject constructor(
                     runeState = RuneState.APPEARING
                 )
 
-                soundManager.playSound(SoundType.RUNE_SPAWN, 1400)
+                soundManager.playSound(SoundType.RUNE_SPAWN)
 
                 delay(500)
                 _uiState.value = _uiState.value.copy(runeState = RuneState.ACTIVE)
@@ -319,8 +320,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // --- FUNCIONES DE UI ---
+
     fun setBuyMultiplier(value: Int) {
         _uiState.value = _uiState.value.copy(buyMultiplier = value)
+    }
+
+    fun toggleShowPurchased() {
+        _showPurchasedState.value = !_showPurchasedState.value
+        recalculateState()
     }
 
     fun onBuyBuilding(buildingId: String) {
@@ -400,6 +408,8 @@ class MainViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 runeManager.completeRuneInteraction()
+                delay(2000)
+                runeManager.hideRune()
             }
         }
     }
@@ -439,11 +449,6 @@ class MainViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun toggleShowPurchased() {
-        _showPurchasedState.value = !_showPurchasedState.value
-        recalculateState()
     }
 
     fun toggleMusic() {
@@ -748,6 +753,7 @@ class MainViewModel @Inject constructor(
         val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
 
         val runeMult = runeManager.getTotalRuneMultiplier()
+        val costReductionMult = runeManager.getCostReductionMultiplier()
 
         val finalGlobalMult = upgradesGlobal
             .multiply(prestigeGlobal)
@@ -800,7 +806,8 @@ class MainViewModel @Inject constructor(
             achievementsProgress = progressText,
             secretsProgress = secretsText,
             echoes = echoesBalance,
-            echoesFormatted = echoesBalance.toBeautifulString()
+            echoesFormatted = echoesBalance.toBeautifulString(),
+            buildingCostMultiplier = costReductionMult
         )
     }
 

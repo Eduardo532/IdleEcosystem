@@ -76,14 +76,12 @@ fun MainScreen(
         val rituals by viewModel.ritualsState.collectAsState()
         val showPurchased by viewModel.showPurchasedState.collectAsState()
 
-        // Dialog states...
         var showAchievementsDialog by remember { mutableStateOf(false) }
         var showPrestigeShopDialog by remember { mutableStateOf(false) }
         var showSettingsDialog by remember { mutableStateOf(false) }
         var showHardResetConfirmation by remember { mutableStateOf(false) }
         var showStatisticsDialog by remember { mutableStateOf(false) }
 
-        // Menu Animation
         var isMenuExpanded by remember { mutableStateOf(true) }
         val menuWeight by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isMenuExpanded) 0.65f else 0.15f, label = "menu")
         var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -104,14 +102,14 @@ fun MainScreen(
 
         Box(modifier = Modifier.fillMaxSize().background(VoidBlack)) {
 
-            // CAPA 0: Partículas (Fondo)
+            // --- CAPA 0: Partículas ---
             ParticleOverlay(
                 system = particleSystem,
                 isParticlesEnabled = uiState.areParticlesEnabled,
                 modifier = Modifier.fillMaxSize().zIndex(0f)
             )
 
-            // CAPA 1: UI Principal
+            // --- CAPA 1: UI Principal ---
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
@@ -135,7 +133,7 @@ fun MainScreen(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // --- NUEVO: BARRA DE BUFFS ACTIVOS ---
+
                         if (uiState.activeRuneBuffs.isNotEmpty()) {
                             ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
                             Spacer(modifier = Modifier.height(8.dp))
@@ -172,6 +170,7 @@ fun MainScreen(
                             buildings = buildings, upgrades = upgrades, rituals = rituals,
                             currentKnowledge = uiState.rawKnowledge, currentEchoes = uiState.echoes,
                             globalMultiplier = uiState.globalMultiplier, buildingCalculator = buildingCalculator,
+                            buildingCostMultiplier = uiState.buildingCostMultiplier,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
@@ -181,7 +180,6 @@ fun MainScreen(
                         )
                     }
 
-                    // Texto Flotante
                     if (floatingTexts.isNotEmpty()) {
                         floatingTexts.forEach { item ->
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -199,16 +197,16 @@ fun MainScreen(
                 }
             }
 
-            // CAPA 2: RUNAS (Z-Index ALTO para que se vean y se toquen)
+            // --- CAPA 2: RUNAS ---
             RuneOverlay(
                 activeRune = uiState.activeRune,
                 runeState = uiState.runeState,
                 onSuccess = { viewModel.onRuneInteractionSuccess() },
                 onFail = { },
-                modifier = Modifier.zIndex(50f) // CORRECCIÓN CLAVE
+                modifier = Modifier.zIndex(50f)
             )
 
-            // CAPA 3: Popups y Dialogos
+            // --- CAPA 3: Popups y Dialogos ---
             AnimatedVisibility(
                 visible = uiState.lastUnlockedAchievement != null,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
@@ -218,7 +216,6 @@ fun MainScreen(
                 uiState.lastUnlockedAchievement?.let { AchievementPopup(achievement = it) }
             }
 
-            // Dialogs
             if (showStatisticsDialog) StatisticsScreen(viewModel.statsManager) { showStatisticsDialog = false }
             if (showHardResetConfirmation) HardResetDialog({ viewModel.onHardResetClicked(); showHardResetConfirmation = false; showSettingsDialog = false }, { showHardResetConfirmation = false })
             if (showSettingsDialog) SettingsDialog(uiState, { showSettingsDialog = false; viewModel.clearExportString() }, { showStatisticsDialog = true }, { viewModel.toggleMusic() }, { viewModel.toggleSfx() }, { viewModel.toggleParticles() }, { viewModel.toggleFloatingText() }, { viewModel.onExportSaveClicked() }, { viewModel.onConfirmImportClicked(); showSettingsDialog = false }, { viewModel.clearExportString() }, { viewModel.onPasteSaveClicked(it) }, { showHardResetConfirmation = true })
@@ -235,20 +232,35 @@ fun MainScreen(
 fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().height(40.dp)
+        modifier = Modifier.fillMaxWidth().height(30.dp)
     ) {
         items(buffs) { buff ->
             val remainingSeconds = ((buff.expirationTime - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
+
+            val labelText = when {
+                buff.costReduction > 0 -> "-${(buff.costReduction * 100).toInt()}% Costos"
+                buff.isAutoClick -> if(buff.multiplier > 1.0) "x${buff.multiplier.toInt()} + Auto" else "AutoClick"
+                buff.echoChanceBonus > 0 -> "+Suerte Ecos"
+                buff.multiplier > 1.0 -> "x${buff.multiplier.toInt()} Prod"
+                else -> "Activo"
+            }
+
+            val borderColor = when {
+                buff.costReduction > 0 -> Color(0xFF90CAF9)
+                buff.isAutoClick -> Color(0xFFFFEB3B)
+                else -> Color(0xFF00E5FF)
+            }
+
             Box(
                 modifier = Modifier
                     .background(Color(0xFF333333), RoundedCornerShape(4.dp))
-                    .border(1.dp, if(buff.isAutoClick) Color.Yellow else Color.Cyan, RoundedCornerShape(4.dp))
+                    .border(1.dp, borderColor, RoundedCornerShape(4.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "${if(buff.isAutoClick) "AUTO" else "x${buff.multiplier.toInt()}"}: ${remainingSeconds}s",
+                    text = "$labelText: ${remainingSeconds}s",
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }

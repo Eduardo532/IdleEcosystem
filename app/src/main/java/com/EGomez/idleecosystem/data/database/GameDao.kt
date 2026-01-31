@@ -5,15 +5,20 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GameDao {
-    // CAMBIO: Buscamos explícitamente el ID 1 en game_save
+    // --- CONSULTAS PRINCIPALES ---
     @Query("SELECT * FROM game_save WHERE id = 1")
     fun getGameState(): Flow<GameStateEntity?>
 
-    // OnConflictStrategy.REPLACE asegura que si ya existe el ID 1, lo actualiza (no crea uno nuevo)
+    // Guarda todo el estado (Dinero, Ecos, Tiempo, y ahora Tutorial)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveGame(gameState: GameStateEntity)
 
-    // --- Tablas secundarias (Mantenlas igual) ---
+    // --- NUEVO: ACTUALIZACIÓN QUIRÚRGICA DEL TUTORIAL ---
+    // Esto es más seguro y eficiente que re-guardar todo el objeto GameStateEntity
+    @Query("UPDATE game_save SET tutorialEnabled = :enabled, completedTutorialSteps = :steps WHERE id = 1")
+    suspend fun updateTutorialState(enabled: Boolean, steps: String)
+
+    // --- TABLAS SECUNDARIAS (Sin cambios) ---
     @Query("SELECT * FROM buildings_save")
     suspend fun getAllBuildings(): List<BuildingEntity>
 
@@ -54,5 +59,5 @@ interface GameDao {
     fun getGameStatistics(): Flow<GameStatisticsEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveGameStatistics(stats: GameStatisticsEntity)
+    suspend fun saveStatistics(stats: GameStatisticsEntity)
 }

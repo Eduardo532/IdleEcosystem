@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.data.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -11,5 +12,11 @@ data class GameStateEntity(
     val prestigeCurrency: String,
     val echoes: String,
     val lastLoginTime: Long,
-    val totalPlayTime: Long
+    val totalPlayTime: Long,
+
+    @ColumnInfo(defaultValue = "1")
+    val tutorialEnabled: Boolean = true,
+
+    @ColumnInfo(defaultValue = "")
+    val completedTutorialSteps: String = ""
 )

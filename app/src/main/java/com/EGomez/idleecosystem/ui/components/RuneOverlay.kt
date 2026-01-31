@@ -3,7 +3,6 @@ package com.EGomez.idleecosystem.ui.components
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -12,14 +11,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.domain.logic.RuneState
@@ -77,21 +81,23 @@ fun RuneOverlay(
         ), label = "Rotation"
     )
 
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize()
-    ) {
-        val density = LocalDensity.current
-        val runeSize = 280.dp
-        val runeSizePx = with(density) { runeSize.toPx() }
-        val maxW = constraints.maxWidth
-        val maxH = constraints.maxHeight
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val runeSize = 280.dp
+    val runeSizePx = with(density) { runeSize.toPx() }
+    val topSafeAreaPx = with(density) { 100.dp.toPx() }
 
-        val positionOffset = remember(activeRune) {
-            val randomX = Random.nextInt(0, (maxW - runeSizePx).toInt().coerceAtLeast(1))
-            val randomY = Random.nextInt(0, (maxH - runeSizePx).toInt().coerceAtLeast(1))
-            IntOffset(randomX, randomY)
-        }
+    val positionOffset = remember(activeRune) {
+        val maxX = (screenWidthPx - runeSizePx).toInt().coerceAtLeast(0)
+        val maxY = (screenHeightPx - runeSizePx).toInt().coerceAtLeast(topSafeAreaPx.toInt())
+        val randomX = Random.nextInt(0, maxX + 1)
+        val randomY = Random.nextInt(topSafeAreaPx.toInt(), maxY + 1)
+        IntOffset(randomX, randomY)
+    }
 
+    Box(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .offset { positionOffset }
@@ -102,27 +108,42 @@ fun RuneOverlay(
                     this.scaleY = scale
                 }
                 .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.Black.copy(alpha = 0.8f), Color.Transparent)
-                    ),
+                    brush = Brush.radialGradient(colors = listOf(Color.Black.copy(alpha = 0.8f), Color.Transparent)),
                     shape = CircleShape
                 )
-                .then(
-                    if (isInteractive) Modifier.background(Color.Transparent) else Modifier
-                ),
+                .then(if (isInteractive) Modifier.background(Color.Transparent) else Modifier),
             contentAlignment = Alignment.Center
         ) {
-            // Nombre de la Runa (Identidad visual)
-            Text(
-                text = activeRune.name.uppercase(),
-                color = activeRune.color.copy(alpha = 0.8f),
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
+            // --- TEXTO TEMÁTICO (NEÓN) ---
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = 20.dp)
-            )
+                    .offset(y = (-65).dp) // Ajustado el offset para letras más pequeñas
+                    .width(runeSize + 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // TÍTULO: Tamaño reducido (16.sp) pero Neón intenso
+                RuneThematicText(
+                    text = activeRune.name.uppercase(),
+                    baseColor = activeRune.color,
+                    fontSize = 16.sp, // REDUCIDO
+                    fontWeight = FontWeight.Black,
+                    glowRadius = 12f // Radio ajustado para letra pequeña
+                )
 
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // DESCRIPCIÓN: Tamaño reducido (12.sp)
+                RuneThematicText(
+                    text = activeRune.description,
+                    baseColor = activeRune.color,
+                    fontSize = 12.sp, // REDUCIDO
+                    fontWeight = FontWeight.Bold,
+                    glowRadius = 8f
+                )
+            }
+
+            // --- GRÁFICOS ---
             when (activeRune.tier) {
                 RuneTier.TIER_1_SWIPE -> SwipeRune(activeRune, isInteractive, onSuccess)
                 RuneTier.TIER_2_HOLD -> HoldRune(activeRune, isInteractive, pulse, rotation, onSuccess)
@@ -132,12 +153,85 @@ fun RuneOverlay(
     }
 }
 
+/**
+ * Componente de texto "Estilo Neón Arcano Mejorado".
+ * Utiliza múltiples capas de sombra para intensificar el color.
+ */
+@Composable
+fun RuneThematicText(
+    text: String,
+    baseColor: Color,
+    fontSize: TextUnit,
+    fontWeight: FontWeight,
+    glowRadius: Float
+) {
+    Box(contentAlignment = Alignment.Center) {
+
+        // CAPA 1: Resplandor Ambiente (Ancho y difuso)
+        Text(
+            text = text,
+            color = baseColor,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = TextAlign.Center,
+            style = TextStyle.Default.copy(
+                shadow = Shadow(
+                    color = baseColor,
+                    blurRadius = glowRadius * 1.5f // Blur amplio
+                )
+            ),
+            modifier = Modifier.alpha(0.6f)
+        )
+
+        // CAPA 2: Resplandor Núcleo (Estrecho e intenso)
+        // Esta capa extra hace que el color se note mucho más
+        Text(
+            text = text,
+            color = baseColor,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = TextAlign.Center,
+            style = TextStyle.Default.copy(
+                shadow = Shadow(
+                    color = baseColor.copy(alpha = 1f), // Color sólido
+                    blurRadius = glowRadius * 0.5f // Blur corto
+                )
+            )
+        )
+
+        // CAPA 3: Borde Negro (Outline)
+        // Separa el neón del fondo
+        Text(
+            text = text,
+            color = Color.Black,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = TextAlign.Center,
+            style = TextStyle.Default.copy(
+                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                    miter = 10f,
+                    width = 3f, // Borde fino
+                    join = StrokeJoin.Round
+                )
+            )
+        )
+
+        // CAPA 4: Núcleo Blanco (Fuente de luz)
+        Text(
+            text = text,
+            color = Color.White,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 @Composable
 fun SwipeRune(rune: RuneVariant, isInteractive: Boolean, onSuccess: () -> Unit) {
     var hasSwiped by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableStateOf(0f) }
 
-    // Guía visual animada
     val infiniteTransition = rememberInfiniteTransition(label = "Guide")
     val guideAlpha by infiniteTransition.animateFloat(
         initialValue = 0.2f, targetValue = 0.8f,
@@ -149,40 +243,25 @@ fun SwipeRune(rune: RuneVariant, isInteractive: Boolean, onSuccess: () -> Unit) 
             .fillMaxSize()
             .then(if (isInteractive) Modifier.pointerInput(Unit) {
                 detectDragGestures(
-                    onDragEnd = {
-                        hasSwiped = false
-                        dragOffset = 0f
-                    }
+                    onDragEnd = { hasSwiped = false; dragOffset = 0f }
                 ) { change, dragAmount ->
                     change.consume()
                     dragOffset += dragAmount.x
                     if (!hasSwiped && dragAmount.x.absoluteValue > 10 && dragOffset.absoluteValue > 100) {
-                        hasSwiped = true
-                        onSuccess()
+                        hasSwiped = true; onSuccess()
                     }
                 }
             } else Modifier)
     ) {
-        val cx = size.width / 2
-        val cy = size.height / 2
-
-        // Color dinámico al arrastrar
+        val cx = size.width / 2; val cy = size.height / 2
         val activeColor = if (dragOffset.absoluteValue > 20) Color.White else rune.color
 
-        // La "Herida" central
-        val path = Path().apply {
-            moveTo(cx - 100f, cy)
-            quadraticTo(cx, cy + 20f, cx + 100f, cy)
-        }
+        val path = Path().apply { moveTo(cx - 100f, cy); quadraticTo(cx, cy + 20f, cx + 100f, cy) }
         drawPath(path, activeColor, style = Stroke(width = 15f, cap = StrokeCap.Round))
 
-        // Flecha Guía
         val guidePath = Path().apply {
-            moveTo(cx - 120f, cy - 40f)
-            lineTo(cx + 120f, cy - 40f)
-            lineTo(cx + 100f, cy - 55f)
-            moveTo(cx + 120f, cy - 40f)
-            lineTo(cx + 100f, cy - 25f)
+            moveTo(cx - 120f, cy - 40f); lineTo(cx + 120f, cy - 40f); lineTo(cx + 100f, cy - 55f)
+            moveTo(cx + 120f, cy - 40f); lineTo(cx + 100f, cy - 25f)
         }
         drawPath(guidePath, rune.color.copy(alpha = guideAlpha), style = Stroke(width = 4f, cap = StrokeCap.Round))
     }
@@ -214,41 +293,30 @@ fun HoldRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, rotation: 
                 detectTapGestures(onPress = { isHolding = true; tryAwaitRelease(); isHolding = false })
             } else Modifier)
     ) {
-        val cx = size.width / 2
-        val cy = size.height / 2
-        val baseRadius = 80f * pulse
-
+        val cx = size.width / 2; val cy = size.height / 2; val baseRadius = 80f * pulse
         rotate(rotation, pivot = Offset(cx, cy)) {
             drawCircle(rune.color.copy(alpha = 0.3f), baseRadius + 30f, style = Stroke(4f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f))))
         }
-        drawCircle(Color.Black, baseRadius)
-        drawCircle(rune.color, baseRadius, style = Stroke(6f))
+        drawCircle(Color.Black, baseRadius); drawCircle(rune.color, baseRadius, style = Stroke(6f))
         drawCircle(Color.White, if (isHolding) baseRadius * progress else baseRadius * 0.2f)
     }
 }
 
 @Composable
 fun TraceRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, onSuccess: () -> Unit) {
-    // DEFINICIÓN DE FORMAS ÚNICAS SEGÚN ID DE RUNA
     val (points, starOrder) = remember(rune.id) {
         when {
-            // Nyarlathotep: ZigZag Caótico
             rune.id.contains("nyarlathotep") -> {
                 val p = listOf(Offset(-0.8f, -0.8f), Offset(0.8f, -0.8f), Offset(-0.8f, 0f), Offset(0.8f, 0f), Offset(0f, 0.8f))
-                val o = listOf(0, 1, 2, 3, 4)
-                Pair(p, o)
+                val o = listOf(0, 1, 2, 3, 4); Pair(p, o)
             }
-            // Azathoth: Círculo/Espiral
             rune.id.contains("azathoth") -> {
                 val p = listOf(Offset(0f, -0.8f), Offset(0.8f, -0.2f), Offset(0.5f, 0.7f), Offset(-0.5f, 0.7f), Offset(-0.8f, -0.2f))
-                val o = listOf(0, 1, 2, 3, 4, 0)
-                Pair(p, o)
+                val o = listOf(0, 1, 2, 3, 4, 0); Pair(p, o)
             }
-            // Cthulhu : Estrella
             else -> {
                 val p = listOf(Offset(0f, -0.9f), Offset(0.6f, 0.8f), Offset(-0.9f, -0.3f), Offset(0.9f, -0.3f), Offset(-0.6f, 0.8f))
-                val o = listOf(0, 1, 2, 3, 4, 0)
-                Pair(p, o)
+                val o = listOf(0, 1, 2, 3, 4, 0); Pair(p, o)
             }
         }
     }
@@ -276,8 +344,7 @@ fun TraceRune(rune: RuneVariant, isInteractive: Boolean, pulse: Float, onSuccess
                     if (absolutePoints.isNotEmpty() && currentTargetIndex > 0 && currentTargetIndex < starOrder.size) {
                         pathDrawn.lineTo(change.position.x, change.position.y)
                         if ((change.position - absolutePoints[starOrder[currentTargetIndex]]).getDistance() < 80f) {
-                            currentTargetIndex++
-                            if (currentTargetIndex >= starOrder.size) onSuccess()
+                            currentTargetIndex++; if (currentTargetIndex >= starOrder.size) onSuccess()
                         }
                     }
                 }

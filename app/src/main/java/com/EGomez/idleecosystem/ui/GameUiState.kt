@@ -6,6 +6,7 @@ import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.RandomEvent
 import com.EGomez.idleecosystem.domain.model.RuneVariant
+import com.EGomez.idleecosystem.domain.model.TutorialStep
 import java.math.BigDecimal
 
 data class GameUiState(
@@ -17,6 +18,8 @@ data class GameUiState(
     val prestigeCurrencyFormatted: String = "0",
     val potentialPrestigeFormatted: String = "0",
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
+
+    // Factor de costo (Runas)
     val buildingCostMultiplier: Double = 1.0,
 
     // Ecos
@@ -33,6 +36,10 @@ data class GameUiState(
     val activeRune: RuneVariant? = null,
     val runeState: RuneState = RuneState.HIDDEN,
     val activeRuneBuffs: List<RuneBuff> = emptyList(),
+
+    // SISTEMA DE TUTORIAL (NUEVO)
+    val currentTutorialStep: TutorialStep? = null,
+    val isTutorialEnabled: Boolean = true,
 
     // Eventos y Logros
     val currentEvent: RandomEvent? = null,

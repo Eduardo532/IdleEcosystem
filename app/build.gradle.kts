@@ -16,15 +16,15 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14" // <--- AGREGA O CORRIGE ESTO
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     defaultConfig {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.9.2"
+        versionCode = 10
+        versionName = "0.10.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

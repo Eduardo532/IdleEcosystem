@@ -25,7 +25,7 @@ import androidx.compose.ui.window.Dialog
 import com.EGomez.idleecosystem.ui.GameUiState
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
-import com.EGomez.idleecosystem.ui.theme.CrimsonRed // Usamos el color nuevo
+import com.EGomez.idleecosystem.ui.theme.CrimsonRed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -42,7 +42,9 @@ fun SettingsDialog(
     onImportClick: () -> Unit,
     onCancelImport: () -> Unit,
     onPasteClick: (String) -> Unit,
-    onHardResetClick: () -> Unit
+    onHardResetClick: () -> Unit,
+    // NUEVO PARAMETRO
+    onToggleTutorial: (Boolean) -> Unit
 ) {
     val clipboardManager = LocalClipboardManager.current
     var isCopied by remember { mutableStateOf(false) }
@@ -98,17 +100,17 @@ fun SettingsDialog(
                     }
                 }
 
-                // --- NUEVA SECCIÓN: GRÁFICOS ---
+                // --- SECCIÓN INTERFAZ & JUEGO ---
                 HorizontalDivider(color = Color.Gray.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 8.dp))
-                Text("Gráficos", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
+                Text("Interfaz & Juego", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Toggle Partículas
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Partículas", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(end = 8.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Partículas", color = Color.Gray, fontSize = 12.sp)
                         Switch(
                             checked = uiState.areParticlesEnabled,
                             onCheckedChange = { onToggleParticles() },
@@ -116,9 +118,19 @@ fun SettingsDialog(
                             modifier = Modifier.scale(0.8f)
                         )
                     }
+                    // Toggle Tutorial (NUEVO)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Tutorial", color = Color.Gray, fontSize = 12.sp)
+                        Switch(
+                            checked = uiState.isTutorialEnabled,
+                            onCheckedChange = { onToggleTutorial(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = ArcanePurple, checkedTrackColor = ArcanePurple.copy(alpha = 0.5f)),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
                     // Toggle Texto Flotante
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Texto Flotante", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(end = 8.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Txt. Flotante", color = Color.Gray, fontSize = 12.sp)
                         Switch(
                             checked = uiState.isFloatingTextEnabled,
                             onCheckedChange = { onToggleFloatingText() },
@@ -210,7 +222,7 @@ fun SettingsDialog(
                     }
                     if (uiState.importError != null) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(uiState.importError!!, color = CrimsonRed, fontSize = 12.sp) // Usando CrimsonRed
+                        Text(uiState.importError!!, color = CrimsonRed, fontSize = 12.sp)
                     }
                 }
                 HorizontalDivider(color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))

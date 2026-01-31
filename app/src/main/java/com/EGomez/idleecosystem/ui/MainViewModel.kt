@@ -42,10 +42,11 @@ class MainViewModel @Inject constructor(
     private val soundManager: SoundManager,
     val statsManager: StatisticsManager,
     private val ritualManager: RitualManager,
-    private val runeManager: RuneManager
+    private val runeManager: RuneManager,
+    private val tutorialManager: TutorialManager
 ) : ViewModel() {
 
-    // --- MODO DEBUG ---
+    // --- CONFIGURACIÓN ---
     private val DEBUG_MODE = false
     private var debugTierIndex = 0
 
@@ -85,6 +86,27 @@ class MainViewModel @Inject constructor(
         startEventSystem()
 
         startRuneSystemObservation()
+        startTutorialObservation()
+    }
+
+    private fun startTutorialObservation() {
+        viewModelScope.launch {
+            launch {
+                tutorialManager.currentStep.collect { step ->
+                    _uiState.value = _uiState.value.copy(currentTutorialStep = step)
+
+                    // --- AQUÍ ESTÁ EL CAMBIO DEL SONIDO ---
+                    if (step != null) {
+                        soundManager.playSound(SoundType.TUTORIAL_POPUP)
+                    }
+                }
+            }
+            launch {
+                tutorialManager.isTutorialEnabled.collect { enabled ->
+                    _uiState.value = _uiState.value.copy(isTutorialEnabled = enabled)
+                }
+            }
+        }
     }
 
     private fun startRuneSystemObservation() {
@@ -97,6 +119,19 @@ class MainViewModel @Inject constructor(
             launch {
                 runeManager.currentRune.collect { rune ->
                     _uiState.value = _uiState.value.copy(activeRune = rune)
+
+                    // Prioridad de Tutorial para Runas
+                    if (rune != null) {
+                        // 1. Intentamos lanzar la intro genérica
+                        tutorialManager.triggerStep(TutorialStep.RUNE_INTRO_GENERIC)
+
+                        // 2. Intentamos lanzar la específica (si la genérica salió, esta entrará en cola)
+                        when (rune.tier) {
+                            RuneTier.TIER_1_SWIPE -> tutorialManager.triggerStep(TutorialStep.RUNE_TUTORIAL_SWIPE)
+                            RuneTier.TIER_2_HOLD -> tutorialManager.triggerStep(TutorialStep.RUNE_TUTORIAL_HOLD)
+                            RuneTier.TIER_3_TRACE -> tutorialManager.triggerStep(TutorialStep.RUNE_TUTORIAL_TRACE)
+                        }
+                    }
                 }
             }
             launch {
@@ -146,7 +181,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 delay(5000)
-
                 val tiers = listOf(RuneTier.TIER_1_SWIPE, RuneTier.TIER_2_HOLD, RuneTier.TIER_3_TRACE)
                 val nextTier = tiers[debugTierIndex % tiers.size]
                 debugTierIndex++
@@ -164,9 +198,7 @@ class MainViewModel @Inject constructor(
                     activeRune = debugRune,
                     runeState = RuneState.APPEARING
                 )
-
                 soundManager.playSound(SoundType.RUNE_SPAWN)
-
                 delay(500)
                 _uiState.value = _uiState.value.copy(runeState = RuneState.ACTIVE)
             }
@@ -184,6 +216,16 @@ class MainViewModel @Inject constructor(
 
                 val savedStats = repository.gameStatistics.firstOrNull()
                 statsManager.loadFromEntity(savedStats)
+
+                // CARGA DE ESTADO DEL TUTORIAL
+                val tEnabled = entity?.tutorialEnabled ?: true
+                val tSteps = entity?.completedTutorialSteps?.split(",")?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
+                tutorialManager.loadProgress(tSteps, tEnabled)
+
+                // Trigger inicial
+                if (tEnabled && !tSteps.contains(TutorialStep.WELCOME.id)) {
+                    tutorialManager.triggerStep(TutorialStep.WELCOME)
+                }
 
                 val refundAmount = prestigeShopManager.calculateLegacyRefund(savedPrestigeShop)
                 var initialSanity = if (entity != null) BigDecimal(entity.prestigeCurrency) else BigDecimal.ZERO
@@ -206,7 +248,9 @@ class MainViewModel @Inject constructor(
                         if (entity != null) BigDecimal(entity.money) else BigDecimal.ZERO,
                         BigDecimal.ZERO,
                         initialSanity,
-                        BigDecimal.ZERO
+                        BigDecimal.ZERO,
+                        tEnabled,
+                        tSteps.joinToString(",")
                     )
                 } else {
                     if (savedPrestigeShop.isNotEmpty()) prestigeShopManager.loadFromSave(savedPrestigeShop)
@@ -233,6 +277,7 @@ class MainViewModel @Inject constructor(
                     repository.createNewGame()
                     arcaneKnowledge = BigDecimal.ZERO.add(prestigeShopManager.getStartingKnowledgeBonus())
                     echoesBalance = BigDecimal.ZERO
+                    tutorialManager.triggerStep(TutorialStep.WELCOME)
                 }
 
                 recalculateState()
@@ -268,15 +313,24 @@ class MainViewModel @Inject constructor(
                 offlineGains = gains.toBeautifulString(),
                 offlineTimeFormatted = timeFormatted
             )
+            // Tutorial Offline
+            tutorialManager.triggerStep(TutorialStep.OFFLINE_GAINS)
         }
     }
 
     fun dismissOfflineDialog() { _uiState.value = _uiState.value.copy(showOfflineDialog = false) }
     fun dismissRefundDialog() { _uiState.value = _uiState.value.copy(showRefundDialog = false) }
 
+    // --- GAME LOOP CON PAUSA ---
     private fun startGameLoop() {
         viewModelScope.launch {
             while (true) {
+                // PAUSA TOTAL: Si el tutorial está activo, congelamos el tiempo
+                if (tutorialManager.isTutorialActive()) {
+                    delay(100)
+                    continue
+                }
+
                 delay(100)
 
                 if (!DEBUG_MODE) {
@@ -293,6 +347,17 @@ class MainViewModel @Inject constructor(
                     statsManager.trackProductionPeak(productionPerSecond)
                     ritualManager.tick(1)
                     oneSecondAccumulator -= 1000
+
+                    // TRIGGERS BASADOS EN RECURSOS (Se ejecutan incluso si acabamos de salir de pausa)
+                    if (arcaneKnowledge >= BigDecimal("10")) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
+
+                    val cheapest = buildingManager.availableBuildings.minByOrNull { it.baseCost }?.baseCost ?: BigDecimal.ZERO
+                    if (arcaneKnowledge >= cheapest && cheapest > BigDecimal.ZERO) tutorialManager.triggerStep(TutorialStep.FIRST_BUILDING)
+
+                    val totalBuildings = buildingManager.availableBuildings.sumOf { it.amountOwned }
+                    if (totalBuildings >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
+
+                    if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
                 }
 
                 buildingManager.checkUnlocks(arcaneKnowledge)
@@ -320,7 +385,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // --- FUNCIONES DE UI ---
+    // --- ACCIONES UI ---
 
     fun setBuyMultiplier(value: Int) {
         _uiState.value = _uiState.value.copy(buyMultiplier = value)
@@ -389,6 +454,7 @@ class MainViewModel @Inject constructor(
                 echoesBalance = echoesBalance.add(BigDecimal.ONE)
                 statsManager.trackEchoesFound(BigDecimal.ONE)
                 soundManager.playSound(SoundType.ECHO_FOUND)
+                tutorialManager.triggerStep(TutorialStep.ECHO_FOUND)
                 updateUi()
             }
         }
@@ -451,6 +517,42 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // --- ACCIONES DE TUTORIAL ---
+
+    fun dismissTutorial() {
+        tutorialManager.dismissCurrentStep()
+        saveTutorialProgress()
+    }
+
+    fun onMenuTabSelected(index: Int) {
+        if (index == 1) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
+        if (index == 2 && echoesBalance > BigDecimal.ZERO) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
+    }
+
+    fun onPrestigeShopOpened() {
+        tutorialManager.triggerStep(TutorialStep.PRESTIGE_SHOP)
+    }
+
+    fun onAscensionDialogOpened() {
+        tutorialManager.triggerStep(TutorialStep.PRESTIGE_MECHANICS)
+    }
+
+    fun toggleTutorial(enabled: Boolean) {
+        tutorialManager.setTutorialEnabled(enabled)
+        saveTutorialProgress()
+    }
+
+    private fun saveTutorialProgress() {
+        viewModelScope.launch {
+            repository.saveTutorialState(
+                tutorialManager.isTutorialEnabled.value,
+                tutorialManager.getCompletedStepsList().joinToString(",")
+            )
+        }
+    }
+
+    // --- UTILS ---
+
     fun toggleMusic() {
         val newState = !soundManager.isMusicEnabled
         soundManager.toggleMusic(newState)
@@ -489,7 +591,13 @@ class MainViewModel @Inject constructor(
                     upgradeManager.resetForPrestige()
 
                     repository.wipeBuildingsAndUpgrades()
-                    repository.performPrestigeReset(prestigeManager.residualSanity, echoesBalance)
+                    repository.performPrestigeReset(
+                        prestigeManager.residualSanity,
+                        echoesBalance,
+                        tutorialManager.isTutorialEnabled.value,
+                        tutorialManager.getCompletedStepsList().joinToString(",")
+                    )
+
                     buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
 
                     arcaneKnowledge = prestigeShopManager.getStartingKnowledgeBonus()
@@ -516,6 +624,8 @@ class MainViewModel @Inject constructor(
                 achievementManager.resetAchievements()
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
                 statsManager.hardReset()
+
+                tutorialManager.resetTutorial()
 
                 runeManager.hideRune()
 
@@ -642,7 +752,7 @@ class MainViewModel @Inject constructor(
             prestigeCurrencyFormatted = prestigeManager.residualSanity.toBeautifulString(),
             globalMultiplier = _uiState.value.globalMultiplier,
             echoes = echoesBalance,
-            echoesFormatted = echoesBalance.toBeautifulString()
+            echoesFormatted = echoesBalance.toBeautifulString(),
         )
     }
 
@@ -668,7 +778,14 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun saveProgressInternal() {
-        repository.saveGame(arcaneKnowledge, BigDecimal.ZERO, prestigeManager.residualSanity, echoesBalance)
+        repository.saveGame(
+            arcaneKnowledge,
+            BigDecimal.ZERO,
+            prestigeManager.residualSanity,
+            echoesBalance,
+            tutorialManager.isTutorialEnabled.value,
+            tutorialManager.getCompletedStepsList().joinToString(",")
+        )
         buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
         achievementManager.availableAchievements.forEach { if (it.isUnlocked) repository.saveAchievement(it.id, true) }
         repository.saveStatistics(statsManager.getEntityForSave())
@@ -678,6 +795,12 @@ class MainViewModel @Inject constructor(
         scheduleNextEvent()
         viewModelScope.launch {
             while (true) {
+                // PAUSA TOTAL EN SISTEMA DE EVENTOS
+                if (tutorialManager.isTutorialActive()) {
+                    delay(100)
+                    continue
+                }
+
                 delay(1000)
                 val currentTime = System.currentTimeMillis()
                 if (currentTime < activeBuffExpiration) {
@@ -705,6 +828,7 @@ class MainViewModel @Inject constructor(
             soundManager.playSound(SoundType.EVENT_APPEAR)
             statsManager.trackEventFound()
             _uiState.value = _uiState.value.copy(currentEvent = event, eventResultText = null)
+            tutorialManager.triggerStep(TutorialStep.EVENT_APPEAR)
         } else {
             scheduleNextEvent()
         }
@@ -809,6 +933,8 @@ class MainViewModel @Inject constructor(
             echoesFormatted = echoesBalance.toBeautifulString(),
             buildingCostMultiplier = costReductionMult
         )
+
+        if (canAscend) tutorialManager.triggerStep(TutorialStep.PRESTIGE_READY)
     }
 
     private fun startAutoSaveLoop() {

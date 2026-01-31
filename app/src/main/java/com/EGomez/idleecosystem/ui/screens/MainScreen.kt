@@ -37,6 +37,7 @@ import com.EGomez.idleecosystem.ui.components.ParticleOverlay
 import com.EGomez.idleecosystem.ui.components.ParticleSystem
 import com.EGomez.idleecosystem.ui.components.ParticleType
 import com.EGomez.idleecosystem.ui.components.RuneOverlay
+import com.EGomez.idleecosystem.ui.components.TutorialOverlay
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
@@ -82,7 +83,10 @@ fun MainScreen(
         var showHardResetConfirmation by remember { mutableStateOf(false) }
         var showStatisticsDialog by remember { mutableStateOf(false) }
 
-        var isMenuExpanded by remember { mutableStateOf(true) }
+        // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
+        var isMenuExpanded by remember { mutableStateOf(false) }
+
+        // Animamos el peso: si está contraído es 0.15f (solo la barrita), si expandido 0.65f
         val menuWeight by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isMenuExpanded) 0.65f else 0.15f, label = "menu")
         var selectedTabIndex by remember { mutableIntStateOf(0) }
 
@@ -164,7 +168,11 @@ fun MainScreen(
 
                         MenuSection(
                             isMenuExpanded = isMenuExpanded, onToggleMenu = { isMenuExpanded = !isMenuExpanded },
-                            menuWeight = menuWeight, selectedTabIndex = selectedTabIndex, onTabSelected = { selectedTabIndex = it },
+                            menuWeight = menuWeight, selectedTabIndex = selectedTabIndex,
+                            onTabSelected = {
+                                selectedTabIndex = it
+                                viewModel.onMenuTabSelected(it)
+                            },
                             buyMultiplier = uiState.buyMultiplier, onBuyMultiplierChanged = { viewModel.setBuyMultiplier(it) },
                             showPurchased = showPurchased, onToggleShowPurchased = { viewModel.toggleShowPurchased() },
                             buildings = buildings, upgrades = upgrades, rituals = rituals,
@@ -174,8 +182,15 @@ fun MainScreen(
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
-                            potentialPrestigeFormatted = uiState.potentialPrestigeFormatted, onAscendClicked = { viewModel.onAscendClicked() },
-                            onShowPrestigeShop = { showPrestigeShopDialog = true },
+                            potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
+                            onAscendClicked = {
+                                viewModel.onAscendClicked()
+                                viewModel.onAscensionDialogOpened()
+                            },
+                            onShowPrestigeShop = {
+                                showPrestigeShopDialog = true
+                                viewModel.onPrestigeShopOpened()
+                            },
                             modifier = Modifier.weight(menuWeight)
                         )
                     }
@@ -197,14 +212,16 @@ fun MainScreen(
                 }
             }
 
-            // --- CAPA 2: RUNAS ---
-            RuneOverlay(
-                activeRune = uiState.activeRune,
-                runeState = uiState.runeState,
-                onSuccess = { viewModel.onRuneInteractionSuccess() },
-                onFail = { },
-                modifier = Modifier.zIndex(50f)
-            )
+            // --- CAPA 2: RUNAS (OPTIMIZADA) ---
+            if (uiState.activeRune != null) {
+                RuneOverlay(
+                    activeRune = uiState.activeRune,
+                    runeState = uiState.runeState,
+                    onSuccess = { viewModel.onRuneInteractionSuccess() },
+                    onFail = { },
+                    modifier = Modifier.zIndex(50f)
+                )
+            }
 
             // --- CAPA 3: Popups y Dialogos ---
             AnimatedVisibility(
@@ -217,13 +234,40 @@ fun MainScreen(
             }
 
             if (showStatisticsDialog) StatisticsScreen(viewModel.statsManager) { showStatisticsDialog = false }
+
             if (showHardResetConfirmation) HardResetDialog({ viewModel.onHardResetClicked(); showHardResetConfirmation = false; showSettingsDialog = false }, { showHardResetConfirmation = false })
-            if (showSettingsDialog) SettingsDialog(uiState, { showSettingsDialog = false; viewModel.clearExportString() }, { showStatisticsDialog = true }, { viewModel.toggleMusic() }, { viewModel.toggleSfx() }, { viewModel.toggleParticles() }, { viewModel.toggleFloatingText() }, { viewModel.onExportSaveClicked() }, { viewModel.onConfirmImportClicked(); showSettingsDialog = false }, { viewModel.clearExportString() }, { viewModel.onPasteSaveClicked(it) }, { showHardResetConfirmation = true })
+
+            if (showSettingsDialog) {
+                SettingsDialog(
+                    uiState = uiState,
+                    onDismiss = { showSettingsDialog = false; viewModel.clearExportString() },
+                    onStatsClick = { showStatisticsDialog = true },
+                    onToggleMusic = { viewModel.toggleMusic() },
+                    onToggleSfx = { viewModel.toggleSfx() },
+                    onToggleParticles = { viewModel.toggleParticles() },
+                    onToggleFloatingText = { viewModel.toggleFloatingText() },
+                    onExportClick = { viewModel.onExportSaveClicked() },
+                    onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
+                    onCancelImport = { viewModel.clearExportString() },
+                    onPasteClick = { viewModel.onPasteSaveClicked(it) },
+                    onHardResetClick = { showHardResetConfirmation = true },
+                    onToggleTutorial = { viewModel.toggleTutorial(it) }
+                )
+            }
+
             if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, uiState.secretsProgress) { showAchievementsDialog = false }
             if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
             uiState.currentEvent?.let { EventDialog(it, uiState.eventResultText) { opt -> viewModel.onEventOptionSelected(opt) } }
+
+            // --- CAPA 4: TUTORIAL (OPTIMIZADA) ---
+            if (uiState.currentTutorialStep != null) {
+                TutorialOverlay(
+                    currentStep = uiState.currentTutorialStep,
+                    onDismiss = { viewModel.dismissTutorial() }
+                )
+            }
         }
     }
 }

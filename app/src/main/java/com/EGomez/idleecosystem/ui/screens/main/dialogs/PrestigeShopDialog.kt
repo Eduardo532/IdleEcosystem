@@ -23,11 +23,13 @@ import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.ui.components.ConstellationMap
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
+import java.math.BigDecimal
 
 @Composable
 fun PrestigeShopDialog(
     upgrades: List<PrestigeUpgrade>,
     currencyFormatted: String,
+    currency: BigDecimal,
     onBuy: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -80,13 +82,20 @@ fun PrestigeShopDialog(
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         if (parentUnlocked) {
+                            val canAfford = currency >= node.currentCost
                             Button(
                                 onClick = { onBuy(node.id) },
+                                enabled = canAfford,
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = ArcanePurple, contentColor = Color.White)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ArcanePurple,
+                                    contentColor = Color.White,
+                                    disabledContainerColor = Color(0xFF333333),
+                                    disabledContentColor = Color.Gray
+                                )
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("MEJORAR", fontWeight = FontWeight.Bold)
+                                    Text(if (canAfford) "MEJORAR" else "CORDURA INSUFICIENTE", fontWeight = FontWeight.Bold)
                                     Text("Coste: ${node.currentCost.toBeautifulString()} Cordura", fontSize = 10.sp)
                                 }
                             }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.ui.MainViewModel
 import com.EGomez.idleecosystem.ui.components.AchievementPopup
+import com.EGomez.idleecosystem.ui.components.OmenButton
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MainTopBar
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
@@ -48,15 +50,18 @@ data class FloatingText(
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
-    buildingCalculator: BuildingCalculator = BuildingCalculator()
+    buildingCalculator: BuildingCalculator = remember { BuildingCalculator() }
 ) {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
+    // Se combina con el tamaño de texto elegido por el usuario en el sistema
+    // (antes se reemplazaba y la opción de accesibilidad no tenía efecto).
+    val finalFontScale = (currentDensity.fontScale * responsiveFontScale).coerceIn(0.6f, 1.6f)
 
     CompositionLocalProvider(
-        LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)
+        LocalDensity provides Density(density = currentDensity.density, fontScale = finalFontScale)
     ) {
         val uiState by viewModel.uiState.collectAsState()
         val buildings by viewModel.buildingsState.collectAsState()
@@ -65,19 +70,21 @@ fun MainScreen(
         val rituals by viewModel.ritualsState.collectAsState()
         val showPurchased by viewModel.showPurchasedState.collectAsState()
 
-        var showAchievementsDialog by remember { mutableStateOf(false) }
-        var showPrestigeShopDialog by remember { mutableStateOf(false) }
-        var showSettingsDialog by remember { mutableStateOf(false) }
-        var showHardResetConfirmation by remember { mutableStateOf(false) }
-        var showStatisticsDialog by remember { mutableStateOf(false) }
+        // rememberSaveable: el estado de la interfaz sobrevive a rotar la pantalla
+        var showAchievementsDialog by rememberSaveable { mutableStateOf(false) }
+        var showPrestigeShopDialog by rememberSaveable { mutableStateOf(false) }
+        var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+        var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
+        var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
+        var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
 
-        var isMenuExpanded by remember { mutableStateOf(true) }
+        var isMenuExpanded by rememberSaveable { mutableStateOf(true) }
         val menuWeight by animateFloatAsState(
             targetValue = if (isMenuExpanded) 0.65f else 0.15f,
             label = "menuAnimation"
         )
 
-        var selectedTabIndex by remember { mutableIntStateOf(0) }
+        var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
 
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
         val scope = rememberCoroutineScope()
@@ -155,9 +162,10 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted,
                             canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
-                            onAscendClicked = { viewModel.onAscendClicked() },
+                            onAscendClicked = { showAscendConfirmation = true },
                             onShowPrestigeShop = { showPrestigeShopDialog = true },
-                            modifier = Modifier.weight(menuWeight)
+                            modifier = Modifier.weight(menuWeight),
+                            prestigeRequirementFormatted = uiState.prestigeRequirementFormatted
                         )
                     }
 
@@ -174,6 +182,16 @@ fun MainScreen(
                                     translationY = -150f * item.animatable.value
                                     alpha = 1f - item.animatable.value
                                 }
+                        )
+                    }
+
+                    uiState.pendingEvent?.let {
+                        OmenButton(
+                            secondsLeft = uiState.pendingEventSecondsLeft,
+                            onClick = { viewModel.onOpenPendingEvent() },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = paddingValues.calculateTopPadding() + 8.dp, end = 16.dp)
                         )
                     }
                 }
@@ -200,6 +218,17 @@ fun MainScreen(
                 )
             }
 
+            if (showAscendConfirmation) {
+                AscendDialog(
+                    sanityGainFormatted = uiState.potentialPrestigeFormatted,
+                    onConfirm = {
+                        viewModel.onAscendClicked()
+                        showAscendConfirmation = false
+                    },
+                    onDismiss = { showAscendConfirmation = false }
+                )
+            }
+
             if (showHardResetConfirmation) {
                 HardResetDialog(
                     onConfirm = {
@@ -221,6 +250,7 @@ fun MainScreen(
                     onStatsClick = { showStatisticsDialog = true },
                     onToggleMusic = { viewModel.toggleMusic() },
                     onToggleSfx = { viewModel.toggleSfx() },
+                    onToggleNotation = { viewModel.toggleNotation() },
                     onExportClick = { viewModel.onExportSaveClicked() },
                     onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
                     onCancelImport = { viewModel.clearExportString() },
@@ -242,6 +272,7 @@ fun MainScreen(
                 PrestigeShopDialog(
                     upgrades = uiState.prestigeUpgrades,
                     currencyFormatted = uiState.prestigeCurrencyFormatted,
+                    currency = uiState.prestigeCurrency,
                     onBuy = { viewModel.onBuyPrestigeUpgrade(it) },
                     onDismiss = { showPrestigeShopDialog = false }
                 )
@@ -251,6 +282,7 @@ fun MainScreen(
                 OfflineGainsDialog(
                     timeFormatted = uiState.offlineTimeFormatted,
                     gainsFormatted = uiState.offlineGains,
+                    echoesFormatted = uiState.offlineEchoes,
                     onDismiss = { viewModel.dismissOfflineDialog() }
                 )
             }

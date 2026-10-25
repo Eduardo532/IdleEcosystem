@@ -40,8 +40,55 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/** Confirmación antes de ascender: antes un toque accidental reiniciaba la partida. */
 @Composable
-fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss: () -> Unit) {
+fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("¿Ascender?", color = Color(0xFFCF6679), fontWeight = FontWeight.Black) },
+        text = {
+            Column {
+                Text(
+                    "Perderás tu Conocimiento, edificios y mejoras del Grimorio.",
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Conservas logros, Ecos y la Tienda de Cordura.",
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "Ganarás +$sanityGainFormatted Cordura",
+                    color = ArcanePurple,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+        },
+        containerColor = Color(0xFF1E1E1E),
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679), contentColor = Color.Black)
+            ) {
+                Text("ASCENDER", fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("CANCELAR", color = Color.Gray) }
+        }
+    )
+}
+
+@Composable
+fun OfflineGainsDialog(
+    timeFormatted: String,
+    gainsFormatted: String,
+    echoesFormatted: String = "",
+    onDismiss: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Mientras dormías...", color = ArcanePurple, fontWeight = FontWeight.Bold) },
@@ -51,6 +98,9 @@ fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss:
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Tiempo: $timeFormatted", color = Color.White)
                 Text(text = "Ganancia: +$gainsFormatted", color = Color(0xFF4CAF50), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                if (echoesFormatted.isNotEmpty()) {
+                    Text(text = "Ecos: +$echoesFormatted", color = Color(0xFF00E5FF), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
             }
         },
         confirmButton = {

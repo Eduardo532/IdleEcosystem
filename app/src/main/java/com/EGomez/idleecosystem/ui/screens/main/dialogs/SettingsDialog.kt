@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.ui.GameUiState
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
@@ -34,6 +35,7 @@ fun SettingsDialog(
     onStatsClick: () -> Unit,
     onToggleMusic: () -> Unit,
     onToggleSfx: () -> Unit,
+    onToggleNotation: () -> Unit,
     onExportClick: () -> Unit,
     onImportClick: () -> Unit,
     onCancelImport: () -> Unit,
@@ -89,6 +91,25 @@ fun SettingsDialog(
                             colors = SwitchDefaults.colors(checkedThumbColor = AncientGold, checkedTrackColor = AncientGold.copy(alpha = 0.5f))
                         )
                     }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Notación de números", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            if (uiState.notation == NumberNotation.SUFFIX) "Sufijos: 1.50M" else "Científica: 1.50e+06",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Switch(
+                        checked = uiState.notation == NumberNotation.SUFFIX,
+                        onCheckedChange = { onToggleNotation() },
+                        colors = SwitchDefaults.colors(checkedThumbColor = ArcanePurple, checkedTrackColor = ArcanePurple.copy(alpha = 0.5f))
+                    )
                 }
                 HorizontalDivider(color = Color.Gray, modifier = Modifier.padding(bottom = 16.dp))
                 Text("Exportar Partida", color = AncientGold, fontWeight = FontWeight.Bold)

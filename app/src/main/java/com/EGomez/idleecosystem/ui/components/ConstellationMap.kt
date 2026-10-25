@@ -5,6 +5,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -26,6 +28,9 @@ fun ConstellationMap(
     onNodeClick: (PrestigeUpgrade) -> Unit
 ) {
     val textMeasurer = rememberTextMeasurer()
+    // pointerInput(Unit) se crea una sola vez: con esto siempre ve la lista y el callback actuales
+    val currentUpgrades by rememberUpdatedState(upgrades)
+    val currentOnNodeClick by rememberUpdatedState(onNodeClick)
 
     // Definición de Colores para el mapa
     val lineColorLocked = Color.Gray.copy(alpha = 0.3f)
@@ -43,16 +48,20 @@ fun ConstellationMap(
                     val width = size.width
                     val height = size.height
 
-                    // Detectar clic en un nodo (con radio de tolerancia)
-                    val clickedNode = upgrades.find { node ->
-                        val nodeX = node.x * width
-                        val nodeY = node.y * height
-                        val distance = Math.hypot((tapOffset.x - nodeX).toDouble(), (tapOffset.y - nodeY).toDouble())
-                        distance < 60.0 // Radio de toque (aumentado para facilitar)
-                    }
+                    // Detectar el nodo MÁS CERCANO dentro del radio de toque
+                    // (antes se tomaba el primero de la lista, y un nodo superpuesto era imposible de tocar)
+                    val clickedNode = currentUpgrades
+                        .map { node ->
+                            val nodeX = node.x * width
+                            val nodeY = node.y * height
+                            node to Math.hypot((tapOffset.x - nodeX).toDouble(), (tapOffset.y - nodeY).toDouble())
+                        }
+                        .filter { (_, distance) -> distance < 60.0 }
+                        .minByOrNull { (_, distance) -> distance }
+                        ?.first
 
                     if (clickedNode != null) {
-                        onNodeClick(clickedNode)
+                        currentOnNodeClick(clickedNode)
                     }
                 }
             }

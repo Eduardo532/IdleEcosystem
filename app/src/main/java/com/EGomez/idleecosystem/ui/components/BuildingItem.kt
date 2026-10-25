@@ -119,6 +119,18 @@ fun BuildingItem(
                     )
                 }
 
+                val nextMilestone = building.nextMilestone
+                Text(
+                    text = if (nextMilestone != null) {
+                        "Próximo hito: $nextMilestone (x2 producción)"
+                    } else {
+                        "Todos los hitos alcanzados"
+                    },
+                    color = if (building.milestonesReached > 0) AncientGold.copy(alpha = 0.8f) else Color.Gray,
+                    fontSize = 10.sp,
+                    maxLines = 1
+                )
+
                 Text(
                     text = building.description,
                     color = Color.DarkGray,

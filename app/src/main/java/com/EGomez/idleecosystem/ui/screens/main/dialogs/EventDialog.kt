@@ -102,11 +102,11 @@ fun EventDialog(
                                             if (i > 0) Spacer(modifier = Modifier.width(12.dp))
                                             val alpha = if (areButtonsEnabled) 1f else 0.5f
                                             when (effect.type) {
-                                                EffectType.ADD_KNOWLEDGE_PERCENT -> {
-                                                    val percent = (effect.value * 100).toInt()
-                                                    val color = if (percent >= 0) Color(0xFF81C784) else Color(0xFFE57373)
+                                                EffectType.ADD_PRODUCTION_MINUTES -> {
+                                                    val minutes = effect.value.toInt()
+                                                    val color = if (minutes >= 0) Color(0xFF81C784) else Color(0xFFE57373)
                                                     Text(
-                                                        "${if (percent >= 0) "+" else ""}$percent% Conocimiento",
+                                                        "${if (minutes >= 0) "+" else ""}$minutes min de producción",
                                                         color = color.copy(alpha = alpha),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold
@@ -124,7 +124,7 @@ fun EventDialog(
                                                 }
                                                 EffectType.GLOBAL_BUFF -> {
                                                     Text(
-                                                        "Potenciador x${effect.value}",
+                                                        "Potenciador x${effect.value} (${effect.durationSeconds}s)",
                                                         color = AncientGold.copy(alpha = alpha),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold

@@ -60,7 +60,8 @@ fun MenuSection(
     potentialPrestigeFormatted: String,
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    prestigeRequirementFormatted: String = "1.00e+06"
 ) {
     val tabs = listOf("Investigación", "Grimorio", "Rituales")
 
@@ -293,7 +294,7 @@ fun MenuSection(
                                         fontWeight = FontWeight.Bold
                                     )
                                 } else {
-                                    Text("Req: 1.00e+06", fontSize = 9.sp)
+                                    Text("Req: $prestigeRequirementFormatted generado", fontSize = 9.sp)
                                 }
                             }
                         }

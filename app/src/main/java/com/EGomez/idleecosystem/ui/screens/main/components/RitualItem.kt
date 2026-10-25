@@ -99,7 +99,7 @@ fun RitualItem(
                         if (canAfford) {
                             Text("INVOCAR (${ritual.baseCost.toBeautifulString()})", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         } else {
-                            Text("FALTA CONOCIMIENTO (${ritual.baseCost.toBeautifulString()})", fontSize = 11.sp)
+                            Text("FALTAN ECOS (${ritual.baseCost.toBeautifulString()})", fontSize = 11.sp)
                         }
                     }
                 }

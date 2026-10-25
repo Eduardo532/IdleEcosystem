@@ -16,15 +16,15 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14" // <--- AGREGA O CORRIGE ESTO
+        kotlinCompilerExtensionVersion = "1.5.14" // Compatible con Kotlin 1.9.24
     }
 
     defaultConfig {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8 // Actualizado para coincidir con 0.8.0 (opcional, pero recomendado)
-        versionName = "0.8.0" // Actualizado a la versión del Release
+        versionCode = 9
+        versionName = "0.9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,9 +44,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
     }
 }
 

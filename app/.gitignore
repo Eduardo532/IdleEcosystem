@@ -154,3 +154,5 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,kotlin
+# Salidas de compilación de release (APK/AAB, baseline profiles)
+/release/

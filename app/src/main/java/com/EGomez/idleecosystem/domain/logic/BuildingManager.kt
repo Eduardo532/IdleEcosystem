@@ -7,6 +7,8 @@ import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class BuildingPurchase(val amount: Int, val cost: BigDecimal)
+
 @Singleton
 class BuildingManager @Inject constructor(
     private val calculator: BuildingCalculator
@@ -79,8 +81,13 @@ class BuildingManager @Inject constructor(
         return calculator.calculateCostForAmount(building, amountToBuy)
     }
 
-    fun tryBuyBuilding(buildingId: String, currentKnowledge: BigDecimal, multiplier: Int): Int {
-        val building = availableBuildings.find { it.id == buildingId } ?: return 0
+    /**
+     * Intenta comprar edificios. Devuelve la cantidad comprada y el costo exacto pagado,
+     * o null si no alcanza el dinero. El costo se calcula una sola vez, aquí, para que
+     * lo que se descuenta sea exactamente lo que se compró.
+     */
+    fun tryBuyBuilding(buildingId: String, currentKnowledge: BigDecimal, multiplier: Int): BuildingPurchase? {
+        val building = availableBuildings.find { it.id == buildingId } ?: return null
 
         val amountToBuy = if (multiplier == -1) {
             calculator.calculateMaxAffordable(building, currentKnowledge)
@@ -88,14 +95,14 @@ class BuildingManager @Inject constructor(
             multiplier
         }
 
-        if (amountToBuy <= 0) return 0
+        if (amountToBuy <= 0) return null
 
         val cost = calculator.calculateCostForAmount(building, amountToBuy)
         if (currentKnowledge >= cost) {
             building.amountOwned += amountToBuy
-            return amountToBuy
+            return BuildingPurchase(amountToBuy, cost)
         }
-        return 0
+        return null
     }
 
     fun getTotalProductionPerSecond(): BigDecimal {
@@ -111,19 +118,20 @@ class BuildingManager @Inject constructor(
         return BigDecimal.ONE.add(clickBuilding.totalProduction)
     }
 
-    fun checkUnlocks(currentKnowledge: BigDecimal) {
+    /** Revela el siguiente edificio cuando posees al menos uno del anterior. Devuelve true si algo cambió. */
+    fun checkUnlocks(): Boolean {
+        var changed = false
         for (i in 0 until availableBuildings.size - 1) {
             val current = availableBuildings[i]
             val next = availableBuildings[i + 1]
-
-            if (current.isVisible && (current.amountOwned > 0 || currentKnowledge >= current.baseCost.divide(BigDecimal("2")))) {
-                if (!next.isVisible && current.amountOwned >= 1) {
-                    next.isVisible = true
-                }
+            if (current.isVisible && current.amountOwned >= 1 && !next.isVisible) {
+                next.isVisible = true
+                changed = true
             }
         }
         availableBuildings[0].isVisible = true
         availableBuildings[1].isVisible = true
+        return changed
     }
 
     fun resetForPrestige() {

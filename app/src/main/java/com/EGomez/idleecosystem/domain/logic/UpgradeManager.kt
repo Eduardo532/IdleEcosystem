@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.data.database.UpgradeEntity
+import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import java.math.BigDecimal
@@ -65,6 +66,25 @@ class UpgradeManager @Inject constructor() {
         return false
     }
 
+    /**
+     * Desbloqueo progresivo ("unfolding"): las mejoras aparecen cuando son relevantes
+     * en lugar de mostrarse las 21 desde el inicio.
+     * - Mejoras de edificio: cuando posees ese edificio (o la cantidad de unlockConditionAmount).
+     * - Mejoras de clic y globales: cuando generaste en esta vida al menos el 10% de su costo.
+     * Las ya compradas siempre se consideran visibles.
+     */
+    fun isUpgradeVisible(upgrade: Upgrade, buildings: List<Building>, knowledgeThisRun: BigDecimal): Boolean {
+        if (upgrade.isBought) return true
+        return when (upgrade.type) {
+            UpgradeType.BUILDING_MULTIPLIER -> {
+                val owned = buildings.find { it.id == upgrade.targetBuildingId }?.amountOwned ?: 0
+                owned >= maxOf(1, upgrade.unlockConditionAmount)
+            }
+            UpgradeType.CLICK_MULTIPLIER, UpgradeType.GLOBAL_MULTIPLIER ->
+                knowledgeThisRun >= upgrade.cost.multiply(VISIBILITY_COST_FRACTION)
+        }
+    }
+
     fun getRawClickMultiplier(): BigDecimal {
         var multiplier = 1.0
         availableUpgrades.filter { it.isBought && it.type == UpgradeType.CLICK_MULTIPLIER }
@@ -88,5 +108,9 @@ class UpgradeManager @Inject constructor() {
 
     fun resetForPrestige() {
         availableUpgrades.forEach { it.isBought = false }
+    }
+
+    companion object {
+        private val VISIBILITY_COST_FRACTION = BigDecimal("0.10")
     }
 }

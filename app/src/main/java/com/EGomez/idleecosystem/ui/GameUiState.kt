@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui
 
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.RandomEvent
@@ -25,6 +26,7 @@ data class GameUiState(
     val buyMultiplier: Int = 1,
     val isMusicEnabled: Boolean = true,
     val isSfxEnabled: Boolean = true,
+    val notation: NumberNotation = NumberNotation.SCIENTIFIC,
 
     // Prestigio / Ascensión
     val prestigeCurrency: BigDecimal = BigDecimal.ZERO, // Cordura (Sanity)
@@ -32,6 +34,7 @@ data class GameUiState(
     val canPrestige: Boolean = false,
     val potentialPrestige: BigDecimal = BigDecimal.ZERO,
     val potentialPrestigeFormatted: String = "0",
+    val prestigeRequirementFormatted: String = "1.00e+06",
     val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),
 
     // Logros
@@ -42,9 +45,13 @@ data class GameUiState(
     // Eventos y Diálogos
     val currentEvent: RandomEvent? = null,
     val eventResultText: String? = null,
+    // Presagio: evento disponible que el jugador puede abrir cuando quiera
+    val pendingEvent: RandomEvent? = null,
+    val pendingEventSecondsLeft: Int = 0,
     val showOfflineDialog: Boolean = false,
     val offlineTimeFormatted: String = "",
     val offlineGains: String = "",
+    val offlineEchoes: String = "",
     val showRefundDialog: Boolean = false,
     val refundAmountString: String = "",
 

@@ -37,7 +37,7 @@ class PrestigeShopManager @Inject constructor() {
         // RAMA SUR: PROFUNDIDAD (Prestigio)
         PrestigeUpgrade("pu_void_1", "Llamada del Vacío", "Multiplica la Cordura obtenida.", BigDecimal("100"), BigDecimal("2.0"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, x = 0.65f, y = 0.35f, parentId = "pu_mind_2"),
         PrestigeUpgrade("pu_void_2", "Abismo", "Gran bono de Cordura.", BigDecimal("500"), BigDecimal("2.5"), BigDecimal("0.20"), UpgradeType.BUILDING_MULTIPLIER, x = 0.75f, y = 0.25f, parentId = "pu_void_1"),
-        PrestigeUpgrade("pu_void_3", "Singularidad", "Multiplicador masivo de Cordura.", BigDecimal("5000"), BigDecimal("4.0"), BigDecimal("0.50"), UpgradeType.BUILDING_MULTIPLIER, x = 0.5f, y = 0.85f, parentId = "pu_void_2"),
+        PrestigeUpgrade("pu_void_3", "Singularidad", "Multiplicador masivo de Cordura.", BigDecimal("5000"), BigDecimal("4.0"), BigDecimal("0.50"), UpgradeType.BUILDING_MULTIPLIER, x = 0.75f, y = 0.1f, parentId = "pu_void_2"),
 
         // META
         PrestigeUpgrade("pu_star_final", "Ascensión Cósmica", "El Multiplicador Supremo.", BigDecimal("5000"), BigDecimal("5.0"), BigDecimal("1.00"), UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.05f, parentId = "pu_mind_4")
@@ -176,6 +176,4 @@ class PrestigeShopManager @Inject constructor() {
 
         return mult
     }
-
-    fun getStartingKnowledgeBonus(): BigDecimal = BigDecimal.ZERO
 }

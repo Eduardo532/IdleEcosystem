@@ -26,7 +26,7 @@ class RandomEventManager @Inject constructor() {
                 EventOption(
                     text = "Estudiarla",
                     flavorResult = "Los símbolos te dan una idea para mejorar la producción.",
-                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.05))
+                    effects = listOf(EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 5.0))
                 ),
                 EventOption(
                     text = "Guardarla",
@@ -35,7 +35,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 20,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() == 0 }
         ),
 
         RandomEvent(
@@ -46,7 +46,7 @@ class RandomEventManager @Inject constructor() {
                 EventOption(
                     text = "Anotar el sueño",
                     flavorResult = "Garabateas algunas formas útiles.",
-                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.08))
+                    effects = listOf(EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 8.0))
                 ),
                 EventOption(
                     text = "Ignorarlo",
@@ -55,7 +55,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 20,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() == 0 }
         ),
 
         RandomEvent(
@@ -66,11 +66,11 @@ class RandomEventManager @Inject constructor() {
                 EventOption(
                     text = "Leer la página",
                     flavorResult = "Conceptos básicos que habías olvidado.",
-                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.10))
+                    effects = listOf(EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 10.0))
                 )
             ),
             weight = 15,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() == 0 }
         ),
 
         // ========================================================================
@@ -86,7 +86,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Mirar dentro",
                     flavorResult = "Tu mente se expande violentamente.",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.20),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 20.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.05)
                     )
                 ),
@@ -97,7 +97,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 10,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -113,11 +113,11 @@ class RandomEventManager @Inject constructor() {
                 EventOption(
                     text = "Observarlo",
                     flavorResult = "Aprendes sobre el movimiento de los astros.",
-                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.10))
+                    effects = listOf(EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 10.0))
                 )
             ),
             weight = 10,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -129,7 +129,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Arrancar el papel",
                     flavorResult = "Encontraste fórmulas antiguas en el yeso.",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.15),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 15.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.02)
                     )
                 ),
@@ -140,7 +140,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 9,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         // ========================================================================
@@ -163,11 +163,11 @@ class RandomEventManager @Inject constructor() {
                 EventOption(
                     text = "Tomar Apuntes",
                     flavorResult = "Documentas el fenómeno con seguridad.",
-                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.25))
+                    effects = listOf(EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 25.0))
                 )
             ),
             weight = 7,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -179,7 +179,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Estudiar el Vértice",
                     flavorResult = "Comprendes la cuarta dimensión.",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.40),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 40.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.15)
                     )
                 ),
@@ -190,7 +190,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 6,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -203,7 +203,7 @@ class RandomEventManager @Inject constructor() {
                     flavorResult = "El fuego purifica. Recuperas la paz.",
                     effects = listOf(
                         EventEffect(EffectType.ADD_SANITY_PERCENT, 0.30),
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, -0.10)
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, -10.0)
                     )
                 ),
                 EventOption(
@@ -213,7 +213,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 5,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -236,7 +236,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 6,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         // ========================================================================
@@ -252,7 +252,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Aceptarlo Todo",
                     flavorResult = "¡LO VEO TODO!",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.75),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 75.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.50)
                     )
                 ),
@@ -263,7 +263,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 3,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -275,7 +275,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Responder",
                     flavorResult = "Te conviertes en un sacerdote de lo profundo.",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.50),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 50.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.25)
                     )
                 ),
@@ -286,7 +286,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 2,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -309,7 +309,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 2,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -321,7 +321,7 @@ class RandomEventManager @Inject constructor() {
                     text = "Aceptar el trato",
                     flavorResult = "Las joyas brillan con luz impía.",
                     effects = listOf(
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.35),
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, 35.0),
                         EventEffect(EffectType.ADD_SANITY_PERCENT, -0.15)
                     )
                 ),
@@ -332,7 +332,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 4,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -345,7 +345,7 @@ class RandomEventManager @Inject constructor() {
                     flavorResult = "Respiras tranquilo.",
                     effects = listOf(
                         EventEffect(EffectType.ADD_SANITY_PERCENT, 0.50),
-                        EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, -0.20)
+                        EventEffect(EffectType.ADD_PRODUCTION_MINUTES, -20.0)
                     )
                 ),
                 EventOption(
@@ -355,14 +355,14 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 3,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, lifetimeSanity -> lifetimeSanity.signum() > 0 }
         )
     )
 
     // AHORA RECIBE EL ESTADO PARA FILTRAR
-    fun getRandomEvent(currentKnowledge: BigDecimal, currentSanity: BigDecimal): RandomEvent? {
+    fun getRandomEvent(currentKnowledge: BigDecimal, lifetimeSanity: BigDecimal): RandomEvent? {
         // 1. Filtramos por la condición definida en cada evento
-        val validEvents = events.filter { it.condition(currentKnowledge, currentSanity) }
+        val validEvents = events.filter { it.condition(currentKnowledge, lifetimeSanity) }
 
         if (validEvents.isEmpty()) return null
 

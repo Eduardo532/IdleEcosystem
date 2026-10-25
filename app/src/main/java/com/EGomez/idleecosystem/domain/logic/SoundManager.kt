@@ -7,6 +7,7 @@ import android.media.SoundPool
 import android.os.Handler
 import android.os.Looper
 import com.EGomez.idleecosystem.R
+import com.EGomez.idleecosystem.data.preferences.GamePreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +21,8 @@ enum class SoundType {
 
 @Singleton
 class SoundManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val preferences: GamePreferences
 ) {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -30,11 +32,15 @@ class SoundManager @Inject constructor(
     // Handler para programar la detención de sonidos
     private val handler = Handler(Looper.getMainLooper())
 
-    // Configuración de usuario
-    var isMusicEnabled: Boolean = true
+    // Configuración de usuario (persistida: antes se reactivaba en cada inicio)
+    var isMusicEnabled: Boolean = preferences.isMusicEnabled
         private set
-    var isSfxEnabled: Boolean = true
+    var isSfxEnabled: Boolean = preferences.isSfxEnabled
         private set
+
+    // Evita que suenen efectos (eventos, logros) con la app en segundo plano
+    @Volatile
+    private var isAppInForeground: Boolean = true
 
     init {
         // 1. Configurar SoundPool para efectos cortos (SFX)
@@ -85,13 +91,18 @@ class SoundManager @Inject constructor(
 
     fun toggleMusic(enabled: Boolean) {
         isMusicEnabled = enabled
+        preferences.isMusicEnabled = enabled
         if (enabled) playMusic() else pauseMusic()
+    }
+
+    fun setAppInForeground(inForeground: Boolean) {
+        isAppInForeground = inForeground
     }
 
     // --- EFECTOS DE SONIDO (SFX) ---
     // MODIFICADO: Ahora acepta un 'maxDurationMs' opcional. Si es null, suena completo.
     fun playSound(type: SoundType, maxDurationMs: Long? = null) {
-        if (!isSfxEnabled) return
+        if (!isSfxEnabled || !isAppInForeground) return
 
         val soundId = soundMap[type] ?: return
         // Variación de Pitch (0.9f a 1.1f) para que el click no suene robótico
@@ -110,12 +121,16 @@ class SoundManager @Inject constructor(
 
     fun toggleSfx(enabled: Boolean) {
         isSfxEnabled = enabled
+        preferences.isSfxEnabled = enabled
     }
 
-    // Limpieza de memoria
-    fun release() {
+    /**
+     * Libera solo el reproductor de música. El SoundPool NO se libera: este objeto es un
+     * singleton que vive tanto como el proceso, y antes liberarlo en onDestroy dejaba la app
+     * sin efectos de sonido tras rotar la pantalla o volver a abrirla.
+     */
+    fun stopMusic() {
         mediaPlayer?.release()
         mediaPlayer = null
-        soundPool.release()
     }
 }

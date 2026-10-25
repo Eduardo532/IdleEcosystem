@@ -6,6 +6,18 @@ import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Foto completa del progreso, para guardarla de una vez. */
+data class GameSnapshot(
+    val knowledge: BigDecimal,
+    val sanity: BigDecimal,
+    val echoes: BigDecimal,
+    val buildings: List<BuildingEntity>,
+    val upgrades: List<UpgradeEntity>,
+    val unlockedAchievements: List<AchievementEntity>,
+    val prestigeUpgrades: List<PrestigeUpgradeEntity>,
+    val statistics: GameStatisticsEntity
+)
+
 @Singleton
 class GameRepository @Inject constructor(
     private val gameDao: GameDao
@@ -46,49 +58,51 @@ class GameRepository @Inject constructor(
 
     suspend fun saveGame(
         currentKnowledge: BigDecimal,
-        premium: BigDecimal,
         prestige: BigDecimal,
         currentEchoes: BigDecimal
     ) {
         val currentState = GameStateEntity(
             id = 1, // SIEMPRE 1
             money = currentKnowledge.toString(),
-            premiumCurrency = premium.toString(),
+            premiumCurrency = "0",
             prestigeCurrency = prestige.toString(),
             echoes = currentEchoes.toString(),
             lastLoginTime = System.currentTimeMillis(),
-            totalPlayTime = 0 // Podrías querer conectar esto con el stats manager más adelante
+            totalPlayTime = 0
         )
         gameDao.saveGame(currentState)
+    }
+
+    /**
+     * Guarda TODO el progreso. Antes el autoguardado no incluía las mejoras ni la tienda
+     * de prestigio, así que al importar una partida esos datos se perdían al reiniciar.
+     * Cada lista se inserta en una sola transacción en lugar de una por fila.
+     */
+    suspend fun saveSnapshot(snapshot: GameSnapshot) {
+        saveGame(snapshot.knowledge, snapshot.sanity, snapshot.echoes)
+        gameDao.insertBuildings(snapshot.buildings)
+        gameDao.insertUpgrades(snapshot.upgrades)
+        if (snapshot.unlockedAchievements.isNotEmpty()) gameDao.insertAchievements(snapshot.unlockedAchievements)
+        gameDao.insertPrestigeUpgrades(snapshot.prestigeUpgrades)
+        gameDao.saveGameStatistics(snapshot.statistics)
+    }
+
+    /** Borra todo el progreso guardado (reinicio total o antes de importar). */
+    suspend fun wipeProgressTables() {
+        gameDao.deleteAllBuildings()
+        gameDao.deleteAllUpgrades()
+        gameDao.deleteAllAchievements()
+        gameDao.deleteAllPrestigeUpgrades()
     }
 
     suspend fun saveStatistics(stats: GameStatisticsEntity) {
         gameDao.saveGameStatistics(stats)
     }
 
-    // --- El resto de funciones se mantienen igual ---
     suspend fun loadBuildings() = gameDao.getAllBuildings()
-    suspend fun saveBuilding(id: String, amount: Int, isVisible: Boolean) = gameDao.insertBuilding(BuildingEntity(id, amount, isVisible))
     suspend fun wipeBuildingsAndUpgrades() { gameDao.deleteAllBuildings(); gameDao.deleteAllUpgrades() }
     suspend fun loadUpgrades() = gameDao.getAllUpgrades()
-    suspend fun saveUpgrade(id: String, isBought: Boolean) = gameDao.insertUpgrade(UpgradeEntity(id, isBought))
     suspend fun loadAchievements() = gameDao.getAllAchievements()
-    suspend fun saveAchievement(id: String, isUnlocked: Boolean) = gameDao.insertAchievement(AchievementEntity(id, isUnlocked))
-    suspend fun clearAllAchievements() = gameDao.deleteAllAchievements()
     suspend fun loadPrestigeUpgrades() = gameDao.getAllPrestigeUpgrades()
-    suspend fun savePrestigeUpgrade(id: String, level: Int) = gameDao.insertPrestigeUpgrade(PrestigeUpgradeEntity(id, level))
     suspend fun clearAllPrestigeUpgrades() = gameDao.deleteAllPrestigeUpgrades()
-
-    suspend fun performPrestigeReset(newPrestigeBalance: BigDecimal, currentEchoes: BigDecimal) {
-        val resetState = GameStateEntity(
-            id = 1,
-            money = "0",
-            premiumCurrency = "0",
-            prestigeCurrency = newPrestigeBalance.toString(),
-            echoes = currentEchoes.toString(),
-            lastLoginTime = System.currentTimeMillis(),
-            totalPlayTime = 0
-        )
-        gameDao.saveGame(resetState)
-    }
 }

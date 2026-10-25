@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     @Inject
-    lateinit var soundManager: SoundManager // <--- INYECCIÓN DE AUDIO
+    lateinit var soundManager: SoundManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +32,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.onAppForegroundChanged(true)
+    }
+
     override fun onResume() {
         super.onResume()
         soundManager.resumeMusic()
@@ -44,11 +49,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.saveProgress()
+        // Pausa eventos y efectos en segundo plano y guarda el progreso
+        viewModel.onAppForegroundChanged(false)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        soundManager.release()
+        // Rotar la pantalla también destruye la Activity: solo se libera la música
+        // cuando el usuario realmente cierra la app. El SoundPool vive con el proceso.
+        if (isFinishing) soundManager.stopMusic()
     }
 }

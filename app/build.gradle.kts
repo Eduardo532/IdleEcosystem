@@ -29,7 +29,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // Clave fija SOLO para las versiones de prueba: así cada APK de prueba nuevo
+        // puede instalarse encima del anterior sin perder el progreso de prueba.
+        // No usar para publicar.
+        create("prueba") {
+            storeFile = file("prueba-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            // Identificador distinto: se instala junto a la app normal sin reemplazarla
+            applicationIdSuffix = ".prueba"
+            versionNameSuffix = "-prueba"
+            signingConfig = signingConfigs.getByName("prueba")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

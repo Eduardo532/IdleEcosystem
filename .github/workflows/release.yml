@@ -2,8 +2,7 @@ name: Release oficial
 
 # Se ejecuta a mano desde la pestaña Actions ("Run workflow").
 # Compila el APK de release, lo firma con la clave del proyecto (secretos del
-# repositorio), comprueba que la firma sea la misma de las versiones anteriores
-# y publica la release con su tag y el archivo app-release.apk.
+# repositorio), comprueba que la firma sea la clave del proyecto y publica la release con su tag y el archivo app-release.apk.
 on:
   workflow_dispatch:
     inputs:
@@ -18,10 +17,12 @@ permissions:
   contents: write
 
 env:
-  # Huella SHA-256 del certificado con el que se firmaron las versiones publicadas
-  # (CN=E Gomez). Si el APK nuevo no tiene esta firma, no se puede instalar encima
-  # de la app actual, así que la release se cancela.
-  EXPECTED_CERT_SHA256: 414f28647c1897edc867cacc0a726caf30788bfe6c62557568ecb90c7aeccdbe
+  # Huella SHA-256 del certificado de la clave de release del proyecto
+  # (CN=E Gomez, creada en noviembre de 2026 para la v0.10.0). Las versiones
+  # futuras deben firmarse con esta misma clave para instalarse encima de la
+  # anterior; si el APK no tiene esta firma, la release se cancela.
+  # (La v0.8.0 usó otra clave, que se perdió: 414f2864...7aeccdbe)
+  EXPECTED_CERT_SHA256: 6de0b0524548dbd5ec6ce7e6e162ba9fca8b4f18586c262b17e8f89b882d482c
 
 jobs:
   release:
@@ -97,10 +98,10 @@ jobs:
           "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" | tee certs.txt
           ACTUAL=$(grep -m1 'certificate SHA-256 digest' certs.txt | awk '{print $NF}')
           if [ "$ACTUAL" != "$EXPECTED_CERT_SHA256" ]; then
-            echo "::error::La firma del APK ($ACTUAL) no es la de las versiones publicadas. Revisa el keystore y el alias."
+            echo "::error::La firma del APK ($ACTUAL) no es la clave de release del proyecto. Revisa el keystore y el alias."
             exit 1
           fi
-          echo "Firma correcta: coincide con la de las versiones anteriores."
+          echo "Firma correcta: es la clave de release del proyecto."
 
       - name: Publicar release
         env:

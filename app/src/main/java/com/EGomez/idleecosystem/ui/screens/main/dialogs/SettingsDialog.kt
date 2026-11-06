@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -24,6 +25,7 @@ import androidx.compose.ui.window.Dialog
 import com.EGomez.idleecosystem.ui.GameUiState
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
+import com.EGomez.idleecosystem.ui.theme.CrimsonRed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,11 +36,15 @@ fun SettingsDialog(
     onStatsClick: () -> Unit,
     onToggleMusic: () -> Unit,
     onToggleSfx: () -> Unit,
+    onToggleParticles: () -> Unit,
+    onToggleFloatingText: () -> Unit,
     onExportClick: () -> Unit,
     onImportClick: () -> Unit,
     onCancelImport: () -> Unit,
     onPasteClick: (String) -> Unit,
-    onHardResetClick: () -> Unit
+    onHardResetClick: () -> Unit,
+    // NUEVO PARAMETRO
+    onToggleTutorial: (Boolean) -> Unit
 ) {
     val clipboardManager = LocalClipboardManager.current
     var isCopied by remember { mutableStateOf(false) }
@@ -58,6 +64,7 @@ fun SettingsDialog(
                 Text("Configuración", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // --- BOTÓN ESTADÍSTICAS ---
                 Button(
                     onClick = onStatsClick,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
@@ -68,8 +75,10 @@ fun SettingsDialog(
                     Text("VER ESTADÍSTICAS", color = Color.White)
                 }
 
+                // --- SECCIÓN AUDIO ---
+                Text("Audio", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -90,7 +99,50 @@ fun SettingsDialog(
                         )
                     }
                 }
+
+                // --- SECCIÓN INTERFAZ & JUEGO ---
+                HorizontalDivider(color = Color.Gray.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 8.dp))
+                Text("Interfaz & Juego", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.align(Alignment.Start))
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Toggle Partículas
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Partículas", color = Color.Gray, fontSize = 12.sp)
+                        Switch(
+                            checked = uiState.areParticlesEnabled,
+                            onCheckedChange = { onToggleParticles() },
+                            colors = SwitchDefaults.colors(checkedThumbColor = AncientGold, checkedTrackColor = AncientGold.copy(alpha = 0.5f)),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
+                    // Toggle Tutorial (NUEVO)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Tutorial", color = Color.Gray, fontSize = 12.sp)
+                        Switch(
+                            checked = uiState.isTutorialEnabled,
+                            onCheckedChange = { onToggleTutorial(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = ArcanePurple, checkedTrackColor = ArcanePurple.copy(alpha = 0.5f)),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
+                    // Toggle Texto Flotante
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Txt. Flotante", color = Color.Gray, fontSize = 12.sp)
+                        Switch(
+                            checked = uiState.isFloatingTextEnabled,
+                            onCheckedChange = { onToggleFloatingText() },
+                            colors = SwitchDefaults.colors(checkedThumbColor = ArcanePurple, checkedTrackColor = ArcanePurple.copy(alpha = 0.5f)),
+                            modifier = Modifier.scale(0.8f)
+                        )
+                    }
+                }
+
                 HorizontalDivider(color = Color.Gray, modifier = Modifier.padding(bottom = 16.dp))
+
+                // --- SECCIÓN EXPORTAR ---
                 Text("Exportar Partida", color = AncientGold, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -131,6 +183,8 @@ fun SettingsDialog(
                 }
 
                 HorizontalDivider(color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
+
+                // --- SECCIÓN IMPORTAR ---
                 Text("Importar Partida", color = AncientGold, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -168,11 +222,13 @@ fun SettingsDialog(
                     }
                     if (uiState.importError != null) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(uiState.importError!!, color = Color.Red, fontSize = 12.sp)
+                        Text(uiState.importError!!, color = CrimsonRed, fontSize = 12.sp)
                     }
                 }
                 HorizontalDivider(color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
-                Button(onClick = onHardResetClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679)), modifier = Modifier.fillMaxWidth()) { Text("REINICIO TOTAL", color = Color.Black, fontWeight = FontWeight.Bold) }
+
+                // --- HARD RESET ---
+                Button(onClick = onHardResetClick, colors = ButtonDefaults.buttonColors(containerColor = CrimsonRed), modifier = Modifier.fillMaxWidth()) { Text("REINICIO TOTAL", color = Color.Black, fontWeight = FontWeight.Bold) }
             }
         }
     }

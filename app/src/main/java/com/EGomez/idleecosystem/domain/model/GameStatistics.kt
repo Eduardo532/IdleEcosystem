@@ -10,7 +10,7 @@ data class GameStatistics(
     val runTimeSeconds: Long = 0, // Tiempo en esta ascensión
 
     // ECONOMÍA
-    val lifetimeKnowledge: BigDecimal = BigDecimal.ZERO, // Todo lo generado jamás
+    val lifetimeKnowledge: BigDecimal = BigDecimal.ZERO, // Todo lo generado
     val runKnowledge: BigDecimal = BigDecimal.ZERO, // Generado en esta run
     val maxKnowledgePerSecond: BigDecimal = BigDecimal.ZERO, // Pico de producción
 
@@ -25,5 +25,10 @@ data class GameStatistics(
 
     // OTROS
     val totalEventsFound: Int = 0,
-    val secretsFound: Int = 0
+    val secretsFound: Int = 0,
+
+    // --- RUNE SYSTEM  ---
+    val runesSevered: Int = 0,    // Tier 1
+    val runesStabilized: Int = 0, // Tier 2
+    val runesInscribed: Int = 0   // Tier 3
 )

@@ -74,12 +74,9 @@ fun StatisticsScreen(
 
                 Column(modifier = Modifier.weight(1f).verticalScroll(scrollState)) {
 
-                    // --- SECCIÓN ACTUALIZADA ---
                     StatSection("Tiempo y Existencia") {
                         StatRow("Inicio de la Obsesión", formatDate(statisticsManager.startTime))
-                        // Usamos la nueva función para mostrar el tiempo real activo
                         StatRow("Tiempo Activo (App Abierta)", formatTime(statisticsManager.getActivePlayTime()))
-                        // Mostramos el tiempo offline acumulado
                         StatRow("Tiempo en el Vacío (Offline)", formatTime(statisticsManager.totalOfflineSeconds))
                         StatRow("Existencia Total", formatTime(statisticsManager.totalPlayTimeSeconds))
                         StatRow("Tiempo en esta Vida", formatTime(statisticsManager.runTimeSeconds))
@@ -100,6 +97,12 @@ fun StatisticsScreen(
                             manual.multiply(java.math.BigDecimal(100)).divide(total, 2, java.math.RoundingMode.HALF_UP)
                         } else java.math.BigDecimal.ZERO
                         StatRow("Porcentaje Manual", "$percent%")
+                    }
+
+                    StatSection("Maestría Rúnica") {
+                        StatRow("Runas Cortadas (Tier 1)", statisticsManager.runesSevered.toString())
+                        StatRow("Runas Estabilizadas (Tier 2)", statisticsManager.runesStabilized.toString())
+                        StatRow("Runas Inscritas (Tier 3)", statisticsManager.runesInscribed.toString())
                     }
 
                     StatSection("Locura y Ascensión") {
@@ -127,7 +130,6 @@ fun StatisticsScreen(
     }
 }
 
-// ... (StatSection y StatRow se mantienen igual)
 @Composable
 fun StatSection(title: String, content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {

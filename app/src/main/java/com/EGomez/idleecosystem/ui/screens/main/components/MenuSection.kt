@@ -52,6 +52,7 @@ fun MenuSection(
     currentEchoes: BigDecimal,
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
+    buildingCostMultiplier: Double, // NUEVO PARÁMETRO
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
     onActivateRitual: (String) -> Unit,
@@ -146,6 +147,7 @@ fun MenuSection(
                                 globalMultiplier = globalMultiplier,
                                 calculator = buildingCalculator,
                                 buyMultiplier = buyMultiplier,
+                                costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -364,6 +366,7 @@ fun MenuSectionPreview() {
         currentEchoes = BigDecimal("10"),
         globalMultiplier = BigDecimal.ONE,
         buildingCalculator = BuildingCalculator(),
+        buildingCostMultiplier = 1.0,
         onBuyBuilding = {},
         onBuyUpgrade = {},
         onActivateRitual = {},

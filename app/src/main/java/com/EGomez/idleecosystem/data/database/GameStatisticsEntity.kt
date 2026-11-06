@@ -11,7 +11,7 @@ data class GameStatisticsEntity(
     val totalPlayTimeSeconds: Long,
     val startTime: Long,
     val runTimeSeconds: Long,
-    val totalOfflineSeconds: Long, // <--- NUEVO CAMPO
+    val totalOfflineSeconds: Long,
 
     // ECONOMÍA
     val lifetimeKnowledge: String,
@@ -27,7 +27,13 @@ data class GameStatisticsEntity(
     val lifetimeSanity: String,
     val spentSanity: String,
 
+    // RUNE SYSTEM
+    val runesSevered: Int = 0,
+    val runesStabilized: Int = 0,
+    val runesInscribed: Int = 0,
+
     // OTROS
     val totalEventsFound: Int,
     val totalEchoes: String = "0"
+
 )

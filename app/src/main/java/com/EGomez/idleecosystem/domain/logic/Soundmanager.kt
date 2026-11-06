@@ -15,7 +15,11 @@ enum class SoundType {
     CLICK,
     BUY,
     ACHIEVEMENT,
-    EVENT_APPEAR
+    EVENT_APPEAR,
+    ECHO_FOUND,
+    RUNE_SPAWN,
+    RUNE_SUCCESS,
+    TUTORIAL_POPUP
 }
 
 @Singleton
@@ -53,6 +57,11 @@ class SoundManager @Inject constructor(
         soundMap[SoundType.BUY] = soundPool.load(context, R.raw.sfx_buy, 1)
         soundMap[SoundType.ACHIEVEMENT] = soundPool.load(context, R.raw.sfx_achievement, 1)
         soundMap[SoundType.EVENT_APPEAR] = soundPool.load(context, R.raw.sfx_event, 1)
+        soundMap[SoundType.ECHO_FOUND] = soundPool.load(context, R.raw.sfx_echos, 1)
+        soundMap[SoundType.RUNE_SPAWN] = soundPool.load(context,R.raw.sfx_rune_spawn,1)
+        soundMap[SoundType.RUNE_SUCCESS] = soundPool.load(context,R.raw.sfx_rune_success,1)
+        soundMap[SoundType.TUTORIAL_POPUP] = soundPool.load(context, R.raw.tutorial_popup,1)
+
     }
 
     // --- MÚSICA DE FONDO (BGM) ---
@@ -61,8 +70,8 @@ class SoundManager @Inject constructor(
 
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(context, R.raw.bgm_drone).apply {
-                isLooping = true // Bucle infinito
-                setVolume(0.5f, 0.5f) // Volumen al 50% para no molestar
+                isLooping = true
+                setVolume(0.5f, 0.5f)
             }
         }
 
@@ -89,18 +98,14 @@ class SoundManager @Inject constructor(
     }
 
     // --- EFECTOS DE SONIDO (SFX) ---
-    // MODIFICADO: Ahora acepta un 'maxDurationMs' opcional. Si es null, suena completo.
     fun playSound(type: SoundType, maxDurationMs: Long? = null) {
         if (!isSfxEnabled) return
 
         val soundId = soundMap[type] ?: return
-        // Variación de Pitch (0.9f a 1.1f) para que el click no suene robótico
         val pitch = if (type == SoundType.CLICK) (0.9f + Math.random() * 0.2f).toFloat() else 1f
 
-        // Reproducimos y guardamos el ID del stream
         val streamId = soundPool.play(soundId, 1f, 1f, 1, 0, pitch)
 
-        // Si definiste una duración, programamos el corte
         if (maxDurationMs != null) {
             handler.postDelayed({
                 soundPool.stop(streamId)
@@ -112,7 +117,6 @@ class SoundManager @Inject constructor(
         isSfxEnabled = enabled
     }
 
-    // Limpieza de memoria
     fun release() {
         mediaPlayer?.release()
         mediaPlayer = null

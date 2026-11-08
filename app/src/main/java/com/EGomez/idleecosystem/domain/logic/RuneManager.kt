@@ -160,53 +160,22 @@ class RuneManager @Inject constructor(
     }
 
     private suspend fun applyRuneEffect(rune: RuneVariant) {
-        var durationMs: Long = 0
-        var multiplier = 1.0
-        var clickMultiplier = 1.0
-        var isAutoClick = false
-        var costReduction = 0.0
-        var echoChance = 0.0
-        var freezesBuffs = false
+        // Los valores de cada runa viven en RuneEffects (con su rango de producción por nivel)
+        val effect = RuneEffects.forRune(rune.id)
 
-        when (rune.id) {
-            // --- TIER 1 ---
-            "t1_blood" -> { multiplier = 50.0; durationMs = 15_000 }
-            "t1_ash" -> { multiplier = 40.0; durationMs = 20_000 }
-            "t1_salt" -> { multiplier = 60.0; durationMs = 10_000 }
-            "t1_bone" -> { _runeRewards.emit(RuneReward.TimeWarp(120)) } // 2 min
-            "t1_shadow" -> { multiplier = 30.0; durationMs = 30_000 }
-            "t1_whisper" -> { clickMultiplier = 10.0; durationMs = 30_000; isAutoClick = true }
-            "t1_rust" -> { multiplier = 45.0; durationMs = 18_000 }
-            "t1_frost" -> { durationMs = 5_000; freezesBuffs = true } // Pausa otros buffs
-            "t1_vermin" -> { multiplier = 55.0; durationMs = 12_000 }
-            "t1_rift" -> { _runeRewards.emit(RuneReward.TimeWarp(300)) } // 5 min
-            "t1_void_minor" -> { durationMs = 30_000; echoChance = 0.01 } // +1% Ecos
+        if (rune.id == "t2_entropy") forceNextSpawn = true // La siguiente runa aparece al ocultarse esta
+        effect.reward?.let { _runeRewards.emit(it) }
 
-            // --- TIER 2 ---
-            "t2_chronos" -> { durationMs = 20_000; isAutoClick = true }
-            "t2_gravity" -> { multiplier = 200.0; durationMs = 20_000 }
-            "t2_barrier" -> { durationMs = 30_000; costReduction = 0.15 } // -15% Costos
-            "t2_tidal" -> { multiplier = 500.0; durationMs = 10_000 }
-            "t2_psyche" -> { _runeRewards.emit(RuneReward.SanityBonus(0.05)) } // +5% Cordura
-            "t2_vision" -> { _runeRewards.emit(RuneReward.TriggerRandomEvent) }
-            "t2_entropy" -> { forceNextSpawn = true } // La siguiente runa aparece al ocultarse esta
-
-            // --- TIER 3 ---
-            "t3_cthulhu" -> { multiplier = 777.0; durationMs = 60_000; _runeRewards.emit(RuneReward.InstantEchoes(1)) }
-            "t3_nyarlathotep" -> { multiplier = 666.0; durationMs = 60_000; isAutoClick = true }
-            "t3_azathoth" -> { _runeRewards.emit(RuneReward.InstantEchoes(50)) }
-        }
-
-        if (durationMs > 0) {
+        if (effect.durationMs > 0) {
             val buff = RuneBuff(
                 id = rune.id,
-                multiplier = multiplier,
-                clickMultiplier = clickMultiplier,
-                costReduction = costReduction,
-                echoChanceBonus = echoChance,
-                expirationTime = System.currentTimeMillis() + durationMs,
-                isAutoClick = isAutoClick,
-                freezesBuffs = freezesBuffs,
+                multiplier = effect.multiplier,
+                clickMultiplier = effect.clickMultiplier,
+                costReduction = effect.costReduction,
+                echoChanceBonus = effect.echoChance,
+                expirationTime = System.currentTimeMillis() + effect.durationMs,
+                isAutoClick = effect.isAutoClick,
+                freezesBuffs = effect.freezesBuffs,
                 description = rune.description
             )
             _activeBuffs.update { it + buff }

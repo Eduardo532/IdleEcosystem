@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
+import com.EGomez.idleecosystem.data.preferences.GamePreferences
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -24,7 +25,8 @@ enum class SoundType {
 
 @Singleton
 class SoundManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val preferences: GamePreferences
 ) {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -34,10 +36,10 @@ class SoundManager @Inject constructor(
     // Handler para programar la detención de sonidos
     private val handler = Handler(Looper.getMainLooper())
 
-    // Configuración de usuario
-    var isMusicEnabled: Boolean = true
+    // Configuración de usuario (persistida entre sesiones)
+    var isMusicEnabled: Boolean = preferences.isMusicEnabled
         private set
-    var isSfxEnabled: Boolean = true
+    var isSfxEnabled: Boolean = preferences.isSfxEnabled
         private set
 
     init {
@@ -94,6 +96,7 @@ class SoundManager @Inject constructor(
 
     fun toggleMusic(enabled: Boolean) {
         isMusicEnabled = enabled
+        preferences.isMusicEnabled = enabled
         if (enabled) playMusic() else pauseMusic()
     }
 
@@ -115,6 +118,7 @@ class SoundManager @Inject constructor(
 
     fun toggleSfx(enabled: Boolean) {
         isSfxEnabled = enabled
+        preferences.isSfxEnabled = enabled
     }
 
     fun release() {

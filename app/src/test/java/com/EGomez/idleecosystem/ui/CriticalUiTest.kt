@@ -16,6 +16,13 @@ import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
+import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
+import com.EGomez.idleecosystem.domain.model.UpgradeType
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.PrestigeShopDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.CONSTELLATION_MAP_TAG
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -106,5 +113,39 @@ class CriticalUiTest {
         funds = BigDecimal(25)
         compose.onNodeWithText("INVOCAR (25 Ecos)").assertIsEnabled().performClick()
         assertEquals(1, invoked)
+    }
+
+    @Test
+    fun `the shop panel shows the new level right after buying`() {
+        // Antes el panel guardaba la copia del nodo tocado y seguía en "nivel 0"
+        // hasta cerrar y volver a abrir la tienda
+        val node = PrestigeUpgrade(
+            id = "pu_test",
+            name = "Nodo de Prueba",
+            description = "Prueba",
+            baseCost = BigDecimal.ONE,
+            costMultiplier = BigDecimal("2"),
+            effectMultiplier = BigDecimal("0.1"),
+            type = UpgradeType.GLOBAL_MULTIPLIER,
+            x = 0.5f,
+            y = 0.5f
+        )
+        var upgrades by mutableStateOf(listOf(node))
+        compose.setContent {
+            PrestigeShopDialog(
+                upgrades = upgrades,
+                currencyFormatted = "10",
+                onBuy = { id -> upgrades = upgrades.map { if (it.id == id) it.copy(level = it.level + 1) else it } },
+                onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }
+        compose.onNodeWithText("MEJORAR").performClick()
+        compose.onNodeWithText("Nivel 1").assertExists()
+        compose.onNodeWithText("Coste: 2 Cordura").assertExists()
+
+        compose.onNodeWithText("MEJORAR").performClick()
+        compose.onNodeWithText("Nivel 2").assertExists()
     }
 }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -27,6 +29,12 @@ fun ConstellationMap(
 ) {
     val textMeasurer = rememberTextMeasurer()
 
+    // pointerInput(Unit) no se reinicia al recomponer: sin esto, el detector de toques
+    // seguía viendo la lista de la PRIMERA composición y devolvía nodos con el nivel
+    // que tenían al abrir la tienda.
+    val currentUpgrades by rememberUpdatedState(upgrades)
+    val currentOnNodeClick by rememberUpdatedState(onNodeClick)
+
     // Definición de Colores para el mapa
     val lineColorLocked = Color.Gray.copy(alpha = 0.3f)
     val lineColorUnlocked = AncientGold.copy(alpha = 0.6f)
@@ -44,7 +52,7 @@ fun ConstellationMap(
                     val height = size.height
 
                     // Detectar clic en un nodo (con radio de tolerancia)
-                    val clickedNode = upgrades.find { node ->
+                    val clickedNode = currentUpgrades.find { node ->
                         val nodeX = node.x * width
                         val nodeY = node.y * height
                         val distance = Math.hypot((tapOffset.x - nodeX).toDouble(), (tapOffset.y - nodeY).toDouble())
@@ -52,7 +60,7 @@ fun ConstellationMap(
                     }
 
                     if (clickedNode != null) {
-                        onNodeClick(clickedNode)
+                        currentOnNodeClick(clickedNode)
                     }
                 }
             }

@@ -16,7 +16,7 @@ class RitualManagerTest {
         val manager = RitualManager()
         assertFalse(manager.tryActivateRitual("rit_blood_frenzy", BigDecimal(4)))
         assertTrue(manager.tryActivateRitual("rit_blood_frenzy", BigDecimal(5)))
-        assertEquals(5.0, manager.getActiveClickMultiplier(), 0.0)
+        assertEquals(listOf(5.0), manager.getActiveClickMultipliers())
     }
 
     @Test
@@ -53,7 +53,7 @@ class RitualManagerTest {
         val ritual = restored.ritual("rit_temporal_rift")
         assertEquals(RitualState.COOLDOWN, ritual.state)
         assertEquals(200L, ritual.timeRemaining)
-        assertEquals(1.0, restored.getActiveProductionMultiplier(), 0.0)
+        assertTrue(restored.getActiveProductionMultipliers().isEmpty())
     }
 
     @Test

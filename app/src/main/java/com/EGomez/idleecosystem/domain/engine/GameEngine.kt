@@ -33,6 +33,7 @@ import com.EGomez.idleecosystem.domain.model.EffectType
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.Ritual
+import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.TutorialStep
@@ -238,6 +239,12 @@ class GameEngine @Inject constructor(
             val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return@post
             soundManager.playSound(SoundType.BUY)
             echoes = echoes.subtract(ritual.baseCost)
+            if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
+                // Producción base, igual que los saltos de tiempo de las runas: los
+                // potenciadores activos no se multiplican sobre este regalo
+                val gain = baseProductionPerSecond.multiply(BigDecimal.valueOf(ritual.effectValue))
+                if (gain.signum() > 0) addKnowledge(gain, isManual = false)
+            }
             recalculate()
         }
     }

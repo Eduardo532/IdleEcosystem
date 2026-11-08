@@ -70,8 +70,12 @@ fun MainScreen(
     val screenWidth = configuration.screenWidthDp
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
+    // Se combina con el tamaño de texto que el usuario eligió en Ajustes del sistema.
+    // Antes se reemplazaba y la opción de accesibilidad no tenía efecto. El tope evita
+    // que los textos más grandes rompan el diseño.
+    val finalFontScale = (responsiveFontScale * currentDensity.fontScale).coerceIn(0.6f, 1.5f)
 
-    CompositionLocalProvider(LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)) {
+    CompositionLocalProvider(LocalDensity provides Density(density = currentDensity.density, fontScale = finalFontScale)) {
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val buildings by viewModel.buildingsState.collectAsStateWithLifecycle()
         val upgrades by viewModel.upgradesState.collectAsStateWithLifecycle()

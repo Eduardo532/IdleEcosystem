@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.data.database.UpgradeEntity
+import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import java.math.BigDecimal
@@ -41,7 +42,21 @@ class UpgradeManager @Inject constructor() {
         // --- FINAL ---
         Upgrade("u_global_2", "Sincronicidad Cósmica", "Todo está conectado.", BigDecimal("500000000000000"), UpgradeType.GLOBAL_MULTIPLIER, 2.0),
         Upgrade("u_void_1", "La Nada Eterna", "Azathoth se agita en sueños.", BigDecimal("1000000000000000000"), UpgradeType.BUILDING_MULTIPLIER, 3.0, "b_void")
-    )
+    ).apply {
+        // Escalera del Grimorio: 3 mejoras por edificio (25, 50 y 100 unidades)
+        addAll(GrimoireLadder.create(BuildingCatalog.create()))
+    }
+
+    /**
+     * Una mejora aparece en el Grimorio cuando tienes las unidades que pide de su
+     * edificio. Las mejoras sin requisito (las originales) están siempre a la vista.
+     * Antes el campo unlockConditionAmount existía pero nadie lo revisaba.
+     */
+    fun isUnlocked(upgrade: Upgrade, buildings: List<Building>): Boolean {
+        if (upgrade.isBought || upgrade.unlockConditionAmount <= 0) return true
+        val target = buildings.find { it.id == upgrade.targetBuildingId } ?: return false
+        return target.amountOwned >= upgrade.unlockConditionAmount
+    }
 
     fun loadFromSave(savedUpgrades: List<UpgradeEntity>) {
         // 1. Limpieza de memoria (Reset)

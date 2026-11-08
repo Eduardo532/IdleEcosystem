@@ -185,6 +185,20 @@ class GameEngineTest {
         Unit // JUnit exige que el test devuelva void
     }
 
+    @Test
+    fun `buy all purchases every affordable upgrade from the cheapest`() = runBlocking {
+        engine.grantKnowledge(BigDecimal(1_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(1_000) }
+
+        // Visibles al inicio: Tinta de Calamar (250) y Pluma de Cuervo (500) suman 750
+        engine.buyAllAffordableUpgrades()
+        val bought = await(engine.upgrades) { list -> list.count { it.isBought } >= 2 }
+        assertTrue(bought.first { it.id == "u_notes_1" }.isBought)
+        assertTrue(bought.first { it.id == "u_click_1" }.isBought)
+        val economy = await(engine.economy) { it.knowledge < BigDecimal(1_000) }
+        assertTrue(economy.knowledge < BigDecimal(300))
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 

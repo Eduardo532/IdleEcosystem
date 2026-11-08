@@ -149,6 +149,7 @@ class MainViewModel @Inject constructor(
         rawKnowledge = economy.knowledge,
         clickMultiplier = economy.clickPower.toBeautifulString(),
         prestigeCurrencyFormatted = economy.sanity.toBeautifulString(),
+        rawSanity = economy.sanity,
         potentialPrestigeFormatted = economy.potentialPrestige.toBeautifulString(),
         canPrestige = economy.canPrestige,
         globalMultiplier = economy.globalMultiplier,
@@ -209,6 +210,8 @@ class MainViewModel @Inject constructor(
     fun onBuyBuilding(buildingId: String) = engine.buyBuilding(buildingId, _uiState.value.buyMultiplier)
 
     fun onBuyUpgrade(upgradeId: String) = engine.buyUpgrade(upgradeId)
+
+    fun onBuyAllUpgrades() = engine.buyAllAffordableUpgrades()
 
     fun onBuyPrestigeUpgrade(id: String) = engine.buyPrestigeUpgrade(id)
 

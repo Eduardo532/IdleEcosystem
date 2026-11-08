@@ -37,6 +37,13 @@ class GamePreferences @Inject constructor(
         get() = prefs.getBoolean(KEY_FLOATING_TEXT, true)
         set(value) = prefs.edit().putBoolean(KEY_FLOATING_TEXT, value).apply()
 
+    /** Continuación pendiente de una cadena de eventos (null si no hay). */
+    var pendingFollowUpEventId: String?
+        get() = prefs.getString(KEY_PENDING_EVENT, null)
+        set(value) = prefs.edit().apply {
+            if (value == null) remove(KEY_PENDING_EVENT) else putString(KEY_PENDING_EVENT, value)
+        }.apply()
+
     fun saveRituals(snapshots: List<RitualSnapshot>, savedAtMillis: Long) {
         prefs.edit()
             .putString(KEY_RITUALS, encodeRituals(snapshots))
@@ -62,6 +69,7 @@ class GamePreferences @Inject constructor(
         private const val KEY_FLOATING_TEXT = "floating_text_enabled"
         private const val KEY_RITUALS = "rituals_state"
         private const val KEY_RITUALS_SAVED_AT = "rituals_saved_at"
+        private const val KEY_PENDING_EVENT = "pending_follow_up_event"
 
         // Formato: "id:ESTADO:segundos;id:ESTADO:segundos"
         fun encodeRituals(snapshots: List<RitualSnapshot>): String =

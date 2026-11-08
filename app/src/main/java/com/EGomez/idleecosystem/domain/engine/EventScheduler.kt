@@ -103,6 +103,20 @@ class EventScheduler @Inject constructor(
         return option
     }
 
+    /**
+     * La continuación que hay que guardar para no perder la cadena al cerrar la app:
+     * la que espera turno o, si ya está en pantalla sin responder, esa misma.
+     */
+    fun followUpToPersist(): String? =
+        pendingFollowUp?.id ?: _state.value.currentEvent?.takeIf { it.isFollowUp && _state.value.resultText == null }?.id
+
+    /** Retoma una cadena guardada: la continuación aparece pronto al volver. */
+    fun restoreFollowUp(eventId: String, nowMillis: Long, random: Random = Random) {
+        val event = randomEventManager.getEvent(eventId)?.takeIf { it.isFollowUp } ?: return
+        pendingFollowUp = event
+        nextEventAtMillis = nowMillis + random.nextLong(FOLLOW_UP_MIN_DELAY_MS, FOLLOW_UP_MAX_DELAY_MS)
+    }
+
     /** Cierra el evento tras mostrar su resultado y programa el siguiente. */
     fun close(nowMillis: Long, random: Random = Random) {
         _state.update { it.copy(currentEvent = null, resultText = null) }

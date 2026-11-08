@@ -12,6 +12,7 @@ import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
+import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
@@ -219,6 +220,27 @@ class GameEngine @Inject constructor(
         if (upgradeManager.tryBuyUpgrade(upgradeId, knowledge)) {
             soundManager.playSound(SoundType.BUY)
             knowledge = knowledge.subtract(upgrade.cost)
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /**
+     * Compra, de la más barata a la más cara, todas las mejoras del Grimorio que
+     * alcance el Conocimiento actual. Un solo recálculo y un solo guardado al final.
+     */
+    fun buyAllAffordableUpgrades() = post {
+        val unlocked = upgradeManager.availableUpgrades
+            .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
+        var bought = 0
+        for (upgrade in GrimoireShopping.plan(unlocked, knowledge)) {
+            if (upgradeManager.tryBuyUpgrade(upgrade.id, knowledge)) {
+                knowledge = knowledge.subtract(upgrade.cost)
+                bought++
+            }
+        }
+        if (bought > 0) {
+            soundManager.playSound(SoundType.BUY)
             recalculate()
             requestSave()
         }
@@ -474,6 +496,9 @@ class GameEngine @Inject constructor(
             echoes = BigDecimal.ZERO
             tutorialManager.triggerStep(TutorialStep.WELCOME)
         }
+
+        // Una cadena de eventos abierta sigue donde quedó
+        saved.pendingFollowUpEventId?.let { eventScheduler.restoreFollowUp(it, System.currentTimeMillis()) }
 
         // Rituales: se restauran descontando el tiempo que la app estuvo cerrada
         if (saved.rituals.isNotEmpty() && saved.ritualsSavedAtMillis > 0) {
@@ -761,7 +786,8 @@ class GameEngine @Inject constructor(
                 snapshot = buildSnapshot(),
                 rituals = ritualManager.snapshot(),
                 takenAtMillis = System.currentTimeMillis(),
-                replace = replace
+                replace = replace,
+                pendingFollowUpEventId = eventScheduler.followUpToPersist()
             )
         )
     }

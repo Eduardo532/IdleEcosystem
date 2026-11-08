@@ -135,6 +135,7 @@ class CriticalUiTest {
             PrestigeShopDialog(
                 upgrades = upgrades,
                 currencyFormatted = "10",
+                currency = BigDecimal(10),
                 onBuy = { id -> upgrades = upgrades.map { if (it.id == id) it.copy(level = it.level + 1) else it } },
                 onDismiss = {}
             )
@@ -147,5 +148,23 @@ class CriticalUiTest {
 
         compose.onNodeWithText("MEJORAR").performClick()
         compose.onNodeWithText("Nivel 2").assertExists()
+    }
+
+    @Test
+    fun `the shop button is disabled and says how much is missing`() {
+        val node = PrestigeUpgrade(
+            id = "pu_test", name = "Nodo de Prueba", description = "Prueba",
+            baseCost = BigDecimal(5), costMultiplier = BigDecimal(2), effectMultiplier = BigDecimal("0.1"),
+            type = UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.5f
+        )
+        var bought = 0
+        compose.setContent {
+            PrestigeShopDialog(listOf(node), "2", BigDecimal(2), { bought++ }, {})
+        }
+
+        compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }
+        compose.onNodeWithText("MEJORAR", substring = true).assertIsNotEnabled().performClick()
+        compose.onNodeWithText("Faltan 3 Cordura", substring = true).assertExists()
+        assertEquals(0, bought)
     }
 }

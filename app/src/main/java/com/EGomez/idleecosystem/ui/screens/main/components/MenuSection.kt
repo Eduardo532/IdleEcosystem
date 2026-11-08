@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
+import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
@@ -31,6 +33,7 @@ import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.components.UpgradeItem
+import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 import java.math.BigDecimal
 
@@ -55,6 +58,7 @@ fun MenuSection(
     buildingCostMultiplier: Double, // NUEVO PARÁMETRO
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
+    onBuyAllUpgrades: () -> Unit = {},
     onActivateRitual: (String) -> Unit,
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
@@ -155,6 +159,10 @@ fun MenuSection(
                     }
                     1 -> {
                         item {
+                            // Cuántas mejoras alcanzan, compradas de la más barata a la más cara
+                            val affordableCount = remember(upgrades, currentKnowledge) {
+                                GrimoireShopping.affordableCount(upgrades, currentKnowledge)
+                            }
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -162,6 +170,25 @@ fun MenuSection(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.End
                             ) {
+                                Button(
+                                    onClick = onBuyAllUpgrades,
+                                    enabled = affordableCount > 0,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AncientGold,
+                                        contentColor = Color.Black,
+                                        disabledContainerColor = Color(0xFF333333),
+                                        disabledContentColor = Color.Gray
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text(
+                                        if (affordableCount > 0) "Comprar todas ($affordableCount)" else "Comprar todas",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
                                 Text(
                                     "Ver Comprados",
                                     color = Color.Gray,

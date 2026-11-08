@@ -187,6 +187,7 @@ fun MainScreen(
                             globalMultiplier = uiState.globalMultiplier, buildingCalculator = buildingCalculator,
                             buildingCostMultiplier = uiState.buildingCostMultiplier,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
+                            onBuyAllUpgrades = { viewModel.onBuyAllUpgrades() },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
@@ -279,7 +280,7 @@ fun MainScreen(
             }
 
             if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, uiState.secretsProgress) { showAchievementsDialog = false }
-            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
+            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
             uiState.currentEvent?.let { EventDialog(it, uiState.eventResultText) { opt -> viewModel.onEventOptionSelected(opt) } }

@@ -5,6 +5,7 @@ import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.AchievementType
 import com.EGomez.idleecosystem.domain.model.Building
 import java.math.BigDecimal
+import java.math.MathContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -231,7 +232,9 @@ class AchievementManager @Inject constructor() {
     fun getGlobalAchievementMultiplier(): BigDecimal {
         var multiplier = BigDecimal.ONE
         availableAchievements.filter { it.isUnlocked }.forEach {
-            multiplier = multiplier.multiply(it.bonusMultiplier)
+            // 16 dígitos significativos: el producto exacto de ~100 bonos arrastraba
+            // cientos de decimales a todos los cálculos de producción.
+            multiplier = multiplier.multiply(it.bonusMultiplier, MathContext.DECIMAL64)
         }
         return multiplier
     }

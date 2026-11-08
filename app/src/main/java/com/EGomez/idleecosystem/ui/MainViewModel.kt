@@ -372,25 +372,30 @@ class MainViewModel @Inject constructor(
                     if (totalBuildings >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
 
                     if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
-                }
 
-                buildingManager.checkUnlocks(arcaneKnowledge)
-                val newUnlockList = achievementManager.checkAchievements(arcaneKnowledge, buildingManager.availableBuildings)
+                    // Desbloqueos, logros y recálculo completo: una vez por segundo.
+                    // Antes corrían cada 100 ms (filtros, ordenamientos y el producto de
+                    // todos los logros 10 veces por segundo en el hilo de la UI). Las
+                    // acciones del jugador siguen recalculando al instante.
+                    buildingManager.checkUnlocks(arcaneKnowledge)
+                    val newUnlockList = achievementManager.checkAchievements(arcaneKnowledge, buildingManager.availableBuildings)
 
-                if (newUnlockList.isNotEmpty()) {
-                    soundManager.playSound(SoundType.ACHIEVEMENT)
-                    saveAchievementsToDb()
-                    val achievementToShow = newUnlockList.last()
-                    _uiState.value = _uiState.value.copy(lastUnlockedAchievement = achievementToShow)
-                    launch {
-                        delay(4000)
-                        if (_uiState.value.lastUnlockedAchievement == achievementToShow) {
-                            _uiState.value = _uiState.value.copy(lastUnlockedAchievement = null)
+                    if (newUnlockList.isNotEmpty()) {
+                        soundManager.playSound(SoundType.ACHIEVEMENT)
+                        saveAchievementsToDb()
+                        val achievementToShow = newUnlockList.last()
+                        _uiState.value = _uiState.value.copy(lastUnlockedAchievement = achievementToShow)
+                        launch {
+                            delay(4000)
+                            if (_uiState.value.lastUnlockedAchievement == achievementToShow) {
+                                _uiState.value = _uiState.value.copy(lastUnlockedAchievement = null)
+                            }
                         }
                     }
+
+                    recalculateState()
                 }
 
-                recalculateState()
                 val productionTick = productionPerSecond.divide(BigDecimal.TEN)
                 if (productionTick > BigDecimal.ZERO) {
                     addKnowledgeInternal(productionTick, isManual = false)
@@ -414,7 +419,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             transactionMutex.withLock {
                 val multiplier = _uiState.value.buyMultiplier
-                val discountFactor = BigDecimal(runeManager.getCostReductionMultiplier())
+                val discountFactor = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
                 val costBefore = buildingManager.getCost(buildingId, multiplier, arcaneKnowledge, discountFactor)
 
                 val amountBought = buildingManager.tryBuyBuilding(buildingId, arcaneKnowledge, multiplier, discountFactor)
@@ -929,6 +934,7 @@ class MainViewModel @Inject constructor(
             .multiply(buffMult)
             .multiply(ritualProdMult)
             .multiply(runeMult)
+            .round(MathContext.DECIMAL64)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
         val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
@@ -944,7 +950,7 @@ class MainViewModel @Inject constructor(
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
             }
-            building.currentMultiplier = specificMult.multiply(finalGlobalMult)
+            building.currentMultiplier = specificMult.multiply(finalGlobalMult, MathContext.DECIMAL64)
         }
 
         productionPerSecond = buildingManager.getTotalProductionPerSecond()

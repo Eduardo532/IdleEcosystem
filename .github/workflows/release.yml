@@ -5,6 +5,9 @@ name: Release oficial
 #     .github/release-notes/vX.Y.Z.md. La primera línea ("# vX.Y.Z - Título") da el
 #     nombre de la release.
 #   - A mano desde la pestaña Actions ("Run workflow"), indicando versión y título.
+#
+# Después de cada ejecución, el job "cleanup" borra las alpha/beta que ya quedaron
+# cubiertas por la última versión oficial (ver más abajo).
 # Compila el APK de release, lo firma con la clave del proyecto (secretos del
 # repositorio), comprueba que la firma sea la clave del proyecto y publica la release con su tag y el archivo app-release.apk.
 on:
@@ -12,6 +15,8 @@ on:
     branches: [ main ]
     paths:
       - '.github/release-notes/v*.md'
+      # También al cambiar este archivo: así la limpieza corre apenas se fusiona
+      - '.github/workflows/release.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -163,3 +168,39 @@ jobs:
       - name: Borrar keystore
         if: always()
         run: rm -f "$RUNNER_TEMP/release.keystore"
+
+  # Borra las pre-releases (alpha/beta) cuya versión ya tiene release oficial:
+  # con la v0.11.1 publicada sobran v0.11.1-beta.1, v0.11.0-alpha.1, etc.
+  # Solo se borra la release de GitHub; el tag de git se conserva como historial y
+  # las notas siguen en .github/release-notes/. Las de versiones futuras (por
+  # ejemplo, v0.12.0-alpha.1 con la v0.11.1 como última oficial) no se tocan.
+  cleanup:
+    needs: release
+    if: always() && needs.release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Borrar alpha/beta ya oficializadas
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          LATEST=$(gh api "repos/$REPO/releases/latest" -q .tag_name 2>/dev/null || true)
+          LATEST=${LATEST#v}
+          if ! echo "$LATEST" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "No hay una release oficial con versión X.Y.Z; no se borra nada."
+            exit 0
+          fi
+          echo "Última versión oficial: v$LATEST"
+
+          gh api --paginate "repos/$REPO/releases" -q '.[] | select(.prerelease) | .tag_name' |
+          while read -r TAG; do
+            BASE=$(echo "$TAG" | sed -nE 's/^v([0-9]+\.[0-9]+\.[0-9]+)-(alpha|beta)\.[0-9]+$/\1/p')
+            [ -z "$BASE" ] && continue
+            # BASE <= LATEST (comparación de versiones, no de texto)
+            if [ "$(printf '%s\n%s\n' "$BASE" "$LATEST" | sort -V | tail -1)" = "$LATEST" ]; then
+              echo "Borrando $TAG (cubierta por v$LATEST); el tag se conserva."
+              gh release delete "$TAG" --repo "$REPO" --yes
+            else
+              echo "Se conserva $TAG (versión futura)."
+            fi
+          done

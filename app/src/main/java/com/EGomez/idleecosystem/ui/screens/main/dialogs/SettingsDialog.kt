@@ -16,8 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import android.content.ClipData
+import androidx.compose.ui.platform.toClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +47,9 @@ fun SettingsDialog(
     // NUEVO PARAMETRO
     onToggleTutorial: (Boolean) -> Unit
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    // LocalClipboard reemplaza a LocalClipboardManager (obsoleto): sus operaciones
+    // son suspend, así que se lanzan en el scope del diálogo.
+    val clipboard = LocalClipboard.current
     var isCopied by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -163,9 +166,12 @@ fun SettingsDialog(
                     }
                     Button(
                         onClick = {
-                            clipboardManager.setText(AnnotatedString(uiState.saveStringExport))
-                            isCopied = true
-                            scope.launch { delay(2000); isCopied = false }
+                            scope.launch {
+                                clipboard.setClipEntry(ClipData.newPlainText(CLIP_LABEL, uiState.saveStringExport).toClipEntry())
+                                isCopied = true
+                                delay(2000)
+                                isCopied = false
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = if (isCopied) Color(0xFF4CAF50) else AncientGold),
                         modifier = Modifier.fillMaxWidth()
@@ -210,8 +216,12 @@ fun SettingsDialog(
                 } else {
                     Button(
                         onClick = {
-                            val text = clipboardManager.getText()?.text
-                            if (!text.isNullOrEmpty()) onPasteClick(text)
+                            scope.launch {
+                                val text = clipboard.getClipEntry()?.clipData
+                                    ?.takeIf { it.itemCount > 0 }
+                                    ?.getItemAt(0)?.text?.toString()
+                                if (!text.isNullOrEmpty()) onPasteClick(text)
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333), contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth()
@@ -233,3 +243,5 @@ fun SettingsDialog(
         }
     }
 }
+
+private const val CLIP_LABEL = "IdleEcosystem"

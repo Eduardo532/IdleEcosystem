@@ -3,7 +3,9 @@ package com.EGomez.idleecosystem.domain.logic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.google.gson.Gson
 import java.math.BigDecimal
 
 class SaveManagerTest {
@@ -56,5 +58,39 @@ class SaveManagerTest {
     fun `corrupt content returns null`() {
         assertNull(saveManager.parseJson("{}"))
         assertNull(saveManager.parseJson("not json"))
+    }
+
+    /**
+     * El formato del código de partida es el NOMBRE de cada campo. Este test fija esos
+     * nombres: si alguien renombra un campo (o R8 lo hiciera), los códigos de otras
+     * versiones dejarían de importarse.
+     */
+    @Test
+    fun `the save code format keeps its field names and round trips`() {
+        val data = FullSaveData(
+            knowledge = BigDecimal("1234.5"),
+            sanity = BigDecimal(7),
+            echoes = BigDecimal(3),
+            buildings = listOf(BuildingSaveModel("b_notes", 4, true)),
+            upgrades = listOf("u_1"),
+            achievements = listOf("a_1"),
+            prestigeUpgrades = listOf(PrestigeUpgradeSaveModel("pu_1", 2)),
+            timestamp = 42L,
+            statistics = StatisticsManager().getEntityForSave(),
+            completedTutorialSteps = listOf("welcome")
+        )
+
+        val json = Gson().toJson(data)
+        listOf(
+            "knowledge", "sanity", "echoes", "buildings", "upgrades", "achievements",
+            "prestigeUpgrades", "timestamp", "statistics", "completedTutorialSteps",
+            "amount", "isVisible", "level", "totalClicks", "runesInscribed"
+        ).forEach { key -> assertTrue("Falta el campo $key", json.contains("\"$key\"")) }
+
+        val parsed = saveManager.parseJson(json)!!
+        assertEquals(0, BigDecimal("1234.5").compareTo(parsed.knowledge))
+        assertEquals(4, parsed.buildings.single().amount)
+        assertEquals(2, parsed.prestigeUpgrades.single().level)
+        assertEquals(listOf("welcome"), parsed.completedTutorialSteps)
     }
 }

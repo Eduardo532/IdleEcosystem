@@ -26,7 +26,7 @@ object RuneCatalog {
     val T1_SALT = RuneVariant("t1_salt", "Runa de Sal", RuneTier.TIER_1_SWIPE, 90, Color.White, "x60 Producción (10s)")
     val T1_BONE = RuneVariant("t1_bone", "Runa de Hueso", RuneTier.TIER_1_SWIPE, 80, Color(0xFFEFEBE9), "+2 Minutos de Tiempo")
     val T1_SHADOW = RuneVariant("t1_shadow", "Runa de Sombra", RuneTier.TIER_1_SWIPE, 80, Color(0xFF212121), "x30 Producción (30s)")
-    val T1_WHISPER = RuneVariant("t1_whisper", "Runa de Susurro", RuneTier.TIER_1_SWIPE, 70, Color(0xFFB39DDB), "x10 Click Power (30s)")
+    val T1_WHISPER = RuneVariant("t1_whisper", "Runa de Susurro", RuneTier.TIER_1_SWIPE, 70, Color(0xFFB39DDB), "x10 Click Power + Auto (30s)")
     val T1_RUST = RuneVariant("t1_rust", "Runa de Óxido", RuneTier.TIER_1_SWIPE, 70, Color(0xFF8D6E63), "x45 Producción (18s)")
     val T1_FROST = RuneVariant("t1_frost", "Runa de Escarcha", RuneTier.TIER_1_SWIPE, 60, Color(0xFF80DEEA), "Pausa Buffs (5s)")
     val T1_VERMIN = RuneVariant("t1_vermin", "Runa de Plaga", RuneTier.TIER_1_SWIPE, 60, Color(0xFFC6FF00), "x55 Producción (12s)")
@@ -44,7 +44,7 @@ object RuneCatalog {
 
     // --- TIER 3: TRACE (3 Runas) ---
     val T3_CTHULHU = RuneVariant("t3_cthulhu", "Sigilo de Cthulhu", RuneTier.TIER_3_TRACE, 60, ArcanePurple, "x777 Prod + 1 Eco")
-    val T3_NYARLATHOTEP = RuneVariant("t3_nyarlathotep", "El Caos Reptante", RuneTier.TIER_3_TRACE, 30, CrimsonRed, "Caos Total (x666 + Auto + Speed)")
+    val T3_NYARLATHOTEP = RuneVariant("t3_nyarlathotep", "El Caos Reptante", RuneTier.TIER_3_TRACE, 30, CrimsonRed, "Caos Total (x666 + Auto)")
     val T3_AZATHOTH = RuneVariant("t3_azathoth", "Sigilo de Azathoth", RuneTier.TIER_3_TRACE, 10, EtherealCyan, "+50 ECOS DEL VACÍO")
 
     fun getVariantsForTier(tier: RuneTier): List<RuneVariant> {

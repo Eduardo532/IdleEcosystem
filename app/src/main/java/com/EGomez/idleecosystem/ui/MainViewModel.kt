@@ -23,6 +23,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -59,6 +61,10 @@ class MainViewModel @Inject constructor(
 
     private var arcaneKnowledge = BigDecimal.ZERO
     private var productionPerSecond = BigDecimal.ZERO
+
+    // Producción sin potenciadores temporales (runas, rituales, eventos).
+    // Se usa para los saltos de tiempo, que antes se multiplicaban por los buffs activos.
+    private var baseProductionPerSecond = BigDecimal.ZERO
     private var echoesBalance = BigDecimal.ZERO
 
     private val transactionMutex = Mutex()
@@ -162,10 +168,9 @@ class MainViewModel @Inject constructor(
                 runeManager.runeRewards.collect { reward ->
                     when (reward) {
                         is RuneReward.TimeWarp -> {
-                            val gain = productionPerSecond.multiply(BigDecimal(reward.seconds))
+                            val gain = baseProductionPerSecond.multiply(BigDecimal(reward.seconds))
                             if (gain > BigDecimal.ZERO) {
                                 addKnowledgeInternal(gain, isManual = false)
-                                statsManager.trackPlayTime(reward.seconds)
                             }
                         }
                         is RuneReward.InstantEchoes -> {
@@ -176,9 +181,7 @@ class MainViewModel @Inject constructor(
                             updateUi()
                         }
                         is RuneReward.SanityBonus -> {
-                            val bonusPercent = BigDecimal(reward.percent)
-                            val bonusAmount = prestigeManager.residualSanity.multiply(bonusPercent)
-                            prestigeManager.residualSanity = prestigeManager.residualSanity.add(bonusAmount)
+                            applySanityPercent(reward.percent)
                             updateUi()
                         }
                         is RuneReward.TriggerRandomEvent -> {
@@ -863,6 +866,22 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Cambia la Cordura en un porcentaje manteniéndola ENTERA.
+     *
+     * Antes la Runa de Mente usaba BigDecimal(Double), que arrastra ~55 decimales:
+     * con 0 de Cordura el resultado era 0E-55, que no es igual a BigDecimal.ZERO ni
+     * mayor que cero, y ningún evento volvía a cumplir su condición.
+     */
+    private fun applySanityPercent(percent: Double) {
+        val current = prestigeManager.residualSanity
+        if (current.signum() <= 0) return
+        val raw = current.multiply(BigDecimal.valueOf(percent))
+        // Ganancias redondeadas hacia arriba (mínimo +1), pérdidas hacia cero
+        val delta = if (percent > 0) raw.setScale(0, RoundingMode.CEILING) else raw.setScale(0, RoundingMode.DOWN)
+        prestigeManager.residualSanity = current.add(delta).max(BigDecimal.ZERO)
+    }
+
     fun onEventOptionSelected(optionIndex: Int) {
         val event = _uiState.value.currentEvent ?: return
         val option = event.options.getOrNull(optionIndex) ?: return
@@ -874,12 +893,7 @@ class MainViewModel @Inject constructor(
                     val bonus = arcaneKnowledge.multiply(percent)
                     if (bonus != BigDecimal.ZERO) addKnowledgeInternal(bonus, isManual = false)
                 }
-                EffectType.ADD_SANITY_PERCENT -> {
-                    val percent = BigDecimal.valueOf(effect.value)
-                    val amount = prestigeManager.residualSanity.multiply(percent)
-                    prestigeManager.residualSanity = prestigeManager.residualSanity.add(amount)
-                    if (prestigeManager.residualSanity < BigDecimal.ZERO) prestigeManager.residualSanity = BigDecimal.ZERO
-                }
+                EffectType.ADD_SANITY_PERCENT -> applySanityPercent(effect.value)
                 EffectType.GLOBAL_BUFF -> {
                     _uiState.value = _uiState.value.copy(activeBuffMultiplier = effect.value)
                     activeBuffExpiration = System.currentTimeMillis() + (effect.durationSeconds * 1000)
@@ -902,7 +916,7 @@ class MainViewModel @Inject constructor(
         val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
         val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
         val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
-        val buffMult = BigDecimal(_uiState.value.activeBuffMultiplier)
+        val buffMult = BigDecimal.valueOf(_uiState.value.activeBuffMultiplier)
         val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
 
         val runeMult = runeManager.getTotalRuneMultiplier()
@@ -918,6 +932,7 @@ class MainViewModel @Inject constructor(
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
         val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
+        val runeClickMult = runeManager.getRuneClickMultiplier()
 
         buildingManager.availableBuildings.forEachIndexed { index, building ->
             val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
@@ -925,6 +940,7 @@ class MainViewModel @Inject constructor(
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
                     .multiply(ritualClickMult)
+                    .multiply(runeClickMult)
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
             }
@@ -932,6 +948,10 @@ class MainViewModel @Inject constructor(
         }
 
         productionPerSecond = buildingManager.getTotalProductionPerSecond()
+        val temporaryMult = buffMult.multiply(ritualProdMult).multiply(runeMult)
+        baseProductionPerSecond = if (temporaryMult.signum() > 0) {
+            productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
+        } else productionPerSecond
         val basePotential = prestigeManager.calculatePotentialPrestige(arcaneKnowledge)
         val shopPrestigeBonus = prestigeShopManager.getPrestigeGainMultiplier()
         val finalPotential = basePotential.multiply(shopPrestigeBonus)

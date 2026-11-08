@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,32 +33,32 @@ fun BuildingItem(
     costMultiplier: Double = 1.0, // NUEVO PARÁMETRO
     onBuyClick: () -> Unit
 ) {
-    val rawCost: BigDecimal
-    val amountToBuyLabel: String
-
     // 1. Calcular Costo Base (Sin descuento)
-    if (buyMultiplier == -1) {
-        // Para el cálculo de MAX, ajustamos los fondos efectivos según el descuento
-        val effectiveFunds = if (costMultiplier < 1.0)
-            currentFunds.divide(BigDecimal(costMultiplier), MathContext.DECIMAL64)
-        else currentFunds
+    // Se memoriza: el conocimiento cambia 10 veces por segundo, pero el costo de x1/x10/x100
+    // solo depende de cuántos edificios tienes. Solo MAX depende de los fondos actuales.
+    val owned = building.amountOwned
+    val fundsKey: BigDecimal? = if (buyMultiplier == -1) currentFunds else null
+    val (rawCost, amountToBuyLabel) = remember(building.id, owned, buyMultiplier, costMultiplier, fundsKey) {
+        if (buyMultiplier == -1) {
+            // Para el cálculo de MAX, ajustamos los fondos efectivos según el descuento
+            val effectiveFunds = if (costMultiplier < 1.0)
+                currentFunds.divide(BigDecimal.valueOf(costMultiplier), MathContext.DECIMAL64)
+            else currentFunds
 
-        val maxAffordable = calculator.calculateMaxAffordable(building, effectiveFunds)
+            val maxAffordable = calculator.calculateMaxAffordable(building, effectiveFunds)
 
-        if (maxAffordable > 0) {
-            rawCost = calculator.calculateCostForAmount(building, maxAffordable)
-            amountToBuyLabel = "+$maxAffordable"
+            if (maxAffordable > 0) {
+                calculator.calculateCostForAmount(building, maxAffordable) to "+$maxAffordable"
+            } else {
+                calculator.calculateNextCost(building) to "+1"
+            }
         } else {
-            rawCost = calculator.calculateNextCost(building)
-            amountToBuyLabel = "+1"
+            calculator.calculateCostForAmount(building, buyMultiplier) to "+$buyMultiplier"
         }
-    } else {
-        rawCost = calculator.calculateCostForAmount(building, buyMultiplier)
-        amountToBuyLabel = "+$buyMultiplier"
     }
 
     // 2. Aplicar Descuento
-    val finalCost = rawCost.multiply(BigDecimal(costMultiplier))
+    val finalCost = rawCost.multiply(BigDecimal.valueOf(costMultiplier))
     val hasDiscount = costMultiplier < 1.0
 
     val canAfford = currentFunds >= finalCost

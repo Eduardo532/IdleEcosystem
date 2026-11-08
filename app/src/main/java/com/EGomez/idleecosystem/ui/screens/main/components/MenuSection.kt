@@ -140,7 +140,7 @@ fun MenuSection(
             ) {
                 when (selectedTabIndex) {
                     0 -> {
-                        items(buildings) { building ->
+                        items(buildings, key = { it.id }) { building ->
                             BuildingItem(
                                 building = building,
                                 currentFunds = currentKnowledge,
@@ -192,7 +192,7 @@ fun MenuSection(
                                 }
                             }
                         } else {
-                            items(upgrades) { upgrade ->
+                            items(upgrades, key = { it.id }) { upgrade ->
                                 val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) "Tu Mente"
                                 else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) "Todo"
                                 else buildings.find { it.id == upgrade.targetBuildingId }?.name ?: "?"
@@ -227,7 +227,7 @@ fun MenuSection(
                         }
                         // ------------------------
 
-                        items(rituals) { ritual ->
+                        items(rituals, key = { it.id }) { ritual ->
                             RitualItem(
                                 ritual = ritual,
                                 currentFunds = currentEchoes,

@@ -68,7 +68,7 @@ class BuildingManager @Inject constructor(
     fun getCost(buildingId: String, amountToBuy: Int, currentKnowledge: BigDecimal, discountFactor: BigDecimal = BigDecimal.ONE): BigDecimal {
         val building = availableBuildings.find { it.id == buildingId } ?: return BigDecimal.ZERO
         val baseCost = if (amountToBuy == -1) {
-            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL128) else currentKnowledge
+            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL64) else currentKnowledge
             val max = calculator.calculateMaxAffordable(building, effectiveKnowledge)
             if (max > 0) calculator.calculateCostForAmount(building, max) else calculator.calculateNextCost(building)
         } else {
@@ -82,7 +82,7 @@ class BuildingManager @Inject constructor(
 
         var amountToBuy = multiplier
         if (amountToBuy == -1) {
-            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL128) else currentKnowledge
+            val effectiveKnowledge = if (discountFactor > BigDecimal.ZERO) currentKnowledge.divide(discountFactor, MathContext.DECIMAL64) else currentKnowledge
             amountToBuy = calculator.calculateMaxAffordable(building, effectiveKnowledge)
         }
 

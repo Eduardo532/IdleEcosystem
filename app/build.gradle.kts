@@ -50,7 +50,11 @@ android {
             if (releaseKeystorePath != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            isMinifyEnabled = false
+            // R8: elimina el código que no se usa (sobre todo los miles de íconos de
+            // material-icons-extended) y los recursos sin referencias. Sin ofuscación;
+            // ver proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

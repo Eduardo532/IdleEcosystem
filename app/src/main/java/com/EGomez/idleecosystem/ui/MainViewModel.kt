@@ -48,7 +48,7 @@ class MainViewModel @Inject constructor(
     private val saveManager: SaveManager,
     private val randomEventManager: RandomEventManager,
     private val soundManager: SoundManager,
-    val statsManager: StatisticsManager,
+    private val statsManager: StatisticsManager,
     private val ritualManager: RitualManager,
     private val runeManager: RuneManager,
     private val tutorialManager: TutorialManager,
@@ -98,6 +98,9 @@ class MainViewModel @Inject constructor(
     val showPurchasedState: StateFlow<Boolean> = _showPurchasedState.asStateFlow()
 
     val ritualsState = ritualManager.rituals
+
+    private val _statisticsState = MutableStateFlow(GameStatistics())
+    val statisticsState: StateFlow<GameStatistics> = _statisticsState.asStateFlow()
 
     init {
         _uiState.value = _uiState.value.copy(
@@ -421,7 +424,7 @@ class MainViewModel @Inject constructor(
                     if (newUnlockList.isNotEmpty()) {
                         soundManager.playSound(SoundType.ACHIEVEMENT)
                         saveAchievementsToDb()
-                        val achievementToShow = newUnlockList.last()
+                        val achievementToShow = newUnlockList.last().copy()
                         _uiState.value = _uiState.value.copy(lastUnlockedAchievement = achievementToShow)
                         launch {
                             delay(4000)
@@ -1017,14 +1020,20 @@ class MainViewModel @Inject constructor(
         val finalPotential = basePotential.multiply(shopPrestigeBonus)
         val canAscend = finalPotential > BigDecimal.ZERO
 
-        _buildingsState.value = buildingManager.availableBuildings.filter { it.isVisible }
-        _upgradesState.value = upgradeManager.availableUpgrades.filter { if (_showPurchasedState.value) true else !it.isBought }.sortedBy { it.cost }
+        // La UI recibe COPIAS: los managers mutan sus objetos en el sitio, y publicar
+        // las mismas instancias hacía que StateFlow viera la lista "igual" (no emitía)
+        // y que Compose no pudiera saltarse elementos sin cambios.
+        _buildingsState.value = buildingManager.availableBuildings.filter { it.isVisible }.map { it.copy() }
+        _upgradesState.value = upgradeManager.availableUpgrades
+            .filter { if (_showPurchasedState.value) true else !it.isBought }
+            .sortedBy { it.cost }
+            .map { it.copy() }
 
         val allAchievements = achievementManager.availableAchievements
         val unlockedTotal = allAchievements.count { it.isUnlocked }
         val secretsFound = allAchievements.count { it.isSecret && it.isUnlocked }
         val secretsTotal = allAchievements.count { it.isSecret }
-        val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }
+        val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }.map { it.copy() }
 
         _achievementsState.value = visibleAchievements
 
@@ -1035,13 +1044,15 @@ class MainViewModel @Inject constructor(
             potentialPrestigeFormatted = finalPotential.toBeautifulString(),
             canPrestige = canAscend,
             globalMultiplier = finalGlobalMult,
-            prestigeUpgrades = prestigeShopManager.upgrades.toList(),
+            prestigeUpgrades = prestigeShopManager.upgrades.map { it.copy() },
             achievementsProgress = progressText,
             secretsProgress = secretsText,
             echoes = echoesBalance,
             echoesFormatted = echoesBalance.toBeautifulString(),
             buildingCostMultiplier = costReductionMult
         )
+
+        _statisticsState.value = statsManager.snapshot()
 
         if (canAscend) tutorialManager.triggerStep(TutorialStep.PRESTIGE_READY)
     }

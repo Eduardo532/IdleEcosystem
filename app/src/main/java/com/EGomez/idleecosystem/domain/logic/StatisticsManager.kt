@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.data.database.GameStatisticsEntity
+import com.EGomez.idleecosystem.domain.model.GameStatistics
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -90,6 +91,27 @@ class StatisticsManager @Inject constructor() {
             runesInscribed = runesInscribed
         )
     }
+
+    /** Copia inmutable para la UI (el Registro Akáshico). */
+    fun snapshot(): GameStatistics = GameStatistics(
+        startTime = startTime,
+        totalPlayTimeSeconds = totalPlayTimeSeconds,
+        totalOfflineSeconds = totalOfflineSeconds,
+        runTimeSeconds = runTimeSeconds,
+        lifetimeKnowledge = lifetimeKnowledge,
+        runKnowledge = runKnowledge,
+        maxKnowledgePerSecond = maxKnowledgePerSecond,
+        totalClicks = totalClicks,
+        manualKnowledgeGenerated = manualKnowledgeGenerated,
+        totalPrestiges = totalPrestiges,
+        lifetimeSanity = lifetimeSanity,
+        spentSanity = spentSanity,
+        totalEventsFound = totalEventsFound,
+        totalEchoes = totalEchoes,
+        runesSevered = runesSevered,
+        runesStabilized = runesStabilized,
+        runesInscribed = runesInscribed
+    )
 
     // --- LÓGICA DE SEGUIMIENTO ---
 

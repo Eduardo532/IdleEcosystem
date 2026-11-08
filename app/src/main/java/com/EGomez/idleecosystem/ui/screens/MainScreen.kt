@@ -241,7 +241,11 @@ fun MainScreen(
                 uiState.lastUnlockedAchievement?.let { AchievementPopup(achievement = it) }
             }
 
-            if (showStatisticsDialog) StatisticsScreen(viewModel.statsManager) { showStatisticsDialog = false }
+            if (showStatisticsDialog) {
+                // Se recolecta solo con el diálogo abierto: no recompone la pantalla principal
+                val statistics by viewModel.statisticsState.collectAsStateWithLifecycle()
+                StatisticsScreen(statistics) { showStatisticsDialog = false }
+            }
 
             if (showAscendConfirmation) {
                 AscendDialog(

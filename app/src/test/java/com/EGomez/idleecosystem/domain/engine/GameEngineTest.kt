@@ -144,7 +144,7 @@ class GameEngineTest {
             repository.gameState.first()?.takeIf { BigDecimal(it.prestigeCurrency).compareTo(BigDecimal(3)) == 0 }
         }
         assertEquals(0, BigDecimal(3).compareTo(BigDecimal(state.prestigeCurrency)))
-        val notes = eventually { repository.loadBuildings().find { it.buildingId == NOTES } }
+        val notes = eventually { repository.loadBuildings().find { it.buildingId == NOTES }?.takeIf { it.amountOwned == 0 } }
         assertEquals(0, notes.amountOwned)
     }
 

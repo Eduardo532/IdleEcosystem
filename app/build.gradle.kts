@@ -63,6 +63,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    testOptions {
+        // Las llamadas a android.util.Log en tests unitarios devuelven valores por defecto
+        unitTests.isReturnDefaultValues = true
+    }
     buildFeatures {
         compose = true
     }

@@ -2,14 +2,29 @@ package com.EGomez.idleecosystem.data.repository
 
 import com.EGomez.idleecosystem.data.database.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
+import androidx.room.withTransaction
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Foto completa del progreso para guardarla en una sola transacción. */
+data class GameSnapshot(
+    val knowledge: BigDecimal,
+    val sanity: BigDecimal,
+    val echoes: BigDecimal,
+    val tutorialEnabled: Boolean,
+    val completedTutorialSteps: String,
+    val buildings: List<BuildingEntity>,
+    val upgrades: List<UpgradeEntity>,
+    val unlockedAchievements: List<AchievementEntity>,
+    val prestigeUpgrades: List<PrestigeUpgradeEntity>,
+    val statistics: GameStatisticsEntity
+)
+
 @Singleton
 class GameRepository @Inject constructor(
-    private val gameDao: GameDao
+    private val gameDao: GameDao,
+    private val database: AppDatabase
 ) {
     val gameState: Flow<GameStateEntity?> = gameDao.getGameState()
     val gameStatistics: Flow<GameStatisticsEntity?> = gameDao.getGameStatistics()
@@ -61,7 +76,7 @@ class GameRepository @Inject constructor(
         completedSteps: String
     ) {
         // Recuperamos el tiempo de juego para no perderlo
-        val current = gameState.firstOrNull()
+        val current = gameDao.getGameStateOnce()
         val currentPlayTime = current?.totalPlayTime ?: 0L
 
         val entity = GameStateEntity(
@@ -76,6 +91,40 @@ class GameRepository @Inject constructor(
             completedTutorialSteps = completedSteps
         )
         gameDao.saveGame(entity)
+    }
+
+    /**
+     * Guarda TODO el progreso de forma atómica. Antes cada tabla (y cada fila) se
+     * escribía por separado: si el proceso moría a mitad de un guardado, la partida
+     * quedaba inconsistente, y el autoguardado no incluía las mejoras ni la tienda.
+     */
+    suspend fun saveSnapshot(snapshot: GameSnapshot) {
+        database.withTransaction {
+            saveGame(
+                snapshot.knowledge,
+                BigDecimal.ZERO,
+                snapshot.sanity,
+                snapshot.echoes,
+                snapshot.tutorialEnabled,
+                snapshot.completedTutorialSteps
+            )
+            gameDao.insertBuildings(snapshot.buildings)
+            gameDao.insertUpgrades(snapshot.upgrades)
+            gameDao.insertAchievements(snapshot.unlockedAchievements)
+            gameDao.insertPrestigeUpgrades(snapshot.prestigeUpgrades)
+            gameDao.saveStatistics(snapshot.statistics)
+        }
+    }
+
+    /** Reemplaza todo lo guardado por la partida importada, en una sola transacción. */
+    suspend fun replaceWithSnapshot(snapshot: GameSnapshot) {
+        database.withTransaction {
+            gameDao.deleteAllBuildings()
+            gameDao.deleteAllUpgrades()
+            gameDao.deleteAllAchievements()
+            gameDao.deleteAllPrestigeUpgrades()
+            saveSnapshot(snapshot)
+        }
     }
 
     // NUEVO: Guardado ligero específico para el tutorial
@@ -112,7 +161,7 @@ class GameRepository @Inject constructor(
         tutorialEnabled: Boolean,
         completedSteps: String
     ) {
-        val current = gameState.firstOrNull()
+        val current = gameDao.getGameStateOnce()
         val currentPlayTime = current?.totalPlayTime ?: 0L
 
         val resetState = GameStateEntity(

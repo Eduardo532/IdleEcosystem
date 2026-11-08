@@ -4,7 +4,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.EGomez.idleecosystem.core.math.toBeautifulString
+import com.EGomez.idleecosystem.data.database.AchievementEntity
+import com.EGomez.idleecosystem.data.database.BuildingEntity
+import com.EGomez.idleecosystem.data.database.PrestigeUpgradeEntity
+import com.EGomez.idleecosystem.data.database.UpgradeEntity
+import com.EGomez.idleecosystem.data.preferences.GamePreferences
 import com.EGomez.idleecosystem.data.repository.GameRepository
+import com.EGomez.idleecosystem.data.repository.GameSnapshot
 import com.EGomez.idleecosystem.domain.logic.*
 import com.EGomez.idleecosystem.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +49,8 @@ class MainViewModel @Inject constructor(
     val statsManager: StatisticsManager,
     private val ritualManager: RitualManager,
     private val runeManager: RuneManager,
-    private val tutorialManager: TutorialManager
+    private val tutorialManager: TutorialManager,
+    private val preferences: GamePreferences
 ) : ViewModel() {
 
     // --- CONFIGURACIÓN ---
@@ -55,6 +62,10 @@ class MainViewModel @Inject constructor(
     private var echoesBalance = BigDecimal.ZERO
 
     private val transactionMutex = Mutex()
+
+    // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
+    @Volatile
+    private var isLoaded = false
     private var timeUntilNextEvent = 0L
     private var activeBuffExpiration = 0L
     private var oneSecondAccumulator = 0L
@@ -79,7 +90,9 @@ class MainViewModel @Inject constructor(
     init {
         _uiState.value = _uiState.value.copy(
             isMusicEnabled = soundManager.isMusicEnabled,
-            isSfxEnabled = soundManager.isSfxEnabled
+            isSfxEnabled = soundManager.isSfxEnabled,
+            areParticlesEnabled = preferences.areParticlesEnabled,
+            isFloatingTextEnabled = preferences.isFloatingTextEnabled
         )
         loadGameDataAndStart()
         startAutoSaveLoop()
@@ -228,7 +241,7 @@ class MainViewModel @Inject constructor(
                 }
 
                 val refundAmount = prestigeShopManager.calculateLegacyRefund(savedPrestigeShop)
-                var initialSanity = if (entity != null) BigDecimal(entity.prestigeCurrency) else BigDecimal.ZERO
+                var initialSanity = parseStoredNumber(entity?.prestigeCurrency)
                 var showRefund = false
 
                 buildingManager.resetForPrestige()
@@ -236,36 +249,25 @@ class MainViewModel @Inject constructor(
                 achievementManager.resetAchievements()
                 prestigeShopManager.upgrades.forEach { it.level = 0 }
 
+                // El progreso normal se carga SIEMPRE. Antes, la migración de la tienda
+                // antigua se saltaba esta carga y el autoguardado escribía los edificios en 0.
+                if (savedBuildings.isNotEmpty()) buildingManager.loadFromSave(savedBuildings)
+                if (savedUpgrades.isNotEmpty()) upgradeManager.loadFromSave(savedUpgrades)
+                if (savedAchievements.isNotEmpty()) achievementManager.loadFromSave(savedAchievements)
+
                 if (refundAmount > BigDecimal.ZERO) {
+                    // Migración legacy: la tienda antigua se reembolsa en Cordura
                     initialSanity = initialSanity.add(refundAmount)
-                    prestigeManager.residualSanity = initialSanity
                     showRefund = true
-
                     repository.clearAllPrestigeUpgrades()
-                    prestigeShopManager.upgrades.forEach { repository.savePrestigeUpgrade(it.id, 0) }
-
-                    repository.saveGame(
-                        if (entity != null) BigDecimal(entity.money) else BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        initialSanity,
-                        BigDecimal.ZERO,
-                        tEnabled,
-                        tSteps.joinToString(",")
-                    )
-                } else {
-                    if (savedPrestigeShop.isNotEmpty()) prestigeShopManager.loadFromSave(savedPrestigeShop)
-                    if (savedBuildings.isNotEmpty()) buildingManager.loadFromSave(savedBuildings)
-                    if (savedUpgrades.isNotEmpty()) upgradeManager.loadFromSave(savedUpgrades)
-                    if (savedAchievements.isNotEmpty()) achievementManager.loadFromSave(savedAchievements)
-
-                    prestigeManager.residualSanity = initialSanity
+                } else if (savedPrestigeShop.isNotEmpty()) {
+                    prestigeShopManager.loadFromSave(savedPrestigeShop)
                 }
+                prestigeManager.residualSanity = initialSanity
 
                 if (entity != null) {
-                    arcaneKnowledge = BigDecimal(entity.money)
-                    echoesBalance = try {
-                        if (entity.echoes.isNullOrEmpty()) BigDecimal.ZERO else BigDecimal(entity.echoes)
-                    } catch (e: Exception) { BigDecimal.ZERO }
+                    arcaneKnowledge = parseStoredNumber(entity.money)
+                    echoesBalance = parseStoredNumber(entity.echoes)
 
                     val currentTime = System.currentTimeMillis()
                     val lastTime = entity.lastLoginTime
@@ -280,6 +282,13 @@ class MainViewModel @Inject constructor(
                     tutorialManager.triggerStep(TutorialStep.WELCOME)
                 }
 
+                // Rituales: se restauran descontando el tiempo que la app estuvo cerrada
+                val (ritualSnapshots, ritualsSavedAt) = preferences.loadRituals()
+                if (ritualSnapshots.isNotEmpty() && ritualsSavedAt > 0) {
+                    val elapsedSeconds = ((System.currentTimeMillis() - ritualsSavedAt) / 1000).coerceAtLeast(0)
+                    ritualManager.restore(ritualSnapshots, elapsedSeconds)
+                }
+
                 recalculateState()
 
                 if (showRefund) {
@@ -289,6 +298,8 @@ class MainViewModel @Inject constructor(
                     )
                 }
                 updateUi()
+                isLoaded = true
+                if (showRefund) saveProgressInternal()
             }
             startGameLoop()
         }
@@ -567,11 +578,13 @@ class MainViewModel @Inject constructor(
 
     fun toggleParticles() {
         val newState = !_uiState.value.areParticlesEnabled
+        preferences.areParticlesEnabled = newState
         _uiState.value = _uiState.value.copy(areParticlesEnabled = newState)
     }
 
     fun toggleFloatingText() {
         val newState = !_uiState.value.isFloatingTextEnabled
+        preferences.isFloatingTextEnabled = newState
         _uiState.value = _uiState.value.copy(isFloatingTextEnabled = newState)
     }
 
@@ -628,6 +641,8 @@ class MainViewModel @Inject constructor(
                 tutorialManager.resetTutorial()
 
                 runeManager.hideRune()
+                ritualManager.reset()
+                preferences.clearRituals()
 
                 repository.clearAllAchievements()
                 repository.clearAllPrestigeUpgrades()
@@ -680,7 +695,7 @@ class MainViewModel @Inject constructor(
                 val preview = SavePreview(
                     date = date,
                     money = data.knowledge.toBeautifulString(),
-                    achievements = "${data.achievements.size} / ${achievementManager.availableAchievements.size}"
+                    achievements = "${achievementManager.availableAchievements.count { it.id in data.achievements }} / ${achievementManager.availableAchievements.size}"
                 )
                 _uiState.value = _uiState.value.copy(importPreview = preview, pendingImportString = saveString, importError = null)
             } else {
@@ -697,37 +712,36 @@ class MainViewModel @Inject constructor(
             val data = saveManager.importSave(saveString)
             if (data != null) {
                 transactionMutex.withLock {
-                    repository.clearAllAchievements()
-                    achievementManager.resetAchievements()
-
                     arcaneKnowledge = data.knowledge
                     prestigeManager.residualSanity = data.sanity
                     echoesBalance = data.echoes
 
+                    // Se parte de cero para que nada de la partida actual se mezcle con la importada
+                    buildingManager.resetForPrestige()
                     data.buildings.forEach { b ->
                         buildingManager.availableBuildings.find { it.id == b.id }?.let {
                             it.amountOwned = b.amount
-                            it.isVisible = b.isVisible
+                            it.isVisible = b.isVisible || b.amount > 0
                         }
                     }
                     upgradeManager.availableUpgrades.forEach { u -> u.isBought = data.upgrades.contains(u.id) }
+                    achievementManager.resetAchievements()
                     achievementManager.availableAchievements.forEach { a -> a.isUnlocked = data.achievements.contains(a.id) }
-
-                    prestigeShopManager.upgrades.forEach { it.level = 0 }
                     prestigeShopManager.upgrades.forEach { p ->
                         p.level = data.prestigeUpgrades.find { it.id == p.id }?.level ?: 0
                     }
-
                     statsManager.loadFromEntity(data.statistics)
-                    repository.saveStatistics(data.statistics)
 
-                    saveProgressInternal()
-                    prestigeShopManager.upgrades.forEach { repository.savePrestigeUpgrade(it.id, it.level) }
+                    // Reemplaza TODO lo guardado en una sola transacción.
+                    // Antes las mejoras importadas no se guardaban y se perdían al reiniciar.
+                    repository.replaceWithSnapshot(buildSnapshot())
 
                     recalculateState()
                     updateUi()
                     clearExportString()
                 }
+            } else {
+                _uiState.value = _uiState.value.copy(importError = "Código inválido o corrupto.")
             }
         }
     }
@@ -767,6 +781,7 @@ class MainViewModel @Inject constructor(
 
     fun saveProgress() {
         viewModelScope.launch {
+            if (!isLoaded) return@launch
             if (transactionMutex.tryLock()) {
                 try {
                     saveProgressInternal()
@@ -777,19 +792,33 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /** Foto completa del estado actual (se arma sin suspender, así es consistente). */
+    private fun buildSnapshot() = GameSnapshot(
+        knowledge = arcaneKnowledge,
+        sanity = prestigeManager.residualSanity,
+        echoes = echoesBalance,
+        tutorialEnabled = tutorialManager.isTutorialEnabled.value,
+        completedTutorialSteps = tutorialManager.getCompletedStepsList().joinToString(","),
+        buildings = buildingManager.availableBuildings.map { BuildingEntity(it.id, it.amountOwned, it.isVisible) },
+        upgrades = upgradeManager.availableUpgrades.map { UpgradeEntity(it.id, it.isBought) },
+        unlockedAchievements = achievementManager.availableAchievements.filter { it.isUnlocked }.map { AchievementEntity(it.id, true) },
+        prestigeUpgrades = prestigeShopManager.upgrades.map { PrestigeUpgradeEntity(it.id, it.level) },
+        statistics = statsManager.getEntityForSave()
+    )
+
     private suspend fun saveProgressInternal() {
-        repository.saveGame(
-            arcaneKnowledge,
-            BigDecimal.ZERO,
-            prestigeManager.residualSanity,
-            echoesBalance,
-            tutorialManager.isTutorialEnabled.value,
-            tutorialManager.getCompletedStepsList().joinToString(",")
-        )
-        buildingManager.availableBuildings.forEach { repository.saveBuilding(it.id, it.amountOwned, it.isVisible) }
-        achievementManager.availableAchievements.forEach { if (it.isUnlocked) repository.saveAchievement(it.id, true) }
-        repository.saveStatistics(statsManager.getEntityForSave())
+        val snapshot = buildSnapshot()
+        preferences.saveRituals(ritualManager.snapshot(), System.currentTimeMillis())
+        repository.saveSnapshot(snapshot)
     }
+
+    /** Lee un número guardado como texto; un valor corrupto ya no crashea la app al iniciar. */
+    private fun parseStoredNumber(value: String?): BigDecimal =
+        try {
+            if (value.isNullOrBlank()) BigDecimal.ZERO else BigDecimal(value).max(BigDecimal.ZERO)
+        } catch (e: NumberFormatException) {
+            BigDecimal.ZERO
+        }
 
     private fun startEventSystem() {
         scheduleNextEvent()

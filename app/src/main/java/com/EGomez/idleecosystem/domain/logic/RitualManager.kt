@@ -57,38 +57,38 @@ class RitualManager @Inject constructor() {
         _rituals.value = initialList
     }
 
+    /**
+     * Avanza el tiempo de los rituales. Soporta saltos grandes (por ejemplo, el tiempo
+     * que la app estuvo cerrada): un ritual activo puede terminar y completar su
+     * enfriamiento en un mismo paso.
+     */
     fun tick(deltaSeconds: Long = 1) {
-        _rituals.update { currentList ->
-            currentList.map { ritual ->
-                when (ritual.state) {
-                    RitualState.ACTIVE -> {
-                        val newTime = ritual.timeRemaining - deltaSeconds
-                        if (newTime <= 0) {
-                            ritual.copy(
-                                state = RitualState.COOLDOWN,
-                                timeRemaining = ritual.cooldownSeconds,
-                                totalTimeForProgress = ritual.cooldownSeconds
-                            )
-                        } else {
-                            ritual.copy(timeRemaining = newTime)
-                        }
-                    }
-                    RitualState.COOLDOWN -> {
-                        val newTime = ritual.timeRemaining - deltaSeconds
-                        if (newTime <= 0) {
-                            ritual.copy(
-                                state = RitualState.READY,
-                                timeRemaining = 0,
-                                totalTimeForProgress = ritual.durationSeconds
-                            )
-                        } else {
-                            ritual.copy(timeRemaining = newTime)
-                        }
-                    }
-                    RitualState.READY -> ritual
-                }
+        if (deltaSeconds <= 0) return
+        _rituals.update { currentList -> currentList.map { advance(it, deltaSeconds) } }
+    }
+
+    private fun advance(ritual: Ritual, deltaSeconds: Long): Ritual {
+        var current = ritual
+        var remaining = deltaSeconds
+        while (remaining > 0 && current.state != RitualState.READY) {
+            if (current.timeRemaining > remaining) {
+                return current.copy(timeRemaining = current.timeRemaining - remaining)
+            }
+            remaining -= current.timeRemaining
+            current = when (current.state) {
+                RitualState.ACTIVE -> current.copy(
+                    state = RitualState.COOLDOWN,
+                    timeRemaining = current.cooldownSeconds,
+                    totalTimeForProgress = current.cooldownSeconds
+                )
+                else -> current.copy(
+                    state = RitualState.READY,
+                    timeRemaining = 0,
+                    totalTimeForProgress = current.durationSeconds
+                )
             }
         }
+        return current
     }
 
     fun tryActivateRitual(ritualId: String, currentFunds: BigDecimal): Boolean {
@@ -124,4 +124,32 @@ class RitualManager @Inject constructor() {
             .forEach { multiplier *= it.effectValue }
         return multiplier
     }
+
+    // --- PERSISTENCIA ---
+
+    fun snapshot(): List<RitualSnapshot> =
+        _rituals.value.map { RitualSnapshot(it.id, it.state, it.timeRemaining) }
+
+    /** Restaura el estado guardado y descuenta el tiempo que pasó desde que se guardó. */
+    fun restore(snapshots: List<RitualSnapshot>, elapsedSeconds: Long) {
+        _rituals.update { currentList ->
+            currentList.map { ritual ->
+                val saved = snapshots.find { it.id == ritual.id } ?: return@map ritual
+                val total = if (saved.state == RitualState.COOLDOWN) ritual.cooldownSeconds else ritual.durationSeconds
+                ritual.copy(
+                    state = saved.state,
+                    timeRemaining = if (saved.state == RitualState.READY) 0 else saved.timeRemaining.coerceIn(0, total),
+                    totalTimeForProgress = total
+                )
+            }
+        }
+        tick(elapsedSeconds)
+    }
+
+    fun reset() {
+        initializeRituals()
+    }
 }
+
+/** Estado mínimo de un ritual para guardarlo entre sesiones. */
+data class RitualSnapshot(val id: String, val state: RitualState, val timeRemaining: Long)

@@ -119,12 +119,21 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // Instala los Baseline Profiles (los de Compose y el del juego) en APKs que no
+    // vienen de Play Store, como los que publicamos en GitHub
+    implementation(libs.androidx.profileinstaller)
+
     // Códigos de partida (exportar / importar)
     implementation(libs.gson)
 
     // Tests de migración de Room con Robolectric
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core.ktx)
+}
+
+// Tipos externos que Compose puede tratar como estables (ver el archivo)
+composeCompiler {
+    stabilityConfigurationFile = layout.projectDirectory.file("compose-stability.conf")
 }
 
 // Room exporta el esquema de cada versión de la base de datos a app/schemas.

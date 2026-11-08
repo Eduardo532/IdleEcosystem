@@ -898,6 +898,8 @@ class MainViewModel @Inject constructor(
     }
 
     private fun triggerRandomEvent() {
+        // La Runa de Visión podía reemplazar un evento que el jugador estaba leyendo
+        if (_uiState.value.currentEvent != null) return
         val event = randomEventManager.getRandomEvent(arcaneKnowledge, prestigeManager.residualSanity)
         if (event != null) {
             soundManager.playSound(SoundType.EVENT_APPEAR)
@@ -927,6 +929,8 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) {
         val event = _uiState.value.currentEvent ?: return
+        // Un doble toque rápido aplicaba el efecto dos veces antes de mostrar el resultado
+        if (_uiState.value.eventResultText != null) return
         val option = event.options.getOrNull(optionIndex) ?: return
 
         option.effects.forEach { effect ->

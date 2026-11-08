@@ -119,6 +119,37 @@ class EventSchedulerTest {
         assertNull(scheduler.tick(EventScheduler.MIN_DELAY_MS - 1, knowledge, sanity))
     }
 
+    @Test
+    fun `an open chain is saved and restored`() {
+        val sanity = BigDecimal.ONE
+        var start = scheduler.trigger(0, knowledge, sanity)!!
+        var attempts = 0
+        while (start.id != "evt_chain_guest_1") {
+            scheduler.close(nowMillis = 0)
+            start = scheduler.trigger(0, knowledge, sanity)!!
+            check(++attempts < 5_000)
+        }
+        scheduler.choose(start.options.indexOfFirst { it.followUpEventId != null }, nowMillis = 0)
+        assertEquals("evt_chain_guest_2", scheduler.followUpToPersist())
+
+        // Otra sesión: un planificador nuevo retoma la cadena
+        val restored = EventScheduler(RandomEventManager())
+        restored.scheduleNext(0)
+        restored.restoreFollowUp("evt_chain_guest_2", nowMillis = 0, random = Random(3))
+        val next = restored.tick(EventScheduler.FOLLOW_UP_MAX_DELAY_MS, knowledge, sanity)
+        assertEquals("evt_chain_guest_2", next?.id)
+        // En pantalla y sin responder, sigue siendo lo que hay que guardar
+        assertEquals("evt_chain_guest_2", restored.followUpToPersist())
+    }
+
+    @Test
+    fun `only real follow-ups can be restored`() {
+        val restored = EventScheduler(RandomEventManager())
+        restored.scheduleNext(0, Random(1))
+        restored.restoreFollowUp("evt_start_coin", nowMillis = 0)
+        assertNull(restored.followUpToPersist())
+    }
+
     /** Los eventos son aleatorios: se muestran hasta dar con uno que tenga potenciador. */
     private fun showEventWithGlobalBuff(): Pair<Int, com.EGomez.idleecosystem.domain.model.EventEffect> {
         repeat(2_000) { attempt ->

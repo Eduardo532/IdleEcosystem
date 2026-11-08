@@ -16,6 +16,7 @@ data class GameUiState(
     val rawKnowledge: BigDecimal = BigDecimal.ZERO,
     val clickMultiplier: String = "1.0",
     val prestigeCurrencyFormatted: String = "0",
+    val rawSanity: BigDecimal = BigDecimal.ZERO,
     val potentialPrestigeFormatted: String = "0",
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
 

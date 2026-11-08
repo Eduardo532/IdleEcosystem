@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import java.math.BigDecimal
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 fun PrestigeShopDialog(
     upgrades: List<PrestigeUpgrade>,
     currencyFormatted: String,
+    currency: BigDecimal,
     onBuy: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -88,14 +90,31 @@ fun PrestigeShopDialog(
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         if (parentUnlocked) {
+                            // Antes el botón estaba siempre activo: sin Cordura suficiente
+                            // el toque no hacía nada y no se veía por qué
+                            val cost = node.currentCost
+                            val canAfford = currency >= cost
                             Button(
                                 onClick = { onBuy(node.id) },
+                                enabled = canAfford,
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = ArcanePurple, contentColor = Color.White)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ArcanePurple,
+                                    contentColor = Color.White,
+                                    disabledContainerColor = Color(0xFF333333),
+                                    disabledContentColor = Color.LightGray
+                                )
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text("MEJORAR", fontWeight = FontWeight.Bold)
-                                    Text("Coste: ${node.currentCost.toBeautifulString()} Cordura", fontSize = 10.sp)
+                                    Text("Coste: ${cost.toBeautifulString()} Cordura", fontSize = 10.sp)
+                                    if (!canAfford) {
+                                        Text(
+                                            "Faltan ${cost.subtract(currency).toBeautifulString()} Cordura",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFFE57373)
+                                        )
+                                    }
                                 }
                             }
                         } else {

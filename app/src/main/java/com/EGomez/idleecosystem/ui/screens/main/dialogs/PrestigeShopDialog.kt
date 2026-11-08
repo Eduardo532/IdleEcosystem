@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,11 +33,17 @@ fun PrestigeShopDialog(
     onBuy: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selectedNode by remember { mutableStateOf<PrestigeUpgrade?>(null) }
+    // Se guarda el ID, no el objeto: el nodo se busca en la lista ACTUAL. Antes se
+    // guardaba la copia del momento del toque, y tras comprar el panel seguía
+    // mostrando el nivel y el costo viejos hasta cerrar y abrir la tienda.
+    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    val selectedNode = upgrades.find { it.id == selectedId }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF050505))) {
             Box(modifier = Modifier.fillMaxSize().padding(top = 60.dp, bottom = 150.dp, start = 20.dp, end = 20.dp)) {
-                ConstellationMap(upgrades = upgrades, onNodeClick = { node -> selectedNode = node })
+                Box(modifier = Modifier.fillMaxSize().testTag(CONSTELLATION_MAP_TAG)) {
+                    ConstellationMap(upgrades = upgrades, onNodeClick = { node -> selectedId = node.id })
+                }
             }
             Column(
                 modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()
@@ -54,7 +62,7 @@ fun PrestigeShopDialog(
                 }
             }
             if (selectedNode != null) {
-                val node = selectedNode!!
+                val node = selectedNode
                 val parentUnlocked = if (node.parentId == null) true else {
                     val parent = upgrades.find { it.id == node.parentId }
                     parent != null && parent.level > 0
@@ -110,3 +118,5 @@ fun PrestigeShopDialog(
         }
     }
 }
+
+const val CONSTELLATION_MAP_TAG = "constellation_map"

@@ -121,9 +121,13 @@ class SoundManager @Inject constructor(
         preferences.isSfxEnabled = enabled
     }
 
-    fun release() {
+    /**
+     * Libera solo el reproductor de música; playMusic() lo vuelve a crear.
+     * El SoundPool NO se libera: este objeto es un singleton que vive tanto como el
+     * proceso y se reutiliza cuando la Activity se recrea.
+     */
+    fun stopMusic() {
         mediaPlayer?.release()
         mediaPlayer = null
-        soundPool.release()
     }
 }

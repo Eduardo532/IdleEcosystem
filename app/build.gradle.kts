@@ -110,6 +110,7 @@ dependencies {
 
     // 4. Ciclo de vida y ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:${libs.versions.lifecycleRuntimeKtx.get()}")
 
     implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que tengas
     kapt("com.google.dagger:hilt-android-compiler:2.51.1") // <--- CAMBIA 'ksp' POR 'kapt' AQUÍ

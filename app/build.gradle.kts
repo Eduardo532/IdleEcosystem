@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
-
-    id("com.google.dagger.hilt.android")
-    id("kotlin-kapt")
+    // Kotlin 2: el compilador de Compose es un plugin de Kotlin (ya no composeOptions)
+    alias(libs.plugins.kotlin.compose)
+    // KSP reemplaza a kapt para Room y Hilt: compila más rápido y no genera stubs de Java
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -15,16 +16,16 @@ android {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
 
     defaultConfig {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 10
-        versionName = "0.10.0"
+        versionCode = 13
+        versionName = "0.11.1"
+
+        // Nombre visible de la app (las builds de prueba lo reemplazan)
+        manifestPlaceholders["appLabel"] = "@string/app_name"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,11 +50,26 @@ android {
             if (releaseKeystorePath != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            isMinifyEnabled = false
+            // R8: elimina el código que no se usa (sobre todo los miles de íconos de
+            // material-icons-extended) y los recursos sin referencias. Sin ofuscación;
+            // ver proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        // Build de pruebas (alpha/beta) que publica el flujo "Preview build".
+        // Igual a release, pero con otro applicationId: se instala JUNTO a la app
+        // oficial sin reemplazarla, con su propio nombre y sus propios datos.
+        create("preview") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = (project.findProperty("previewSuffix") as String?) ?: "-preview"
+            manifestPlaceholders["appLabel"] = (project.findProperty("previewLabel") as String?) ?: "IdleEcosystem Preview"
+            matchingFallbacks += listOf("release")
         }
     }
     compileOptions {
@@ -62,6 +78,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    testOptions {
+        // Las llamadas a android.util.Log en tests unitarios devuelven valores por defecto
+        unitTests.isReturnDefaultValues = true
+        // Robolectric (tests de migración de Room) necesita los recursos de Android
+        unitTests.isIncludeAndroidResources = true
     }
     buildFeatures {
         compose = true
@@ -87,27 +109,39 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
-    implementation ("com.google.code.gson:gson:2.10.1")
+    // Persistencia (Room)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
+    // Inyección de dependencias (Hilt)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    // 1. Persistencia (Room Database) - Vital para guardar progreso
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    // Instala los Baseline Profiles (los de Compose y el del juego) en APKs que no
+    // vienen de Play Store, como los que publicamos en GitHub
+    implementation(libs.androidx.profileinstaller)
 
-    // 2. Inyección de Dependencias (Hilt) - Para gestionar Singletons del juego
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    // Códigos de partida (exportar / importar)
+    implementation(libs.gson)
 
-    // 3. Serialización (Para guardar objetos complejos como JSON si es necesario)
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    // Tests de migración de Room con Robolectric
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core.ktx)
+}
 
-    // 4. Ciclo de vida y ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+// Tipos externos que Compose puede tratar como estables (ver el archivo)
+composeCompiler {
+    stabilityConfigurationFile = layout.projectDirectory.file("compose-stability.conf")
+}
 
-    implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que tengas
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1") // <--- CAMBIA 'ksp' POR 'kapt' AQUÍ
-
+// Room exporta el esquema de cada versión de la base de datos a app/schemas.
+// Esos JSON se versionan en git y permiten escribir tests de migración exactos.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

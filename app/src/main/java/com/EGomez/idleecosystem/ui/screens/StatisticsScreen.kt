@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.EGomez.idleecosystem.core.math.toBeautifulString
-import com.EGomez.idleecosystem.domain.logic.StatisticsManager
+import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 import com.EGomez.idleecosystem.ui.theme.SurfaceGrey
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun StatisticsScreen(
-    statisticsManager: StatisticsManager,
+    stats: GameStatistics,
     onDismiss: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -75,24 +75,24 @@ fun StatisticsScreen(
                 Column(modifier = Modifier.weight(1f).verticalScroll(scrollState)) {
 
                     StatSection("Tiempo y Existencia") {
-                        StatRow("Inicio de la Obsesión", formatDate(statisticsManager.startTime))
-                        StatRow("Tiempo Activo (App Abierta)", formatTime(statisticsManager.getActivePlayTime()))
-                        StatRow("Tiempo en el Vacío (Offline)", formatTime(statisticsManager.totalOfflineSeconds))
-                        StatRow("Existencia Total", formatTime(statisticsManager.totalPlayTimeSeconds))
-                        StatRow("Tiempo en esta Vida", formatTime(statisticsManager.runTimeSeconds))
+                        StatRow("Inicio de la Obsesión", formatDate(stats.startTime))
+                        StatRow("Tiempo Activo (App Abierta)", formatTime(stats.activePlayTimeSeconds))
+                        StatRow("Tiempo en el Vacío (Offline)", formatTime(stats.totalOfflineSeconds))
+                        StatRow("Existencia Total", formatTime(stats.totalPlayTimeSeconds))
+                        StatRow("Tiempo en esta Vida", formatTime(stats.runTimeSeconds))
                     }
 
                     StatSection("Conocimiento Prohibido") {
-                        StatRow("Generado (Histórico)", statisticsManager.lifetimeKnowledge.toBeautifulString())
-                        StatRow("Generado (Esta Vida)", statisticsManager.runKnowledge.toBeautifulString())
-                        StatRow("Mayor Producción/seg", statisticsManager.maxKnowledgePerSecond.toBeautifulString())
+                        StatRow("Generado (Histórico)", stats.lifetimeKnowledge.toBeautifulString())
+                        StatRow("Generado (Esta Vida)", stats.runKnowledge.toBeautifulString())
+                        StatRow("Mayor Producción/seg", stats.maxKnowledgePerSecond.toBeautifulString())
                     }
 
                     StatSection("Interacción") {
-                        StatRow("Clics Realizados", statisticsManager.totalClicks.toString())
-                        StatRow("Conocimiento Manual", statisticsManager.manualKnowledgeGenerated.toBeautifulString())
-                        val total = statisticsManager.lifetimeKnowledge
-                        val manual = statisticsManager.manualKnowledgeGenerated
+                        StatRow("Clics Realizados", stats.totalClicks.toString())
+                        StatRow("Conocimiento Manual", stats.manualKnowledgeGenerated.toBeautifulString())
+                        val total = stats.lifetimeKnowledge
+                        val manual = stats.manualKnowledgeGenerated
                         val percent = if (total > java.math.BigDecimal.ZERO) {
                             manual.multiply(java.math.BigDecimal(100)).divide(total, 2, java.math.RoundingMode.HALF_UP)
                         } else java.math.BigDecimal.ZERO
@@ -100,20 +100,20 @@ fun StatisticsScreen(
                     }
 
                     StatSection("Maestría Rúnica") {
-                        StatRow("Runas Cortadas (Tier 1)", statisticsManager.runesSevered.toString())
-                        StatRow("Runas Estabilizadas (Tier 2)", statisticsManager.runesStabilized.toString())
-                        StatRow("Runas Inscritas (Tier 3)", statisticsManager.runesInscribed.toString())
+                        StatRow("Runas Cortadas (Tier 1)", stats.runesSevered.toString())
+                        StatRow("Runas Estabilizadas (Tier 2)", stats.runesStabilized.toString())
+                        StatRow("Runas Inscritas (Tier 3)", stats.runesInscribed.toString())
                     }
 
                     StatSection("Locura y Ascensión") {
-                        StatRow("Veces Ascendido", statisticsManager.totalPrestiges.toString())
-                        StatRow("Cordura Obtenida", statisticsManager.lifetimeSanity.toBeautifulString())
-                        StatRow("Cordura Gastada", statisticsManager.spentSanity.toBeautifulString())
+                        StatRow("Veces Ascendido", stats.totalPrestiges.toString())
+                        StatRow("Cordura Obtenida", stats.lifetimeSanity.toBeautifulString())
+                        StatRow("Cordura Gastada", stats.spentSanity.toBeautifulString())
                     }
 
                     StatSection("Misterios") {
-                        StatRow("Eventos Encontrados", statisticsManager.totalEventsFound.toString())
-                        StatRow("Ecos Hallados", statisticsManager.totalEchoes.toBeautifulString())
+                        StatRow("Eventos Encontrados", stats.totalEventsFound.toString())
+                        StatRow("Ecos Hallados", stats.totalEchoes.toBeautifulString())
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

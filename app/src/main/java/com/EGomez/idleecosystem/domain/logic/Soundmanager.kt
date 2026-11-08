@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
+import com.EGomez.idleecosystem.data.preferences.GamePreferences
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -24,7 +25,8 @@ enum class SoundType {
 
 @Singleton
 class SoundManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val preferences: GamePreferences
 ) {
 
     private var mediaPlayer: MediaPlayer? = null
@@ -34,10 +36,13 @@ class SoundManager @Inject constructor(
     // Handler para programar la detención de sonidos
     private val handler = Handler(Looper.getMainLooper())
 
-    // Configuración de usuario
-    var isMusicEnabled: Boolean = true
+    // Configuración de usuario (persistida entre sesiones). @Volatile: se cambian desde
+    // la UI y se leen desde el hilo del motor, que es quien reproduce los efectos.
+    @Volatile
+    var isMusicEnabled: Boolean = preferences.isMusicEnabled
         private set
-    var isSfxEnabled: Boolean = true
+    @Volatile
+    var isSfxEnabled: Boolean = preferences.isSfxEnabled
         private set
 
     init {
@@ -94,6 +99,7 @@ class SoundManager @Inject constructor(
 
     fun toggleMusic(enabled: Boolean) {
         isMusicEnabled = enabled
+        preferences.isMusicEnabled = enabled
         if (enabled) playMusic() else pauseMusic()
     }
 
@@ -115,11 +121,16 @@ class SoundManager @Inject constructor(
 
     fun toggleSfx(enabled: Boolean) {
         isSfxEnabled = enabled
+        preferences.isSfxEnabled = enabled
     }
 
-    fun release() {
+    /**
+     * Libera solo el reproductor de música; playMusic() lo vuelve a crear.
+     * El SoundPool NO se libera: este objeto es un singleton que vive tanto como el
+     * proceso y se reutiliza cuando la Activity se recrea.
+     */
+    fun stopMusic() {
         mediaPlayer?.release()
         mediaPlayer = null
-        soundPool.release()
     }
 }

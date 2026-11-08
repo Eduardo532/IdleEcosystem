@@ -75,7 +75,7 @@ fun AchievementsDialog(
 
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     if (achievements.isEmpty()) { item { Text("Vacío...", color = Color.Gray) } }
-                    else { items(displayList) { (ach, isRevealed) -> AchievementItem(achievement = ach, isRevealed = isRevealed) } }
+                    else { items(displayList, key = { it.first.id }) { (ach, isRevealed) -> AchievementItem(achievement = ach, isRevealed = isRevealed) } }
                 }
             }
         }

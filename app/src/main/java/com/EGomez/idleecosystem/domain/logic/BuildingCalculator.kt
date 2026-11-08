@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
+import com.EGomez.idleecosystem.core.math.BigMath
 import com.EGomez.idleecosystem.domain.model.Building
 import java.math.BigDecimal
 import java.math.MathContext
@@ -37,15 +38,28 @@ class BuildingCalculator @Inject constructor() {
         val costOfNext = calculateNextCost(building)
         if (currentMoney < costOfNext) return 0
 
-        val r = building.growthFactor.toDouble()
-        val costNextDouble = costOfNext.toDouble()
-        val moneyDouble = currentMoney.toDouble()
+        val r = building.growthFactor
 
         // Formula inversa derivada de la suma geométrica:
         // n = log_r ( 1 + (Money * (r-1) / CostNext) )
-        val term = 1 + (moneyDouble * (r - 1) / costNextDouble)
-        val n = Math.log(term) / Math.log(r)
+        // Se calcula con logaritmos de BigDecimal: con Double, por encima de 1e308 el
+        // resultado era Infinity y el botón MAX dejaba de comprar.
+        val term = BigDecimal.ONE.add(
+            currentMoney.multiply(r.subtract(BigDecimal.ONE)).divide(costOfNext, MathContext.DECIMAL64)
+        )
+        val estimate = BigMath.ln(term) / BigMath.ln(r)
+        var n = estimate.toLong().coerceIn(1L, MAX_BULK_PURCHASE.toLong()).toInt()
 
-        return n.toInt()
+        // La estimación puede desviarse en ±1 por redondeo: se corrige con el costo
+        // exacto (antes MAX a veces calculaba uno de más y la compra fallaba).
+        while (n > 1 && calculateCostForAmount(building, n) > currentMoney) n--
+        while (n < MAX_BULK_PURCHASE && calculateCostForAmount(building, n + 1) <= currentMoney) n++
+
+        return n
+    }
+
+    companion object {
+        /** Límite de una compra masiva, para no desbordar Int. */
+        const val MAX_BULK_PURCHASE = 100_000
     }
 }

@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,27 +70,32 @@ fun MainScreen(
     val screenWidth = configuration.screenWidthDp
     val currentDensity = LocalDensity.current
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
+    // Se combina con el tamaño de texto que el usuario eligió en Ajustes del sistema.
+    // Antes se reemplazaba y la opción de accesibilidad no tenía efecto. El tope evita
+    // que los textos más grandes rompan el diseño.
+    val finalFontScale = (responsiveFontScale * currentDensity.fontScale).coerceIn(0.6f, 1.5f)
 
-    CompositionLocalProvider(LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)) {
-        val uiState by viewModel.uiState.collectAsState()
-        val buildings by viewModel.buildingsState.collectAsState()
-        val upgrades by viewModel.upgradesState.collectAsState()
-        val achievements by viewModel.achievementsState.collectAsState()
-        val rituals by viewModel.ritualsState.collectAsState()
-        val showPurchased by viewModel.showPurchasedState.collectAsState()
+    CompositionLocalProvider(LocalDensity provides Density(density = currentDensity.density, fontScale = finalFontScale)) {
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val buildings by viewModel.buildingsState.collectAsStateWithLifecycle()
+        val upgrades by viewModel.upgradesState.collectAsStateWithLifecycle()
+        val achievements by viewModel.achievementsState.collectAsStateWithLifecycle()
+        val rituals by viewModel.ritualsState.collectAsStateWithLifecycle()
+        val showPurchased by viewModel.showPurchasedState.collectAsStateWithLifecycle()
 
-        var showAchievementsDialog by remember { mutableStateOf(false) }
-        var showPrestigeShopDialog by remember { mutableStateOf(false) }
-        var showSettingsDialog by remember { mutableStateOf(false) }
-        var showHardResetConfirmation by remember { mutableStateOf(false) }
-        var showStatisticsDialog by remember { mutableStateOf(false) }
+        var showAchievementsDialog by rememberSaveable { mutableStateOf(false) }
+        var showPrestigeShopDialog by rememberSaveable { mutableStateOf(false) }
+        var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+        var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
+        var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
+        var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
 
         // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
-        var isMenuExpanded by remember { mutableStateOf(false) }
+        var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
         // Animamos el peso: si está contraído es 0.15f (solo la barrita), si expandido 0.65f
         val menuWeight by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isMenuExpanded) 0.65f else 0.15f, label = "menu")
-        var selectedTabIndex by remember { mutableIntStateOf(0) }
+        var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
         val particleSystem = remember { ParticleSystem() }
@@ -184,7 +191,8 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             onAscendClicked = {
-                                viewModel.onAscendClicked()
+                                // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
+                                showAscendConfirmation = true
                                 viewModel.onAscensionDialogOpened()
                             },
                             onShowPrestigeShop = {
@@ -233,7 +241,22 @@ fun MainScreen(
                 uiState.lastUnlockedAchievement?.let { AchievementPopup(achievement = it) }
             }
 
-            if (showStatisticsDialog) StatisticsScreen(viewModel.statsManager) { showStatisticsDialog = false }
+            if (showStatisticsDialog) {
+                // Se recolecta solo con el diálogo abierto: no recompone la pantalla principal
+                val statistics by viewModel.statisticsState.collectAsStateWithLifecycle()
+                StatisticsScreen(statistics) { showStatisticsDialog = false }
+            }
+
+            if (showAscendConfirmation) {
+                AscendDialog(
+                    sanityGainFormatted = uiState.potentialPrestigeFormatted,
+                    onConfirm = {
+                        viewModel.onAscendClicked()
+                        showAscendConfirmation = false
+                    },
+                    onDismiss = { showAscendConfirmation = false }
+                )
+            }
 
             if (showHardResetConfirmation) HardResetDialog({ viewModel.onHardResetClicked(); showHardResetConfirmation = false; showSettingsDialog = false }, { showHardResetConfirmation = false })
 

@@ -1,0 +1,144 @@
+name: Preview build
+
+# Publishes a test APK (alpha/beta pre-release) at the end of each development day.
+#
+# How it is triggered: merging into the integration branch a new notes file named
+#   .github/release-notes/vX.Y.Z-alpha.N.md   or   .github/release-notes/vX.Y.Z-beta.N.md
+# The first line of the file ("# vX.Y.Z-beta.N - Día N: Título") is the release title.
+#
+# Versioning rules (base = last official release):
+#   - Day with only fixes/improvements -> patch bump (0.10.0 -> 0.10.1), channel "beta"
+#   - Day with new features            -> minor bump (0.10.x -> 0.11.0), channel "alpha"
+#   - Each further day toward the same version increments N (beta.1, beta.2, ...)
+#   - X.Y.Z must match versionName in app/build.gradle.kts
+#
+# The APK uses the "preview" build type: different applicationId, so it installs
+# next to the official app without replacing it, and it is signed with the project
+# release key so each new preview installs over the previous one.
+on:
+  push:
+    branches: [ claude/develop, develop ]
+    paths:
+      - '.github/release-notes/v*-alpha.*.md'
+      - '.github/release-notes/v*-beta.*.md'
+
+permissions:
+  contents: write
+
+env:
+  EXPECTED_CERT_SHA256: 6de0b0524548dbd5ec6ce7e6e162ba9fca8b4f18586c262b17e8f89b882d482c
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Find the new notes file
+        id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          PATTERN='^\.github/release-notes/v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta)\.[0-9]+\.md$'
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            FILE=$(git log -1 --diff-filter=A --name-only --format= -- .github/release-notes/ | grep -E "$PATTERN" | tail -1)
+          else
+            FILE=$(git diff --name-only --diff-filter=A "$BEFORE" "$GITHUB_SHA" -- .github/release-notes/ | grep -E "$PATTERN" | tail -1)
+          fi
+          if [ -z "$FILE" ]; then
+            echo "No new alpha/beta notes in this push; nothing to publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION=$(basename "$FILE" .md | sed 's/^v//')          # 0.10.1-beta.1
+          BASE=${VERSION%%-*}                                     # 0.10.1
+          SUFFIX=-${VERSION#*-}                                   # -beta.1
+          CHANNEL=$(echo "$SUFFIX" | sed -E 's/^-([a-z]+)\..*/\1/') # beta
+          LABEL="IdleEcosystem $(echo "${CHANNEL:0:1}" | tr a-z A-Z)${CHANNEL:1}"
+          TITLE=$(head -1 "$FILE" | sed 's/^#\s*//')
+
+          GRADLE_VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if [ "$GRADLE_VERSION" != "$BASE" ]; then
+            echo "::error::$FILE targets $BASE but versionName is $GRADLE_VERSION."
+            exit 1
+          fi
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Release v$VERSION already exists. Use the next number."
+            exit 1
+          fi
+
+          {
+            echo "skip=false"
+            echo "file=$FILE"
+            echo "version=$VERSION"
+            echo "suffix=$SUFFIX"
+            echo "label=$LABEL"
+            echo "title=$TITLE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Restore signing key
+        if: steps.notes.outputs.skip == 'false'
+        env:
+          KS: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KS" ]; then echo "::error::Missing RELEASE_KEYSTORE_BASE64 secret"; exit 1; fi
+          echo "$KS" | tr -d ' \r\n' | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          echo "RELEASE_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Set up JDK 17
+        if: steps.notes.outputs.skip == 'false'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          # Caché de Gradle integrada (antes gradle/actions/setup-gradle)
+          cache: gradle
+
+      - name: Unit tests and preview APK
+        if: steps.notes.outputs.skip == 'false'
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          PREVIEW_SUFFIX: ${{ steps.notes.outputs.suffix }}
+          PREVIEW_LABEL: ${{ steps.notes.outputs.label }}
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assemblePreview "-PpreviewSuffix=$PREVIEW_SUFFIX" "-PpreviewLabel=$PREVIEW_LABEL"
+
+      - name: Verify signature
+        if: steps.notes.outputs.skip == 'false'
+        run: |
+          APK=app/build/outputs/apk/preview/app-preview.apk
+          BT=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+          "$ANDROID_HOME/build-tools/$BT/apksigner" verify --print-certs "$APK" | tee certs.txt
+          ACTUAL=$(grep -m1 'certificate SHA-256 digest' certs.txt | awk '{print $NF}')
+          if [ "$ACTUAL" != "$EXPECTED_CERT_SHA256" ]; then
+            echo "::error::APK is not signed with the project release key ($ACTUAL)."
+            exit 1
+          fi
+
+      - name: Publish pre-release
+        if: steps.notes.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.notes.outputs.version }}
+          TITLE: ${{ steps.notes.outputs.title }}
+          NOTES_FILE: ${{ steps.notes.outputs.file }}
+        run: |
+          APK="IdleEcosystem-v$VERSION.apk"
+          cp app/build/outputs/apk/preview/app-preview.apk "$APK"
+          gh release create "v$VERSION" "$APK" \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "$TITLE" \
+            --notes-file "$NOTES_FILE"
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"

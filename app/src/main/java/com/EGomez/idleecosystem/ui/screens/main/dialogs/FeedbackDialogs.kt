@@ -40,6 +40,44 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/**
+ * Confirmación antes de ascender. Antes el botón ascendía al instante: un toque
+ * accidental reiniciaba la partida, y el tutorial "El Ciclo" aparecía después.
+ */
+@Composable
+fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("¿ASCENDER?", color = AncientGold, fontWeight = FontWeight.Black) },
+        text = {
+            Column {
+                Text("Perderás tu Conocimiento, tus edificios y las mejoras del Grimorio.", color = Color.White)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Conservas logros, Ecos, rituales y la Tienda de Cordura.", color = Color.Gray, fontSize = 13.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "Ganarás +$sanityGainFormatted Cordura Residual",
+                    color = ArcanePurple,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+        },
+        containerColor = Color(0xFF1E1E1E),
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black)
+            ) {
+                Text("ASCENDER", fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("CANCELAR", color = Color.Gray) }
+        }
+    )
+}
+
 @Composable
 fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss: () -> Unit) {
     AlertDialog(

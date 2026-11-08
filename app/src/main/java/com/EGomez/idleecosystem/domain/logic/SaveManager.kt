@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import android.util.Base64
+import android.util.Log
 import com.EGomez.idleecosystem.data.database.GameStatisticsEntity
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
@@ -21,7 +22,9 @@ data class FullSaveData(
     val achievements: List<String>,
     val prestigeUpgrades: List<PrestigeUpgradeSaveModel>,
     val timestamp: Long,
-    val statistics: GameStatisticsEntity
+    val statistics: GameStatisticsEntity,
+    // Tutoriales vistos. Los códigos anteriores a la v0.11.0 no lo incluyen.
+    val completedTutorialSteps: List<String> = emptyList()
 )
 
 data class BuildingSaveModel(val id: String, val amount: Int, val isVisible: Boolean)
@@ -40,7 +43,8 @@ class SaveManager @Inject constructor() {
         upgrades: List<Upgrade>,
         achievements: List<Achievement>,
         prestigeUpgrades: List<PrestigeUpgrade>,
-        statistics: GameStatisticsEntity
+        statistics: GameStatisticsEntity,
+        completedTutorialSteps: List<String> = emptyList()
     ): String {
         try {
             val buildingSaves = buildings.map { BuildingSaveModel(it.id, it.amountOwned, it.isVisible) }
@@ -57,26 +61,136 @@ class SaveManager @Inject constructor() {
                 achievements = achievementIds,
                 prestigeUpgrades = prestigeSaves,
                 timestamp = System.currentTimeMillis(),
-                statistics = statistics
+                statistics = statistics,
+                completedTutorialSteps = completedTutorialSteps
             )
 
             val jsonString = gson.toJson(saveData)
             return Base64.encodeToString(jsonString.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "No se pudo exportar la partida", e)
             return ""
         }
     }
 
     fun importSave(saveString: String): FullSaveData? {
         return try {
-            val decodedBytes = Base64.decode(saveString, Base64.NO_WRAP)
-            val jsonString = String(decodedBytes, Charsets.UTF_8)
-            gson.fromJson(jsonString, FullSaveData::class.java)
+            val decodedBytes = Base64.decode(saveString.trim(), Base64.NO_WRAP)
+            parseJson(String(decodedBytes, Charsets.UTF_8))
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.w(TAG, "No se pudo decodificar el código de partida", e)
             null
         }
     }
+
+    /**
+     * Convierte el JSON en datos válidos: sin nulls, sin negativos, sin duplicados.
+     *
+     * Gson crea los objetos sin pasar por el constructor de Kotlin, así que un campo
+     * ausente (por ejemplo "echoes" en un código antiguo) quedaba en null dentro de un
+     * tipo no nulo y la app crasheaba más tarde. Por eso se lee primero en [RawSaveData],
+     * donde todo es opcional, y luego se normaliza.
+     */
+    fun parseJson(json: String): FullSaveData? {
+        val raw = try {
+            gson.fromJson(json, RawSaveData::class.java)
+        } catch (e: Exception) {
+            Log.w(TAG, "JSON de partida inválido", e)
+            null
+        } ?: return null
+
+        // Un código sin conocimiento ni edificios no es una partida
+        if (raw.knowledge == null && raw.buildings == null) return null
+
+        return FullSaveData(
+            knowledge = raw.knowledge.nonNegative(),
+            sanity = raw.sanity.nonNegative(),
+            echoes = raw.echoes.nonNegative(),
+            buildings = raw.buildings.orEmpty().filterNotNull().mapNotNull { b ->
+                val id = b.id ?: return@mapNotNull null
+                BuildingSaveModel(id, (b.amount ?: 0).coerceAtLeast(0), b.isVisible ?: false)
+            },
+            upgrades = raw.upgrades.orEmpty().filterNotNull().distinct(),
+            achievements = raw.achievements.orEmpty().filterNotNull().distinct(),
+            prestigeUpgrades = raw.prestigeUpgrades.orEmpty().filterNotNull().mapNotNull { p ->
+                val id = p.id ?: return@mapNotNull null
+                PrestigeUpgradeSaveModel(id, (p.level ?: 0).coerceAtLeast(0))
+            },
+            timestamp = raw.timestamp ?: System.currentTimeMillis(),
+            statistics = raw.statistics.toEntity(),
+            completedTutorialSteps = raw.completedTutorialSteps.orEmpty().filterNotNull().distinct()
+        )
+    }
+
+    private fun BigDecimal?.nonNegative(): BigDecimal =
+        if (this == null || this.signum() < 0) BigDecimal.ZERO else this
+
+    private fun String?.numberOrZero(): String =
+        try { BigDecimal(this ?: "0").max(BigDecimal.ZERO).toString() } catch (e: NumberFormatException) { "0" }
+
+    private fun RawStatistics?.toEntity(): GameStatisticsEntity {
+        val s = this
+        return GameStatisticsEntity(
+            id = 1,
+            totalPlayTimeSeconds = (s?.totalPlayTimeSeconds ?: 0).coerceAtLeast(0),
+            startTime = s?.startTime ?: System.currentTimeMillis(),
+            runTimeSeconds = (s?.runTimeSeconds ?: 0).coerceAtLeast(0),
+            totalOfflineSeconds = (s?.totalOfflineSeconds ?: 0).coerceAtLeast(0),
+            lifetimeKnowledge = s?.lifetimeKnowledge.numberOrZero(),
+            runKnowledge = s?.runKnowledge.numberOrZero(),
+            maxKnowledgePerSecond = s?.maxKnowledgePerSecond.numberOrZero(),
+            totalClicks = (s?.totalClicks ?: 0).coerceAtLeast(0),
+            manualKnowledgeGenerated = s?.manualKnowledgeGenerated.numberOrZero(),
+            totalPrestiges = (s?.totalPrestiges ?: 0).coerceAtLeast(0),
+            lifetimeSanity = s?.lifetimeSanity.numberOrZero(),
+            spentSanity = s?.spentSanity.numberOrZero(),
+            totalEchoes = s?.totalEchoes.numberOrZero(),
+            totalEventsFound = (s?.totalEventsFound ?: 0).coerceAtLeast(0),
+            runesSevered = (s?.runesSevered ?: 0).coerceAtLeast(0),
+            runesStabilized = (s?.runesStabilized ?: 0).coerceAtLeast(0),
+            runesInscribed = (s?.runesInscribed ?: 0).coerceAtLeast(0)
+        )
+    }
+
+    private companion object {
+        const val TAG = "SaveManager"
+    }
 }
+
+// Versión tolerante del JSON (todo opcional) usada solo para importar
+private data class RawSaveData(
+    val knowledge: BigDecimal?,
+    val sanity: BigDecimal?,
+    val echoes: BigDecimal?,
+    val buildings: List<RawBuilding?>?,
+    val upgrades: List<String?>?,
+    val achievements: List<String?>?,
+    val prestigeUpgrades: List<RawPrestigeUpgrade?>?,
+    val timestamp: Long?,
+    val statistics: RawStatistics?,
+    val completedTutorialSteps: List<String?>?
+)
+
+private data class RawBuilding(val id: String?, val amount: Int?, val isVisible: Boolean?)
+private data class RawPrestigeUpgrade(val id: String?, val level: Int?)
+
+private data class RawStatistics(
+    val totalPlayTimeSeconds: Long?,
+    val startTime: Long?,
+    val runTimeSeconds: Long?,
+    val totalOfflineSeconds: Long?,
+    val lifetimeKnowledge: String?,
+    val runKnowledge: String?,
+    val maxKnowledgePerSecond: String?,
+    val totalClicks: Long?,
+    val manualKnowledgeGenerated: String?,
+    val totalPrestiges: Int?,
+    val lifetimeSanity: String?,
+    val spentSanity: String?,
+    val totalEchoes: String?,
+    val totalEventsFound: Int?,
+    val runesSevered: Int?,
+    val runesStabilized: Int?,
+    val runesInscribed: Int?
+)

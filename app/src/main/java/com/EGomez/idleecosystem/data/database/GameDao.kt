@@ -9,6 +9,10 @@ interface GameDao {
     @Query("SELECT * FROM game_save WHERE id = 1")
     fun getGameState(): Flow<GameStateEntity?>
 
+    // Lectura puntual (no Flow) para usar dentro de transacciones
+    @Query("SELECT * FROM game_save WHERE id = 1")
+    suspend fun getGameStateOnce(): GameStateEntity?
+
     // Guarda todo el estado (Dinero, Ecos, Tiempo, y ahora Tutorial)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveGame(gameState: GameStateEntity)
@@ -25,6 +29,9 @@ interface GameDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBuilding(building: BuildingEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBuildings(buildings: List<BuildingEntity>)
+
     @Query("DELETE FROM buildings_save")
     suspend fun deleteAllBuildings()
 
@@ -33,6 +40,9 @@ interface GameDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUpgrade(upgrade: UpgradeEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUpgrades(upgrades: List<UpgradeEntity>)
 
     @Query("DELETE FROM upgrades_save")
     suspend fun deleteAllUpgrades()
@@ -43,6 +53,9 @@ interface GameDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAchievement(achievement: AchievementEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAchievements(achievements: List<AchievementEntity>)
+
     @Query("DELETE FROM achievements_save")
     suspend fun deleteAllAchievements()
 
@@ -51,6 +64,9 @@ interface GameDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPrestigeUpgrade(entity: PrestigeUpgradeEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPrestigeUpgrades(entities: List<PrestigeUpgradeEntity>)
 
     @Query("DELETE FROM prestige_upgrades")
     suspend fun deleteAllPrestigeUpgrades()

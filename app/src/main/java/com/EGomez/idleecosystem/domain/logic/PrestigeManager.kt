@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
+import com.EGomez.idleecosystem.core.math.BigMath
 import java.math.BigDecimal
 import java.math.MathContext
 import javax.inject.Inject
@@ -15,14 +16,18 @@ class PrestigeManager @Inject constructor() {
     private val PRESTIGE_THRESHOLD = BigDecimal("1000000") // Mínimo 1M para ascender
     private val BONUS_PER_POINT = BigDecimal("0.10")       // 10% de bono por punto
 
-    // Calcula cuánta Cordura ganarías si reinicias ahora
-    fun calculatePotentialPrestige(currentKnowledge: BigDecimal): BigDecimal {
-        if (currentKnowledge < PRESTIGE_THRESHOLD) return BigDecimal.ZERO
+    /**
+     * Calcula cuánta Cordura ganarías si reinicias ahora.
+     *
+     * Recibe el conocimiento GENERADO en la vida actual, no el saldo: antes se usaba el
+     * saldo, y comprar edificios antes de ascender reducía la recompensa.
+     */
+    fun calculatePotentialPrestige(knowledgeThisRun: BigDecimal): BigDecimal {
+        if (knowledgeThisRun < PRESTIGE_THRESHOLD) return BigDecimal.ZERO
 
-        val ratio = currentKnowledge.divide(PRESTIGE_THRESHOLD, MathContext.DECIMAL64)
-        val sqrtValue = Math.sqrt(ratio.toDouble())
-
-        return BigDecimal(sqrtValue).setScale(0, java.math.RoundingMode.FLOOR)
+        val ratio = knowledgeThisRun.divide(PRESTIGE_THRESHOLD, MathContext.DECIMAL64)
+        // Raíz sin pasar por Double: Math.sqrt(Infinity) crasheaba por encima de 1e308
+        return BigMath.floorSqrt(ratio)
     }
 
     // Calcula el multiplicador global actual basado en tu Cordura

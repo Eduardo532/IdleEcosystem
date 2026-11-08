@@ -30,6 +30,7 @@ sealed class RuneReward {
 data class RuneBuff(
     val id: String,
     val multiplier: Double = 1.0,
+    val clickMultiplier: Double = 1.0, // Solo afecta al poder de clic
     val costReduction: Double = 0.0, // 0.15 = 15% descuento
     val echoChanceBonus: Double = 0.0, // 0.01 = +1%
     val expirationTime: Long,
@@ -59,6 +60,9 @@ class RuneManager @Inject constructor(
     private var timeSinceLastRune = 0L
     private var runeLifeTime = 0f
 
+    // Runa de Entropía: la siguiente runa aparece apenas se oculte la actual
+    private var forceNextSpawn = false
+
     private val SPAWN_COOLDOWN_SECONDS = 40
     private val SPAWN_CHANCE_PER_TICK = 0.001f
 
@@ -83,7 +87,9 @@ class RuneManager @Inject constructor(
         // 2. Ciclo de Vida de la Runa
         if (_runeState.value == RuneState.HIDDEN) {
             timeSinceLastRune += deltaMillis
-            if (timeSinceLastRune >= SPAWN_COOLDOWN_SECONDS * 1000) {
+            if (forceNextSpawn) {
+                spawnRune()
+            } else if (timeSinceLastRune >= SPAWN_COOLDOWN_SECONDS * 1000) {
                 if (Random.nextFloat() < SPAWN_CHANCE_PER_TICK) {
                     spawnRune()
                 }
@@ -97,6 +103,7 @@ class RuneManager @Inject constructor(
     }
 
     private fun spawnRune() {
+        forceNextSpawn = false
         val roll = Random.nextFloat()
         // AJUSTE DE TIERS:
         // 0% - 80% : Tier 1 (Común)
@@ -146,13 +153,16 @@ class RuneManager @Inject constructor(
             RuneTier.TIER_3_TRACE -> statisticsManager.trackRuneInscribed()
         }
 
-        applyRuneEffect(rune)
+        // El ciclo se reinicia ANTES de aplicar el efecto: antes se reiniciaba después
+        // y anulaba a la Runa de Entropía.
         timeSinceLastRune = 0
+        applyRuneEffect(rune)
     }
 
     private suspend fun applyRuneEffect(rune: RuneVariant) {
         var durationMs: Long = 0
         var multiplier = 1.0
+        var clickMultiplier = 1.0
         var isAutoClick = false
         var costReduction = 0.0
         var echoChance = 0.0
@@ -165,7 +175,7 @@ class RuneManager @Inject constructor(
             "t1_salt" -> { multiplier = 60.0; durationMs = 10_000 }
             "t1_bone" -> { _runeRewards.emit(RuneReward.TimeWarp(120)) } // 2 min
             "t1_shadow" -> { multiplier = 30.0; durationMs = 30_000 }
-            "t1_whisper" -> { multiplier = 10.0; durationMs = 30_000; isAutoClick = true }
+            "t1_whisper" -> { clickMultiplier = 10.0; durationMs = 30_000; isAutoClick = true }
             "t1_rust" -> { multiplier = 45.0; durationMs = 18_000 }
             "t1_frost" -> { durationMs = 5_000; freezesBuffs = true } // Pausa otros buffs
             "t1_vermin" -> { multiplier = 55.0; durationMs = 12_000 }
@@ -179,7 +189,7 @@ class RuneManager @Inject constructor(
             "t2_tidal" -> { multiplier = 500.0; durationMs = 10_000 }
             "t2_psyche" -> { _runeRewards.emit(RuneReward.SanityBonus(0.05)) } // +5% Cordura
             "t2_vision" -> { _runeRewards.emit(RuneReward.TriggerRandomEvent) }
-            "t2_entropy" -> { timeSinceLastRune = SPAWN_COOLDOWN_SECONDS * 1000L } // Reinicio instantáneo (siguiente tick spawnea)
+            "t2_entropy" -> { forceNextSpawn = true } // La siguiente runa aparece al ocultarse esta
 
             // --- TIER 3 ---
             "t3_cthulhu" -> { multiplier = 777.0; durationMs = 60_000; _runeRewards.emit(RuneReward.InstantEchoes(1)) }
@@ -191,6 +201,7 @@ class RuneManager @Inject constructor(
             val buff = RuneBuff(
                 id = rune.id,
                 multiplier = multiplier,
+                clickMultiplier = clickMultiplier,
                 costReduction = costReduction,
                 echoChanceBonus = echoChance,
                 expirationTime = System.currentTimeMillis() + durationMs,
@@ -208,18 +219,20 @@ class RuneManager @Inject constructor(
     }
 
     private fun failRune() {
+        // Una runa ignorada reinicia la espera: antes la siguiente podía aparecer de inmediato
+        timeSinceLastRune = 0
         _runeState.value = RuneState.FAILED
         hideRune()
     }
 
     // --- Helpers de Cálculo ---
-    fun getTotalRuneMultiplier(): BigDecimal {
-        var total = BigDecimal.ONE
-        _activeBuffs.value.forEach {
-            if (it.multiplier > 1.0) total = total.multiply(BigDecimal.valueOf(it.multiplier))
-        }
-        return total
-    }
+    /** Multiplicadores de producción de cada runa activa (se suman en BuffMath). */
+    fun getActiveProductionMultipliers(): List<Double> =
+        _activeBuffs.value.map { it.multiplier }.filter { it > 1.0 }
+
+    /** Multiplicadores de clic de cada runa activa (se suman en BuffMath). */
+    fun getActiveClickMultipliers(): List<Double> =
+        _activeBuffs.value.map { it.clickMultiplier }.filter { it > 1.0 }
 
     fun getCostReductionMultiplier(): Double {
         val reduction = _activeBuffs.value.sumOf { it.costReduction }

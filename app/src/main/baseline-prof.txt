@@ -1,0 +1,11 @@
+# Baseline Profile del juego.
+#
+# Los APK se instalan desde GitHub, no desde Play Store, así que Android no recibe
+# perfiles de la nube: sin esto, el código del juego se interpreta las primeras
+# veces que se abre y se compila de a poco. ProfileInstaller usa este archivo
+# para compilarlo por adelantado (AOT) tras la instalación.
+#
+# El juego es pequeño: se incluyen todas sus clases y métodos. Compose, Room y
+# Hilt ya traen sus propios perfiles.
+HSPLcom/EGomez/idleecosystem/**;->**(**)**
+Lcom/EGomez/idleecosystem/**;

@@ -1,9 +1,17 @@
 name: Release oficial
 
-# Se ejecuta a mano desde la pestaña Actions ("Run workflow").
+# Se ejecuta de dos formas:
+#   - Automática: al fusionar en main un archivo NUEVO de notas oficiales
+#     .github/release-notes/vX.Y.Z.md. La primera línea ("# vX.Y.Z - Título") da el
+#     nombre de la release.
+#   - A mano desde la pestaña Actions ("Run workflow"), indicando versión y título.
 # Compila el APK de release, lo firma con la clave del proyecto (secretos del
 # repositorio), comprueba que la firma sea la clave del proyecto y publica la release con su tag y el archivo app-release.apk.
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/release-notes/v*.md'
   workflow_dispatch:
     inputs:
       version:
@@ -28,11 +36,43 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Determinar versión
+        id: meta
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_TITLE: ${{ inputs.title }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            VERSION="$INPUT_VERSION"
+            TITLE="$INPUT_TITLE"
+          else
+            # Solo notas oficiales nuevas (vX.Y.Z.md); las de alpha/beta no cuentan
+            FILE=$(git diff --name-only --diff-filter=A "$BEFORE" "$GITHUB_SHA" -- .github/release-notes/ \
+              | grep -E '^\.github/release-notes/v[0-9]+\.[0-9]+\.[0-9]+\.md$' | tail -1)
+            if [ -z "$FILE" ]; then
+              echo "No hay notas oficiales nuevas en este push; no se publica nada."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            VERSION=$(basename "$FILE" .md | sed 's/^v//')
+            TITLE=$(head -1 "$FILE" | sed -E 's/^#\s*v[0-9.]+\s*-\s*//')
+          fi
+          {
+            echo "skip=false"
+            echo "version=$VERSION"
+            echo "title=$TITLE"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comprobar versión y tag
+        if: steps.meta.outputs.skip == 'false'
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.meta.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           GRADLE_VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
@@ -50,6 +90,7 @@ jobs:
           fi
 
       - name: Comprobar secretos de firma
+        if: steps.meta.outputs.skip == 'false'
         env:
           KS: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
           KS_PASS: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
@@ -67,6 +108,7 @@ jobs:
           fi
 
       - name: Restaurar keystore
+        if: steps.meta.outputs.skip == 'false'
         env:
           KS: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
         run: |
@@ -74,15 +116,16 @@ jobs:
           echo "RELEASE_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
 
       - name: Configurar JDK 17
-        uses: actions/setup-java@v4
+        if: steps.meta.outputs.skip == 'false'
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v4
+          # Caché de Gradle integrada (antes gradle/actions/setup-gradle)
+          cache: gradle
 
       - name: Compilar APK de release
+        if: steps.meta.outputs.skip == 'false'
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
@@ -92,6 +135,7 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Verificar firma
+        if: steps.meta.outputs.skip == 'false'
         run: |
           APK=app/build/outputs/apk/release/app-release.apk
           BT=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
@@ -104,10 +148,11 @@ jobs:
           echo "Firma correcta: es la clave de release del proyecto."
 
       - name: Publicar release
+        if: steps.meta.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ inputs.version }}
-          TITLE: ${{ inputs.title }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          TITLE: ${{ steps.meta.outputs.title }}
         run: |
           gh release create "v$VERSION" app/build/outputs/apk/release/app-release.apk \
             --target "$GITHUB_SHA" \

@@ -69,6 +69,20 @@ class TutorialManager @Inject constructor() {
         _completedSteps.value = currentSet
     }
 
+    /**
+     * Marca varios pasos como vistos (por ejemplo, al importar una partida) y los quita
+     * de la pantalla y de la cola si estaban pendientes.
+     */
+    fun markStepsAsCompleted(stepIds: Set<String>) {
+        if (stepIds.isEmpty()) return
+        _completedSteps.value = _completedSteps.value + stepIds
+        tutorialQueue.removeAll { it.id in stepIds }
+        val current = _currentStep.value
+        if (current != null && current.id in stepIds) {
+            _currentStep.value = if (tutorialQueue.isNotEmpty()) tutorialQueue.removeFirst() else null
+        }
+    }
+
     fun setTutorialEnabled(enabled: Boolean) {
         _isTutorialEnabled.value = enabled
         if (!enabled) {

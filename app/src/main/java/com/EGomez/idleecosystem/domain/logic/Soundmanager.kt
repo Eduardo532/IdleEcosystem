@@ -36,9 +36,12 @@ class SoundManager @Inject constructor(
     // Handler para programar la detención de sonidos
     private val handler = Handler(Looper.getMainLooper())
 
-    // Configuración de usuario (persistida entre sesiones)
+    // Configuración de usuario (persistida entre sesiones). @Volatile: se cambian desde
+    // la UI y se leen desde el hilo del motor, que es quien reproduce los efectos.
+    @Volatile
     var isMusicEnabled: Boolean = preferences.isMusicEnabled
         private set
+    @Volatile
     var isSfxEnabled: Boolean = preferences.isSfxEnabled
         private set
 

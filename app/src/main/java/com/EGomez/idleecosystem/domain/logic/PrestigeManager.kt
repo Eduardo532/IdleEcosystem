@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
+import com.EGomez.idleecosystem.core.math.BigMath
 import java.math.BigDecimal
 import java.math.MathContext
 import javax.inject.Inject
@@ -20,9 +21,8 @@ class PrestigeManager @Inject constructor() {
         if (currentKnowledge < PRESTIGE_THRESHOLD) return BigDecimal.ZERO
 
         val ratio = currentKnowledge.divide(PRESTIGE_THRESHOLD, MathContext.DECIMAL64)
-        val sqrtValue = Math.sqrt(ratio.toDouble())
-
-        return BigDecimal(sqrtValue).setScale(0, java.math.RoundingMode.FLOOR)
+        // Raíz sin pasar por Double: Math.sqrt(Infinity) crasheaba por encima de 1e308
+        return BigMath.floorSqrt(ratio)
     }
 
     // Calcula el multiplicador global actual basado en tu Cordura

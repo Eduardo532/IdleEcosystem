@@ -35,7 +35,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 20,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() == 0 }
         ),
 
         RandomEvent(
@@ -55,7 +55,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 20,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() == 0 }
         ),
 
         RandomEvent(
@@ -70,7 +70,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 15,
-            condition = { _, sanity -> sanity == BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() == 0 }
         ),
 
         // ========================================================================
@@ -97,7 +97,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 10,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -117,7 +117,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 10,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -140,7 +140,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 9,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         // ========================================================================
@@ -167,7 +167,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 7,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -190,7 +190,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 6,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -213,7 +213,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 5,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -236,7 +236,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 6,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         // ========================================================================
@@ -263,7 +263,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 3,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -286,7 +286,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 2,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -309,7 +309,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 2,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -332,7 +332,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 4,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         ),
 
         RandomEvent(
@@ -355,7 +355,7 @@ class RandomEventManager @Inject constructor() {
                 )
             ),
             weight = 3,
-            condition = { _, sanity -> sanity > BigDecimal.ZERO }
+            condition = { _, sanity -> sanity.signum() > 0 }
         )
     )
 

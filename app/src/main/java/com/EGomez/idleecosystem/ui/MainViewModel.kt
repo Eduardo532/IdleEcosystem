@@ -22,6 +22,7 @@ import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -94,7 +95,9 @@ class MainViewModel @Inject constructor(
     // =====================================================================
 
     private fun observeEngine() {
-        viewModelScope.launch {
+        // Formatear números enormes 10 veces por segundo no le corresponde al hilo de la UI.
+        // MutableStateFlow.update es seguro entre hilos.
+        viewModelScope.launch(Dispatchers.Default) {
             engine.economy.collect { economy -> _uiState.update { it.withEconomy(economy) } }
         }
         viewModelScope.launch {

@@ -21,6 +21,7 @@ import com.EGomez.idleecosystem.domain.logic.SoundManager
 import com.EGomez.idleecosystem.domain.logic.StatisticsManager
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
+import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.SupervisorJob
@@ -148,6 +149,24 @@ class GameEngineTest {
         assertEquals(0, notes.amountOwned)
     }
 
+    @Test
+    fun `the knowledge offering grants two minutes of base production`() = runBlocking {
+        engine.grantKnowledge(BigDecimal(1_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(1_000) }
+        engine.buyBuilding(NOTES, 10)
+        val production = await(engine.economy) { it.productionPerSecond.signum() > 0 }.productionPerSecond
+
+        repeat(25) { engine.click(echoFound = true) }
+        val before = await(engine.economy) { it.echoes >= BigDecimal(25) }.knowledge
+
+        engine.activateRitual(OFFERING)
+        await(engine.rituals) { list -> list.first { it.id == OFFERING }.state != RitualState.READY }
+        val after = await(engine.economy) { it.echoes.signum() == 0 }.knowledge
+
+        // Al menos 120 s de producción (el bucle sigue sumando mientras tanto)
+        assertTrue(after.subtract(before) >= production.multiply(BigDecimal(120)))
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 
@@ -164,6 +183,7 @@ class GameEngineTest {
 
     private companion object {
         const val NOTES = "b_notes"
+        const val OFFERING = "rit_knowledge_offering"
         const val TIMEOUT_MS = 10_000L
     }
 }

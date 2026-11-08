@@ -45,14 +45,14 @@ class RitualManagerTest {
     @Test
     fun `restore subtracts the time the app was closed`() {
         val original = RitualManager()
-        original.tryActivateRitual("rit_temporal_rift", BigDecimal(100)) // 5s active, 300s cooldown
+        original.tryActivateRitual("rit_temporal_rift", BigDecimal(100)) // 15s active, 300s cooldown
         val saved = original.snapshot()
 
         val restored = RitualManager()
         restored.restore(saved, elapsedSeconds = 105)
         val ritual = restored.ritual("rit_temporal_rift")
         assertEquals(RitualState.COOLDOWN, ritual.state)
-        assertEquals(200L, ritual.timeRemaining)
+        assertEquals(210L, ritual.timeRemaining)
         assertTrue(restored.getActiveProductionMultipliers().isEmpty())
     }
 
@@ -62,5 +62,30 @@ class RitualManagerTest {
         manager.tryActivateRitual("rit_blood_frenzy", BigDecimal(100))
         manager.reset()
         assertTrue(manager.rituals.value.all { it.state == RitualState.READY })
+    }
+
+    @Test
+    fun `a pricier production ritual is never worth less per echo`() {
+        // Antes la Grieta Temporal (50 Ecos) daba 95 s de producción: menos por Eco
+        // que el Cántico del Vacío (15 Ecos, 60 s)
+        val byCost = RitualManager().rituals.value
+            .filter { it.productionSeconds > 0 }
+            .sortedBy { it.baseCost }
+        byCost.zipWithNext().forEach { (cheaper, pricier) ->
+            val cheaperValue = cheaper.productionSeconds.toDouble() / cheaper.baseCost.toDouble()
+            val pricierValue = pricier.productionSeconds.toDouble() / pricier.baseCost.toDouble()
+            assertTrue(
+                "${pricier.name} rinde $pricierValue s/Eco, menos que ${cheaper.name} ($cheaperValue)",
+                pricierValue >= cheaperValue
+            )
+        }
+    }
+
+    @Test
+    fun `instant knowledge rituals are not production buffs`() {
+        val manager = RitualManager()
+        manager.tryActivateRitual("rit_knowledge_offering", BigDecimal(100))
+        assertTrue(manager.getActiveProductionMultipliers().isEmpty())
+        assertEquals(120L, manager.ritual("rit_knowledge_offering").productionSeconds)
     }
 }

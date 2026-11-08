@@ -97,9 +97,9 @@ fun RitualItem(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         if (canAfford) {
-                            Text("INVOCAR (${ritual.baseCost.toBeautifulString()})", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text("INVOCAR (${ritual.baseCost.toBeautifulString()} Ecos)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         } else {
-                            Text("FALTA CONOCIMIENTO (${ritual.baseCost.toBeautifulString()})", fontSize = 11.sp)
+                            Text("FALTAN ECOS (${ritual.baseCost.toBeautifulString()})", fontSize = 11.sp)
                         }
                     }
                 }

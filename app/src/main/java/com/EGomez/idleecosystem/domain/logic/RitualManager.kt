@@ -44,14 +44,34 @@ class RitualManager @Inject constructor() {
                 effectValue = 3.0
             ),
             Ritual(
+                id = "rit_knowledge_offering",
+                name = "Ofrenda de Conocimiento",
+                description = "Los Ecos se disuelven en saber: 2 minutos de producción al instante.",
+                baseCost = BigDecimal("25"),
+                durationSeconds = 1,
+                cooldownSeconds = 600,
+                effectType = RitualEffectType.INSTANT_KNOWLEDGE,
+                effectValue = 120.0 // segundos de producción base
+            ),
+            Ritual(
                 id = "rit_temporal_rift",
                 name = "Grieta Temporal",
-                description = "Un breve instante de eficiencia infinita.",
+                description = "Un instante de eficiencia imposible. x20 a la producción.",
                 baseCost = BigDecimal("50"),
-                durationSeconds = 5,
+                durationSeconds = 15,
                 cooldownSeconds = 300,
                 effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
                 effectValue = 20.0
+            ),
+            Ritual(
+                id = "rit_eternal_vigil",
+                name = "Vigilia Eterna",
+                description = "Dos minutos sin dormir, sin parpadear. x6 a la producción.",
+                baseCost = BigDecimal("100"),
+                durationSeconds = 120,
+                cooldownSeconds = 1200,
+                effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
+                effectValue = 6.0
             )
         )
         _rituals.value = initialList

@@ -18,7 +18,9 @@ data class EventEffect(
 data class EventOption(
     val text: String,
     val flavorResult: String,
-    val effects: List<EventEffect>
+    val effects: List<EventEffect>,
+    // Cadena: elegir esta opción hace que el PRÓXIMO evento sea este (por id)
+    val followUpEventId: String? = null
 )
 
 data class RandomEvent(
@@ -27,5 +29,9 @@ data class RandomEvent(
     val description: String,
     val options: List<EventOption>,
     val weight: Int = 10,
-    val condition: (BigDecimal, BigDecimal) -> Boolean = { _, _ -> true }
+    val condition: (BigDecimal, BigDecimal) -> Boolean = { _, _ -> true },
+    // Solo aparece después de esta cantidad de Ascensiones
+    val minAscensions: Int = 0,
+    // Continuación de una cadena: nunca aparece al azar, solo tras su opción previa
+    val isFollowUp: Boolean = false
 )

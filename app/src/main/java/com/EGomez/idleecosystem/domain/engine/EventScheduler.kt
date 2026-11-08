@@ -37,6 +37,9 @@ class EventScheduler @Inject constructor(
     private var nextEventAtMillis = 0L
     private var buffExpiresAtMillis = 0L
 
+    // Continuación de una cadena elegida en el último evento: será el próximo
+    private var pendingFollowUp: RandomEvent? = null
+
     val buffMultiplier: Double get() = _state.value.buffMultiplier
 
     fun scheduleNext(nowMillis: Long, random: Random = Random) {
@@ -47,10 +50,10 @@ class EventScheduler @Inject constructor(
      * Avanza un segundo de juego.
      * @return el evento que acaba de aparecer, o null.
      */
-    fun tick(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal): RandomEvent? {
+    fun tick(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
         updateBuff(nowMillis)
         if (_state.value.currentEvent == null && nowMillis >= nextEventAtMillis) {
-            return trigger(nowMillis, knowledge, sanity)
+            return trigger(nowMillis, knowledge, sanity, ascensions)
         }
         return null
     }
@@ -59,10 +62,12 @@ class EventScheduler @Inject constructor(
      * Muestra un evento ahora (también lo usa la Runa de Visión).
      * @return el evento mostrado, o null si ya había uno o ninguno cumple su condición.
      */
-    fun trigger(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal): RandomEvent? {
+    fun trigger(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
         // La Runa de Visión podía reemplazar un evento que el jugador estaba leyendo
         if (_state.value.currentEvent != null) return null
-        val event = randomEventManager.getRandomEvent(knowledge, sanity)
+        // Una cadena abierta tiene prioridad sobre el azar
+        val event = pendingFollowUp?.also { pendingFollowUp = null }
+            ?: randomEventManager.getRandomEvent(knowledge, sanity, ascensions)
         if (event == null) {
             scheduleNext(nowMillis)
             return null
@@ -83,6 +88,8 @@ class EventScheduler @Inject constructor(
         if (current.resultText != null) return null
         val option = event.options.getOrNull(optionIndex) ?: return null
 
+        option.followUpEventId?.let { pendingFollowUp = randomEventManager.getEvent(it) }
+
         var buff = current.buffMultiplier
         var remaining = current.buffSecondsRemaining
         option.effects.filter { it.type == EffectType.GLOBAL_BUFF }.forEach { effect ->
@@ -97,9 +104,14 @@ class EventScheduler @Inject constructor(
     }
 
     /** Cierra el evento tras mostrar su resultado y programa el siguiente. */
-    fun close(nowMillis: Long) {
+    fun close(nowMillis: Long, random: Random = Random) {
         _state.update { it.copy(currentEvent = null, resultText = null) }
-        scheduleNext(nowMillis)
+        if (pendingFollowUp != null) {
+            // La historia sigue pronto, no en 2 a 4 minutos
+            nextEventAtMillis = nowMillis + random.nextLong(FOLLOW_UP_MIN_DELAY_MS, FOLLOW_UP_MAX_DELAY_MS)
+        } else {
+            scheduleNext(nowMillis, random)
+        }
     }
 
     /** Ascensión y reinicio: el potenciador temporal no sobrevive. */
@@ -123,5 +135,7 @@ class EventScheduler @Inject constructor(
     companion object {
         const val MIN_DELAY_MS = 90_000L
         const val MAX_DELAY_MS = 240_000L
+        const val FOLLOW_UP_MIN_DELAY_MS = 20_000L
+        const val FOLLOW_UP_MAX_DELAY_MS = 45_000L
     }
 }

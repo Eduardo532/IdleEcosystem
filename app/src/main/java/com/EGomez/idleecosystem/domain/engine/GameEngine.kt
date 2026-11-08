@@ -546,7 +546,7 @@ class GameEngine @Inject constructor(
         if (buildingManager.availableBuildings.sumOf { it.amountOwned } >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
         if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
 
-        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity)?.let { onEventShown() }
+        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)?.let { onEventShown() }
 
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
@@ -599,7 +599,7 @@ class GameEngine @Inject constructor(
                     }
                     is RuneReward.SanityBonus -> applySanityPercent(reward.percent)
                     is RuneReward.TriggerRandomEvent -> {
-                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity)
+                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)
                             ?.let { onEventShown() }
                     }
                 }

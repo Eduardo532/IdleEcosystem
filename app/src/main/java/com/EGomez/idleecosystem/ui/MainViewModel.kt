@@ -714,7 +714,8 @@ class MainViewModel @Inject constructor(
             upgradeManager.availableUpgrades,
             achievementManager.availableAchievements,
             prestigeShopManager.upgrades,
-            currentStats
+            currentStats,
+            tutorialManager.getCompletedStepsList()
         )
 
         val unlockedAch = achievementManager.availableAchievements.count { it.isUnlocked }
@@ -777,6 +778,10 @@ class MainViewModel @Inject constructor(
                         p.level = data.prestigeUpgrades.find { it.id == p.id }?.level ?: 0
                     }
                     statsManager.loadFromEntity(data.statistics)
+
+                    // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
+                    // (se suman a los vistos en este dispositivo)
+                    tutorialManager.markStepsAsCompleted(TutorialProgress.stepsSeenIn(data))
 
                     // Reemplaza TODO lo guardado en una sola transacción.
                     // Antes las mejoras importadas no se guardaban y se perdían al reiniciar.

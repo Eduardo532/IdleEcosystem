@@ -22,7 +22,9 @@ data class FullSaveData(
     val achievements: List<String>,
     val prestigeUpgrades: List<PrestigeUpgradeSaveModel>,
     val timestamp: Long,
-    val statistics: GameStatisticsEntity
+    val statistics: GameStatisticsEntity,
+    // Tutoriales vistos. Los códigos anteriores a la v0.11.0 no lo incluyen.
+    val completedTutorialSteps: List<String> = emptyList()
 )
 
 data class BuildingSaveModel(val id: String, val amount: Int, val isVisible: Boolean)
@@ -41,7 +43,8 @@ class SaveManager @Inject constructor() {
         upgrades: List<Upgrade>,
         achievements: List<Achievement>,
         prestigeUpgrades: List<PrestigeUpgrade>,
-        statistics: GameStatisticsEntity
+        statistics: GameStatisticsEntity,
+        completedTutorialSteps: List<String> = emptyList()
     ): String {
         try {
             val buildingSaves = buildings.map { BuildingSaveModel(it.id, it.amountOwned, it.isVisible) }
@@ -58,7 +61,8 @@ class SaveManager @Inject constructor() {
                 achievements = achievementIds,
                 prestigeUpgrades = prestigeSaves,
                 timestamp = System.currentTimeMillis(),
-                statistics = statistics
+                statistics = statistics,
+                completedTutorialSteps = completedTutorialSteps
             )
 
             val jsonString = gson.toJson(saveData)
@@ -114,7 +118,8 @@ class SaveManager @Inject constructor() {
                 PrestigeUpgradeSaveModel(id, (p.level ?: 0).coerceAtLeast(0))
             },
             timestamp = raw.timestamp ?: System.currentTimeMillis(),
-            statistics = raw.statistics.toEntity()
+            statistics = raw.statistics.toEntity(),
+            completedTutorialSteps = raw.completedTutorialSteps.orEmpty().filterNotNull().distinct()
         )
     }
 
@@ -163,7 +168,8 @@ private data class RawSaveData(
     val achievements: List<String?>?,
     val prestigeUpgrades: List<RawPrestigeUpgrade?>?,
     val timestamp: Long?,
-    val statistics: RawStatistics?
+    val statistics: RawStatistics?,
+    val completedTutorialSteps: List<String?>?
 )
 
 private data class RawBuilding(val id: String?, val amount: Int?, val isVisible: Boolean?)

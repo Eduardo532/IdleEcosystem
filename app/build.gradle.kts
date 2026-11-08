@@ -134,6 +134,10 @@ dependencies {
     // Tests de migración de Room con Robolectric
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core.ktx)
+
+    // Tests de interfaz de Compose sobre Robolectric (sin emulador)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4)
 }
 
 // Tipos externos que Compose puede tratar como estables (ver el archivo)

@@ -58,6 +58,17 @@ jobs:
           if [ "$missing" = 1 ]; then grep -E "SaveData|SaveModel|Raw|GameStatisticsEntity" dex.txt | head -60; fi
           exit $missing
 
+      # Room genera el esquema de la base de datos (app/schemas) al compilar. Debe
+      # estar en git: es la base de los tests de migración de la próxima versión.
+      # Si un cambio en las entidades no trae su esquema, aquí se ve el diff completo.
+      - name: Check Room schemas are committed
+        run: |
+          git add --intent-to-add app/schemas 2>/dev/null || true
+          if ! git diff --exit-code -- app/schemas; then
+            echo "::error::El esquema de Room cambió y no está en git. Agrega los archivos de app/schemas."
+            exit 1
+          fi
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v5

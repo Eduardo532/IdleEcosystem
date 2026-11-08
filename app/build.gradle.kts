@@ -66,6 +66,8 @@ android {
     testOptions {
         // Las llamadas a android.util.Log en tests unitarios devuelven valores por defecto
         unitTests.isReturnDefaultValues = true
+        // Robolectric (tests de migración de Room) necesita los recursos de Android
+        unitTests.isIncludeAndroidResources = true
     }
     buildFeatures {
         compose = true
@@ -101,6 +103,8 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test:core-ktx:1.6.1")
 
     // 2. Inyección de Dependencias (Hilt) - Para gestionar Singletons del juego
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
@@ -114,4 +118,12 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que tengas
     kapt("com.google.dagger:hilt-android-compiler:2.51.1") // <--- CAMBIA 'ksp' POR 'kapt' AQUÍ
 
+}
+
+// Room exporta el esquema de cada versión de la base de datos a app/schemas.
+// Esos JSON se versionan en git y permiten escribir tests de migración exactos.
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }

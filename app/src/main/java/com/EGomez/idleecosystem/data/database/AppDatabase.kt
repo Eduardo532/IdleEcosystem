@@ -14,7 +14,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PrestigeUpgradeEntity::class,
         GameStatisticsEntity::class
     ],
-    version = 10
+    version = 10,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao

@@ -26,6 +26,9 @@ android {
         versionCode = 10
         versionName = "0.10.0"
 
+        // Nombre visible de la app (las builds de prueba lo reemplazan)
+        manifestPlaceholders["appLabel"] = "@string/app_name"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -54,6 +57,17 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        // Build de pruebas (alpha/beta) que publica el flujo "Preview build".
+        // Igual a release, pero con otro applicationId: se instala JUNTO a la app
+        // oficial sin reemplazarla, con su propio nombre y sus propios datos.
+        create("preview") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".preview"
+            versionNameSuffix = (project.findProperty("previewSuffix") as String?) ?: "-preview"
+            manifestPlaceholders["appLabel"] = (project.findProperty("previewLabel") as String?) ?: "IdleEcosystem Preview"
+            matchingFallbacks += listOf("release")
         }
     }
     compileOptions {

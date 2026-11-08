@@ -182,6 +182,7 @@ class GameEngineTest {
 
         engine.buyUpgrade(rungId)
         await(engine.upgrades) { list -> list.any { it.id == rungId && it.isBought } }
+        Unit // JUnit exige que el test devuelva void
     }
 
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =

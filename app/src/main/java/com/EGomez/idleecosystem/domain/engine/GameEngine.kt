@@ -214,6 +214,8 @@ class GameEngine @Inject constructor(
 
     fun buyUpgrade(upgradeId: String) = post {
         val upgrade = upgradeManager.availableUpgrades.find { it.id == upgradeId } ?: return@post
+        // Una mejora que todavía no aparece en el Grimorio no se puede comprar
+        if (!upgradeManager.isUnlocked(upgrade, buildingManager.availableBuildings)) return@post
         if (upgradeManager.tryBuyUpgrade(upgradeId, knowledge)) {
             soundManager.playSound(SoundType.BUY)
             knowledge = knowledge.subtract(upgrade.cost)
@@ -716,7 +718,10 @@ class GameEngine @Inject constructor(
      */
     private fun publishCollections() {
         _buildings.value = buildingManager.availableBuildings.filter { it.isVisible }.map { it.copy() }
-        _upgrades.value = upgradeManager.availableUpgrades.sortedBy { it.cost }.map { it.copy() }
+        _upgrades.value = upgradeManager.availableUpgrades
+            .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
+            .sortedBy { it.cost }
+            .map { it.copy() }
 
         val all = achievementManager.availableAchievements
         _achievements.value = all.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }.map { it.copy() }

@@ -167,6 +167,24 @@ class GameEngineTest {
         assertTrue(after.subtract(before) >= production.multiply(BigDecimal(120)))
     }
 
+    @Test
+    fun `a grimoire rung can only be bought once its building count is reached`() = runBlocking {
+        val rungId = "u_notes_at_25"
+        engine.grantKnowledge(BigDecimal("1000000"))
+        await(engine.economy) { it.knowledge >= BigDecimal("1000000") }
+
+        // Con 0 Notas la mejora no aparece y no se puede comprar
+        assertTrue(engine.upgrades.value.none { it.id == rungId })
+        engine.buyUpgrade(rungId)
+        engine.buyBuilding(NOTES, 25)
+        await(engine.upgrades) { list -> list.any { it.id == rungId } }
+        assertTrue(engine.upgrades.value.first { it.id == rungId }.isBought.not())
+
+        engine.buyUpgrade(rungId)
+        await(engine.upgrades) { list -> list.any { it.id == rungId && it.isBought } }
+        Unit // JUnit exige que el test devuelva void
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 

@@ -963,32 +963,34 @@ class MainViewModel @Inject constructor(
         val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
         val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
         val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
-        val buffMult = BigDecimal.valueOf(_uiState.value.activeBuffMultiplier)
-        val ritualProdMult = BigDecimal.valueOf(ritualManager.getActiveProductionMultiplier())
-
-        val runeMult = runeManager.getTotalRuneMultiplier()
         val costReductionMult = runeManager.getCostReductionMultiplier()
+
+        // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
+        // Los permanentes se siguen multiplicando.
+        val temporaryMult = BuffMath.additive(
+            listOf(_uiState.value.activeBuffMultiplier) +
+                ritualManager.getActiveProductionMultipliers() +
+                runeManager.getActiveProductionMultipliers()
+        )
+        val temporaryClickMult = BuffMath.additive(
+            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers()
+        )
 
         val finalGlobalMult = upgradesGlobal
             .multiply(prestigeGlobal)
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
-            .multiply(buffMult)
-            .multiply(ritualProdMult)
-            .multiply(runeMult)
+            .multiply(temporaryMult)
             .round(MathContext.DECIMAL64)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
-        val ritualClickMult = BigDecimal.valueOf(ritualManager.getActiveClickMultiplier())
-        val runeClickMult = runeManager.getRuneClickMultiplier()
 
         buildingManager.availableBuildings.forEachIndexed { index, building ->
             val shopTierBonus = prestigeShopManager.getBuildingTierMultiplier(index)
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
-                    .multiply(ritualClickMult)
-                    .multiply(runeClickMult)
+                    .multiply(temporaryClickMult)
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id).multiply(shopTierBonus)
             }
@@ -996,7 +998,6 @@ class MainViewModel @Inject constructor(
         }
 
         productionPerSecond = buildingManager.getTotalProductionPerSecond()
-        val temporaryMult = buffMult.multiply(ritualProdMult).multiply(runeMult)
         baseProductionPerSecond = if (temporaryMult.signum() > 0) {
             productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
         } else productionPerSecond

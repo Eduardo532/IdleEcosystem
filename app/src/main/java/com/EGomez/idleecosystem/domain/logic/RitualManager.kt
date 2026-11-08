@@ -111,19 +111,13 @@ class RitualManager @Inject constructor() {
         return false
     }
 
-    fun getActiveProductionMultiplier(): Double {
-        var multiplier = 1.0
+    fun getActiveProductionMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.PRODUCTION_MULTIPLIER }
-            .forEach { multiplier *= it.effectValue }
-        return multiplier
-    }
+            .map { it.effectValue }
 
-    fun getActiveClickMultiplier(): Double {
-        var multiplier = 1.0
+    fun getActiveClickMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.CLICK_MULTIPLIER }
-            .forEach { multiplier *= it.effectValue }
-        return multiplier
-    }
+            .map { it.effectValue }
 
     // --- PERSISTENCIA ---
 

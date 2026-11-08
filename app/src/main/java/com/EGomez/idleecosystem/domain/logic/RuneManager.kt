@@ -219,26 +219,20 @@ class RuneManager @Inject constructor(
     }
 
     private fun failRune() {
+        // Una runa ignorada reinicia la espera: antes la siguiente podía aparecer de inmediato
+        timeSinceLastRune = 0
         _runeState.value = RuneState.FAILED
         hideRune()
     }
 
     // --- Helpers de Cálculo ---
-    fun getTotalRuneMultiplier(): BigDecimal {
-        var total = BigDecimal.ONE
-        _activeBuffs.value.forEach {
-            if (it.multiplier > 1.0) total = total.multiply(BigDecimal.valueOf(it.multiplier))
-        }
-        return total
-    }
+    /** Multiplicadores de producción de cada runa activa (se suman en BuffMath). */
+    fun getActiveProductionMultipliers(): List<Double> =
+        _activeBuffs.value.map { it.multiplier }.filter { it > 1.0 }
 
-    fun getRuneClickMultiplier(): BigDecimal {
-        var total = BigDecimal.ONE
-        _activeBuffs.value.forEach {
-            if (it.clickMultiplier > 1.0) total = total.multiply(BigDecimal.valueOf(it.clickMultiplier))
-        }
-        return total
-    }
+    /** Multiplicadores de clic de cada runa activa (se suman en BuffMath). */
+    fun getActiveClickMultipliers(): List<Double> =
+        _activeBuffs.value.map { it.clickMultiplier }.filter { it > 1.0 }
 
     fun getCostReductionMultiplier(): Double {
         val reduction = _activeBuffs.value.sumOf { it.costReduction }

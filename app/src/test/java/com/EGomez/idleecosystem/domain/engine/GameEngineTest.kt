@@ -122,8 +122,8 @@ class GameEngineTest {
         assertEquals(0, before.first { it.id == NOTES }.amountOwned)
 
         engine.save()
-        val saved = eventually { repository.loadBuildings().find { it.id == NOTES }?.takeIf { it.amount == 1 } }
-        assertEquals(1, saved.amount)
+        val saved = eventually { repository.loadBuildings().find { it.buildingId == NOTES }?.takeIf { it.amountOwned == 1 } }
+        assertEquals(1, saved.amountOwned)
     }
 
     @Test
@@ -144,8 +144,8 @@ class GameEngineTest {
             repository.gameState.first()?.takeIf { BigDecimal(it.prestigeCurrency).compareTo(BigDecimal(3)) == 0 }
         }
         assertEquals(0, BigDecimal(3).compareTo(BigDecimal(state.prestigeCurrency)))
-        val notes = eventually { repository.loadBuildings().find { it.id == NOTES } }
-        assertEquals(0, notes.amount)
+        val notes = eventually { repository.loadBuildings().find { it.buildingId == NOTES } }
+        assertEquals(0, notes.amountOwned)
     }
 
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =

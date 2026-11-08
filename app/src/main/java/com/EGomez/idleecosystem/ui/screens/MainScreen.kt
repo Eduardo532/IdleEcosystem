@@ -84,6 +84,7 @@ fun MainScreen(
         var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
         var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
         var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
+        var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
 
         // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
         var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -186,7 +187,8 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             onAscendClicked = {
-                                viewModel.onAscendClicked()
+                                // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
+                                showAscendConfirmation = true
                                 viewModel.onAscensionDialogOpened()
                             },
                             onShowPrestigeShop = {
@@ -236,6 +238,17 @@ fun MainScreen(
             }
 
             if (showStatisticsDialog) StatisticsScreen(viewModel.statsManager) { showStatisticsDialog = false }
+
+            if (showAscendConfirmation) {
+                AscendDialog(
+                    sanityGainFormatted = uiState.potentialPrestigeFormatted,
+                    onConfirm = {
+                        viewModel.onAscendClicked()
+                        showAscendConfirmation = false
+                    },
+                    onDismiss = { showAscendConfirmation = false }
+                )
+            }
 
             if (showHardResetConfirmation) HardResetDialog({ viewModel.onHardResetClicked(); showHardResetConfirmation = false; showSettingsDialog = false }, { showHardResetConfirmation = false })
 

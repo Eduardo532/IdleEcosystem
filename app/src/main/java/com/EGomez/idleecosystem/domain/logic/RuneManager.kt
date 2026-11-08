@@ -167,18 +167,31 @@ class RuneManager @Inject constructor(
         effect.reward?.let { _runeRewards.emit(it) }
 
         if (effect.durationMs > 0) {
-            val buff = RuneBuff(
-                id = rune.id,
-                multiplier = effect.multiplier,
-                clickMultiplier = effect.clickMultiplier,
-                costReduction = effect.costReduction,
-                echoChanceBonus = effect.echoChance,
-                expirationTime = System.currentTimeMillis() + effect.durationMs,
-                isAutoClick = effect.isAutoClick,
-                freezesBuffs = effect.freezesBuffs,
-                description = rune.description
+            val now = System.currentTimeMillis()
+            // Si el autoclic dura menos que el potenciador, va en un buff aparte
+            val splitAutoClick = effect.isAutoClick && effect.effectiveAutoClickMs < effect.durationMs
+            val buffs = mutableListOf(
+                RuneBuff(
+                    id = rune.id,
+                    multiplier = effect.multiplier,
+                    clickMultiplier = effect.clickMultiplier,
+                    costReduction = effect.costReduction,
+                    echoChanceBonus = effect.echoChance,
+                    expirationTime = now + effect.durationMs,
+                    isAutoClick = effect.isAutoClick && !splitAutoClick,
+                    freezesBuffs = effect.freezesBuffs,
+                    description = rune.description
+                )
             )
-            _activeBuffs.update { it + buff }
+            if (splitAutoClick) {
+                buffs += RuneBuff(
+                    id = "${rune.id}_auto",
+                    expirationTime = now + effect.effectiveAutoClickMs,
+                    isAutoClick = true,
+                    description = rune.description
+                )
+            }
+            _activeBuffs.update { it + buffs }
         }
     }
 

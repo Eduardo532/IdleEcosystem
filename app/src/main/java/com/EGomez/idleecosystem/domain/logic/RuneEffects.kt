@@ -18,6 +18,8 @@ data class RuneEffect(
     val clickMultiplier: Double = 1.0,
     val durationMs: Long = 0,
     val isAutoClick: Boolean = false,
+    /** Duración del autoclic si es más corta que la del potenciador (null = la misma). */
+    val autoClickDurationMs: Long? = null,
     val costReduction: Double = 0.0,
     val echoChance: Double = 0.0,
     val freezesBuffs: Boolean = false,
@@ -38,17 +40,22 @@ data class RuneEffect(
     /** True si la runa entrega producción (multiplicador o salto de tiempo). */
     val givesProduction: Boolean get() = productionSeconds > 0
 
+    /** Cuánto dura el autoclic de esta runa. */
+    val effectiveAutoClickMs: Long
+        get() = if (isAutoClick) (autoClickDurationMs ?: durationMs).coerceAtMost(durationMs) else 0L
+
     /**
-     * Valor de una runa de clic, en "clics equivalentes": el autoclic pulsa
-     * [AUTO_CLICKS_PER_SECOND] veces por segundo, y cada clic vale
-     * [clickMultiplier] clics normales. Sin autoclic, el multiplicador solo
-     * potencia los clics del jugador y no se cuenta aquí.
+     * Valor del autoclic en "clics equivalentes": pulsa [AUTO_CLICKS_PER_SECOND]
+     * veces por segundo y cada clic vale [clickMultiplier] clics normales. El
+     * multiplicador de producción también potencia el clic (es parte del
+     * multiplicador global), así que una runa que da ambos se cuenta completa.
+     * Sin autoclic, el bono de clic solo potencia los clics del jugador y no se
+     * cuenta aquí.
      */
     val clickEquivalents: Long
         get() {
-            if (!isAutoClick) return 0L
-            val clicks = durationMs / 1000 * AUTO_CLICKS_PER_SECOND
-            return (clicks * clickMultiplier.coerceAtLeast(1.0)).toLong()
+            val clicks = effectiveAutoClickMs / 1000 * AUTO_CLICKS_PER_SECOND
+            return (clicks * clickMultiplier.coerceAtLeast(1.0) * multiplier.coerceAtLeast(1.0)).toLong()
         }
 
     companion object {
@@ -102,7 +109,9 @@ object RuneEffects {
 
         // --- TIER 3 (trazar) ---
         "t3_cthulhu" -> RuneEffect(multiplier = 30.0, durationMs = 60_000, reward = RuneReward.InstantEchoes(1)) // 1.740 s
-        "t3_nyarlathotep" -> RuneEffect(multiplier = 25.0, durationMs = 60_000, isAutoClick = true)              // 1.440 s
+        // 1.440 s de producción + autoclic de 20 s potenciado x25 = 5.000 clics. Antes el
+        // autoclic duraba los 60 s completos: 600 clics x25 = 15.000, el doble del techo.
+        "t3_nyarlathotep" -> RuneEffect(multiplier = 25.0, durationMs = 60_000, isAutoClick = true, autoClickDurationMs = 20_000)
         "t3_azathoth" -> RuneEffect(reward = RuneReward.InstantEchoes(50))
 
         else -> RuneEffect()

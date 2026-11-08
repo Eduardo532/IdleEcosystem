@@ -66,10 +66,11 @@ class RuneEffectsTest {
     }
 
     @Test
-    fun `every click-only rune stays inside its tier click budget`() {
+    fun `every auto-click rune stays inside its tier click budget`() {
+        // Incluye las runas que además dan producción (El Caos Reptante)
         allRunes.forEach { rune ->
             val effect = RuneEffects.forRune(rune.id)
-            if (effect.givesProduction || effect.clickEquivalents == 0L) return@forEach
+            if (effect.clickEquivalents == 0L) return@forEach
             val budget = RuneEffects.clickBudgetFor(rune.tier)
             assertTrue(
                 "${rune.name} entrega ${effect.clickEquivalents} clics; su nivel permite $budget",
@@ -96,5 +97,13 @@ class RuneEffectsTest {
                 assertTrue("'${rune.description}' debería decir $shown", rune.description.contains(shown))
             }
         }
+    }
+
+    @Test
+    fun `the chaos rune auto-click is boosted by its own production multiplier`() {
+        val chaos = RuneEffects.forRune("t3_nyarlathotep")
+        assertEquals(20_000L, chaos.effectiveAutoClickMs)
+        // 200 clics x25
+        assertEquals(5_000L, chaos.clickEquivalents)
     }
 }

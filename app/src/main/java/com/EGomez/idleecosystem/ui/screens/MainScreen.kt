@@ -306,7 +306,11 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
 
             val labelText = when {
                 buff.costReduction > 0 -> "-${(buff.costReduction * 100).toInt()}% Costos"
-                buff.isAutoClick -> if(buff.multiplier > 1.0) "x${buff.multiplier.toInt()} + Auto" else "AutoClick"
+                buff.isAutoClick -> when {
+                    buff.multiplier > 1.0 -> "x${buff.multiplier.toInt()} + Auto"
+                    buff.clickMultiplier > 1.0 -> "x${buff.clickMultiplier.toInt()} Clic + Auto"
+                    else -> "AutoClick"
+                }
                 buff.echoChanceBonus > 0 -> "+Suerte Ecos"
                 buff.multiplier > 1.0 -> "x${buff.multiplier.toInt()} Prod"
                 else -> "Activo"

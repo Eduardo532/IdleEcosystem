@@ -44,7 +44,7 @@ object RuneCatalog {
 
     // --- TIER 3: TRACE (3 Runas) ---
     val T3_CTHULHU = RuneVariant("t3_cthulhu", "Sigilo de Cthulhu", RuneTier.TIER_3_TRACE, 60, ArcanePurple, "x30 Producción (60s) + 1 Eco")
-    val T3_NYARLATHOTEP = RuneVariant("t3_nyarlathotep", "El Caos Reptante", RuneTier.TIER_3_TRACE, 30, CrimsonRed, "Caos Total: x25 + Auto (60s)")
+    val T3_NYARLATHOTEP = RuneVariant("t3_nyarlathotep", "El Caos Reptante", RuneTier.TIER_3_TRACE, 30, CrimsonRed, "Caos Total: x25 Producción (60s) + Autoclic (20s)")
     val T3_AZATHOTH = RuneVariant("t3_azathoth", "Sigilo de Azathoth", RuneTier.TIER_3_TRACE, 10, EtherealCyan, "+50 ECOS DEL VACÍO")
 
     fun getVariantsForTier(tier: RuneTier): List<RuneVariant> {

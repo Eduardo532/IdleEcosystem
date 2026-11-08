@@ -356,13 +356,188 @@ class RandomEventManager @Inject constructor() {
             ),
             weight = 3,
             condition = { _, sanity -> sanity.signum() > 0 }
+        ),
+
+        // ========================================================================
+        // CADENAS: una decisión abre el próximo evento
+        // ========================================================================
+
+        RandomEvent(
+            id = "evt_chain_book_1",
+            title = "El Libro sin Título",
+            description = "En tu escritorio hay un libro que no compraste. La tapa está tibia.",
+            options = listOf(
+                EventOption(
+                    text = "Abrirlo",
+                    flavorResult = "Las páginas están en blanco... por ahora.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    followUpEventId = "evt_chain_book_2"
+                ),
+                EventOption(
+                    text = "Venderlo",
+                    flavorResult = "El librero no quiso tocarlo, pero pagó bien.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.05))
+                )
+            ),
+            weight = 6,
+            condition = { _, sanity -> sanity.signum() > 0 }
+        ),
+        RandomEvent(
+            id = "evt_chain_book_2",
+            title = "Páginas que se Escriben Solas",
+            description = "Las páginas del libro se llenan de tinta mientras duermes. Ahora hablan de ti.",
+            options = listOf(
+                EventOption(
+                    text = "Seguir leyendo",
+                    flavorResult = "Cada línea revela algo que no deberías saber.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.15)),
+                    followUpEventId = "evt_chain_book_3"
+                ),
+                EventOption(
+                    text = "Quemar el libro",
+                    flavorResult = "Las cenizas forman una palabra antes de dispersarse.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.03))
+                )
+            ),
+            isFollowUp = true
+        ),
+        RandomEvent(
+            id = "evt_chain_book_3",
+            title = "El Autor",
+            description = "La última página tiene una firma. Es tu letra. Alguien llama a la puerta.",
+            options = listOf(
+                EventOption(
+                    text = "Abrir la puerta",
+                    flavorResult = "Te reconoces en el umbral. Por un minuto, sabes todo.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 4.0, durationSeconds = 60))
+                ),
+                EventOption(
+                    text = "Esconderte",
+                    flavorResult = "Los golpes cesan al amanecer. El libro ya no está.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.05))
+                )
+            ),
+            isFollowUp = true
+        ),
+
+        RandomEvent(
+            id = "evt_chain_guest_1",
+            title = "Un Desconocido en la Puerta",
+            description = "Un hombre empapado pide refugio. No está lloviendo.",
+            options = listOf(
+                EventOption(
+                    text = "Dejarlo pasar",
+                    flavorResult = "Se sienta junto al fuego sin decir palabra.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    followUpEventId = "evt_chain_guest_2"
+                ),
+                EventOption(
+                    text = "Cerrar la puerta",
+                    flavorResult = "Escuchas pasos alejándose... hacia el mar.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0))
+                )
+            ),
+            weight = 6,
+            condition = { _, sanity -> sanity.signum() > 0 }
+        ),
+        RandomEvent(
+            id = "evt_chain_guest_2",
+            title = "El Huésped no Duerme",
+            description = "Toda la noche murmura en una lengua que casi entiendes.",
+            options = listOf(
+                EventOption(
+                    text = "Transcribir sus palabras",
+                    flavorResult = "Al amanecer, tus notas valen una fortuna.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.12))
+                ),
+                EventOption(
+                    text = "Responderle",
+                    flavorResult = "Sonríe. Te enseña una canción para la próxima marea.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 3.0, durationSeconds = 45))
+                )
+            ),
+            isFollowUp = true
+        ),
+
+        // ========================================================================
+        // MEMORIAS: solo aparecen después de Ascender
+        // ========================================================================
+
+        RandomEvent(
+            id = "evt_ascended_memories",
+            title = "Recuerdos de Otra Vida",
+            description = "Reconoces una fórmula que nunca estudiaste. La escribiste antes de Ascender.",
+            options = listOf(
+                EventOption(
+                    text = "Recordar",
+                    flavorResult = "Tu yo anterior dejó buenas notas.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.08))
+                ),
+                EventOption(
+                    text = "Dejar el pasado atrás",
+                    flavorResult = "Hay paz en olvidar.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.03))
+                )
+            ),
+            weight = 8,
+            condition = { _, sanity -> sanity.signum() > 0 },
+            minAscensions = 1
+        ),
+        RandomEvent(
+            id = "evt_ascended_echo",
+            title = "El Eco de tus Ascensiones",
+            description = "Tres versiones de ti susurran a la vez. Coinciden en todo.",
+            options = listOf(
+                EventOption(
+                    text = "Escuchar el coro",
+                    flavorResult = "Por un momento trabajan contigo.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 3.0, durationSeconds = 90))
+                ),
+                EventOption(
+                    text = "Preguntarles algo",
+                    flavorResult = "Responden con lo que aprendieron.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.20))
+                )
+            ),
+            weight = 5,
+            condition = { _, sanity -> sanity.signum() > 0 },
+            minAscensions = 3
+        ),
+        RandomEvent(
+            id = "evt_ascended_throne",
+            title = "La Mirada del Trono",
+            description = "Has subido tantas veces que algo, allá arriba, te devuelve la mirada.",
+            options = listOf(
+                EventOption(
+                    text = "Sostener la mirada",
+                    flavorResult = "No parpadeas. Algo te respeta.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 6.0, durationSeconds = 45))
+                ),
+                EventOption(
+                    text = "Inclinar la cabeza",
+                    flavorResult = "La humildad tiene su recompensa.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.10))
+                )
+            ),
+            weight = 3,
+            condition = { _, sanity -> sanity.signum() > 0 },
+            minAscensions = 5
         )
     )
 
+    /** Un evento por id (las continuaciones de cadena se piden así). */
+    fun getEvent(id: String): RandomEvent? = events.find { it.id == id }
+
+    /** Todo el catálogo, para revisarlo en los tests. */
+    fun allEvents(): List<RandomEvent> = events
+
     // AHORA RECIBE EL ESTADO PARA FILTRAR
-    fun getRandomEvent(currentKnowledge: BigDecimal, currentSanity: BigDecimal): RandomEvent? {
-        // 1. Filtramos por la condición definida en cada evento
-        val validEvents = events.filter { it.condition(currentKnowledge, currentSanity) }
+    fun getRandomEvent(currentKnowledge: BigDecimal, currentSanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
+        // 1. Filtramos por la condición de cada evento. Las continuaciones de cadena
+        //    nunca salen al azar, y las Memorias esperan sus Ascensiones.
+        val validEvents = events.filter {
+            !it.isFollowUp && ascensions >= it.minAscensions && it.condition(currentKnowledge, currentSanity)
+        }
 
         if (validEvents.isEmpty()) return null
 

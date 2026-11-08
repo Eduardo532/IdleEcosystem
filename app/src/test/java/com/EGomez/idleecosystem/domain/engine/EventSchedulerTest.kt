@@ -80,6 +80,45 @@ class EventSchedulerTest {
         assertEquals(0, scheduler.state.value.buffSecondsRemaining)
     }
 
+    @Test
+    fun `choosing a chain option makes its follow-up the next event, soon`() {
+        val sanity = BigDecimal.ONE
+        var start = scheduler.trigger(0, knowledge, sanity)!!
+        var attempts = 0
+        while (start.id != "evt_chain_book_1") {
+            scheduler.close(nowMillis = 0)
+            start = scheduler.trigger(0, knowledge, sanity)!!
+            check(++attempts < 5_000) { "El libro sin título nunca apareció" }
+        }
+        val chainOption = start.options.indexOfFirst { it.followUpEventId != null }
+
+        scheduler.choose(chainOption, nowMillis = 0)
+        scheduler.close(nowMillis = 0, random = Random(1))
+
+        assertNull(scheduler.tick(EventScheduler.FOLLOW_UP_MIN_DELAY_MS - 1, knowledge, sanity))
+        val next = scheduler.tick(EventScheduler.FOLLOW_UP_MAX_DELAY_MS, knowledge, sanity)
+        assertEquals("evt_chain_book_2", next?.id)
+    }
+
+    @Test
+    fun `an option without a link does not continue the chain`() {
+        val sanity = BigDecimal.ONE
+        var start = scheduler.trigger(0, knowledge, sanity)!!
+        var attempts = 0
+        while (start.id != "evt_chain_book_1") {
+            scheduler.close(nowMillis = 0)
+            start = scheduler.trigger(0, knowledge, sanity)!!
+            check(++attempts < 5_000)
+        }
+        val endOption = start.options.indexOfFirst { it.followUpEventId == null }
+
+        scheduler.choose(endOption, nowMillis = 0)
+        scheduler.close(nowMillis = 0)
+
+        // Vuelve a la espera normal de 90 s o más
+        assertNull(scheduler.tick(EventScheduler.MIN_DELAY_MS - 1, knowledge, sanity))
+    }
+
     /** Los eventos son aleatorios: se muestran hasta dar con uno que tenga potenciador. */
     private fun showEventWithGlobalBuff(): Pair<Int, com.EGomez.idleecosystem.domain.model.EventEffect> {
         repeat(2_000) { attempt ->

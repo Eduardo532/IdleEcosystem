@@ -3,6 +3,8 @@ package com.EGomez.idleecosystem.ui
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.EGomez.idleecosystem.core.math.NumberFormatting
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.core.math.formatSecondsToTime
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.data.preferences.GamePreferences
@@ -64,7 +66,8 @@ class MainViewModel @Inject constructor(
             isMusicEnabled = soundManager.isMusicEnabled,
             isSfxEnabled = soundManager.isSfxEnabled,
             areParticlesEnabled = preferences.areParticlesEnabled,
-            isFloatingTextEnabled = preferences.isFloatingTextEnabled
+            isFloatingTextEnabled = preferences.isFloatingTextEnabled,
+            numberNotation = preferences.numberNotation
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -85,6 +88,7 @@ class MainViewModel @Inject constructor(
     val statisticsState: StateFlow<GameStatistics> = engine.statistics
 
     init {
+        NumberFormatting.notation = preferences.numberNotation
         observeEngine()
         engine.start(viewModelScope)
         if (GameEngine.DEBUG_RUNES) startDebugRuneCycle()
@@ -274,6 +278,14 @@ class MainViewModel @Inject constructor(
         val newState = !_uiState.value.areParticlesEnabled
         preferences.areParticlesEnabled = newState
         _uiState.update { it.copy(areParticlesEnabled = newState) }
+    }
+
+    fun setNumberNotation(notation: NumberNotation) {
+        preferences.numberNotation = notation
+        NumberFormatting.notation = notation
+        // Los textos ya formateados se rehacen al instante (con el juego en pausa el
+        // motor no vuelve a publicar la economía hasta reanudar)
+        _uiState.update { it.copy(numberNotation = notation).withEconomy(engine.economy.value) }
     }
 
     fun toggleFloatingText() {

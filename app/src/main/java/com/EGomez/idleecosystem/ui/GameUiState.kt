@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui
 
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -70,7 +71,8 @@ data class GameUiState(
     val isMusicEnabled: Boolean = true,
     val isSfxEnabled: Boolean = true,
     val areParticlesEnabled: Boolean = true,
-    val isFloatingTextEnabled: Boolean = true
+    val isFloatingTextEnabled: Boolean = true,
+    val numberNotation: NumberNotation = NumberNotation.SCIENTIFIC
 )
 
 data class SavePreview(

@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.data.preferences
 
 import android.content.Context
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.RitualSnapshot
 import com.EGomez.idleecosystem.domain.model.RitualState
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,6 +38,12 @@ class GamePreferences @Inject constructor(
         get() = prefs.getBoolean(KEY_FLOATING_TEXT, true)
         set(value) = prefs.edit().putBoolean(KEY_FLOATING_TEXT, value).apply()
 
+    var numberNotation: NumberNotation
+        get() = prefs.getString(KEY_NOTATION, null)
+            ?.let { saved -> NumberNotation.entries.firstOrNull { it.name == saved } }
+            ?: NumberNotation.SCIENTIFIC
+        set(value) = prefs.edit().putString(KEY_NOTATION, value.name).apply()
+
     /** Continuación pendiente de una cadena de eventos (null si no hay). */
     var pendingFollowUpEventId: String?
         get() = prefs.getString(KEY_PENDING_EVENT, null)
@@ -70,6 +77,7 @@ class GamePreferences @Inject constructor(
         private const val KEY_RITUALS = "rituals_state"
         private const val KEY_RITUALS_SAVED_AT = "rituals_saved_at"
         private const val KEY_PENDING_EVENT = "pending_follow_up_event"
+        private const val KEY_NOTATION = "number_notation"
 
         // Formato: "id:ESTADO:segundos;id:ESTADO:segundos"
         fun encodeRituals(snapshots: List<RitualSnapshot>): String =

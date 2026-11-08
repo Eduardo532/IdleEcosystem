@@ -23,6 +23,9 @@ import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.PrestigeShopDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.CONSTELLATION_MAP_TAG
+import androidx.compose.ui.test.onNodeWithContentDescription
+import com.EGomez.idleecosystem.core.math.NumberNotation
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.SettingsDialog
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -166,5 +169,32 @@ class CriticalUiTest {
         compose.onNodeWithText("MEJORAR", substring = true).assertIsNotEnabled().performClick()
         compose.onNodeWithText("Faltan 3 Cordura", substring = true).assertExists()
         assertEquals(0, bought)
+    }
+
+    @Test
+    fun `settings open a section, change the notation and go back`() {
+        var chosen: NumberNotation? = null
+        compose.setContent {
+            SettingsDialog(
+                uiState = GameUiState(),
+                onDismiss = {}, onStatsClick = {}, onToggleMusic = {}, onToggleSfx = {},
+                onToggleParticles = {}, onToggleFloatingText = {},
+                onNotationSelected = { chosen = it },
+                onExportClick = {}, onImportClick = {}, onCancelImport = {}, onPasteClick = {},
+                onHardResetClick = {}, onToggleTutorial = {}
+            )
+        }
+
+        // La lista de secciones; el reinicio total ya no está a la vista
+        compose.onNodeWithText("Zona peligrosa").assertExists()
+        compose.onNodeWithText("REINICIO TOTAL").assertDoesNotExist()
+
+        compose.onNodeWithText("Pantalla").performClick()
+        compose.onNodeWithText("1.23 M").assertExists() // ejemplo de la notación con nombres
+        compose.onNodeWithText("Con nombres").performClick()
+        assertEquals(NumberNotation.SUFFIX, chosen)
+
+        compose.onNodeWithContentDescription("Volver").performClick()
+        compose.onNodeWithText("Zona peligrosa").assertExists()
     }
 }

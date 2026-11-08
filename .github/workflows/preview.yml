@@ -43,12 +43,17 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BEFORE: ${{ github.event.before }}
         run: |
-          PATTERN='^\.github/release-notes/v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta)\.[0-9]+\.md$'
+          NOTES_RE='\.github/release-notes/v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta)\.[0-9]+\.md$'
+          # Notas nuevas (A) o editadas (M). Editar las notas de una versión que no se
+          # pudo publicar (por ejemplo, porque falló la compilación) reintenta la
+          # publicación; editar las de una versión ya publicada no hace nada.
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            FILE=$(git log -1 --diff-filter=A --name-only --format= -- .github/release-notes/ | grep -E "$PATTERN" | tail -1)
+            ENTRY=$(git log -1 --diff-filter=AM --name-status --format= -- .github/release-notes/ | awk '{print $1" "$2}' | grep -E "^[AM] $NOTES_RE" | tail -1)
           else
-            FILE=$(git diff --name-only --diff-filter=A "$BEFORE" "$GITHUB_SHA" -- .github/release-notes/ | grep -E "$PATTERN" | tail -1)
+            ENTRY=$(git diff --name-status --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- .github/release-notes/ | awk '{print $1" "$2}' | grep -E "^[AM] $NOTES_RE" | tail -1)
           fi
+          STATUS=${ENTRY%% *}
+          FILE=${ENTRY#* }
           if [ -z "$FILE" ]; then
             echo "No new alpha/beta notes in this push; nothing to publish."
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -68,6 +73,11 @@ jobs:
             exit 1
           fi
           if gh release view "v$VERSION" >/dev/null 2>&1; then
+            if [ "$STATUS" = "M" ]; then
+              echo "Release v$VERSION already published; edited notes are not republished."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "::error::Release v$VERSION already exists. Use the next number."
             exit 1
           fi

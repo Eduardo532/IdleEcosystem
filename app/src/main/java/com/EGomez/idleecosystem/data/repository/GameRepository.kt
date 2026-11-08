@@ -66,8 +66,7 @@ class GameRepository @Inject constructor(
         gameDao.saveStatistics(initialStats)
     }
 
-    // --- ACTUALIZADO: AHORA RECIBE EL ESTADO DEL TUTORIAL ---
-    suspend fun saveGame(
+    private suspend fun saveGame(
         money: BigDecimal,
         premium: BigDecimal,
         prestige: BigDecimal,
@@ -116,7 +115,7 @@ class GameRepository @Inject constructor(
         }
     }
 
-    /** Reemplaza todo lo guardado por la partida importada, en una sola transacción. */
+    /** Reemplaza todo lo guardado (ascensión, reinicio, importación) en una sola transacción. */
     suspend fun replaceWithSnapshot(snapshot: GameSnapshot) {
         database.withTransaction {
             gameDao.deleteAllBuildings()
@@ -127,55 +126,9 @@ class GameRepository @Inject constructor(
         }
     }
 
-    // NUEVO: Guardado ligero específico para el tutorial
-    suspend fun saveTutorialState(enabled: Boolean, steps: String) {
-        gameDao.updateTutorialState(enabled, steps)
-    }
-
-    // --- MANEJO DE EDIFICIOS ---
+    // --- LECTURA (las escrituras pasan por saveSnapshot / replaceWithSnapshot) ---
     suspend fun loadBuildings() = gameDao.getAllBuildings()
-    suspend fun saveBuilding(id: String, amount: Int, isVisible: Boolean) = gameDao.insertBuilding(BuildingEntity(id, amount, isVisible))
-    suspend fun wipeBuildingsAndUpgrades() { gameDao.deleteAllBuildings(); gameDao.deleteAllUpgrades() }
-
-    // --- MANEJO DE MEJORAS ---
     suspend fun loadUpgrades() = gameDao.getAllUpgrades()
-    suspend fun saveUpgrade(id: String, isBought: Boolean) = gameDao.insertUpgrade(UpgradeEntity(id, isBought))
-
-    // --- MANEJO DE LOGROS ---
     suspend fun loadAchievements() = gameDao.getAllAchievements()
-    suspend fun saveAchievement(id: String, isUnlocked: Boolean) = gameDao.insertAchievement(AchievementEntity(id, isUnlocked))
-    suspend fun clearAllAchievements() = gameDao.deleteAllAchievements()
-
-    // --- MANEJO DE TIENDA DE PRESTIGIO ---
     suspend fun loadPrestigeUpgrades() = gameDao.getAllPrestigeUpgrades()
-    suspend fun savePrestigeUpgrade(id: String, level: Int) = gameDao.insertPrestigeUpgrade(PrestigeUpgradeEntity(id, level))
-    suspend fun clearAllPrestigeUpgrades() = gameDao.deleteAllPrestigeUpgrades()
-
-    // --- MANEJO DE ESTADÍSTICAS ---
-    suspend fun saveStatistics(entity: GameStatisticsEntity) = gameDao.saveStatistics(entity)
-
-    // --- ACTUALIZADO: PRESTIGIO CON TUTORIAL ---
-    suspend fun performPrestigeReset(
-        newPrestigeBalance: BigDecimal,
-        currentEchoes: BigDecimal,
-        tutorialEnabled: Boolean,
-        completedSteps: String
-    ) {
-        val current = gameDao.getGameStateOnce()
-        val currentPlayTime = current?.totalPlayTime ?: 0L
-
-        val resetState = GameStateEntity(
-            id = 1,
-            money = "0",
-            premiumCurrency = "0",
-            prestigeCurrency = newPrestigeBalance.toString(),
-            echoes = currentEchoes.toString(),
-            lastLoginTime = System.currentTimeMillis(),
-            totalPlayTime = currentPlayTime,
-            // Mantenemos configuración del tutorial y pasos completados
-            tutorialEnabled = tutorialEnabled,
-            completedTutorialSteps = completedSteps
-        )
-        gameDao.saveGame(resetState)
-    }
 }

@@ -270,6 +270,7 @@ fun MainScreen(
                     onToggleSfx = { viewModel.toggleSfx() },
                     onToggleParticles = { viewModel.toggleParticles() },
                     onToggleFloatingText = { viewModel.toggleFloatingText() },
+                    onNotationSelected = { viewModel.setNumberNotation(it) },
                     onExportClick = { viewModel.onExportSaveClicked() },
                     onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
                     onCancelImport = { viewModel.clearExportString() },

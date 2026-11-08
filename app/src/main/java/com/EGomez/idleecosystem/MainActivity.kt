@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     @Inject
-    lateinit var soundManager: SoundManager // <--- INYECCIÓN DE AUDIO
+    lateinit var soundManager: SoundManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +32,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.onAppForegroundChanged(inForeground = true)
+    }
+
     override fun onResume() {
         super.onResume()
         soundManager.resumeMusic()
@@ -44,11 +49,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.saveProgress()
+        // Pausa el juego en segundo plano (runas, eventos, sonidos) y guarda
+        viewModel.onAppForegroundChanged(inForeground = false)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        soundManager.release()
+        // SoundManager es un singleton que vive con el proceso: liberar su SoundPool
+        // aquí dejaba la app sin efectos tras rotar la pantalla o salir con "Atrás".
+        // Solo se libera la música cuando el usuario cierra la Activity de verdad.
+        if (isFinishing) soundManager.stopMusic()
     }
 }

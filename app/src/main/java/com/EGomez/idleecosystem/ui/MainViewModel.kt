@@ -72,6 +72,12 @@ class MainViewModel @Inject constructor(
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
     @Volatile
     private var isLoaded = false
+
+    // Con la app en segundo plano el juego se pausa (runas, eventos, sonidos) y el
+    // tiempo transcurrido se acredita como tiempo offline al volver.
+    @Volatile
+    private var isInForeground = true
+    private var backgroundSinceMillis = 0L
     private var timeUntilNextEvent = 0L
     private var activeBuffExpiration = 0L
     private var oneSecondAccumulator = 0L
@@ -314,7 +320,9 @@ class MainViewModel @Inject constructor(
         recalculateState()
 
         val shopOfflineBonus = prestigeShopManager.getOfflinePrestigeMultiplier()
-        val finalOfflineProd = productionPerSecond.multiply(shopOfflineBonus)
+        // Producción base: los buffs temporales (runas, rituales, eventos) no se
+        // extienden a todo el tiempo fuera del juego.
+        val finalOfflineProd = baseProductionPerSecond.multiply(shopOfflineBonus)
         val gains = finalOfflineProd.multiply(secondsBD)
 
         if (gains > BigDecimal.ZERO) {
@@ -332,6 +340,36 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Lo llama la Activity en onStart/onStop. Antes el bucle seguía corriendo con la app
+     * minimizada: aparecían runas y eventos (con sonido) que expiraban sin verse, y si
+     * Android congelaba el proceso ese tiempo simplemente se perdía.
+     */
+    fun onAppForegroundChanged(inForeground: Boolean) {
+        if (inForeground == isInForeground) return
+        isInForeground = inForeground
+
+        if (!inForeground) {
+            backgroundSinceMillis = System.currentTimeMillis()
+            saveProgress()
+            return
+        }
+
+        val since = backgroundSinceMillis
+        backgroundSinceMillis = 0L
+        if (since <= 0L || !isLoaded) return
+        viewModelScope.launch {
+            transactionMutex.withLock {
+                val elapsedMillis = System.currentTimeMillis() - since
+                if (elapsedMillis <= 0) return@withLock
+                ritualManager.tick(elapsedMillis / 1000)
+                if (elapsedMillis > 10_000) calculateOfflineGains(elapsedMillis)
+                recalculateState()
+                updateUi()
+            }
+        }
+    }
+
     fun dismissOfflineDialog() { _uiState.value = _uiState.value.copy(showOfflineDialog = false) }
     fun dismissRefundDialog() { _uiState.value = _uiState.value.copy(showRefundDialog = false) }
 
@@ -339,8 +377,8 @@ class MainViewModel @Inject constructor(
     private fun startGameLoop() {
         viewModelScope.launch {
             while (true) {
-                // PAUSA TOTAL: Si el tutorial está activo, congelamos el tiempo
-                if (tutorialManager.isTutorialActive()) {
+                // PAUSA TOTAL: tutorial activo o app en segundo plano
+                if (!isInForeground || tutorialManager.isTutorialActive()) {
                     delay(100)
                     continue
                 }
@@ -828,7 +866,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             while (true) {
                 // PAUSA TOTAL EN SISTEMA DE EVENTOS
-                if (tutorialManager.isTutorialActive()) {
+                if (!isInForeground || tutorialManager.isTutorialActive()) {
                     delay(100)
                     continue
                 }

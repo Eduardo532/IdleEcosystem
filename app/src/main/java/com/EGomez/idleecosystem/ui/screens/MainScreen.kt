@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -70,25 +72,25 @@ fun MainScreen(
     val responsiveFontScale = ((screenWidth / 380f) * 0.75f).coerceIn(0.6f, 1.1f)
 
     CompositionLocalProvider(LocalDensity provides Density(density = currentDensity.density, fontScale = responsiveFontScale)) {
-        val uiState by viewModel.uiState.collectAsState()
-        val buildings by viewModel.buildingsState.collectAsState()
-        val upgrades by viewModel.upgradesState.collectAsState()
-        val achievements by viewModel.achievementsState.collectAsState()
-        val rituals by viewModel.ritualsState.collectAsState()
-        val showPurchased by viewModel.showPurchasedState.collectAsState()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val buildings by viewModel.buildingsState.collectAsStateWithLifecycle()
+        val upgrades by viewModel.upgradesState.collectAsStateWithLifecycle()
+        val achievements by viewModel.achievementsState.collectAsStateWithLifecycle()
+        val rituals by viewModel.ritualsState.collectAsStateWithLifecycle()
+        val showPurchased by viewModel.showPurchasedState.collectAsStateWithLifecycle()
 
-        var showAchievementsDialog by remember { mutableStateOf(false) }
-        var showPrestigeShopDialog by remember { mutableStateOf(false) }
-        var showSettingsDialog by remember { mutableStateOf(false) }
-        var showHardResetConfirmation by remember { mutableStateOf(false) }
-        var showStatisticsDialog by remember { mutableStateOf(false) }
+        var showAchievementsDialog by rememberSaveable { mutableStateOf(false) }
+        var showPrestigeShopDialog by rememberSaveable { mutableStateOf(false) }
+        var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+        var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
+        var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
 
         // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
-        var isMenuExpanded by remember { mutableStateOf(false) }
+        var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
         // Animamos el peso: si está contraído es 0.15f (solo la barrita), si expandido 0.65f
         val menuWeight by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isMenuExpanded) 0.65f else 0.15f, label = "menu")
-        var selectedTabIndex by remember { mutableIntStateOf(0) }
+        var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
         val particleSystem = remember { ParticleSystem() }

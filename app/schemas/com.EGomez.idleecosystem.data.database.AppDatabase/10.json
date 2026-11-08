@@ -1,0 +1,316 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 10,
+    "identityHash": "663e1368f84269e90cbbbe2f917fba6a",
+    "entities": [
+      {
+        "tableName": "game_save",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `money` TEXT NOT NULL, `premiumCurrency` TEXT NOT NULL, `prestigeCurrency` TEXT NOT NULL, `echoes` TEXT NOT NULL, `lastLoginTime` INTEGER NOT NULL, `totalPlayTime` INTEGER NOT NULL, `tutorialEnabled` INTEGER NOT NULL DEFAULT 1, `completedTutorialSteps` TEXT NOT NULL DEFAULT '', PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "money",
+            "columnName": "money",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "premiumCurrency",
+            "columnName": "premiumCurrency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prestigeCurrency",
+            "columnName": "prestigeCurrency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "echoes",
+            "columnName": "echoes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastLoginTime",
+            "columnName": "lastLoginTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalPlayTime",
+            "columnName": "totalPlayTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tutorialEnabled",
+            "columnName": "tutorialEnabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "completedTutorialSteps",
+            "columnName": "completedTutorialSteps",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "buildings_save",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`buildingId` TEXT NOT NULL, `amountOwned` INTEGER NOT NULL, `isUnlocked` INTEGER NOT NULL, PRIMARY KEY(`buildingId`))",
+        "fields": [
+          {
+            "fieldPath": "buildingId",
+            "columnName": "buildingId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountOwned",
+            "columnName": "amountOwned",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUnlocked",
+            "columnName": "isUnlocked",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "buildingId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "upgrades_save",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`upgradeId` TEXT NOT NULL, `isBought` INTEGER NOT NULL, PRIMARY KEY(`upgradeId`))",
+        "fields": [
+          {
+            "fieldPath": "upgradeId",
+            "columnName": "upgradeId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isBought",
+            "columnName": "isBought",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "upgradeId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "achievements_save",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `isUnlocked` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUnlocked",
+            "columnName": "isUnlocked",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "prestige_upgrades",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `level` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "game_statistics",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `totalPlayTimeSeconds` INTEGER NOT NULL, `startTime` INTEGER NOT NULL, `runTimeSeconds` INTEGER NOT NULL, `totalOfflineSeconds` INTEGER NOT NULL, `lifetimeKnowledge` TEXT NOT NULL, `runKnowledge` TEXT NOT NULL, `maxKnowledgePerSecond` TEXT NOT NULL, `totalClicks` INTEGER NOT NULL, `manualKnowledgeGenerated` TEXT NOT NULL, `totalPrestiges` INTEGER NOT NULL, `lifetimeSanity` TEXT NOT NULL, `spentSanity` TEXT NOT NULL, `runesSevered` INTEGER NOT NULL, `runesStabilized` INTEGER NOT NULL, `runesInscribed` INTEGER NOT NULL, `totalEventsFound` INTEGER NOT NULL, `totalEchoes` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalPlayTimeSeconds",
+            "columnName": "totalPlayTimeSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startTime",
+            "columnName": "startTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runTimeSeconds",
+            "columnName": "runTimeSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalOfflineSeconds",
+            "columnName": "totalOfflineSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lifetimeKnowledge",
+            "columnName": "lifetimeKnowledge",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runKnowledge",
+            "columnName": "runKnowledge",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxKnowledgePerSecond",
+            "columnName": "maxKnowledgePerSecond",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalClicks",
+            "columnName": "totalClicks",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "manualKnowledgeGenerated",
+            "columnName": "manualKnowledgeGenerated",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalPrestiges",
+            "columnName": "totalPrestiges",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lifetimeSanity",
+            "columnName": "lifetimeSanity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spentSanity",
+            "columnName": "spentSanity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runesSevered",
+            "columnName": "runesSevered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runesStabilized",
+            "columnName": "runesStabilized",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runesInscribed",
+            "columnName": "runesInscribed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalEventsFound",
+            "columnName": "totalEventsFound",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalEchoes",
+            "columnName": "totalEchoes",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '663e1368f84269e90cbbbe2f917fba6a')"
+    ]
+  }
+}

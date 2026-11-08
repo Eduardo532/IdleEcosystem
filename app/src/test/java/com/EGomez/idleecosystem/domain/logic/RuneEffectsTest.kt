@@ -64,4 +64,37 @@ class RuneEffectsTest {
         // Antes: x777 durante 60 s = 46.560 s (casi 13 horas)
         assertTrue(cthulhu.productionSeconds <= 40 * 60)
     }
+
+    @Test
+    fun `every click-only rune stays inside its tier click budget`() {
+        allRunes.forEach { rune ->
+            val effect = RuneEffects.forRune(rune.id)
+            if (effect.givesProduction || effect.clickEquivalents == 0L) return@forEach
+            val budget = RuneEffects.clickBudgetFor(rune.tier)
+            assertTrue(
+                "${rune.name} entrega ${effect.clickEquivalents} clics; su nivel permite $budget",
+                effect.clickEquivalents in budget
+            )
+        }
+    }
+
+    @Test
+    fun `a tier 2 click rune is worth more than a tier 1 one`() {
+        // Antes la Runa de Susurro (nivel 1, x10 + autoclic 30 s = 3.000 clics) valía
+        // quince veces más que la Runa del Tiempo (nivel 2, autoclic 20 s = 200 clics)
+        val whisper = RuneEffects.forRune("t1_whisper").clickEquivalents
+        val chronos = RuneEffects.forRune("t2_chronos").clickEquivalents
+        assertTrue(chronos > whisper)
+    }
+
+    @Test
+    fun `click descriptions show the real click multiplier`() {
+        allRunes.forEach { rune ->
+            val effect = RuneEffects.forRune(rune.id)
+            if (effect.clickMultiplier > 1.0) {
+                val shown = "x${effect.clickMultiplier.toInt()} Clic"
+                assertTrue("'${rune.description}' debería decir $shown", rune.description.contains(shown))
+            }
+        }
+    }
 }

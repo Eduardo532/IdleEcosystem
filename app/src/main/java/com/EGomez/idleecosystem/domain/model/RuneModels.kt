@@ -26,7 +26,7 @@ object RuneCatalog {
     val T1_SALT = RuneVariant("t1_salt", "Runa de Sal", RuneTier.TIER_1_SWIPE, 90, Color.White, "x15 Producción (10s)")
     val T1_BONE = RuneVariant("t1_bone", "Runa de Hueso", RuneTier.TIER_1_SWIPE, 80, Color(0xFFEFEBE9), "+2 Minutos de Tiempo")
     val T1_SHADOW = RuneVariant("t1_shadow", "Runa de Sombra", RuneTier.TIER_1_SWIPE, 80, Color(0xFF212121), "x5 Producción (30s)")
-    val T1_WHISPER = RuneVariant("t1_whisper", "Runa de Susurro", RuneTier.TIER_1_SWIPE, 70, Color(0xFFB39DDB), "x10 Click Power + Auto (30s)")
+    val T1_WHISPER = RuneVariant("t1_whisper", "Runa de Susurro", RuneTier.TIER_1_SWIPE, 70, Color(0xFFB39DDB), "x2 Clic + Autoclic (20s)")
     val T1_RUST = RuneVariant("t1_rust", "Runa de Óxido", RuneTier.TIER_1_SWIPE, 70, Color(0xFF8D6E63), "x9 Producción (18s)")
     val T1_FROST = RuneVariant("t1_frost", "Runa de Escarcha", RuneTier.TIER_1_SWIPE, 60, Color(0xFF80DEEA), "Pausa Buffs (5s)")
     val T1_VERMIN = RuneVariant("t1_vermin", "Runa de Plaga", RuneTier.TIER_1_SWIPE, 60, Color(0xFFC6FF00), "x12 Producción (12s)")
@@ -34,7 +34,7 @@ object RuneCatalog {
     val T1_VOID_MINOR = RuneVariant("t1_void_minor", "Runa de Vacío Menor", RuneTier.TIER_1_SWIPE, 30, Color(0xFF6200EE), "+1% Chance Ecos")
 
     // --- TIER 2: HOLD (7 Runas) ---
-    val T2_CHRONOS = RuneVariant("t2_chronos", "Runa del Tiempo", RuneTier.TIER_2_HOLD, 80, AncientGold, "Autoclicker (20s)")
+    val T2_CHRONOS = RuneVariant("t2_chronos", "Runa del Tiempo", RuneTier.TIER_2_HOLD, 80, AncientGold, "x5 Clic + Autoclic (30s)")
     val T2_GRAVITY = RuneVariant("t2_gravity", "Runa de Gravedad", RuneTier.TIER_2_HOLD, 70, Color(0xFF3F51B5), "x25 Producción (20s)")
     val T2_BARRIER = RuneVariant("t2_barrier", "Runa de Barrera", RuneTier.TIER_2_HOLD, 60, Color(0xFF90CAF9), "-15% Costos (30s)")
     val T2_TIDAL = RuneVariant("t2_tidal", "Runa de Marea", RuneTier.TIER_2_HOLD, 50, Color(0xFF0277BD), "Ola de Producción x50 (10s)")

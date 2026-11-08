@@ -1001,12 +1001,12 @@ class MainViewModel @Inject constructor(
         val allAchievements = achievementManager.availableAchievements
         val unlockedTotal = allAchievements.count { it.isUnlocked }
         val secretsFound = allAchievements.count { it.isSecret && it.isUnlocked }
-        val secretsTotal = 13
+        val secretsTotal = allAchievements.count { it.isSecret }
         val visibleAchievements = allAchievements.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }
 
         _achievementsState.value = visibleAchievements
 
-        val progressText = "$unlockedTotal / 100"
+        val progressText = "$unlockedTotal / ${allAchievements.size}"
         val secretsText = if (secretsFound > 0) "Secretos: $secretsFound / $secretsTotal" else null
 
         _uiState.value = _uiState.value.copy(

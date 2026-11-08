@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
-
-    id("com.google.dagger.hilt.android")
-    id("kotlin-kapt")
+    // Kotlin 2: el compilador de Compose es un plugin de Kotlin (ya no composeOptions)
+    alias(libs.plugins.kotlin.compose)
+    // KSP reemplaza a kapt para Room y Hilt: compila más rápido y no genera stubs de Java
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -15,9 +16,6 @@ android {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
 
     defaultConfig {
         applicationId = "com.EGomez.idleecosystem"
@@ -107,38 +105,30 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
-    implementation ("com.google.code.gson:gson:2.10.1")
+    // Persistencia (Room)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
+    // Inyección de dependencias (Hilt)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    // 1. Persistencia (Room Database) - Vital para guardar progreso
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
-    testImplementation("org.robolectric:robolectric:4.13")
-    testImplementation("androidx.test:core-ktx:1.6.1")
+    // Códigos de partida (exportar / importar)
+    implementation(libs.gson)
 
-    // 2. Inyección de Dependencias (Hilt) - Para gestionar Singletons del juego
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-
-    // 3. Serialización (Para guardar objetos complejos como JSON si es necesario)
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-
-    // 4. Ciclo de vida y ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:${libs.versions.lifecycleRuntimeKtx.get()}")
-
-    implementation("com.google.dagger:hilt-android:2.51.1") // O la versión que tengas
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1") // <--- CAMBIA 'ksp' POR 'kapt' AQUÍ
-
+    // Tests de migración de Room con Robolectric
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core.ktx)
 }
 
 // Room exporta el esquema de cada versión de la base de datos a app/schemas.
 // Esos JSON se versionan en git y permiten escribir tests de migración exactos.
-kapt {
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

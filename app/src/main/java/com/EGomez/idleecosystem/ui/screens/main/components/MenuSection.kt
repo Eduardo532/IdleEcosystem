@@ -295,7 +295,7 @@ fun MenuSection(
                                         fontWeight = FontWeight.Bold
                                     )
                                 } else {
-                                    Text("Req: 1.00e+06", fontSize = 9.sp)
+                                    Text("Req: 1.00e+06 generado", fontSize = 9.sp)
                                 }
                             }
                         }

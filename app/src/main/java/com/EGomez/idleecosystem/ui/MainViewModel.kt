@@ -637,7 +637,7 @@ class MainViewModel @Inject constructor(
     fun onAscendClicked() {
         viewModelScope.launch {
             transactionMutex.withLock {
-                val basePotential = prestigeManager.calculatePotentialPrestige(arcaneKnowledge)
+                val basePotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
                 val shopBonus = prestigeShopManager.getPrestigeGainMultiplier()
                 val finalPotential = basePotential.multiply(shopBonus)
 
@@ -858,6 +858,12 @@ class MainViewModel @Inject constructor(
         repository.saveSnapshot(snapshot)
     }
 
+    /**
+     * Conocimiento generado en la vida actual (se reinicia al ascender). Se usa el saldo
+     * como respaldo por si las estadísticas de una partida antigua no lo registraron.
+     */
+    private fun knowledgeThisRun(): BigDecimal = statsManager.runKnowledge.max(arcaneKnowledge)
+
     /** Lee un número guardado como texto; un valor corrupto ya no crashea la app al iniciar. */
     private fun parseStoredNumber(value: String?): BigDecimal =
         try {
@@ -1000,7 +1006,7 @@ class MainViewModel @Inject constructor(
         baseProductionPerSecond = if (temporaryMult.signum() > 0) {
             productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
         } else productionPerSecond
-        val basePotential = prestigeManager.calculatePotentialPrestige(arcaneKnowledge)
+        val basePotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
         val shopPrestigeBonus = prestigeShopManager.getPrestigeGainMultiplier()
         val finalPotential = basePotential.multiply(shopPrestigeBonus)
         val canAscend = finalPotential > BigDecimal.ZERO

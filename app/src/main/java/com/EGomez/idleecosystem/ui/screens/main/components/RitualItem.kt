@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import com.EGomez.idleecosystem.ui.components.AutoChip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +29,9 @@ import java.math.BigDecimal
 fun RitualItem(
     ritual: Ritual,
     currentFunds: BigDecimal,
+    /** Si el ritual se activa solo: null mientras el hito no está alcanzado. */
+    autoSelected: Boolean? = null,
+    onToggleAuto: () -> Unit = {},
     onActivate: () -> Unit
 ) {
     val canAfford = currentFunds >= ritual.baseCost
@@ -65,8 +69,14 @@ fun RitualItem(
                     fontSize = 16.sp
                 )
 
-                if (ritual.state == RitualState.ACTIVE) {
-                    Text(stringResource(R.string.active_label), color = Color(0xFF4CAF50), fontWeight = FontWeight.Black, fontSize = 10.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (ritual.state == RitualState.ACTIVE) {
+                        Text(stringResource(R.string.active_label), color = Color(0xFF4CAF50), fontWeight = FontWeight.Black, fontSize = 10.sp)
+                    }
+                    if (autoSelected != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        AutoChip(selected = autoSelected, onClick = onToggleAuto)
+                    }
                 }
             }
 

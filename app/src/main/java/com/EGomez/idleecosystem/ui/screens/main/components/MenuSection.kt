@@ -33,6 +33,9 @@ import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
+import com.EGomez.idleecosystem.ui.components.AutoChip
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
@@ -75,6 +78,11 @@ fun MenuSection(
     potentialPrestigeFormatted: String,
     doubleSanityAtFormatted: String? = null,
     revealed: SystemReveal = SystemReveal(),
+    ascensions: Int = 0,
+    automation: AutomationSettings = AutomationSettings(),
+    onToggleAutoBuildings: () -> Unit = {},
+    onToggleAutoGrimoire: () -> Unit = {},
+    onToggleAutoRitual: (String) -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -122,6 +130,14 @@ fun MenuSection(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    // Autocomprador de edificios (hito de Ascensión)
+                    if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
+                        AutoChip(
+                            selected = automation.buildings,
+                            onClick = onToggleAutoBuildings,
+                            modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
+                        )
+                    }
                     listOf(1, 5, 10, 100, BuildingMilestones.BUY_TO_MILESTONE, -1).forEach { mult ->
                         val label = when (mult) {
                             -1 -> "MAX"
@@ -221,6 +237,11 @@ fun MenuSection(
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
+                                // Autocomprador del Grimorio (hito de Ascensión)
+                                if (AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions)) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    AutoChip(selected = automation.grimoire, onClick = onToggleAutoGrimoire)
+                                }
                                 Spacer(modifier = Modifier.weight(1f))
                                 Text(
                                     stringResource(R.string.show_purchased),
@@ -298,6 +319,8 @@ fun MenuSection(
                             RitualItem(
                                 ritual = ritual,
                                 currentFunds = currentEchoes,
+                                autoSelected = if (AscensionMilestone.AUTO_RITUAL.isReached(ascensions)) automation.ritualId == ritual.id else null,
+                                onToggleAuto = { onToggleAutoRitual(ritual.id) },
                                 onActivate = { onActivateRitual(ritual.id) }
                             )
                         }
@@ -403,6 +426,7 @@ fun MenuSection(
 
 private const val LOCKED_TITLE = "???"
 const val LOCKED_ASCENSION_TAG = "locked_ascension"
+const val AUTO_BUILDINGS_TAG = "auto_buildings"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
 @Composable

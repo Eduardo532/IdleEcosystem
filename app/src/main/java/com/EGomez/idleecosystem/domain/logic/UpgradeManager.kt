@@ -119,7 +119,8 @@ class UpgradeManager @Inject constructor() {
         return multiplier
     }
 
-    fun resetForPrestige() {
-        availableUpgrades.forEach { it.isBought = false }
+    /** Al Ascender se pierden las mejoras, salvo las que [keep] conserve (hitos de Ascensión). */
+    fun resetForPrestige(keep: (Upgrade) -> Boolean = { false }) {
+        availableUpgrades.forEach { if (!(it.isBought && keep(it))) it.isBought = false }
     }
 }

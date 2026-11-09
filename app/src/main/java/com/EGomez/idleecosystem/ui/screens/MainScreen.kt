@@ -203,6 +203,11 @@ fun MainScreen(
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
                             revealed = uiState.revealed,
+                            ascensions = uiState.ascensions,
+                            automation = uiState.automation,
+                            onToggleAutoBuildings = { viewModel.toggleAutoBuildings() },
+                            onToggleAutoGrimoire = { viewModel.toggleAutoGrimoire() },
+                            onToggleAutoRitual = { viewModel.toggleAutoRitual(it) },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -270,6 +275,7 @@ fun MainScreen(
                         doubleGain = uiState.doubleSanityGainFormatted,
                         doubleAt = uiState.doubleSanityAtFormatted
                     ),
+                    ascensions = uiState.ascensions,
                     onConfirm = {
                         viewModel.onAscendClicked()
                         showAscendConfirmation = false

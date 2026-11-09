@@ -9,6 +9,7 @@ import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.core.math.formatSecondsToTime
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.data.preferences.GamePreferences
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.engine.AchievementProgress
 import com.EGomez.idleecosystem.domain.engine.EconomyState
 import com.EGomez.idleecosystem.domain.engine.EngineEffect
@@ -69,7 +70,8 @@ class MainViewModel @Inject constructor(
             areParticlesEnabled = preferences.areParticlesEnabled,
             isFloatingTextEnabled = preferences.isFloatingTextEnabled,
             numberNotation = preferences.numberNotation,
-            language = AppLanguage.fromTag(preferences.languageTag) ?: AppLanguage.systemDefault()
+            language = AppLanguage.fromTag(preferences.languageTag) ?: AppLanguage.systemDefault(),
+            automation = preferences.automation
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -94,6 +96,7 @@ class MainViewModel @Inject constructor(
 
     init {
         NumberFormatting.notation = preferences.numberNotation
+        engine.setAutomation(preferences.automation)
         observeEngine()
         engine.start(viewModelScope)
         if (GameEngine.DEBUG_RUNES) startDebugRuneCycle()
@@ -173,7 +176,8 @@ class MainViewModel @Inject constructor(
         buildingCostMultiplier = economy.buildingCostMultiplier,
         echoes = economy.echoes,
         echoesFormatted = economy.echoes.toBeautifulString(),
-        revealed = economy.revealed
+        revealed = economy.revealed,
+        ascensions = economy.ascensions
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -289,6 +293,21 @@ class MainViewModel @Inject constructor(
         val newState = !soundManager.isSfxEnabled
         soundManager.toggleSfx(newState)
         _uiState.update { it.copy(isSfxEnabled = newState) }
+    }
+
+    fun toggleAutoBuildings() = updateAutomation { it.copy(buildings = !it.buildings) }
+
+    fun toggleAutoGrimoire() = updateAutomation { it.copy(grimoire = !it.grimoire) }
+
+    /** Elige el ritual automático; tocar el mismo otra vez lo apaga. */
+    fun toggleAutoRitual(ritualId: String) =
+        updateAutomation { it.copy(ritualId = if (it.ritualId == ritualId) null else ritualId) }
+
+    private fun updateAutomation(change: (AutomationSettings) -> AutomationSettings) {
+        val settings = change(_uiState.value.automation)
+        preferences.automation = settings
+        engine.setAutomation(settings)
+        _uiState.update { it.copy(automation = settings) }
     }
 
     fun toggleParticles() {

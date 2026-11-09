@@ -10,6 +10,8 @@ import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.AchievementSets
+import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
@@ -41,6 +43,7 @@ import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RitualEffectType
+import com.EGomez.idleecosystem.domain.model.RitualState
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.TutorialStep
@@ -79,6 +82,8 @@ data class EconomyState(
     val buildingCostMultiplier: Double = 1.0,
     /** Pestañas y paneles que el jugador ya descubrió. */
     val revealed: SystemReveal = SystemReveal(),
+    /** Ascensiones hechas en toda la partida: deciden los hitos de Ascensión. */
+    val ascensions: Int = 0,
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
 
@@ -147,6 +152,7 @@ class GameEngine @Inject constructor(
     private var globalMultiplier = BigDecimal.ONE
     private var potentialPrestige = BigDecimal.ZERO
     private var prestigePacing = PrestigePacing()
+    private var automation = AutomationSettings()
     private var costMultiplier = 1.0
 
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
@@ -289,9 +295,15 @@ class GameEngine @Inject constructor(
     }
 
     fun activateRitual(ritualId: String) = post {
+        if (performRitual(ritualId)) soundManager.playSound(SoundType.BUY)
+    }
+
+    /** Elige qué automatizaciones están encendidas (solo actúan con su hito alcanzado). */
+    fun setAutomation(settings: AutomationSettings) = post { automation = settings }
+
+    private fun performRitual(ritualId: String): Boolean {
         if (ritualManager.tryActivateRitual(ritualId, echoes)) {
-            val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return@post
-            soundManager.playSound(SoundType.BUY)
+            val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return false
             echoes = echoes.subtract(ritual.baseCost)
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
                 // Producción base, igual que los saltos de tiempo de las runas: los
@@ -300,7 +312,67 @@ class GameEngine @Inject constructor(
                 if (gain.signum() > 0) addKnowledge(gain, isManual = false)
             }
             recalculate()
+            return true
         }
+        return false
+    }
+
+    /**
+     * Las automatizaciones de los hitos de Ascensión, una vez por segundo. Los
+     * autocompradores gastan como máximo la mitad del Conocimiento, para dejar margen
+     * a las decisiones del jugador, y compran de a una unidad: empiezan lentos.
+     */
+    private fun runAutomation() {
+        val ascensions = statsManager.totalPrestiges
+        var changed = false
+        if (automation.buildings && AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
+            changed = autoBuyBuildings() || changed
+        }
+        if (automation.grimoire && AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions)) {
+            changed = autoBuyUpgrades() || changed
+        }
+        val ritualId = automation.ritualId
+        if (ritualId != null && AscensionMilestone.AUTO_RITUAL.isReached(ascensions)) {
+            val ready = ritualManager.rituals.value.find { it.id == ritualId }?.state == RitualState.READY
+            if (ready) changed = performRitual(ritualId) || changed
+        }
+        if (changed) {
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
+    private fun autoBuyBuildings(): Boolean {
+        var budget = knowledge.multiply(BigDecimal.valueOf(AutomationSettings.BUDGET_FRACTION))
+        val discount = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
+        var bought = false
+        val candidates = buildingManager.availableBuildings.filter { it.isVisible }.reversed()
+        for (building in candidates) {
+            val cost = buildingManager.getCost(building.id, 1, knowledge, discount)
+            if (cost.signum() <= 0 || cost > budget) continue
+            if (buildingManager.tryBuyBuilding(building.id, knowledge, 1, discount) > 0) {
+                knowledge = knowledge.subtract(cost)
+                budget = budget.subtract(cost)
+                bought = true
+            }
+        }
+        return bought
+    }
+
+    /** Las mejoras del Grimorio que entren en el presupuesto, de la más barata a la más cara. */
+    private fun autoBuyUpgrades(): Boolean {
+        val budget = knowledge.multiply(BigDecimal.valueOf(AutomationSettings.BUDGET_FRACTION))
+        val unlocked = upgradeManager.availableUpgrades
+            .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
+        var bought = false
+        for (upgrade in GrimoireShopping.plan(unlocked, budget)) {
+            if (upgradeManager.tryBuyUpgrade(upgrade.id, knowledge)) {
+                knowledge = knowledge.subtract(upgrade.cost)
+                bought = true
+            }
+        }
+        return bought
     }
 
     fun completeRune() = post {
@@ -336,8 +408,14 @@ class GameEngine @Inject constructor(
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
 
+        // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
+        val ascensions = statsManager.totalPrestiges
         buildingManager.resetForPrestige()
-        upgradeManager.resetForPrestige()
+        upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, ascensions) })
+        if (AscensionMilestone.STARTING_SYNAPSES.isReached(ascensions)) {
+            buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
+                ?.amountOwned = AscensionMilestone.STARTING_SYNAPSES
+        }
         knowledge = prestigeShopManager.getStartingKnowledgeBonus()
         eventScheduler.clearBuff()
 
@@ -603,6 +681,7 @@ class GameEngine @Inject constructor(
         if (buildingManager.availableBuildings.sumOf { it.amountOwned } >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
         if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
         triggerDepthTutorials()
+        runAutomation()
 
         eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)?.let { onEventShown() }
 
@@ -704,6 +783,9 @@ class GameEngine @Inject constructor(
             it.type == UpgradeType.SYNERGY && !it.isBought && upgradeManager.isUnlocked(it, buildings)
         }
         if (synergyAvailable) tutorialManager.triggerStep(TutorialStep.SYNERGIES)
+        val ascensions = statsManager.totalPrestiges
+        if (ascensions >= 1) tutorialManager.triggerStep(TutorialStep.ASCENSION_MILESTONES)
+        if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
     }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
@@ -843,6 +925,7 @@ class GameEngine @Inject constructor(
             prestigePacing = prestigePacing,
             buildingCostMultiplier = costMultiplier,
             revealed = currentReveal(),
+            ascensions = statsManager.totalPrestiges,
             echoChance = echoChance()
         )
     }

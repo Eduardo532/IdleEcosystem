@@ -2,6 +2,11 @@ package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
 import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.remember
+import com.EGomez.idleecosystem.domain.logic.SanitySpending
+import java.util.Locale
+import java.text.DecimalFormatSymbols
+import java.text.DecimalFormat
 import com.EGomez.idleecosystem.R
 import java.math.BigDecimal
 import androidx.compose.foundation.BorderStroke
@@ -91,6 +96,7 @@ fun PrestigeShopDialog(
                             Text(stringResource(R.string.current_effect), color = Color.Gray, fontSize = 12.sp)
                             Text(node.currentEffectDisplay, color = Color(0xFF81C784), fontWeight = FontWeight.Bold)
                         }
+                        if (parentUnlocked) SpendPreviewLines(node, currency)
                         Spacer(modifier = Modifier.height(16.dp))
                         if (parentUnlocked) {
                             // Antes el botón estaba siempre activo: sin Cordura suficiente
@@ -142,3 +148,40 @@ fun PrestigeShopDialog(
 }
 
 const val CONSTELLATION_MAP_TAG = "constellation_map"
+
+/**
+ * Las dos caras de gastar Cordura: lo que sube el nodo y lo que baja el bono de la
+ * Cordura Residual. En los nodos globales, además, el efecto neto en la producción.
+ */
+@Composable
+private fun SpendPreviewLines(node: PrestigeUpgrade, sanity: BigDecimal) {
+    val preview = remember(node.id, node.level, sanity) { SanitySpending.preview(node, sanity) }
+    Spacer(modifier = Modifier.height(6.dp))
+    Text(
+        stringResource(R.string.spend_node, multiplierText(preview.nodeBefore), multiplierText(preview.nodeAfter)),
+        color = Color.LightGray,
+        fontSize = 12.sp
+    )
+    Text(
+        stringResource(R.string.spend_sanity_bonus, multiplierText(preview.sanityBonusBefore), multiplierText(preview.sanityBonusAfter)),
+        color = Color.Gray,
+        fontSize = 12.sp
+    )
+    preview.netProduction?.let { net ->
+        Text(
+            stringResource(R.string.spend_net, multiplierText(net)),
+            color = if (net >= BigDecimal.ONE) Color(0xFF81C784) else Color(0xFFE57373),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            modifier = Modifier.testTag(SPEND_NET_TAG)
+        )
+    }
+}
+
+/** "1.25" o, para multiplicadores enormes, la notación del juego. */
+private fun multiplierText(value: BigDecimal): String =
+    if (value < BigDecimal(1_000)) DecimalFormat("0.00", DecimalFormatSymbols(Locale.US)).format(value)
+    else value.toBeautifulString()
+
+const val SPEND_NET_TAG = "spend_net"
+

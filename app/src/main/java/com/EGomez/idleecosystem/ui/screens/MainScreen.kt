@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
@@ -333,14 +334,26 @@ fun MainScreen(
     }
 }
 
+/**
+ * Las runas activas con su cuenta regresiva. La lista solo se publica cuando cambia
+ * (al empezar o terminar un efecto), así que el reloj vive aquí: antes el tiempo se
+ * calculaba al dibujar y se quedaba fijo en la duración inicial.
+ */
 @Composable
-fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
+fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::currentTimeMillis) {
+    val now by produceState(clock()) {
+        while (true) {
+            value = clock()
+            delay(BUFF_TICK_MS)
+        }
+    }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().height(30.dp)
     ) {
         items(buffs) { buff ->
-            val remainingSeconds = ((buff.expirationTime - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
+            // Redondeo hacia arriba: muestra "20s" al empezar y "1s" en el último segundo
+            val remainingSeconds = ((buff.expirationTime - now + 999) / 1000).coerceAtLeast(0)
 
             val labelText = when {
                 buff.costReduction > 0 -> stringResource(R.string.buff_costs, (buff.costReduction * 100).toInt())
@@ -376,3 +389,6 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
         }
     }
 }
+
+/** Cada cuánto se refresca la cuenta regresiva de las runas. */
+private const val BUFF_TICK_MS = 250L

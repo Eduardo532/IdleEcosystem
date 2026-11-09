@@ -200,11 +200,11 @@ fun InfoSection(
 
 const val RESEARCH_BUTTON_TAG = "research_button"
 
-/** Clics por segundo al mantener el dedo: la mitad que el autoclic de las runas (10/s). */
-const val HOLD_CLICKS_PER_SECOND = 5
+/** Clics por segundo al mantener el dedo: algo menos que el autoclic de las runas (10/s). */
+const val HOLD_CLICKS_PER_SECOND = 8
 private const val HOLD_INTERVAL_MS = 1_000L / HOLD_CLICKS_PER_SECOND
 /** Lo que hay que mantener el dedo antes de que empiecen los clics automáticos. */
-private const val HOLD_DELAY_MS = 400L
+private const val HOLD_DELAY_MS = 300L
 
 /**
  * Un toque hace un clic al apoyar el dedo. Si el dedo sigue apoyado pasado

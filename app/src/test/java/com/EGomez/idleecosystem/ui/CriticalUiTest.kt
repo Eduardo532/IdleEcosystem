@@ -22,6 +22,8 @@ import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
 import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.logic.RuneBuff
+import com.EGomez.idleecosystem.ui.screens.ActiveBuffsDisplay
 import com.EGomez.idleecosystem.ui.screens.main.components.RESEARCH_BUTTON_TAG
 import androidx.compose.runtime.Composable
 import org.junit.Assert.assertTrue
@@ -287,8 +289,8 @@ class CriticalUiTest {
         compose.waitForIdle()
         val afterRelease = clicks
 
-        // 1 al apoyar el dedo y luego uno cada 200 ms desde los 400 ms
-        assertTrue("clics: $afterRelease", afterRelease >= 3)
+        // 1 al apoyar el dedo y luego uno cada 125 ms desde los 300 ms (unos 6 en total)
+        assertTrue("clics: $afterRelease", afterRelease >= 4)
         // Al soltar se detiene
         compose.mainClock.advanceTimeBy(1_000)
         compose.waitForIdle()
@@ -326,6 +328,20 @@ class CriticalUiTest {
 
         compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertDoesNotExist()
         compose.onNodeWithText("ASCENDER").assertExists()
+    }
+
+    @Test
+    fun `the rune countdown goes down in real time`() {
+        var now = 0L
+        val buff = RuneBuff(id = "t1_test", multiplier = 2.0, expirationTime = 20_000L, description = "")
+        compose.setContent { ActiveBuffsDisplay(listOf(buff), clock = { now }) }
+
+        compose.onNodeWithText("20s", substring = true).assertExists()
+
+        // La lista no cambia: solo pasa el tiempo
+        now = 5_000L
+        compose.mainClock.advanceTimeBy(500)
+        compose.onNodeWithText("15s", substring = true).assertExists()
     }
 }
 

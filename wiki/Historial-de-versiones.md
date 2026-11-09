@@ -2,6 +2,12 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.15.x · "Ascender sin Repetir" *(en pruebas)*
+
+Segunda etapa del plan de retención: que Ascender no obligue a repetir el inicio a mano.
+
+- **v0.15.0:** hitos de Ascensión (1, 3, 5, 10, 25 y 50), autocompradores de edificios y del Grimorio, ritual automático y efecto neto al gastar Cordura en el Mapa de Locura.
+
 ## v0.14.2 · "Metas a la Vista" *(oficial, 9 nov 2026)*
 
 Primera etapa del plan de retención: que el juego siempre muestre una meta y que los edificios viejos sigan importando.

@@ -27,6 +27,28 @@ Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimient
 | | Ecos |
 | | Estadísticas |
 
+### Hitos de Ascensión *(v0.15)*
+
+Según cuántas veces hayas Ascendido en toda la partida, cada vida nueva empieza con algo, conserva algo o suma una automatización:
+
+| Ascensiones | Hito |
+|---|---|
+| 1 | Empiezas cada vida con 10 Sinapsis |
+| 3 | Conservas las mejoras de clic del Grimorio |
+| 5 | Autocomprador de edificios |
+| 10 | Autocomprador del Grimorio |
+| 25 | Conservas las sinergias compradas |
+| 50 | Un ritual elegido se activa solo |
+
+La confirmación de Ascender muestra la lista: ✓ los que ya tienes y ★ el que desbloquea la Ascensión que estás por hacer.
+
+**Autocompradores:** se encienden y apagan con el botón **AUTO** (sobre las pestañas para los edificios, junto a "Comprar todas" para el Grimorio y en cada ritual para el ritual automático).
+
+- Nunca gastan más de la **mitad** de tu Conocimiento.
+- El de edificios compra **una unidad de cada edificio por segundo**, del más caro al más barato.
+- El del Grimorio compra las mejoras que entran en ese presupuesto, de la más barata a la más cara.
+- El ritual automático se activa cuando está listo y te alcanzan los Ecos.
+
 ### Qué da la Cordura
 
 Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: con 25 puntos, x3,5.
@@ -36,6 +58,8 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 La tienda de Cordura: una constelación de **17 nodos**. Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
+
+**Efecto neto** *(v0.15)*: al elegir un nodo, el panel muestra cuánto sube el nodo, cuánto baja el bono de tu Cordura y, en los nodos de producción global, el resultado neto. Si el neto es menor que x1, ese nivel baja tu producción.
 
 | Nodo | Efecto | Por nivel | Costo base | Crecimiento | Requiere |
 |---|---|---|---|---|---|

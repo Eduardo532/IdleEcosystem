@@ -172,13 +172,16 @@ class MainViewModel @Inject constructor(
         globalMultiplier = economy.globalMultiplier,
         buildingCostMultiplier = economy.buildingCostMultiplier,
         echoes = economy.echoes,
-        echoesFormatted = economy.echoes.toBeautifulString()
+        echoesFormatted = economy.echoes.toBeautifulString(),
+        revealed = economy.revealed
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
         achievementsProgress = "${progress.unlocked} / ${progress.total}",
         secretsFound = progress.secretsFound,
-        secretsTotal = progress.secretsTotal
+        secretsTotal = progress.secretsTotal,
+        setsCompleted = progress.setsCompleted,
+        setsTotal = progress.setsTotal
     )
 
     private fun onEngineEffect(effect: EngineEffect) {

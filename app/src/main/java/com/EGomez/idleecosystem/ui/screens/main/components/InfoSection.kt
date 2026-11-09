@@ -4,7 +4,9 @@ import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -124,6 +127,8 @@ fun InfoSection(
                 .weight(1f)
         ) {
             var buttonPositionInRoot by remember { mutableStateOf(Offset.Zero) }
+            // El gesto vive mientras dure la pantalla: siempre llama a la versión actual
+            val currentOnManualClick by rememberUpdatedState(onManualClick)
             var buttonSize by remember { mutableStateOf(IntSize.Zero) }
 
             Box(
@@ -141,25 +146,25 @@ fun InfoSection(
                         buttonPositionInRoot = coordinates.positionInRoot()
                         buttonSize = coordinates.size
                     }
-                    .pointerInput(Unit) {
-                        detectTapGestures { tapOffset ->
-                            // Cálculos de geometría
-                            val globalClickX = buttonPositionInRoot.x + tapOffset.x
-                            val globalClickY = buttonPositionInRoot.y + tapOffset.y
+                    // Tocar hace un clic; mantener el dedo sigue haciendo clics
+                    .clickAndHold { tapOffset ->
+                        // Cálculos de geometría
+                        val globalClickX = buttonPositionInRoot.x + tapOffset.x
+                        val globalClickY = buttonPositionInRoot.y + tapOffset.y
 
-                            val centerX = buttonPositionInRoot.x + (buttonSize.width / 2f)
-                            val centerY = buttonPositionInRoot.y + (buttonSize.height / 2f)
+                        val centerX = buttonPositionInRoot.x + (buttonSize.width / 2f)
+                        val centerY = buttonPositionInRoot.y + (buttonSize.height / 2f)
 
-                            val currentRadius = buttonSize.width / 2f // Radio actual en pixeles
+                        val currentRadius = buttonSize.width / 2f // Radio actual en pixeles
 
-                            // Enviamos: Dónde tocó, Dónde está el centro, Qué tan grande es
-                            onManualClick(
-                                Offset(globalClickX, globalClickY),
-                                Offset(centerX, centerY),
-                                currentRadius
-                            )
-                        }
+                        // Enviamos: Dónde tocó, Dónde está el centro, Qué tan grande es
+                        currentOnManualClick(
+                            Offset(globalClickX, globalClickY),
+                            Offset(centerX, centerY),
+                            currentRadius
+                        )
                     }
+                    .testTag(RESEARCH_BUTTON_TAG)
             ) {
                 Box(
                     modifier = Modifier
@@ -189,6 +194,48 @@ fun InfoSection(
                     }
                 }
             }
+        }
+    }
+}
+
+const val RESEARCH_BUTTON_TAG = "research_button"
+
+/** Clics por segundo al mantener el dedo: la mitad que el autoclic de las runas (10/s). */
+const val HOLD_CLICKS_PER_SECOND = 5
+private const val HOLD_INTERVAL_MS = 1_000L / HOLD_CLICKS_PER_SECOND
+/** Lo que hay que mantener el dedo antes de que empiecen los clics automáticos. */
+private const val HOLD_DELAY_MS = 400L
+
+/**
+ * Un toque hace un clic al apoyar el dedo. Si el dedo sigue apoyado pasado
+ * [HOLD_DELAY_MS], se repite a [HOLD_CLICKS_PER_SECOND] clics por segundo en la
+ * posición actual del dedo, hasta que se levanta. El clic frenético cansa y en un
+ * teléfono es incómodo: así la fase activa no castiga la mano.
+ */
+internal fun Modifier.clickAndHold(onClick: (Offset) -> Unit): Modifier = pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown()
+        var position = down.position
+        onClick(position)
+
+        // Si se suelta antes de la espera, fue un toque normal
+        val endedEarly = withTimeoutOrNull(HOLD_DELAY_MS) {
+            waitForUpOrCancellation()
+            true
+        }
+        if (endedEarly != null) return@awaitEachGesture
+
+        while (true) {
+            val released = withTimeoutOrNull(HOLD_INTERVAL_MS) {
+                while (true) {
+                    val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id }
+                    if (change == null || !change.pressed) break
+                    position = change.position
+                }
+                true
+            }
+            if (released != null) break
+            onClick(position)
         }
     }
 }

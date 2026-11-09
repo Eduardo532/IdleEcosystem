@@ -18,6 +18,13 @@ import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
+import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
+import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.ui.screens.main.components.RESEARCH_BUTTON_TAG
+import androidx.compose.runtime.Composable
+import org.junit.Assert.assertTrue
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.NEXT_GOAL_TAG
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.NextGoal
@@ -249,4 +256,76 @@ class CriticalUiTest {
         compose.onNodeWithText("Siguiente punto: +4 al llegar a 1.60e+07").assertExists()
         compose.onNodeWithText("Para duplicar: +6 al llegar a 3.60e+07").assertExists()
     }
+
+    @Composable
+    private fun ResearchButton(onClick: () -> Unit) {
+        InfoSection(
+            knowledgeFormatted = "100", knowledgePerSecond = "1", globalMultiplier = BigDecimal.ONE,
+            activeBuffMultiplier = 1.0, buffTimeRemaining = 0, clickMultiplier = "1",
+            onManualClick = { _, _, _ -> onClick() }
+        )
+    }
+
+    @Test
+    fun `a quick tap on research is a single click`() {
+        var clicks = 0
+        compose.setContent { ResearchButton { clicks++ } }
+
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performClick()
+        compose.waitForIdle()
+        assertEquals(1, clicks)
+    }
+
+    @Test
+    fun `holding research keeps clicking until released`() {
+        var clicks = 0
+        compose.setContent { ResearchButton { clicks++ } }
+
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performTouchInput { down(center) }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performTouchInput { up() }
+        compose.waitForIdle()
+        val afterRelease = clicks
+
+        // 1 al apoyar el dedo y luego uno cada 200 ms desde los 400 ms
+        assertTrue("clics: $afterRelease", afterRelease >= 3)
+        // Al soltar se detiene
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.waitForIdle()
+        assertEquals(afterRelease, clicks)
+    }
+
+    @Composable
+    private fun Menu(selectedTab: Int, revealed: SystemReveal) {
+        MenuSection(
+            isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+            selectedTabIndex = selectedTab, onTabSelected = {},
+            buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+            buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+            currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+            buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+            onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+            prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+            revealed = revealed, onAscendClicked = {}, onShowPrestigeShop = {}
+        )
+    }
+
+    @Test
+    fun `undiscovered systems show their requirement`() {
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(false, false, false)) }
+
+        compose.onNodeWithText("Grimorio").assertDoesNotExist()
+        compose.onNodeWithText("Reúne 250 de Conocimiento para descubrir el Grimorio.", substring = true).assertExists()
+        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertExists()
+        compose.onNodeWithText("ASCENDER").assertDoesNotExist()
+    }
+
+    @Test
+    fun `discovered systems look as before`() {
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal()) }
+
+        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertDoesNotExist()
+        compose.onNodeWithText("ASCENDER").assertExists()
+    }
 }
+

@@ -21,7 +21,41 @@ object ContentTranslations {
 
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
-            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: ladderName(text)
+            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: ladderName(text)
+
+    /** Sinergias entre edificios vecinos ([BuildingSynergies]). */
+    private val SYNERGIES = mapOf(
+        "Mente y Mano" to "Mind and Hand",
+        "Notas Desordenadas: +1% de producción por cada unidad de Sinapsis Arcana." to "Messy Notes: +1% production for each Arcane Synapse you own.",
+        "Notas al Margen" to "Marginalia",
+        "Pergaminos Prohibidos: +1% de producción por cada unidad de Notas Desordenadas." to "Forbidden Scrolls: +1% production for each Messy Notes you own.",
+        "Inscripciones Rituales" to "Ritual Inscriptions",
+        "Artefacto Susurrante: +1% de producción por cada unidad de Pergaminos Prohibidos." to "Whispering Artifact: +1% production for each Forbidden Scrolls you own.",
+        "Reliquias de Culto" to "Cult Relics",
+        "Sectario Novato: +1% de producción por cada unidad de Artefacto Susurrante." to "Novice Cultist: +1% production for each Whispering Artifact you own.",
+        "Jerarquía del Culto" to "Cult Hierarchy",
+        "Sacerdote Demente: +1% de producción por cada unidad de Sectario Novato." to "Deranged Priest: +1% production for each Novice Cultist you own.",
+        "Procesión Subterránea" to "Underground Procession",
+        "Santuario Subterráneo: +1% de producción por cada unidad de Sacerdote Demente." to "Underground Sanctuary: +1% production for each Deranged Priest you own.",
+        "Cámara de Sacrificios" to "Sacrificial Chamber",
+        "Altar de Hueso: +1% de producción por cada unidad de Santuario Subterráneo." to "Bone Altar: +1% production for each Underground Sanctuary you own.",
+        "Sangre en la Piedra" to "Blood on the Stone",
+        "Monolito de Obsidiana: +1% de producción por cada unidad de Altar de Hueso." to "Obsidian Monolith: +1% production for each Bone Altar you own.",
+        "Cimientos Ciclópeos" to "Cyclopean Foundations",
+        "Templo de R'lyeh: +1% de producción por cada unidad de Monolito de Obsidiana." to "Temple of R'lyeh: +1% production for each Obsidian Monolith you own.",
+        "Geometría No Euclidiana" to "Non-Euclidean Geometry",
+        "Portal Dimensional: +1% de producción por cada unidad de Templo de R'lyeh." to "Dimensional Portal: +1% production for each Temple of R'lyeh you own.",
+        "Mareas del Otro Lado" to "Tides from Beyond",
+        "Criadero de Shoggoths: +1% de producción por cada unidad de Portal Dimensional." to "Shoggoth Hatchery: +1% production for each Dimensional Portal you own.",
+        "Pesadillas Vivientes" to "Living Nightmares",
+        "Fragmento de Sueño: +1% de producción por cada unidad de Criadero de Shoggoths." to "Dream Fragment: +1% production for each Shoggoth Hatchery you own.",
+        "Soñar con las Estrellas" to "Dreaming of the Stars",
+        "Alineación Estelar: +1% de producción por cada unidad de Fragmento de Sueño." to "Stellar Alignment: +1% production for each Dream Fragment you own.",
+        "Cuando las Estrellas Estén en Posición" to "When the Stars Are Right",
+        "Avatar Primigenio: +1% de producción por cada unidad de Alineación Estelar." to "Primordial Avatar: +1% production for each Stellar Alignment you own.",
+        "El Heraldo del Trono" to "Herald of the Throne",
+        "Trono del Vacío: +1% de producción por cada unidad de Avatar Primigenio." to "Throne of the Void: +1% production for each Primordial Avatar you own."
+    )
 
     /** Escalera del Grimorio: "<Edificio>: <Escalón>" se arma con las dos partes. */
     private fun ladderName(text: String): String? {

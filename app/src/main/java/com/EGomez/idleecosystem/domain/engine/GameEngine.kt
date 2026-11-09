@@ -9,6 +9,7 @@ import com.EGomez.idleecosystem.data.repository.GameSnapshot
 import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
+import com.EGomez.idleecosystem.domain.logic.AchievementSets
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
@@ -28,6 +29,7 @@ import com.EGomez.idleecosystem.domain.logic.SaveManager
 import com.EGomez.idleecosystem.domain.logic.SoundManager
 import com.EGomez.idleecosystem.domain.logic.SoundType
 import com.EGomez.idleecosystem.domain.logic.StatisticsManager
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.TutorialProgress
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
@@ -74,6 +76,8 @@ data class EconomyState(
     val knowledgeThisRun: BigDecimal = BigDecimal.ZERO,
     val prestigePacing: PrestigePacing = PrestigePacing(),
     val buildingCostMultiplier: Double = 1.0,
+    /** Pestañas y paneles que el jugador ya descubrió. */
+    val revealed: SystemReveal = SystemReveal(),
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
 
@@ -81,7 +85,10 @@ data class AchievementProgress(
     val unlocked: Int = 0,
     val total: Int = 0,
     val secretsFound: Int = 0,
-    val secretsTotal: Int = 0
+    val secretsTotal: Int = 0,
+    /** Conjuntos de logros completos (cada uno duplica su edificio) y cuántos hay. */
+    val setsCompleted: Int = 0,
+    val setsTotal: Int = 0
 )
 
 /** Avisos de una sola vez (diálogos y popups), que no forman parte del estado. */
@@ -456,8 +463,10 @@ class GameEngine @Inject constructor(
     }
 
     fun onMenuTabSelected(index: Int) = post {
-        if (index == 1) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
-        if (index == 2 && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
+        // Una pestaña sin descubrir muestra su requisito, no su tutorial
+        val revealed = currentReveal()
+        if (index == 1 && revealed.grimoire) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
+        if (index == 2 && revealed.rituals && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
     }
 
     fun onPrestigeShopOpened() = post { tutorialManager.triggerStep(TutorialStep.PRESTIGE_SHOP) }
@@ -680,6 +689,16 @@ class GameEngine @Inject constructor(
 
     private fun currentClickPower(): BigDecimal = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
 
+    private fun currentReveal(): SystemReveal = SystemReveal.compute(
+        lifetimeKnowledge = statsManager.lifetimeKnowledge,
+        anyUpgradeBought = upgradeManager.availableUpgrades.any { it.isBought },
+        lifetimeEchoes = statsManager.totalEchoes,
+        echoes = echoes,
+        canAscend = potentialPrestige.signum() > 0,
+        ascensions = statsManager.totalPrestiges,
+        sanity = prestigeManager.residualSanity
+    )
+
     private fun echoChance(): Double = BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -733,14 +752,20 @@ class GameEngine @Inject constructor(
             .round(MathContext.DECIMAL64)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
-        buildingManager.availableBuildings.forEachIndexed { index, building ->
+        val completedSets = AchievementSets.completed(achievementManager.availableAchievements)
+        val buildings = buildingManager.availableBuildings
+        buildings.forEachIndexed { index, building ->
+            val setMult = AchievementSets.multiplier(building.id, completedSets)
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
                     .multiply(temporaryClickMult)
+                    .multiply(setMult)
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id)
+                    .multiply(upgradeManager.getSynergyMultiplier(building.id, buildings))
                     .multiply(prestigeShopManager.getBuildingTierMultiplier(index))
+                    .multiply(setMult)
             }
             building.currentMultiplier = specificMult.multiply(globalMultiplier, MathContext.DECIMAL64)
         }
@@ -778,7 +803,9 @@ class GameEngine @Inject constructor(
             unlocked = all.count { it.isUnlocked },
             total = all.size,
             secretsFound = all.count { it.isSecret && it.isUnlocked },
-            secretsTotal = all.count { it.isSecret }
+            secretsTotal = all.count { it.isSecret },
+            setsCompleted = AchievementSets.completed(all).size,
+            setsTotal = AchievementSets.byBuilding(all).size
         )
         _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings)
         _prestigeUpgrades.value = prestigeShopManager.upgrades.map { it.copy() }
@@ -798,6 +825,7 @@ class GameEngine @Inject constructor(
             knowledgeThisRun = knowledgeThisRun(),
             prestigePacing = prestigePacing,
             buildingCostMultiplier = costMultiplier,
+            revealed = currentReveal(),
             echoChance = echoChance()
         )
     }

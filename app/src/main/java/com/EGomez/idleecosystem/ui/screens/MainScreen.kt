@@ -201,6 +201,7 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
+                            revealed = uiState.revealed,
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -311,6 +312,8 @@ fun MainScreen(
                     achievementsProgress = uiState.achievementsProgress,
                     secretsProgress = if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null,
                     nextGoal = uiState.nextGoal,
+                    setsCompleted = uiState.setsCompleted,
+                    setsTotal = uiState.setsTotal,
                     onDismiss = { showAchievementsDialog = false }
                 )
             }

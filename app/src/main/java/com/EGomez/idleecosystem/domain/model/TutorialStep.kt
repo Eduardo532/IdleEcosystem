@@ -16,7 +16,7 @@ enum class TutorialStep(
     MENU_INTRO(
         "menu_intro",
         "Gestión Arcana",
-        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción.",
+        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción. Las pestañas marcadas con ??? se descubren más adelante: el candado indica qué te falta.",
         "Al tener > 10 de conocimiento"
     ),
     FIRST_BUILDING(
@@ -28,7 +28,7 @@ enum class TutorialStep(
     BUY_MULTIPLIERS(
         "buy_multipliers",
         "Producción en Masa",
-        "Usa los botones 'x1', 'x5', 'x10', 'x100', 'MAX' a la derecha para comprar múltiples edificios a la vez. 'MAX' compra el máximo posible con tu saldo actual.",
+        "Usa los botones sobre las pestañas para comprar varios edificios a la vez: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta.",
         "Tras comprar 5 edificios totales"
     ),
 
@@ -98,13 +98,13 @@ enum class TutorialStep(
     PRESTIGE_READY(
         "prestige_ready",
         "Ascensión Disponible",
-        "Tu conocimiento ha alcanzado un nuevo horizonte. La 'Ascensión' está disponible en la última pestaña (Estrella). Reiniciar te hará más fuerte.",
+        "Tu conocimiento ha alcanzado un nuevo horizonte. La 'Ascensión' está disponible en el panel inferior del menú desplegado. Reiniciar te hará más fuerte.",
         "Cuando canAscend cambia a true"
     ),
     PRESTIGE_MECHANICS(
         "prestige_mechanics",
         "El Ciclo",
-        "Al ascender:\n- Reinicias: Edificios, Mejoras y Dinero.\n- Ganas: Cordura Residual.\n\nCada punto de Cordura aumenta tu producción permanentemente.",
+        "Al ascender:\n- Reinicias: Edificios, Mejoras y Dinero.\n- Ganas: Cordura Residual.\n\nCada punto de Cordura aumenta tu producción permanentemente. La Cordura crece con la raíz cuadrada: duplicarla exige 4 veces más Conocimiento, y la confirmación te muestra cuánto falta.",
         "Al hacer click en el botón de Ascender (antes de confirmar)"
     ),
     PRESTIGE_SHOP(
@@ -120,5 +120,31 @@ enum class TutorialStep(
         "Producción Pasiva",
         "El universo siguió funcionando en tu ausencia. Has recolectado Conocimiento basado en tu producción automática y el tiempo transcurrido.",
         "Al abrir la app y recibir ganancias offline"
+    ),
+
+    // --- FASE 6: METAS Y PROFUNDIDAD (v0.14) ---
+    HOLD_TO_CLICK(
+        "hold_to_click",
+        "Mano Incansable",
+        "No hace falta tocar sin descanso: mantén el dedo sobre la Zona Central y seguirás investigando solo, 8 veces por segundo.",
+        "Tras 25 clics manuales"
+    ),
+    NEXT_GOAL(
+        "next_goal",
+        "La Próxima Meta",
+        "La línea dorada bajo el Trofeo avanza hacia tu próxima meta: el logro que tienes más cerca. Toca el Trofeo para verla completa. Cada logro aumenta tu producción para siempre.",
+        "Al desbloquear el primer logro"
+    ),
+    ACHIEVEMENT_SETS(
+        "achievement_sets",
+        "Colecciones",
+        "Los logros de cantidad de un mismo edificio forman un conjunto. Complétalo entero y ese edificio producirá el doble para siempre, incluso después de Ascender. En los Logros verás cuántos conjuntos llevas.",
+        "Al tener 2 logros del mismo conjunto"
+    ),
+    SYNERGIES(
+        "synergies",
+        "Lazos Prohibidos",
+        "Ha aparecido una Sinergia en el Grimorio. Una vez comprada, cada unidad de un edificio suma un 1% a la producción del siguiente: tus edificios antiguos vuelven a importar.",
+        "Al aparecer la primera sinergia en el Grimorio"
     )
 }

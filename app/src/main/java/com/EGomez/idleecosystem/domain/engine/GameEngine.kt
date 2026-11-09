@@ -44,6 +44,7 @@ import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.TutorialStep
+import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -601,6 +602,7 @@ class GameEngine @Inject constructor(
         if (cheapest.signum() > 0 && knowledge >= cheapest) tutorialManager.triggerStep(TutorialStep.FIRST_BUILDING)
         if (buildingManager.availableBuildings.sumOf { it.amountOwned } >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
         if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
+        triggerDepthTutorials()
 
         eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)?.let { onEventShown() }
 
@@ -688,6 +690,21 @@ class GameEngine @Inject constructor(
     }
 
     private fun currentClickPower(): BigDecimal = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
+
+    /** Tutoriales de las mecánicas de la v0.14, cada uno cuando su sistema entra en juego. */
+    private fun triggerDepthTutorials() {
+        if (statsManager.totalClicks >= HOLD_TUTORIAL_CLICKS) tutorialManager.triggerStep(TutorialStep.HOLD_TO_CLICK)
+        val achievements = achievementManager.availableAchievements
+        if (achievements.any { it.isUnlocked && !it.isSecret }) tutorialManager.triggerStep(TutorialStep.NEXT_GOAL)
+        if (AchievementSets.byBuilding(achievements).values.any { set -> set.count { it.isUnlocked } >= 2 }) {
+            tutorialManager.triggerStep(TutorialStep.ACHIEVEMENT_SETS)
+        }
+        val buildings = buildingManager.availableBuildings
+        val synergyAvailable = upgradeManager.availableUpgrades.any {
+            it.type == UpgradeType.SYNERGY && !it.isBought && upgradeManager.isUnlocked(it, buildings)
+        }
+        if (synergyAvailable) tutorialManager.triggerStep(TutorialStep.SYNERGIES)
+    }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
         lifetimeKnowledge = statsManager.lifetimeKnowledge,
@@ -886,6 +903,8 @@ class GameEngine @Inject constructor(
         const val DEBUG_RUNES = false
 
         const val BASE_ECHO_CHANCE = 0.01
+        /** Clics manuales tras los que se enseña a mantener pulsado. */
+        private const val HOLD_TUTORIAL_CLICKS = 25L
         private const val TICK_MS = 100L
         private const val AUTOSAVE_INTERVAL_MS = 5_000L
         private const val OFFLINE_THRESHOLD_MS = 10_000L

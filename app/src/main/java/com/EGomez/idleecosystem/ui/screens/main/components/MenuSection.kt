@@ -257,9 +257,16 @@ fun MenuSection(
                                 else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) stringResource(R.string.target_all)
                                 else buildings.find { it.id == upgrade.targetBuildingId }?.name?.let { tr(it) } ?: "?"
 
+                                // Una sinergia no multiplica por un valor fijo: suma por unidad
+                                val effectText = if (upgrade.type == UpgradeType.SYNERGY) {
+                                    val sourceName = buildings.find { it.id == upgrade.sourceBuildingId }?.name?.let { tr(it) } ?: "?"
+                                    stringResource(R.string.upgrade_effect_synergy, sourceName)
+                                } else null
+
                                 UpgradeItem(
                                     upgrade = upgrade,
                                     targetInfo = stringResource(R.string.affects, targetName),
+                                    effectText = effectText,
                                     currentFunds = currentKnowledge,
                                     onBuy = { onBuyUpgrade(upgrade.id) }
                                 )

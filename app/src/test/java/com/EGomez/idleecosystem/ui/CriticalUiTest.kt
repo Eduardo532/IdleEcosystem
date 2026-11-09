@@ -298,12 +298,17 @@ class CriticalUiTest {
     }
 
     @Composable
-    private fun Menu(selectedTab: Int, revealed: SystemReveal) {
+    private fun Menu(
+        selectedTab: Int,
+        revealed: SystemReveal,
+        buildings: List<Building> = emptyList(),
+        upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList()
+    ) {
         MenuSection(
             isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
             selectedTabIndex = selectedTab, onTabSelected = {},
             buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
-            buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+            buildings = buildings, upgrades = upgrades, rituals = emptyList(),
             currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
             buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
             onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
@@ -342,6 +347,17 @@ class CriticalUiTest {
         now = 5_000L
         compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithText("15s", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a synergy shows its per unit effect instead of x1`() {
+        val catalog = com.EGomez.idleecosystem.domain.logic.BuildingCatalog.create()
+        val synergy = com.EGomez.idleecosystem.domain.logic.BuildingSynergies.create(catalog)
+            .first { it.sourceBuildingId == "b_notes" }
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(), buildings = catalog, upgrades = listOf(synergy)) }
+
+        compose.onNodeWithText("Efecto: +1% por unidad de Notas Desordenadas").assertExists()
+        compose.onNodeWithText("Efecto: x1").assertDoesNotExist()
     }
 }
 

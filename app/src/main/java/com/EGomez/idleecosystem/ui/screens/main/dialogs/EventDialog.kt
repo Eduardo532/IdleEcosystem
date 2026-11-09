@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
@@ -31,8 +32,8 @@ fun EventDialog(
         // Estado 2: Resultado
         AlertDialog(
             onDismissRequest = {},
-            title = { Text(event.title, color = ArcanePurple, fontWeight = FontWeight.Bold) },
-            text = { Text(resultText, color = Color.White, fontStyle = FontStyle.Italic) },
+            title = { Text(tr(event.title), color = ArcanePurple, fontWeight = FontWeight.Bold) },
+            text = { Text(tr(resultText), color = Color.White, fontStyle = FontStyle.Italic) },
             confirmButton = {},
             containerColor = Color(0xFF1E1E1E),
             shape = RoundedCornerShape(16.dp),
@@ -51,7 +52,7 @@ fun EventDialog(
             onDismissRequest = {},
             title = {
                 Text(
-                    event.title,
+                    tr(event.title),
                     color = AncientGold,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
@@ -59,7 +60,7 @@ fun EventDialog(
             },
             text = {
                 Column {
-                    Text(event.description, color = Color.LightGray, fontSize = 14.sp)
+                    Text(tr(event.description), color = Color.LightGray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(24.dp))
 
                     event.options.forEachIndexed { index, option ->
@@ -84,7 +85,7 @@ fun EventDialog(
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    option.text,
+                                    tr(option.text),
                                     color = if (areButtonsEnabled) Color.White else Color.Gray,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp

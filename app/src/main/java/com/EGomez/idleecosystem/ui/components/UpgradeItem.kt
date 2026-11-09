@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
@@ -56,7 +57,7 @@ fun UpgradeItem(
             Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 if (isBought){
                     Text(
-                        text = upgrade.name,
+                        text = tr(upgrade.name),
                         color = infoGreen,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -66,7 +67,7 @@ fun UpgradeItem(
                 }
                 else{
                     Text(
-                        text = upgrade.name,
+                        text = tr(upgrade.name),
                         color = ArcanePurple,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -79,7 +80,7 @@ fun UpgradeItem(
 
 
                 Text(
-                    text = upgrade.description,
+                    text = tr(upgrade.description),
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Italic,

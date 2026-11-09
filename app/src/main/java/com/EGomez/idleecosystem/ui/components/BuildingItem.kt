@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
@@ -95,7 +96,7 @@ fun BuildingItem(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = building.name,
+                        text = tr(building.name),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -130,7 +131,7 @@ fun BuildingItem(
                 }
 
                 Text(
-                    text = building.description,
+                    text = tr(building.description),
                     color = Color.DarkGray,
                     fontSize = 10.sp,
                     lineHeight = 12.sp,

@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -124,7 +125,7 @@ fun RuneOverlay(
             ) {
                 // TÍTULO: Tamaño reducido (16.sp) pero Neón intenso
                 RuneThematicText(
-                    text = activeRune.name.uppercase(),
+                    text = tr(activeRune.name).uppercase(),
                     baseColor = activeRune.color,
                     fontSize = 16.sp, // REDUCIDO
                     fontWeight = FontWeight.Black,
@@ -135,7 +136,7 @@ fun RuneOverlay(
 
                 // DESCRIPCIÓN: Tamaño reducido (12.sp)
                 RuneThematicText(
-                    text = activeRune.description,
+                    text = tr(activeRune.description),
                     baseColor = activeRune.color,
                     fontSize = 12.sp, // REDUCIDO
                     fontWeight = FontWeight.Bold,

@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
@@ -83,7 +84,7 @@ fun AchievementItem(
             Column(modifier = Modifier.weight(1f)) {
                 // 1. TÍTULO
                 Text(
-                    text = if (showContent) achievement.name else "???",
+                    text = if (showContent) tr(achievement.name) else "???",
                     color = titleColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
@@ -92,7 +93,7 @@ fun AchievementItem(
                 if (showContent) {
                     // 2. REQUISITO
                     Text(
-                        text = achievement.requirement,
+                        text = tr(achievement.requirement),
                         color = if (isUnlocked) Color(0xFF66BB6A) else Color(0xFFFFB74D),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -101,7 +102,7 @@ fun AchievementItem(
 
                     // 3. DESCRIPCIÓN
                     Text(
-                        text = achievement.description,
+                        text = tr(achievement.description),
                         color = Color.Gray,
                         fontSize = 11.sp,
                         fontStyle = FontStyle.Italic,

@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.animation.core.animateFloatAsState
@@ -58,7 +59,7 @@ fun RitualItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = ritual.name,
+                    text = tr(ritual.name),
                     color = if (ritual.state == RitualState.ACTIVE) AncientGold else Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -72,7 +73,7 @@ fun RitualItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = ritual.description,
+                text = tr(ritual.description),
                 color = Color.Gray,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,

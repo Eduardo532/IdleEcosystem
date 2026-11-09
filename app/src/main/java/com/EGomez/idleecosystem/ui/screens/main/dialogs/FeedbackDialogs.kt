@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -21,8 +23,8 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red) },
-        title = { Text("¿ESTÁS SEGURO?", color = Color.Red, fontWeight = FontWeight.Black) },
-        text = { Text("Esta acción borrará PERMANENTEMENTE todo tu progreso.\n\nNo se puede deshacer.", color = Color.White) },
+        title = { Text(stringResource(R.string.reset_confirm_title), color = Color.Red, fontWeight = FontWeight.Black) },
+        text = { Text(stringResource(R.string.reset_confirm_text), color = Color.White) },
         containerColor = Color(0xFF1E1E1E),
         titleContentColor = Color.Red,
         textContentColor = Color.White,
@@ -31,11 +33,11 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
             ) {
-                Text("SÍ, BORRAR TODO", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.reset_confirm_button), color = Color.White, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("CANCELAR", color = Color.Gray) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color.Gray) }
         }
     )
 }
@@ -48,15 +50,15 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("¿ASCENDER?", color = AncientGold, fontWeight = FontWeight.Black) },
+        title = { Text(stringResource(R.string.ascend_question), color = AncientGold, fontWeight = FontWeight.Black) },
         text = {
             Column {
-                Text("Perderás tu Conocimiento, tus edificios y las mejoras del Grimorio.", color = Color.White)
+                Text(stringResource(R.string.ascend_lose), color = Color.White)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Conservas logros, Ecos, rituales y la Tienda de Cordura.", color = Color.Gray, fontSize = 13.sp)
+                Text(stringResource(R.string.ascend_keep), color = Color.Gray, fontSize = 13.sp)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    "Ganarás +$sanityGainFormatted Cordura Residual",
+                    stringResource(R.string.ascend_gain, sanityGainFormatted),
                     color = ArcanePurple,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
@@ -69,11 +71,11 @@ fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: 
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black)
             ) {
-                Text("ASCENDER", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.ascend), fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("CANCELAR", color = Color.Gray) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color.Gray) }
         }
     )
 }
@@ -82,18 +84,18 @@ fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: 
 fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Mientras dormías...", color = ArcanePurple, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.offline_title), color = ArcanePurple, fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                Text("Tu locura creció en las sombras.", color = Color.Gray)
+                Text(stringResource(R.string.offline_text), color = Color.Gray)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Tiempo: $timeFormatted", color = Color.White)
-                Text(text = "Ganancia: +$gainsFormatted", color = Color(0xFF4CAF50), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                Text(text = stringResource(R.string.offline_time, timeFormatted), color = Color.White)
+                Text(text = stringResource(R.string.offline_gain, gainsFormatted), color = Color(0xFF4CAF50), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
             }
         },
         confirmButton = {
             Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = ArcanePurple)) {
-                Text("Aceptar")
+                Text(stringResource(R.string.accept))
             }
         },
         containerColor = Color(0xFF1E1E1E),
@@ -105,19 +107,19 @@ fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss:
 fun RefundDialog(refundAmount: String, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Actualización del Cosmos", color = AncientGold, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.refund_title), color = AncientGold, fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                Text("El sistema de Prestigio ha evolucionado a un Mapa Estelar.", color = Color.Gray)
+                Text(stringResource(R.string.refund_text1), color = Color.Gray)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Tus mejoras anteriores han sido reiniciadas y tu inversión ha sido devuelta íntegramente.", color = Color.White)
+                Text(stringResource(R.string.refund_text2), color = Color.White)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Cordura Recuperada: +$refundAmount", color = ArcanePurple, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(stringResource(R.string.refund_amount, refundAmount), color = ArcanePurple, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
         },
         confirmButton = {
             Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black)) {
-                Text("EXPLORAR")
+                Text(stringResource(R.string.explore))
             }
         },
         containerColor = Color(0xFF1E1E1E),

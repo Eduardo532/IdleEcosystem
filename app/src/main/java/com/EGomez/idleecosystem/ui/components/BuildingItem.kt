@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,7 +70,7 @@ fun BuildingItem(
     } else BigDecimal.ONE
     val hasSpecificMultiplier = specificMult > BigDecimal("1.01")
 
-    val prodLabel = if (building.type == BuildingType.CLICK) "Clic" else "Prod"
+    val prodLabel = if (building.type == BuildingType.CLICK) stringResource(R.string.prod_click) else stringResource(R.string.prod_production)
     val prodSuffix = if (building.type == BuildingType.CLICK) "" else "/s"
 
     val tierColor = when (building.tier) {
@@ -119,7 +121,7 @@ fun BuildingItem(
 
                 Row {
                     Text(
-                        text = "Posees: ${building.amountOwned} | $prodLabel: ${productionToShow.toBeautifulString()}$prodSuffix",
+                        text = stringResource(R.string.owned_line, building.amountOwned, prodLabel, productionToShow.toBeautifulString(), prodSuffix),
                         color = if (hasSpecificMultiplier) Color(0xFF81C784) else Color.Gray,
                         fontSize = 12.sp,
                         maxLines = 1,
@@ -144,7 +146,7 @@ fun BuildingItem(
                 colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black, disabledContainerColor = Color(0xFF333333), disabledContentColor = Color.White.copy(alpha = 0.6f))
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Comprar $amountToBuyLabel", maxLines = 1)
+                    Text(text = stringResource(R.string.buy_amount, amountToBuyLabel), maxLines = 1)
 
                     if (hasDiscount) {
                         Row(verticalAlignment = Alignment.CenterVertically) {

@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -110,7 +112,7 @@ fun AchievementItem(
                     if (isUnlocked) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Efecto: Global x${achievement.bonusMultiplier}",
+                            text = stringResource(R.string.achievement_effect, achievement.bonusMultiplier.toString()),
                             color = accentColor, // También aplicamos el color al texto del efecto
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
@@ -119,7 +121,7 @@ fun AchievementItem(
                 } else {
                     // TEXTO OCULTO
                     Text(
-                        text = "Este conocimiento está oculto para ti.",
+                        text = stringResource(R.string.achievement_hidden),
                         color = Color.DarkGray,
                         fontSize = 11.sp,
                         fontStyle = FontStyle.Italic

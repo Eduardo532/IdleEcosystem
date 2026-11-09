@@ -39,7 +39,8 @@ import java.math.BigDecimal
  * MAX, ascender e invocar rituales. Corren sobre Robolectric, sin emulador.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34], application = Application::class)
+// Textos en español (el idioma por defecto del juego); EnglishUiTest cubre el inglés
+@Config(sdk = [34], application = Application::class, qualifiers = "es")
 class CriticalUiTest {
 
     @get:Rule
@@ -180,6 +181,7 @@ class CriticalUiTest {
                 onDismiss = {}, onStatsClick = {}, onToggleMusic = {}, onToggleSfx = {},
                 onToggleParticles = {}, onToggleFloatingText = {},
                 onNotationSelected = { chosen = it },
+                onLanguageSelected = {},
                 onExportClick = {}, onImportClick = {}, onCancelImport = {}, onPasteClick = {},
                 onHardResetClick = {}, onToggleTutorial = {}
             )

@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,7 +107,7 @@ fun UpgradeItem(
 
                 Row (verticalAlignment = Alignment.CenterVertically){
                     Text(
-                        text = "Efecto: x$multString",
+                        text = stringResource(R.string.upgrade_effect, multString),
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
@@ -115,7 +117,7 @@ fun UpgradeItem(
 
             if (isBought) {
                 Text(
-                    text = "COMPRADO",
+                    text = stringResource(R.string.bought_label),
                     color = infoGreen, // CAMBIO: Texto Gris solicitado
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,

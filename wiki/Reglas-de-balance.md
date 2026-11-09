@@ -65,6 +65,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Cordura = `⌊√(generado en esta vida ÷ 10⁶)⌋ × bono de Cordura`. Duplicarla exige 4 veces más Conocimiento.
 - Cada punto de Cordura Residual: +10 % de producción global (se suma: `1 + 0,1 × Cordura`).
 
+## Hitos y automatización
+
+- Hitos en 1, 3, 5, 10, 25 y 50 Ascensiones totales. *(Código: `AscensionMilestone`.)*
+- Los autocompradores gastan como máximo el **50 %** del Conocimiento: una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.BUDGET_FRACTION`.)*
+- Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
+
 ## Clic
 
 - Clic = `1 + producción total de la Sinapsis`.

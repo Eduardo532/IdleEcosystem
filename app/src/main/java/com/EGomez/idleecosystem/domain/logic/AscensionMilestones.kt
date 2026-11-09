@@ -13,7 +13,7 @@ import com.EGomez.idleecosystem.domain.model.UpgradeType
  * Milestones de Antimatter Dimensions.)
  */
 enum class AscensionMilestone(val ascensions: Int) {
-    /** Cada vida empieza con [STARTING_SYNAPSES] Sinapsis. */
+    /** Cada vida empieza con [SYNAPSES_AT_START] Sinapsis. */
     STARTING_SYNAPSES(1),
     /** Al Ascender se conservan las mejoras de clic del Grimorio. */
     KEEP_CLICK_UPGRADES(3),
@@ -29,7 +29,7 @@ enum class AscensionMilestone(val ascensions: Int) {
     fun isReached(totalAscensions: Int) = totalAscensions >= ascensions
 
     companion object {
-        const val STARTING_SYNAPSES = 10
+        const val SYNAPSES_AT_START = 10
 
         fun reached(totalAscensions: Int): Set<AscensionMilestone> =
             entries.filter { it.isReached(totalAscensions) }.toSet()

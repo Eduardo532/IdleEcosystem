@@ -414,7 +414,7 @@ class GameEngine @Inject constructor(
         upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, ascensions) })
         if (AscensionMilestone.STARTING_SYNAPSES.isReached(ascensions)) {
             buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
-                ?.amountOwned = AscensionMilestone.STARTING_SYNAPSES
+                ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
         knowledge = prestigeShopManager.getStartingKnowledgeBonus()
         eventScheduler.clearBuff()

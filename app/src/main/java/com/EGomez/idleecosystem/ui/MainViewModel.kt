@@ -178,7 +178,9 @@ class MainViewModel @Inject constructor(
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
         achievementsProgress = "${progress.unlocked} / ${progress.total}",
         secretsFound = progress.secretsFound,
-        secretsTotal = progress.secretsTotal
+        secretsTotal = progress.secretsTotal,
+        setsCompleted = progress.setsCompleted,
+        setsTotal = progress.setsTotal
     )
 
     private fun onEngineEffect(effect: EngineEffect) {

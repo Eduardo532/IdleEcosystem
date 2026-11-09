@@ -45,6 +45,8 @@ class UpgradeManager @Inject constructor() {
     ).apply {
         // Escalera del Grimorio: 3 mejoras por edificio (25, 50 y 100 unidades)
         addAll(GrimoireLadder.create(BuildingCatalog.create()))
+        // Sinergias entre edificios vecinos (al tener 50 de ambos)
+        addAll(BuildingSynergies.create(BuildingCatalog.create()))
     }
 
     /**
@@ -55,7 +57,11 @@ class UpgradeManager @Inject constructor() {
     fun isUnlocked(upgrade: Upgrade, buildings: List<Building>): Boolean {
         if (upgrade.isBought || upgrade.unlockConditionAmount <= 0) return true
         val target = buildings.find { it.id == upgrade.targetBuildingId } ?: return false
-        return target.amountOwned >= upgrade.unlockConditionAmount
+        if (target.amountOwned < upgrade.unlockConditionAmount) return false
+        // Las sinergias piden también las unidades del edificio que potencia
+        val sourceId = upgrade.sourceBuildingId ?: return true
+        val source = buildings.find { it.id == sourceId } ?: return false
+        return source.amountOwned >= upgrade.unlockConditionAmount
     }
 
     fun loadFromSave(savedUpgrades: List<UpgradeEntity>) {
@@ -99,6 +105,18 @@ class UpgradeManager @Inject constructor() {
         availableUpgrades.filter { it.isBought && it.type == UpgradeType.BUILDING_MULTIPLIER && it.targetBuildingId == buildingId }
             .forEach { multiplier *= it.multiplier }
         return BigDecimal(multiplier)
+    }
+
+    /** Lo que suman las sinergias compradas a [buildingId], según los edificios que las alimentan. */
+    fun getSynergyMultiplier(buildingId: String, buildings: List<Building>): BigDecimal {
+        var multiplier = BigDecimal.ONE
+        availableUpgrades
+            .filter { it.isBought && it.type == UpgradeType.SYNERGY && it.targetBuildingId == buildingId }
+            .forEach { synergy ->
+                val owned = buildings.find { it.id == synergy.sourceBuildingId }?.amountOwned ?: 0
+                multiplier = multiplier.multiply(BuildingSynergies.multiplier(owned))
+            }
+        return multiplier
     }
 
     fun resetForPrestige() {

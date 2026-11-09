@@ -35,6 +35,8 @@ fun AchievementsDialog(
     achievementsProgress: String,
     secretsProgress: String?,
     nextGoal: NextGoal? = null,
+    setsCompleted: Int = 0,
+    setsTotal: Int = 0,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -57,6 +59,17 @@ fun AchievementsDialog(
                     IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.Gray) }
                 }
                 nextGoal?.let { NextGoalCard(it) }
+                if (setsTotal > 0) {
+                    // Conjuntos: todos los logros de un edificio duplican su producción
+                    Text(
+                        stringResource(R.string.achievement_sets, setsCompleted, setsTotal),
+                        color = AncientGold,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                    Text(stringResource(R.string.achievement_sets_hint), color = Color.Gray, fontSize = 11.sp)
+                }
                 HorizontalDivider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
                 val displayList = remember(achievements) {

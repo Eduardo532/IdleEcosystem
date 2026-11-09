@@ -12,6 +12,7 @@ import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
@@ -226,6 +227,29 @@ class GameEngineTest {
         assertTrue(goal.progress >= 0.9f)
     }
 
+    @Test
+    fun `a synergy boosts the next building by one percent per unit`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("1e9"))
+        await(engine.economy) { it.knowledge >= BigDecimal("1e9") }
+        engine.buyBuilding(NOTES, 50)
+        engine.buyBuilding(SCROLLS, 50)
+        val synergyId = BuildingSynergies.idFor(NOTES, SCROLLS)
+        await(engine.upgrades) { list -> list.any { it.id == synergyId } }
+
+        fun ratio(list: List<com.EGomez.idleecosystem.domain.model.Building>): BigDecimal {
+            val notes = list.first { it.id == NOTES }.currentMultiplier
+            val scrolls = list.first { it.id == SCROLLS }.currentMultiplier
+            return scrolls.divide(notes, java.math.MathContext.DECIMAL64)
+        }
+        val before = ratio(engine.buildings.value)
+
+        engine.buyUpgrade(synergyId)
+        // 50 Notas -> +50 % solo para los Pergaminos
+        val expected = before.multiply(BigDecimal("1.5"))
+        await(engine.buildings) { list -> ratio(list).subtract(expected).abs() < BigDecimal("0.0001") }
+        Unit // JUnit exige que el test devuelva void
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 
@@ -242,6 +266,7 @@ class GameEngineTest {
 
     private companion object {
         const val NOTES = "b_notes"
+        const val SCROLLS = "b_scrolls"
         const val OFFERING = "rit_knowledge_offering"
         const val TIMEOUT_MS = 10_000L
     }

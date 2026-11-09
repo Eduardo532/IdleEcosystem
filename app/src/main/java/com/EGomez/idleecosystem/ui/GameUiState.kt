@@ -59,6 +59,8 @@ data class GameUiState(
     val nextGoal: NextGoal? = null,
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
+    val setsCompleted: Int = 0,
+    val setsTotal: Int = 0,
 
     // Tienda de Prestigio
     val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),

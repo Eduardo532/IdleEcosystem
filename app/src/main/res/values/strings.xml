@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="achievement_sets">Conjuntos completos: %1$d / %2$d</string>
+    <string name="achievement_sets_hint">Completa todos los logros de un edificio (sin contar los secretos) para duplicar su producción.</string>
     <string name="app_name" translatable="false">IdleEcosystem</string>
     <string name="accept">Aceptar</string>
     <string name="achievement_effect">Efecto: Global x%1$s</string>

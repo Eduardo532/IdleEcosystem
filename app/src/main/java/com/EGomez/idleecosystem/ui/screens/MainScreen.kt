@@ -311,6 +311,8 @@ fun MainScreen(
                     achievementsProgress = uiState.achievementsProgress,
                     secretsProgress = if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null,
                     nextGoal = uiState.nextGoal,
+                    setsCompleted = uiState.setsCompleted,
+                    setsTotal = uiState.setsTotal,
                     onDismiss = { showAchievementsDialog = false }
                 )
             }

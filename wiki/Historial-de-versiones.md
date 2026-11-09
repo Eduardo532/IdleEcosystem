@@ -7,6 +7,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 Segunda etapa del plan de retención: que Ascender no obligue a repetir el inicio a mano.
 
 - **v0.15.0:** hitos de Ascensión (1, 3, 5, 10, 25 y 50), autocompradores de edificios y del Grimorio, ritual automático y efecto neto al gastar Cordura en el Mapa de Locura.
+- **v0.15.1:** panel de automatización (presupuesto, edificios, Grimorio, ritual) y Ascensión automática al duplicar la Cordura.
 
 ## v0.14.2 · "Metas a la Vista" *(oficial, 9 nov 2026)*
 

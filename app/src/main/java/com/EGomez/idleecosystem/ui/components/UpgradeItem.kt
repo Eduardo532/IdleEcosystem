@@ -26,6 +26,8 @@ fun UpgradeItem(
     upgrade: Upgrade,
     targetInfo: String,
     currentFunds: BigDecimal,
+    /** Texto del efecto cuando no es un multiplicador fijo (las sinergias). */
+    effectText: String? = null,
     onBuy: () -> Unit
 ) {
     val canAfford = currentFunds >= upgrade.cost
@@ -108,7 +110,7 @@ fun UpgradeItem(
 
                 Row (verticalAlignment = Alignment.CenterVertically){
                     Text(
-                        text = stringResource(R.string.upgrade_effect, multString),
+                        text = effectText ?: stringResource(R.string.upgrade_effect, multString),
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold

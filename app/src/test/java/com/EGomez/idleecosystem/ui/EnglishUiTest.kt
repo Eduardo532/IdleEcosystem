@@ -65,4 +65,17 @@ class EnglishUiTest {
         compose.onNodeWithText("Messy Notes").assertExists()
         compose.onNodeWithText("Frantic scribbles.").assertExists()
     }
+
+    @Test
+    fun `the next goal is translated`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog(
+                achievements = emptyList(), achievementsProgress = "0 / 0", secretsProgress = null,
+                nextGoal = com.EGomez.idleecosystem.domain.logic.NextGoal("b_not_2", "Notas II", "50 Notas", 0.68f),
+                onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Next goal: 50 Notes (68%)").assertExists()
+    }
 }

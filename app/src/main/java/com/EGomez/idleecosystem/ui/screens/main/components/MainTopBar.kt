@@ -14,7 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +33,7 @@ fun MainTopBar(
     menuWeight: Float,
     achievements: List<Achievement>,
     achievementsProgress: String,
+    nextGoalProgress: Float? = null,
     onSettingsClick: () -> Unit,
     onStatsClick: () -> Unit,
     onAchievementsClick: () -> Unit
@@ -69,7 +73,21 @@ fun MainTopBar(
                     .clickable { onAchievementsClick() }
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        // La próxima meta: una línea fina dentro del botón de logros
+                        .drawBehind {
+                            if (nextGoalProgress == null) return@drawBehind
+                            val inset = 10.dp.toPx()
+                            val y = size.height - 2.dp.toPx()
+                            val stroke = 2.dp.toPx()
+                            val end = size.width - inset
+                            drawLine(Color.White.copy(alpha = 0.12f), Offset(inset, y), Offset(end, y), stroke, StrokeCap.Round)
+                            val filled = inset + (end - inset) * nextGoalProgress.coerceIn(0f, 1f)
+                            if (filled > inset) {
+                                drawLine(AncientGold, Offset(inset, y), Offset(filled, y), stroke, StrokeCap.Round)
+                            }
+                        }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(

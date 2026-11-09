@@ -21,7 +21,41 @@ object ContentTranslations {
 
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
-            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: ladderName(text)
+            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: ladderName(text)
+
+    /** Sinergias entre edificios vecinos ([BuildingSynergies]). */
+    private val SYNERGIES = mapOf(
+        "Mente y Mano" to "Mind and Hand",
+        "Notas Desordenadas: +1% de producción por cada unidad de Sinapsis Arcana." to "Messy Notes: +1% production for each Arcane Synapse you own.",
+        "Notas al Margen" to "Marginalia",
+        "Pergaminos Prohibidos: +1% de producción por cada unidad de Notas Desordenadas." to "Forbidden Scrolls: +1% production for each Messy Notes you own.",
+        "Inscripciones Rituales" to "Ritual Inscriptions",
+        "Artefacto Susurrante: +1% de producción por cada unidad de Pergaminos Prohibidos." to "Whispering Artifact: +1% production for each Forbidden Scrolls you own.",
+        "Reliquias de Culto" to "Cult Relics",
+        "Sectario Novato: +1% de producción por cada unidad de Artefacto Susurrante." to "Novice Cultist: +1% production for each Whispering Artifact you own.",
+        "Jerarquía del Culto" to "Cult Hierarchy",
+        "Sacerdote Demente: +1% de producción por cada unidad de Sectario Novato." to "Deranged Priest: +1% production for each Novice Cultist you own.",
+        "Procesión Subterránea" to "Underground Procession",
+        "Santuario Subterráneo: +1% de producción por cada unidad de Sacerdote Demente." to "Underground Sanctuary: +1% production for each Deranged Priest you own.",
+        "Cámara de Sacrificios" to "Sacrificial Chamber",
+        "Altar de Hueso: +1% de producción por cada unidad de Santuario Subterráneo." to "Bone Altar: +1% production for each Underground Sanctuary you own.",
+        "Sangre en la Piedra" to "Blood on the Stone",
+        "Monolito de Obsidiana: +1% de producción por cada unidad de Altar de Hueso." to "Obsidian Monolith: +1% production for each Bone Altar you own.",
+        "Cimientos Ciclópeos" to "Cyclopean Foundations",
+        "Templo de R'lyeh: +1% de producción por cada unidad de Monolito de Obsidiana." to "Temple of R'lyeh: +1% production for each Obsidian Monolith you own.",
+        "Geometría No Euclidiana" to "Non-Euclidean Geometry",
+        "Portal Dimensional: +1% de producción por cada unidad de Templo de R'lyeh." to "Dimensional Portal: +1% production for each Temple of R'lyeh you own.",
+        "Mareas del Otro Lado" to "Tides from Beyond",
+        "Criadero de Shoggoths: +1% de producción por cada unidad de Portal Dimensional." to "Shoggoth Hatchery: +1% production for each Dimensional Portal you own.",
+        "Pesadillas Vivientes" to "Living Nightmares",
+        "Fragmento de Sueño: +1% de producción por cada unidad de Criadero de Shoggoths." to "Dream Fragment: +1% production for each Shoggoth Hatchery you own.",
+        "Soñar con las Estrellas" to "Dreaming of the Stars",
+        "Alineación Estelar: +1% de producción por cada unidad de Fragmento de Sueño." to "Stellar Alignment: +1% production for each Dream Fragment you own.",
+        "Cuando las Estrellas Estén en Posición" to "When the Stars Are Right",
+        "Avatar Primigenio: +1% de producción por cada unidad de Alineación Estelar." to "Primordial Avatar: +1% production for each Stellar Alignment you own.",
+        "El Heraldo del Trono" to "Herald of the Throne",
+        "Trono del Vacío: +1% de producción por cada unidad de Avatar Primigenio." to "Throne of the Void: +1% production for each Primordial Avatar you own."
+    )
 
     /** Escalera del Grimorio: "<Edificio>: <Escalón>" se arma con las dos partes. */
     private fun ladderName(text: String): String? {
@@ -218,14 +252,22 @@ object ContentTranslations {
     )
 
     private val TUTORIAL: Map<String, String> = mapOf(
+        "Mano Incansable" to "Tireless Hand",
+        "No hace falta tocar sin descanso: mantén el dedo sobre la Zona Central y seguirás investigando solo, 8 veces por segundo." to "No need to tap nonstop: keep your finger on the Central Zone and you will keep researching on your own, 8 times per second.",
+        "La Próxima Meta" to "The Next Goal",
+        "La línea dorada bajo el Trofeo avanza hacia tu próxima meta: el logro que tienes más cerca. Toca el Trofeo para verla completa. Cada logro aumenta tu producción para siempre." to "The golden line under the Trophy moves toward your next goal: the achievement you are closest to. Tap the Trophy to see it in full. Every achievement increases your production forever.",
+        "Colecciones" to "Collections",
+        "Los logros de cantidad de un mismo edificio forman un conjunto. Complétalo entero y ese edificio producirá el doble para siempre, incluso después de Ascender. En los Logros verás cuántos conjuntos llevas." to "The quantity achievements of a building form a set. Complete it and that building produces double forever, even after you Ascend. The Achievements list shows how many sets you have.",
+        "Lazos Prohibidos" to "Forbidden Bonds",
+        "Ha aparecido una Sinergia en el Grimorio. Una vez comprada, cada unidad de un edificio suma un 1% a la producción del siguiente: tus edificios antiguos vuelven a importar." to "A Synergy has appeared in the Grimoire. Once bought, each unit of a building adds 1% to the next one's production: your old buildings matter again.",
         "El Despertar" to "The Awakening",
         "Has despertado en el vacío. Tu tarea es generar energía. Toca repetidamente la Zona Central de la pantalla para recolectar Conocimiento Arcano." to "You have awoken in the void. Your task is to generate energy. Tap the Central Zone of the screen repeatedly to gather Arcane Knowledge.",
         "Gestión Arcana" to "Arcane Management",
-        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción." to "You need to expand. Open the Bottom Menu by tapping its title bar or the arrow to see your building options.",
+        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción. Las pestañas marcadas con ??? se descubren más adelante: el candado indica qué te falta." to "You need to expand. Open the Bottom Menu by tapping its title bar or the arrow to see your building options. Tabs marked ??? are discovered later: the lock tells you what you still need.",
         "Automatización" to "Automation",
         "El trabajo manual cansa. En la primera pestaña (Investigación), compra tu primera estructura. Esto generará Conocimiento automáticamente cada segundo." to "Manual work is tiring. In the first tab (Research), buy your first structure. It will generate Knowledge automatically every second.",
         "Producción en Masa" to "Mass Production",
-        "Usa los botones 'x1', 'x5', 'x10', 'x100', 'MAX' a la derecha para comprar múltiples edificios a la vez. 'MAX' compra el máximo posible con tu saldo actual." to "Use the 'x1', 'x5', 'x10', 'x100' and 'MAX' buttons on the right to buy several buildings at once. 'MAX' buys as many as your current balance allows.",
+        "Usa los botones sobre las pestañas para comprar varios edificios a la vez: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta." to "Use the buttons above the tabs to buy several buildings at once: 'x1' to 'x100', 'MAX' (as many as your balance allows) and 'NEXT' (exactly what is missing for the building's next milestone, where upgrades and achievements unlock). Each building's bar shows how far it is.",
         "Potenciación" to "Empowerment",
         "Has desbloqueado la segunda pestaña (Grimorio). Aquí puedes adquirir tecnologías que multiplican la eficiencia de tus edificios y tus clicks." to "You have unlocked the second tab (Grimoire). Here you can acquire techniques that multiply the efficiency of your buildings and your clicks.",
         "Panel de Control" to "Control Panel",
@@ -245,9 +287,9 @@ object ContentTranslations {
         "Runa Mítica" to "Mythic Rune",
         "¡Una runa de gran poder! Requiere precisión. DIBUJA (Trace) siguiendo los puntos conectados en la pantalla." to "A rune of great power! It demands precision. TRACE the connected points on the screen.",
         "Ascensión Disponible" to "Ascension Available",
-        "Tu conocimiento ha alcanzado un nuevo horizonte. La 'Ascensión' está disponible en la última pestaña (Estrella). Reiniciar te hará más fuerte." to "Your knowledge has reached a new horizon. 'Ascension' is available in the last tab (Star). Starting over will make you stronger.",
+        "Tu conocimiento ha alcanzado un nuevo horizonte. La 'Ascensión' está disponible en el panel inferior del menú desplegado. Reiniciar te hará más fuerte." to "Your knowledge has reached a new horizon. 'Ascension' is available in the bottom panel of the open menu. Starting over will make you stronger.",
         "El Ciclo" to "The Cycle",
-        "Al ascender:\n- Reinicias: Edificios, Mejoras y Dinero.\n- Ganas: Cordura Residual.\n\nCada punto de Cordura aumenta tu producción permanentemente." to "When you ascend:\n- You reset: Buildings, Upgrades and Money.\n- You gain: Residual Sanity.\n\nEach point of Sanity permanently increases your production.",
+        "Al ascender:\n- Reinicias: Edificios, Mejoras y Dinero.\n- Ganas: Cordura Residual.\n\nCada punto de Cordura aumenta tu producción permanentemente. La Cordura crece con la raíz cuadrada: duplicarla exige 4 veces más Conocimiento, y la confirmación te muestra cuánto falta." to "When you ascend:\n- You reset: Buildings, Upgrades and Money.\n- You gain: Residual Sanity.\n\nEach point of Sanity permanently increases your production. Sanity grows with the square root: doubling it takes 4 times more Knowledge, and the confirmation shows how far you are.",
         "Tienda de Prestigio" to "Prestige Shop",
         "Aquí puedes gastar tu Cordura Residual en mejoras eternas. Gastar Cordura reduce tu bono actual, pero las mejoras suelen valer la inversión." to "Here you can spend your Residual Sanity on eternal upgrades. Spending Sanity lowers your current bonus, but the upgrades are usually worth it.",
         "Producción Pasiva" to "Passive Production",

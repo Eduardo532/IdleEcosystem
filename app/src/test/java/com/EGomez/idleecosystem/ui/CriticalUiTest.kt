@@ -16,6 +16,20 @@ import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
+import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
+import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.logic.RuneBuff
+import com.EGomez.idleecosystem.ui.screens.ActiveBuffsDisplay
+import com.EGomez.idleecosystem.ui.screens.main.components.RESEARCH_BUTTON_TAG
+import androidx.compose.runtime.Composable
+import org.junit.Assert.assertTrue
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.NEXT_GOAL_TAG
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.NextGoal
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
@@ -199,4 +213,151 @@ class CriticalUiTest {
         compose.onNodeWithContentDescription("Volver").performClick()
         compose.onNodeWithText("Zona peligrosa").assertExists()
     }
+
+    @Test
+    fun `the milestone option buys exactly what is missing`() {
+        var bought = 0
+        compose.setContent {
+            BuildingItem(
+                notes.copy(amountOwned = 19), BigDecimal(100_000), BigDecimal.ONE, BuildingCalculator(),
+                buyMultiplier = BuildingMilestones.BUY_TO_MILESTONE,
+                milestones = listOf(10, 25, 50)
+            ) { bought++ }
+        }
+
+        // 19 Notas: el hito siguiente es 25
+        compose.onNodeWithText("Hito 25 · faltan 6").assertExists()
+        compose.onNodeWithText("Comprar +6", substring = true).assertIsEnabled().performClick()
+        assertEquals(1, bought)
+    }
+
+    @Test
+    fun `the next goal is shown at the top of the achievements`() {
+        compose.setContent {
+            AchievementsDialog(
+                achievements = emptyList(), achievementsProgress = "0 / 0", secretsProgress = null,
+                nextGoal = NextGoal("b_not_2", "Notas II", "50 Notas", 0.68f),
+                onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithTag(NEXT_GOAL_TAG).assertExists()
+        compose.onNodeWithText("Próxima meta: 50 Notas (68%)").assertExists()
+    }
+
+    @Test
+    fun `the ascend dialog says when the reward doubles`() {
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                pacing = AscendPacing("9.50e+06", "4", "1.60e+07", "6", "3.60e+07")
+            )
+        }
+
+        compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertExists()
+        compose.onNodeWithText("Siguiente punto: +4 al llegar a 1.60e+07").assertExists()
+        compose.onNodeWithText("Para duplicar: +6 al llegar a 3.60e+07").assertExists()
+    }
+
+    @Composable
+    private fun ResearchButton(onClick: () -> Unit) {
+        InfoSection(
+            knowledgeFormatted = "100", knowledgePerSecond = "1", globalMultiplier = BigDecimal.ONE,
+            activeBuffMultiplier = 1.0, buffTimeRemaining = 0, clickMultiplier = "1",
+            onManualClick = { _, _, _ -> onClick() }
+        )
+    }
+
+    @Test
+    fun `a quick tap on research is a single click`() {
+        var clicks = 0
+        compose.setContent { ResearchButton { clicks++ } }
+
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performClick()
+        compose.waitForIdle()
+        assertEquals(1, clicks)
+    }
+
+    @Test
+    fun `holding research keeps clicking until released`() {
+        var clicks = 0
+        compose.setContent { ResearchButton { clicks++ } }
+
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performTouchInput { down(center) }
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.onNodeWithTag(RESEARCH_BUTTON_TAG).performTouchInput { up() }
+        compose.waitForIdle()
+        val afterRelease = clicks
+
+        // 1 al apoyar el dedo y luego uno cada 125 ms desde los 300 ms (unos 6 en total)
+        assertTrue("clics: $afterRelease", afterRelease >= 4)
+        // Al soltar se detiene
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.waitForIdle()
+        assertEquals(afterRelease, clicks)
+    }
+
+    @Composable
+    private fun Menu(
+        selectedTab: Int,
+        revealed: SystemReveal,
+        buildings: List<Building> = emptyList(),
+        upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList()
+    ) {
+        MenuSection(
+            isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+            selectedTabIndex = selectedTab, onTabSelected = {},
+            buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+            buildings = buildings, upgrades = upgrades, rituals = emptyList(),
+            currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+            buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+            onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+            prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+            revealed = revealed, onAscendClicked = {}, onShowPrestigeShop = {}
+        )
+    }
+
+    @Test
+    fun `undiscovered systems show their requirement`() {
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(false, false, false)) }
+
+        compose.onNodeWithText("Grimorio").assertDoesNotExist()
+        compose.onNodeWithText("Reúne 250 de Conocimiento para descubrir el Grimorio.", substring = true).assertExists()
+        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertExists()
+        compose.onNodeWithText("ASCENDER").assertDoesNotExist()
+    }
+
+    @Test
+    fun `discovered systems look as before`() {
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal()) }
+
+        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertDoesNotExist()
+        compose.onNodeWithText("ASCENDER").assertExists()
+    }
+
+    @Test
+    fun `the rune countdown goes down in real time`() {
+        var now = 0L
+        val buff = RuneBuff(id = "t1_test", multiplier = 2.0, expirationTime = 20_000L, description = "")
+        compose.setContent { ActiveBuffsDisplay(listOf(buff), clock = { now }) }
+
+        compose.onNodeWithText("20s", substring = true).assertExists()
+
+        // La lista no cambia: solo pasa el tiempo
+        now = 5_000L
+        compose.mainClock.advanceTimeBy(500)
+        compose.onNodeWithText("15s", substring = true).assertExists()
+    }
+
+    @Test
+    fun `a synergy shows its per unit effect instead of x1`() {
+        val catalog = com.EGomez.idleecosystem.domain.logic.BuildingCatalog.create()
+        val synergy = com.EGomez.idleecosystem.domain.logic.BuildingSynergies.create(catalog)
+            .first { it.sourceBuildingId == "b_notes" }
+        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(), buildings = catalog, upgrades = listOf(synergy)) }
+
+        compose.onNodeWithText("Efecto: +1% por unidad de Notas Desordenadas").assertExists()
+        compose.onNodeWithText("Efecto: x1").assertDoesNotExist()
+    }
 }
+

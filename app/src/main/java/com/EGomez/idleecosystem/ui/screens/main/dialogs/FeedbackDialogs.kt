@@ -47,7 +47,12 @@ fun HardResetDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
  * accidental reiniciaba la partida, y el tutorial "El Ciclo" aparecía después.
  */
 @Composable
-fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun AscendDialog(
+    sanityGainFormatted: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    pacing: AscendPacing? = null
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.ascend_question), color = AncientGold, fontWeight = FontWeight.Black) },
@@ -63,6 +68,15 @@ fun AscendDialog(sanityGainFormatted: String, onConfirm: () -> Unit, onDismiss: 
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+                // Cuánto más rendiría esperar: la Cordura crece con la raíz del Conocimiento
+                if (pacing != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.ascend_generated, pacing.generated), color = Color.Gray, fontSize = 12.sp)
+                    Text(stringResource(R.string.ascend_next_point, pacing.nextGain, pacing.nextAt), color = Color.Gray, fontSize = 12.sp)
+                    if (pacing.doubleGain != null && pacing.doubleAt != null) {
+                        Text(stringResource(R.string.ascend_double, pacing.doubleGain, pacing.doubleAt), color = Color.Gray, fontSize = 12.sp)
+                    }
+                }
             }
         },
         containerColor = Color(0xFF1E1E1E),
@@ -127,3 +141,12 @@ fun RefundDialog(refundAmount: String, onDismiss: () -> Unit) {
         modifier = Modifier.border(BorderStroke(1.dp, AncientGold), RoundedCornerShape(16.dp))
     )
 }
+
+/** Los textos del ritmo de la Ascensión, ya formateados. */
+data class AscendPacing(
+    val generated: String,
+    val nextGain: String,
+    val nextAt: String,
+    val doubleGain: String?,
+    val doubleAt: String?
+)

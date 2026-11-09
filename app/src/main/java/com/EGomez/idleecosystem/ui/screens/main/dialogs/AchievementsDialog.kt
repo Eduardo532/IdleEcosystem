@@ -20,7 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import com.EGomez.idleecosystem.domain.logic.NextGoal
 import com.EGomez.idleecosystem.domain.model.Achievement
+import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.ui.components.AchievementItem
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
@@ -30,6 +34,9 @@ fun AchievementsDialog(
     achievements: List<Achievement>,
     achievementsProgress: String,
     secretsProgress: String?,
+    nextGoal: NextGoal? = null,
+    setsCompleted: Int = 0,
+    setsTotal: Int = 0,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -50,6 +57,18 @@ fun AchievementsDialog(
                         secretsProgress?.let { Text(it, color = ArcanePurple, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                     }
                     IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.Gray) }
+                }
+                nextGoal?.let { NextGoalCard(it) }
+                if (setsTotal > 0) {
+                    // Conjuntos: todos los logros de un edificio duplican su producción
+                    Text(
+                        stringResource(R.string.achievement_sets, setsCompleted, setsTotal),
+                        color = AncientGold,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 10.dp)
+                    )
+                    Text(stringResource(R.string.achievement_sets_hint), color = Color.Gray, fontSize = 11.sp)
                 }
                 HorizontalDivider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
@@ -83,3 +102,33 @@ fun AchievementsDialog(
         }
     }
 }
+
+/** La meta más cercana, con su avance, arriba de la lista de logros. */
+@Composable
+private fun NextGoalCard(goal: NextGoal) {
+    val percent = (goal.progress * 100).toInt().coerceIn(0, 99)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .testTag(NEXT_GOAL_TAG)
+    ) {
+        Text(
+            text = stringResource(R.string.next_goal, tr(goal.requirement), percent),
+            color = Color.LightGray,
+            fontSize = 13.sp
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        LinearProgressIndicator(
+            progress = { goal.progress },
+            color = AncientGold,
+            trackColor = Color.White.copy(alpha = 0.1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+        )
+    }
+}
+
+const val NEXT_GOAL_TAG = "next_goal"

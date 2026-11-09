@@ -11,6 +11,8 @@ import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
@@ -199,6 +201,56 @@ class GameEngineTest {
         assertTrue(economy.knowledge < BigDecimal(300))
     }
 
+    @Test
+    fun `buying to the next milestone stops exactly on it`() = runBlocking {
+        engine.grantKnowledge(BigDecimal(100_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(100_000) }
+
+        // Notas: el primer hito es el logro de 10 y el siguiente, la escalera de 25
+        engine.buyBuilding(NOTES, BuildingMilestones.BUY_TO_MILESTONE)
+        await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned == 10 } }
+        engine.buyBuilding(NOTES, BuildingMilestones.BUY_TO_MILESTONE)
+        await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned == 25 } }
+        Unit // JUnit exige que el test devuelva void
+    }
+
+    @Test
+    fun `the next goal follows the most advanced achievement`() = runBlocking {
+        // Partida nueva: la primera meta es el primer logro de Conocimiento
+        assertEquals("k_1", await(engine.nextGoal) { it != null }!!.achievementId)
+
+        engine.grantKnowledge(BigDecimal(1_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(1_000) }
+        engine.buyBuilding(NOTES, 9)
+        // 9 de 10 Notas (90 %) supera a cualquier meta de Conocimiento
+        val goal = await(engine.nextGoal) { it?.achievementId == "b_not_1" }!!
+        assertTrue(goal.progress >= 0.9f)
+    }
+
+    @Test
+    fun `a synergy boosts the next building by one percent per unit`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("1e9"))
+        await(engine.economy) { it.knowledge >= BigDecimal("1e9") }
+        engine.buyBuilding(NOTES, 50)
+        engine.buyBuilding(SCROLLS, 50)
+        val synergyId = BuildingSynergies.idFor(NOTES, SCROLLS)
+        await(engine.upgrades) { list -> list.any { it.id == synergyId } }
+
+        fun ratio(list: List<com.EGomez.idleecosystem.domain.model.Building>): BigDecimal {
+            val notes = list.first { it.id == NOTES }.currentMultiplier
+            val scrolls = list.first { it.id == SCROLLS }.currentMultiplier
+            return scrolls.divide(notes, java.math.MathContext.DECIMAL64)
+        }
+        // Los Pergaminos se publican al hacerse visibles (en el siguiente segundo)
+        val before = ratio(await(engine.buildings) { list -> list.any { it.id == SCROLLS && it.amountOwned == 50 } })
+
+        engine.buyUpgrade(synergyId)
+        // 50 Notas -> +50 % solo para los Pergaminos
+        val expected = before.multiply(BigDecimal("1.5"))
+        await(engine.buildings) { list -> ratio(list).subtract(expected).abs() < BigDecimal("0.0001") }
+        Unit // JUnit exige que el test devuelva void
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 
@@ -215,6 +267,7 @@ class GameEngineTest {
 
     private companion object {
         const val NOTES = "b_notes"
+        const val SCROLLS = "b_scrolls"
         const val OFFERING = "rit_knowledge_offering"
         const val TIMEOUT_MS = 10_000L
     }

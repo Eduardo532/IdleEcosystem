@@ -2,6 +2,8 @@ package com.EGomez.idleecosystem.ui
 
 import com.EGomez.idleecosystem.core.locale.AppLanguage
 import com.EGomez.idleecosystem.core.math.NumberNotation
+import com.EGomez.idleecosystem.domain.logic.NextGoal
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -20,6 +22,12 @@ data class GameUiState(
     val prestigeCurrencyFormatted: String = "0",
     val rawSanity: BigDecimal = BigDecimal.ZERO,
     val potentialPrestigeFormatted: String = "0",
+    // Ritmo de la Ascensión (ya formateado)
+    val knowledgeThisRunFormatted: String = "0",
+    val nextSanityGainFormatted: String = "1",
+    val nextSanityAtFormatted: String = "0",
+    val doubleSanityGainFormatted: String? = null,
+    val doubleSanityAtFormatted: String? = null,
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
 
     // Factor de costo (Runas)
@@ -49,8 +57,13 @@ data class GameUiState(
     val eventResultText: String? = null,
     val lastUnlockedAchievement: Achievement? = null,
     val achievementsProgress: String = "0 / 0",
+    val nextGoal: NextGoal? = null,
+    /** Pestañas y paneles descubiertos (los demás se ven como "???"). */
+    val revealed: SystemReveal = SystemReveal(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
+    val setsCompleted: Int = 0,
+    val setsTotal: Int = 0,
 
     // Tienda de Prestigio
     val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),

@@ -5,6 +5,8 @@ import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
@@ -20,13 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
@@ -59,6 +65,7 @@ fun MenuSection(
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
     buildingCostMultiplier: Double, // NUEVO PARÁMETRO
+    buildingMilestones: Map<String, List<Int>> = emptyMap(),
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
     onBuyAllUpgrades: () -> Unit = {},
@@ -66,11 +73,24 @@ fun MenuSection(
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
+    doubleSanityAtFormatted: String? = null,
+    revealed: SystemReveal = SystemReveal(),
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf(stringResource(R.string.tab_research), stringResource(R.string.tab_grimoire), stringResource(R.string.tab_rituals))
+    // Un sistema sin descubrir se ve como "???" hasta cumplir su requisito
+    val tabs = listOf(
+        stringResource(R.string.tab_research),
+        if (revealed.grimoire) stringResource(R.string.tab_grimoire) else LOCKED_TITLE,
+        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE
+    )
+    val lockedTabText = when {
+        selectedTabIndex == 1 && !revealed.grimoire ->
+            stringResource(R.string.locked_grimoire, SystemReveal.GRIMOIRE_AT.toBeautifulString())
+        selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
+        else -> null
+    }
 
     Column(
         modifier = modifier
@@ -93,14 +113,21 @@ fun MenuSection(
 
         if (menuWeight > 0.2f) {
             if (selectedTabIndex == 0) {
+                val milestoneLabel = stringResource(R.string.buy_milestone_chip)
+                // Seis opciones no caben en pantallas angostas: la fila se desplaza
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    listOf(1, 5, 10, 100, -1).forEach { mult ->
-                        val label = if (mult == -1) "MAX" else "x$mult"
+                    listOf(1, 5, 10, 100, BuildingMilestones.BUY_TO_MILESTONE, -1).forEach { mult ->
+                        val label = when (mult) {
+                            -1 -> "MAX"
+                            BuildingMilestones.BUY_TO_MILESTONE -> milestoneLabel
+                            else -> "x$mult"
+                        }
                         FilterChip(
                             selected = buyMultiplier == mult,
                             onClick = { onBuyMultiplierChanged(mult) },
@@ -145,7 +172,9 @@ fun MenuSection(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             ) {
-                when (selectedTabIndex) {
+                if (lockedTabText != null) {
+                    item { LockedSystem(lockedTabText) }
+                } else when (selectedTabIndex) {
                     0 -> {
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
@@ -155,6 +184,7 @@ fun MenuSection(
                                 calculator = buildingCalculator,
                                 buyMultiplier = buyMultiplier,
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
+                                milestones = buildingMilestones[building.id].orEmpty(),
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -227,9 +257,16 @@ fun MenuSection(
                                 else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) stringResource(R.string.target_all)
                                 else buildings.find { it.id == upgrade.targetBuildingId }?.name?.let { tr(it) } ?: "?"
 
+                                // Una sinergia no multiplica por un valor fijo: suma por unidad
+                                val effectText = if (upgrade.type == UpgradeType.SYNERGY) {
+                                    val sourceName = buildings.find { it.id == upgrade.sourceBuildingId }?.name?.let { tr(it) } ?: "?"
+                                    stringResource(R.string.upgrade_effect_synergy, sourceName)
+                                } else null
+
                                 UpgradeItem(
                                     upgrade = upgrade,
                                     targetInfo = stringResource(R.string.affects, targetName),
+                                    effectText = effectText,
                                     currentFunds = currentKnowledge,
                                     onBuy = { onBuyUpgrade(upgrade.id) }
                                 )
@@ -269,7 +306,18 @@ fun MenuSection(
                 }
             }
 
-            if (isMenuExpanded) {
+            if (isMenuExpanded && !revealed.ascension) {
+                HorizontalDivider(color = Color(0xFF333333))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF0D0D0D))
+                        .padding(12.dp)
+                        .testTag(LOCKED_ASCENSION_TAG)
+                ) {
+                    LockedSystem(stringResource(R.string.locked_ascension, BigDecimal("1000000").toBeautifulString()))
+                }
+            } else if (isMenuExpanded) {
                 HorizontalDivider(color = Color(0xFF333333))
                 Row(
                     modifier = Modifier
@@ -292,6 +340,14 @@ fun MenuSection(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // Cuándo conviene ascender: el punto en que la recompensa se duplica
+                        if (canPrestige && doubleSanityAtFormatted != null) {
+                            Text(
+                                stringResource(R.string.sanity_double_short, doubleSanityAtFormatted),
+                                color = Color.Gray,
+                                fontSize = 9.sp
+                            )
+                        }
                     }
                     Row {
                         Button(
@@ -342,6 +398,25 @@ fun MenuSection(
                     .padding(bottom = 8.dp)
             )
         }
+    }
+}
+
+private const val LOCKED_TITLE = "???"
+const val LOCKED_ASCENSION_TAG = "locked_ascension"
+
+/** Un sistema sin descubrir: un candado y lo que falta para verlo. */
+@Composable
+private fun LockedSystem(requirement: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 12.dp)
+    ) {
+        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(requirement, color = Color.Gray, fontSize = 13.sp)
     }
 }
 

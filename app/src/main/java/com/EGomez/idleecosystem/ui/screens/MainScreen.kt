@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
@@ -136,6 +137,7 @@ fun MainScreen(
                         menuWeight = menuWeight,
                         achievements = achievements,
                         achievementsProgress = uiState.achievementsProgress,
+                        nextGoalProgress = uiState.nextGoal?.progress,
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -193,11 +195,14 @@ fun MainScreen(
                             currentKnowledge = uiState.rawKnowledge, currentEchoes = uiState.echoes,
                             globalMultiplier = uiState.globalMultiplier, buildingCalculator = buildingCalculator,
                             buildingCostMultiplier = uiState.buildingCostMultiplier,
+                            buildingMilestones = viewModel.buildingMilestones,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
                             onBuyAllUpgrades = { viewModel.onBuyAllUpgrades() },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
+                            doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
+                            revealed = uiState.revealed,
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -258,6 +263,13 @@ fun MainScreen(
             if (showAscendConfirmation) {
                 AscendDialog(
                     sanityGainFormatted = uiState.potentialPrestigeFormatted,
+                    pacing = AscendPacing(
+                        generated = uiState.knowledgeThisRunFormatted,
+                        nextGain = uiState.nextSanityGainFormatted,
+                        nextAt = uiState.nextSanityAtFormatted,
+                        doubleGain = uiState.doubleSanityGainFormatted,
+                        doubleAt = uiState.doubleSanityAtFormatted
+                    ),
                     onConfirm = {
                         viewModel.onAscendClicked()
                         showAscendConfirmation = false
@@ -295,7 +307,17 @@ fun MainScreen(
                 )
             }
 
-            if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null) { showAchievementsDialog = false }
+            if (showAchievementsDialog) {
+                AchievementsDialog(
+                    achievements = achievements,
+                    achievementsProgress = uiState.achievementsProgress,
+                    secretsProgress = if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null,
+                    nextGoal = uiState.nextGoal,
+                    setsCompleted = uiState.setsCompleted,
+                    setsTotal = uiState.setsTotal,
+                    onDismiss = { showAchievementsDialog = false }
+                )
+            }
             if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
@@ -312,14 +334,26 @@ fun MainScreen(
     }
 }
 
+/**
+ * Las runas activas con su cuenta regresiva. La lista solo se publica cuando cambia
+ * (al empezar o terminar un efecto), así que el reloj vive aquí: antes el tiempo se
+ * calculaba al dibujar y se quedaba fijo en la duración inicial.
+ */
 @Composable
-fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
+fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::currentTimeMillis) {
+    val now by produceState(clock()) {
+        while (true) {
+            value = clock()
+            delay(BUFF_TICK_MS)
+        }
+    }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().height(30.dp)
     ) {
         items(buffs) { buff ->
-            val remainingSeconds = ((buff.expirationTime - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
+            // Redondeo hacia arriba: muestra "20s" al empezar y "1s" en el último segundo
+            val remainingSeconds = ((buff.expirationTime - now + 999) / 1000).coerceAtLeast(0)
 
             val labelText = when {
                 buff.costReduction > 0 -> stringResource(R.string.buff_costs, (buff.costReduction * 100).toInt())
@@ -355,3 +389,6 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
         }
     }
 }
+
+/** Cada cuánto se refresca la cuenta regresiva de las runas. */
+private const val BUFF_TICK_MS = 250L

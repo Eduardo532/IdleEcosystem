@@ -158,7 +158,7 @@ enum class TutorialStep(
     AUTOMATION(
         "automation",
         "Manos Ajenas",
-        "Tus sectarios ya saben qué hacer. El botón 'AUTO' sobre las pestañas compra edificios solo, una unidad por segundo, sin gastar más de la mitad de tu Conocimiento. Tócalo para encenderlo o apagarlo.",
+        "Tus sectarios ya saben qué hacer. El botón 'AUTO' sobre las pestañas compra edificios solo, una unidad por segundo, sin gastar más de la mitad de tu Conocimiento. El engranaje de al lado abre el panel de automatización: qué edificios comprar y cuánto gastar.",
         "Al alcanzar el hito del autocomprador de edificios (5 Ascensiones)"
     )
 }

@@ -51,4 +51,21 @@ class AscensionMilestonesTest {
         assertTrue(bought.isNotEmpty())
         assertTrue(bought.all { it.type == UpgradeType.CLICK_MULTIPLIER })
     }
+
+    @Test
+    fun `auto ascension waits until the gain doubles the sanity`() {
+        // Sin Cordura: basta con 1 punto
+        assertFalse(AutomationSettings.shouldAutoAscend(java.math.BigDecimal.ZERO, java.math.BigDecimal.ZERO))
+        assertTrue(AutomationSettings.shouldAutoAscend(java.math.BigDecimal.ONE, java.math.BigDecimal.ZERO))
+        // Con 10 de Cordura hacen falta 10 más
+        assertFalse(AutomationSettings.shouldAutoAscend(java.math.BigDecimal(9), java.math.BigDecimal(10)))
+        assertTrue(AutomationSettings.shouldAutoAscend(java.math.BigDecimal(10), java.math.BigDecimal(10)))
+    }
+
+    @Test
+    fun `the budget is a fraction of the knowledge`() {
+        assertEquals(0.5, AutomationSettings().budgetFraction, 0.0)
+        assertEquals(0.25, AutomationSettings(budgetPercent = 25).budgetFraction, 0.0)
+        assertTrue(AutomationSettings.BUDGET_OPTIONS.contains(AutomationSettings.DEFAULT_BUDGET_PERCENT))
+    }
 }

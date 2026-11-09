@@ -64,6 +64,8 @@ data class GameUiState(
     /** Ascensiones totales (hitos) y automatizaciones elegidas. */
     val ascensions: Int = 0,
     val automation: AutomationSettings = AutomationSettings(),
+    /** Cordura ganada en la última Ascensión automática (aviso breve), o null. */
+    val autoAscensionNotice: String? = null,
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

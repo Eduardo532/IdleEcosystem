@@ -18,6 +18,10 @@ import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AutomationDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_ASCEND_TAG
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertCountEquals
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
 import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
@@ -398,6 +402,39 @@ class CriticalUiTest {
         compose.onNodeWithText("Al mejorar: x1.00 → x1.10").assertExists()
         compose.onNodeWithText("Bono de Cordura: x3.00 → x2.90").assertExists()
         compose.onNodeWithText("Neto en producción: x1.06").assertExists()
+    }
+
+    @Composable
+    private fun Automation(ascensions: Int, onBudget: (Int) -> Unit = {}) {
+        AutomationDialog(
+            settings = com.EGomez.idleecosystem.domain.logic.AutomationSettings(),
+            ascensions = ascensions,
+            buildings = listOf(notes),
+            rituals = emptyList(),
+            onBudgetSelected = onBudget,
+            onToggleBuildings = {}, onToggleBuildingExcluded = {}, onToggleGrimoire = {},
+            onToggleAutoAscend = {}, onRitualSelected = {}, onDismiss = {}
+        )
+    }
+
+    @Test
+    fun `the automation panel opens each section with its milestone`() {
+        compose.setContent { Automation(ascensions = 5) }
+
+        compose.onNodeWithText("Notas Desordenadas").assertExists()
+        // La Ascensión automática llega con 10 Ascensiones
+        compose.onNodeWithTag(AUTO_ASCEND_TAG).assertDoesNotExist()
+        compose.onAllNodesWithText("Se desbloquea con 10 Ascensiones.").assertCountEquals(2)
+    }
+
+    @Test
+    fun `the automation budget can be changed`() {
+        var chosen = 0
+        compose.setContent { Automation(ascensions = 10, onBudget = { chosen = it }) }
+
+        compose.onNodeWithTag(AUTO_ASCEND_TAG).assertExists()
+        compose.onNodeWithText("25%").performClick()
+        assertEquals(25, chosen)
     }
 }
 

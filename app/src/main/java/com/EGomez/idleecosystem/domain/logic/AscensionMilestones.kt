@@ -2,6 +2,7 @@ package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
+import java.math.BigDecimal
 
 /**
  * Hitos de Ascensión: al llegar a cierta cantidad de Ascensiones, cada vida nueva
@@ -19,7 +20,7 @@ enum class AscensionMilestone(val ascensions: Int) {
     KEEP_CLICK_UPGRADES(3),
     /** Compra edificios solo, con la mitad del Conocimiento como tope. */
     BUILDING_AUTOBUYER(5),
-    /** Compra mejoras del Grimorio solo, con el mismo tope. */
+    /** Compra mejoras del Grimorio solo, con el mismo tope, y permite Ascender sola. */
     GRIMOIRE_AUTOBUYER(10),
     /** Al Ascender se conservan las sinergias compradas. */
     KEEP_SYNERGIES(25),
@@ -55,10 +56,27 @@ data class AutomationSettings(
     val buildings: Boolean = true,
     val grimoire: Boolean = true,
     /** El ritual que se activa solo (null = ninguno). */
-    val ritualId: String? = null
+    val ritualId: String? = null,
+    /** Edificios que el autocomprador no toca. */
+    val excludedBuildings: Set<String> = emptySet(),
+    /** Porcentaje máximo del Conocimiento que pueden gastar los autocompradores. */
+    val budgetPercent: Int = DEFAULT_BUDGET_PERCENT,
+    /** Ascender sola cuando la Cordura ganada duplique la que se tiene. */
+    val autoAscend: Boolean = false
 ) {
+    val budgetFraction: Double get() = budgetPercent.coerceIn(1, 100) / 100.0
+
     companion object {
-        /** Los autocompradores gastan como máximo esta fracción del Conocimiento. */
-        const val BUDGET_FRACTION = 0.5
+        const val DEFAULT_BUDGET_PERCENT = 50
+        val BUDGET_OPTIONS = listOf(10, 25, 50, 75, 100)
+
+        /**
+         * La regla de la Ascensión automática: ascender cuando la Cordura que se gana
+         * es al menos la que ya se tiene (la duplica), y nunca por menos de 1 punto.
+         * Es el consejo clásico del género ("abdica al duplicar"), y evita ascender en
+         * bucle por migajas.
+         */
+        fun shouldAutoAscend(gain: BigDecimal, residualSanity: BigDecimal): Boolean =
+            gain.signum() > 0 && gain >= residualSanity.max(BigDecimal.ONE)
     }
 }

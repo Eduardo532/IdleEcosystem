@@ -23,7 +23,20 @@
     <string name="ascend_requirement">Req: %1$s generated</string>
     <string name="ascension_count">This will be ascension #%1$d.</string>
     <string name="ascension_milestones_title">Ascension milestones</string>
+    <string name="auto_ascended">Automatic ascension: +%1$s Residual Sanity</string>
     <string name="auto_chip">AUTO</string>
+    <string name="automation_ascend">Automatic ascension</string>
+    <string name="automation_ascend_hint">Ascends on its own when the Sanity you would gain matches or exceeds what you have, that is, when it doubles it.</string>
+    <string name="automation_budget">Autobuyers spend up to %1$d%% of your Knowledge.</string>
+    <string name="automation_budget_title">Budget</string>
+    <string name="automation_buildings">Building autobuyer</string>
+    <string name="automation_buildings_hint">Buys one unit of each checked building per second, from the most expensive to the cheapest.</string>
+    <string name="automation_grimoire">Grimoire autobuyer</string>
+    <string name="automation_grimoire_hint">Buys the upgrades that fit the budget, from the cheapest to the most expensive.</string>
+    <string name="automation_locked">Unlocks at %1$d ascensions.</string>
+    <string name="automation_ritual">Automatic ritual</string>
+    <string name="automation_ritual_none">None</string>
+    <string name="automation_title">Automation</string>
     <string name="back">Back</string>
     <string name="big_numbers">Big numbers</string>
     <string name="bought_label">BOUGHT</string>
@@ -39,6 +52,7 @@
     <string name="buy_amount">Buy %1$s</string>
     <string name="buy_milestone_chip">NEXT</string>
     <string name="cancel">CANCEL</string>
+    <string name="cd_automation_settings">Automation settings</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_statistics">Statistics</string>
     <string name="close">Close</string>
@@ -73,7 +87,7 @@
     <string name="madness_map">MADNESS MAP</string>
     <string name="milestone_auto_ritual">A chosen ritual activates on its own.</string>
     <string name="milestone_building_autobuyer">Building autobuyer.</string>
-    <string name="milestone_grimoire_autobuyer">Grimoire autobuyer.</string>
+    <string name="milestone_grimoire_autobuyer">Grimoire autobuyer and automatic ascension.</string>
     <string name="milestone_keep_click">You keep the Grimoire\'s click upgrades.</string>
     <string name="milestone_keep_synergies">You keep the synergies you bought.</string>
     <string name="milestone_progress">Milestone %1$d · %2$d to go</string>

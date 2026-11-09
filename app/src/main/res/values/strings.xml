@@ -24,7 +24,20 @@
     <string name="ascend_requirement">Req: %1$s generado</string>
     <string name="ascension_count">Esta será tu Ascensión n.º %1$d.</string>
     <string name="ascension_milestones_title">Hitos de Ascensión</string>
+    <string name="auto_ascended">Ascensión automática: +%1$s Cordura Residual</string>
     <string name="auto_chip">AUTO</string>
+    <string name="automation_ascend">Ascensión automática</string>
+    <string name="automation_ascend_hint">Asciende sola cuando la Cordura que ganarías iguala o supera la que tienes, es decir, cuando la duplica.</string>
+    <string name="automation_budget">Los autocompradores gastan hasta el %1$d%% de tu Conocimiento.</string>
+    <string name="automation_budget_title">Presupuesto</string>
+    <string name="automation_buildings">Autocomprador de edificios</string>
+    <string name="automation_buildings_hint">Compra una unidad de cada edificio marcado por segundo, del más caro al más barato.</string>
+    <string name="automation_grimoire">Autocomprador del Grimorio</string>
+    <string name="automation_grimoire_hint">Compra las mejoras que entran en el presupuesto, de la más barata a la más cara.</string>
+    <string name="automation_locked">Se desbloquea con %1$d Ascensiones.</string>
+    <string name="automation_ritual">Ritual automático</string>
+    <string name="automation_ritual_none">Ninguno</string>
+    <string name="automation_title">Automatización</string>
     <string name="back">Volver</string>
     <string name="big_numbers">Números grandes</string>
     <string name="bought_label">COMPRADO</string>
@@ -40,6 +53,7 @@
     <string name="buy_amount">Comprar %1$s</string>
     <string name="buy_milestone_chip">HITO</string>
     <string name="cancel">CANCELAR</string>
+    <string name="cd_automation_settings">Ajustes de automatización</string>
     <string name="cd_settings">Configuración</string>
     <string name="cd_statistics">Estadísticas</string>
     <string name="close">Cerrar</string>
@@ -74,7 +88,7 @@
     <string name="madness_map">MAPA DE LOCURA</string>
     <string name="milestone_auto_ritual">Un ritual elegido se activa solo.</string>
     <string name="milestone_building_autobuyer">Autocomprador de edificios.</string>
-    <string name="milestone_grimoire_autobuyer">Autocomprador del Grimorio.</string>
+    <string name="milestone_grimoire_autobuyer">Autocomprador del Grimorio y Ascensión automática.</string>
     <string name="milestone_keep_click">Conservas las mejoras de clic del Grimorio.</string>
     <string name="milestone_keep_synergies">Conservas las sinergias compradas.</string>
     <string name="milestone_progress">Hito %1$d · faltan %2$d</string>

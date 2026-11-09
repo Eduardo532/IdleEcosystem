@@ -241,7 +241,8 @@ class GameEngineTest {
             val scrolls = list.first { it.id == SCROLLS }.currentMultiplier
             return scrolls.divide(notes, java.math.MathContext.DECIMAL64)
         }
-        val before = ratio(engine.buildings.value)
+        // Los Pergaminos se publican al hacerse visibles (en el siguiente segundo)
+        val before = ratio(await(engine.buildings) { list -> list.any { it.id == SCROLLS && it.amountOwned == 50 } })
 
         engine.buyUpgrade(synergyId)
         // 50 Notas -> +50 % solo para los Pergaminos

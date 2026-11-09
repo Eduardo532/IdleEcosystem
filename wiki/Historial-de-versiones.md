@@ -8,6 +8,7 @@ Primera etapa del plan de retención: que el juego siempre muestre una meta y qu
 
 - **v0.14.0:** próxima meta (en el botón de logros), botón **HITO** y barra de hito en cada edificio, ritmo de la Ascensión (cuándo llega el siguiente punto y cuándo se duplica).
 - **v0.14.1:** conjuntos de logros (x2 por edificio), 15 sinergias entre edificios, mantener pulsado para hacer clic, revelación gradual de Grimorio, Rituales y Ascensión. La alpha.2 corrige la cuenta regresiva de las runas.
+- **v0.14.2:** tutoriales de las mecánicas nuevas (mantener pulsado, próxima meta, conjuntos y sinergias), tutoriales anteriores actualizados y efecto real de las sinergias en el Grimorio.
 
 ## v0.13.4 · "Ecos de Otras Vidas" *(oficial, 9 nov 2026)*
 

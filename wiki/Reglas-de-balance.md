@@ -1,0 +1,90 @@
+# Reglas de balance
+
+Estas son las reglas que mantienen el juego equilibrado. Casi todas tienen un **test unitario** que falla si un valor nuevo se sale de ellas: antes de cambiar un número, revisa la regla que le corresponde.
+
+## Unidad de medida: segundos de producción
+
+Para comparar bonos distintos, se miden en **segundos de producción base equivalentes**:
+
+- un potenciador **xM durante D segundos** aporta `(M − 1) × D` segundos extra;
+- un **salto de tiempo** aporta exactamente sus segundos.
+
+Ejemplo: x10 durante 15 s = 9 × 15 = **135 s** de producción.
+
+## Potenciadores temporales: se suman
+
+Runas, rituales y eventos combinan sus multiplicadores **sumando**: `1 + Σ(Mᵢ − 1)`. Los permanentes (mejoras, Cordura, logros, Mapa de Locura) se multiplican.
+
+Así, x10 + x20 activos a la vez dan x29, no x200. *(Código: `BuffMath`.)*
+
+## Runas
+
+Cada nivel tiene un rango fijo de valor:
+
+| Nivel | Runas de producción | Runas de clic (en clics equivalentes) |
+|---|---|---|
+| 1 | 90 – 180 s | 300 – 600 |
+| 2 | 360 – 600 s | 1.200 – 2.400 |
+| 3 | 1.200 – 2.400 s | 4.000 – 8.000 |
+
+- Clics equivalentes de una runa de clic = `clics × multiplicador de clic × multiplicador de producción`.
+- El autoclic de las runas hace **10 clics/s**.
+- *(Código: `RuneEffects`; test: `RuneEffectsTest` recorre todo el catálogo.)*
+
+## Rituales
+
+Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
+
+| Ritual | Costo | Segundos de producción | Por Eco |
+|---|---|---|---|
+| Cántico del Vacío | 15 | (3 − 1) × 30 = 60 | 4,0 |
+| Ofrenda de Conocimiento | 25 | 120 | 4,8 |
+| Grieta Temporal | 50 | (20 − 1) × 15 = 285 | 5,7 |
+| Vigilia Eterna | 100 | (6 − 1) × 120 = 600 | 6,0 |
+
+*(Código: `Ritual.productionSeconds`.)*
+
+## Edificios
+
+- Costo de la unidad n: `costo base × 1,15ⁿ`.
+- Cada edificio se desbloquea al tener 1 del anterior.
+
+## Grimorio
+
+- **Escalera:** escalones en 25, 50 y 100; cada uno x2. Costo `costo base × 1,15^escalón × 10`, redondeado a 2 cifras significativas. *(Código: `GrimoireLadder`.)*
+- **Sinergias:** una por par de edificios vecinos (15). Aparecen con 50 de ambos, cuestan lo mismo que el escalón de 50 del edificio objetivo y dan `1 + 0,01 × unidades del edificio fuente`. Sin tope. *(Código: `BuildingSynergies`.)*
+
+## Logros
+
+- El bono global de logros es el **producto** de los bonos de los logros desbloqueados (redondeado a 16 cifras).
+- **Conjuntos:** todos los logros de cantidad no secretos de un edificio → x2 a ese edificio. *(Código: `AchievementSets`.)*
+- **Próxima meta:** el logro no secreto con mayor progreso (a igual progreso, el primero de la lista). *(Código: `NextGoalFinder`.)*
+
+## Ascensión
+
+- Cordura = `⌊√(generado en esta vida ÷ 10⁶)⌋ × bono de Cordura`. Duplicarla exige 4 veces más Conocimiento.
+- Cada punto de Cordura Residual: +10 % de producción global (se suma: `1 + 0,1 × Cordura`).
+
+## Clic
+
+- Clic = `1 + producción total de la Sinapsis`.
+- Mantener pulsado: **8 clics/s** a partir de los 0,3 s, por debajo del autoclic de las runas (10/s) para no quitarles valor.
+- Probabilidad de Eco por clic: 1 % + bonos de runas.
+
+## Revelación de sistemas
+
+| Sistema | Condición |
+|---|---|
+| Grimorio | 250 de Conocimiento histórico, o alguna mejora comprada, o haber Ascendido |
+| Rituales | Algún Eco encontrado, o haber Ascendido |
+| Ascensión | Poder Ascender, tener Cordura, o haber Ascendido |
+
+Usa estadísticas históricas: un sistema descubierto no vuelve a esconderse salvo con el reinicio total. *(Código: `SystemReveal`.)*
+
+## Reglas técnicas
+
+- La tabla principal del guardado se llama **`game_save`**. Es un estándar del proyecto y **no se cambia**.
+- El esquema de Room se guarda en `app/schemas/` y la CI falla si cambia sin actualizarse.
+- La CI también comprueba que los campos del guardado no se renombren al minificar.
+- El motor corre en un solo hilo; la interfaz solo recibe copias.
+- Todo texto de contenido nuevo necesita su traducción al inglés: `ContentTranslationsTest` falla si falta alguna.

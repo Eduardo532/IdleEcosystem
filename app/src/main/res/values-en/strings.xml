@@ -74,7 +74,7 @@
     <string name="milestone_auto_ritual">A chosen ritual activates on its own.</string>
     <string name="milestone_building_autobuyer">Building autobuyer.</string>
     <string name="milestone_grimoire_autobuyer">Grimoire autobuyer.</string>
-    <string name="milestone_keep_click">You keep the Grimoire's click upgrades.</string>
+    <string name="milestone_keep_click">You keep the Grimoire\'s click upgrades.</string>
     <string name="milestone_keep_synergies">You keep the synergies you bought.</string>
     <string name="milestone_progress">Milestone %1$d · %2$d to go</string>
     <string name="milestone_starting_synapses">You start every life with 10 Synapses.</string>

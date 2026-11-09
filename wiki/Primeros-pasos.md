@@ -25,6 +25,10 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al cerrar el ju
 - **Botón de logros (arriba a la derecha):** la línea dorada de su borde inferior avanza hacia tu **próxima meta**, el logro pendiente más cercano. Ábrelo para verla completa.
 - **Etiquetas de colores bajo el contador:** los efectos activos de runas, con su tiempo restante.
 
+## Tutoriales
+
+El juego te explica cada sistema la primera vez que aparece, con una ventana que pausa la partida mientras la lees. Se pueden desactivar en Configuración → Juego.
+
 ## Consejos
 
 - Usa el botón **HITO** del menú de compra: compra justo lo que falta para el siguiente hito de un edificio, donde se desbloquea una mejora o un logro.

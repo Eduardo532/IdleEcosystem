@@ -17,8 +17,8 @@ import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
-import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
-import com.EGomez.idleecosystem.ui.screens.main.components.NEXT_GOAL_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.NEXT_GOAL_TAG
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.NextGoal
 import androidx.compose.ui.test.onNodeWithTag
@@ -223,21 +223,17 @@ class CriticalUiTest {
     }
 
     @Test
-    fun `the next goal is shown and opens the achievements`() {
-        var opened = 0
+    fun `the next goal is shown at the top of the achievements`() {
         compose.setContent {
-            InfoSection(
-                knowledgeFormatted = "100", knowledgePerSecond = "1", globalMultiplier = BigDecimal.ONE,
-                activeBuffMultiplier = 1.0, buffTimeRemaining = 0, clickMultiplier = "1",
-                onManualClick = { _, _, _ -> },
+            AchievementsDialog(
+                achievements = emptyList(), achievementsProgress = "0 / 0", secretsProgress = null,
                 nextGoal = NextGoal("b_not_2", "Notas II", "50 Notas", 0.68f),
-                onNextGoalClick = { opened++ }
+                onDismiss = {}
             )
         }
 
+        compose.onNodeWithTag(NEXT_GOAL_TAG).assertExists()
         compose.onNodeWithText("Próxima meta: 50 Notas (68%)").assertExists()
-        compose.onNodeWithTag(NEXT_GOAL_TAG).performClick()
-        assertEquals(1, opened)
     }
 
     @Test

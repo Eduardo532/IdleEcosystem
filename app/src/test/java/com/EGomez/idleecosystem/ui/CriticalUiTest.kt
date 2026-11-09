@@ -16,6 +16,11 @@ import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
+import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
+import com.EGomez.idleecosystem.ui.screens.main.components.NEXT_GOAL_TAG
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.NextGoal
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
@@ -198,5 +203,54 @@ class CriticalUiTest {
 
         compose.onNodeWithContentDescription("Volver").performClick()
         compose.onNodeWithText("Zona peligrosa").assertExists()
+    }
+
+    @Test
+    fun `the milestone option buys exactly what is missing`() {
+        var bought = 0
+        compose.setContent {
+            BuildingItem(
+                notes.copy(amountOwned = 19), BigDecimal(100_000), BigDecimal.ONE, BuildingCalculator(),
+                buyMultiplier = BuildingMilestones.BUY_TO_MILESTONE,
+                milestones = listOf(10, 25, 50)
+            ) { bought++ }
+        }
+
+        // 19 Notas: el hito siguiente es 25
+        compose.onNodeWithText("Hito 25 · faltan 6").assertExists()
+        compose.onNodeWithText("Comprar +6", substring = true).assertIsEnabled().performClick()
+        assertEquals(1, bought)
+    }
+
+    @Test
+    fun `the next goal is shown and opens the achievements`() {
+        var opened = 0
+        compose.setContent {
+            InfoSection(
+                knowledgeFormatted = "100", knowledgePerSecond = "1", globalMultiplier = BigDecimal.ONE,
+                activeBuffMultiplier = 1.0, buffTimeRemaining = 0, clickMultiplier = "1",
+                onManualClick = { _, _, _ -> },
+                nextGoal = NextGoal("b_not_2", "Notas II", "50 Notas", 0.68f),
+                onNextGoalClick = { opened++ }
+            )
+        }
+
+        compose.onNodeWithText("Próxima meta: 50 Notas (68%)").assertExists()
+        compose.onNodeWithTag(NEXT_GOAL_TAG).performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun `the ascend dialog says when the reward doubles`() {
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                pacing = AscendPacing("9.50e+06", "4", "1.60e+07", "6", "3.60e+07")
+            )
+        }
+
+        compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertExists()
+        compose.onNodeWithText("Siguiente punto: +4 al llegar a 1.60e+07").assertExists()
+        compose.onNodeWithText("Para duplicar: +6 al llegar a 3.60e+07").assertExists()
     }
 }

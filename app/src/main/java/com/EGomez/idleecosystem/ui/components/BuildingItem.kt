@@ -21,6 +21,7 @@ import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.SurfaceGrey
 import java.math.BigDecimal
@@ -34,6 +35,7 @@ fun BuildingItem(
     calculator: BuildingCalculator,
     buyMultiplier: Int,
     costMultiplier: Double = 1.0, // NUEVO PARÁMETRO
+    milestones: List<Int> = emptyList(),
     onBuyClick: () -> Unit
 ) {
     // 1. Calcular Costo Base (Sin descuento)
@@ -55,9 +57,18 @@ fun BuildingItem(
             } else {
                 calculator.calculateNextCost(building) to "+1"
             }
+        } else if (buyMultiplier == BuildingMilestones.BUY_TO_MILESTONE) {
+            // Justo lo que falta para el siguiente hito
+            val amount = BuildingMilestones.amountToNext(milestones, owned)
+            calculator.calculateCostForAmount(building, amount) to "+$amount"
         } else {
             calculator.calculateCostForAmount(building, buyMultiplier) to "+$buyMultiplier"
         }
+    }
+    val nextMilestone = remember(owned, milestones) { BuildingMilestones.next(milestones, owned) }
+    val milestoneProgress = remember(owned, milestones) {
+        val start = BuildingMilestones.previous(milestones, owned)
+        ((owned - start).toFloat() / (nextMilestone - start)).coerceIn(0f, 1f)
     }
 
     // 2. Aplicar Descuento
@@ -138,6 +149,30 @@ fun BuildingItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                // Cuánto falta para el siguiente hito (escalón del Grimorio o logro)
+                if (milestones.isNotEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { milestoneProgress },
+                            color = tierColor,
+                            trackColor = Color.White.copy(alpha = 0.08f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(3.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.milestone_progress, nextMilestone, nextMilestone - owned),
+                            color = Color.Gray,
+                            fontSize = 9.sp,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.width(8.dp))
 

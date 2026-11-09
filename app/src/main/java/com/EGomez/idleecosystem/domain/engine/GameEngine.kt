@@ -11,9 +11,13 @@ import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
+import com.EGomez.idleecosystem.domain.logic.NextGoal
+import com.EGomez.idleecosystem.domain.logic.NextGoalFinder
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
+import com.EGomez.idleecosystem.domain.logic.PrestigePacing
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
@@ -66,6 +70,9 @@ data class EconomyState(
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
     val potentialPrestige: BigDecimal = BigDecimal.ZERO,
     val canPrestige: Boolean = false,
+    /** Conocimiento generado en esta vida: el que cuenta para la Cordura. */
+    val knowledgeThisRun: BigDecimal = BigDecimal.ZERO,
+    val prestigePacing: PrestigePacing = PrestigePacing(),
     val buildingCostMultiplier: Double = 1.0,
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
@@ -131,6 +138,7 @@ class GameEngine @Inject constructor(
     private var baseProductionPerSecond = BigDecimal.ZERO
     private var globalMultiplier = BigDecimal.ONE
     private var potentialPrestige = BigDecimal.ZERO
+    private var prestigePacing = PrestigePacing()
     private var costMultiplier = 1.0
 
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
@@ -157,6 +165,16 @@ class GameEngine @Inject constructor(
 
     private val _achievementProgress = MutableStateFlow(AchievementProgress())
     val achievementProgress: StateFlow<AchievementProgress> = _achievementProgress.asStateFlow()
+
+    /** El logro pendiente más avanzado, o null si ya no quedan. */
+    private val _nextGoal = MutableStateFlow<NextGoal?>(null)
+    val nextGoal: StateFlow<NextGoal?> = _nextGoal.asStateFlow()
+
+    /** Hitos de cada edificio (escalera del Grimorio y logros); no cambian en la partida. */
+    val buildingMilestones: Map<String, List<Int>> = BuildingMilestones.build(
+        buildingManager.availableBuildings.map { it.id },
+        achievementManager.availableAchievements
+    )
 
     private val _prestigeUpgrades = MutableStateFlow<List<PrestigeUpgrade>>(emptyList())
     val prestigeUpgrades: StateFlow<List<PrestigeUpgrade>> = _prestigeUpgrades.asStateFlow()
@@ -201,7 +219,11 @@ class GameEngine @Inject constructor(
         publishEconomy()
     }
 
-    fun buyBuilding(buildingId: String, amount: Int) = post {
+    fun buyBuilding(buildingId: String, requested: Int) = post {
+        val amount = if (requested == BuildingMilestones.BUY_TO_MILESTONE) {
+            val owned = buildingManager.availableBuildings.find { it.id == buildingId }?.amountOwned ?: return@post
+            BuildingMilestones.amountToNext(buildingMilestones[buildingId].orEmpty(), owned)
+        } else requested
         val discount = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
         val cost = buildingManager.getCost(buildingId, amount, knowledge, discount)
         val bought = buildingManager.tryBuyBuilding(buildingId, knowledge, amount, discount)
@@ -728,8 +750,10 @@ class GameEngine @Inject constructor(
             productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
         } else productionPerSecond
 
-        potentialPrestige = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
-            .multiply(prestigeShopManager.getPrestigeGainMultiplier())
+        val gainMultiplier = prestigeShopManager.getPrestigeGainMultiplier()
+        potentialPrestige = prestigeManager.calculatePotentialPrestige(knowledgeThisRun()).multiply(gainMultiplier)
+        // Una vez por segundo basta: solo cambia al cruzar un punto de Cordura
+        prestigePacing = prestigeManager.pacing(knowledgeThisRun(), gainMultiplier)
 
         publishCollections()
         publishEconomy()
@@ -756,6 +780,7 @@ class GameEngine @Inject constructor(
             secretsFound = all.count { it.isSecret && it.isUnlocked },
             secretsTotal = all.count { it.isSecret }
         )
+        _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings)
         _prestigeUpgrades.value = prestigeShopManager.upgrades.map { it.copy() }
         _statistics.value = statsManager.snapshot()
     }
@@ -770,6 +795,8 @@ class GameEngine @Inject constructor(
             globalMultiplier = globalMultiplier,
             potentialPrestige = potentialPrestige,
             canPrestige = potentialPrestige.signum() > 0,
+            knowledgeThisRun = knowledgeThisRun(),
+            prestigePacing = prestigePacing,
             buildingCostMultiplier = costMultiplier,
             echoChance = echoChance()
         )

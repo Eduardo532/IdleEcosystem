@@ -30,6 +30,30 @@ class PrestigeManager @Inject constructor() {
         return BigMath.floorSqrt(ratio)
     }
 
+    /**
+     * Cuánto falta para el siguiente punto y para duplicar la recompensa. La Cordura es
+     * la raíz cuadrada del Conocimiento generado, así que duplicarla exige 4 veces más:
+     * mostrarlo convierte "¿cuándo asciendo?" en una meta concreta.
+     *
+     * [gainMultiplier] es el bono de la Tienda de Cordura (se aplica a los puntos, no
+     * al Conocimiento necesario).
+     */
+    fun pacing(knowledgeThisRun: BigDecimal, gainMultiplier: BigDecimal = BigDecimal.ONE): PrestigePacing {
+        val points = calculatePotentialPrestige(knowledgeThisRun)
+        val nextPoints = points.add(BigDecimal.ONE)
+        val doublePoints = points.multiply(BigDecimal(2))
+        return PrestigePacing(
+            nextGain = nextPoints.multiply(gainMultiplier),
+            nextAt = knowledgeForPoints(nextPoints),
+            doubleGain = if (points.signum() > 0) doublePoints.multiply(gainMultiplier) else null,
+            doubleAt = if (points.signum() > 0) knowledgeForPoints(doublePoints) else null
+        )
+    }
+
+    /** El Conocimiento generado en una vida que da exactamente [points] de Cordura. */
+    fun knowledgeForPoints(points: BigDecimal): BigDecimal =
+        points.multiply(points).multiply(PRESTIGE_THRESHOLD)
+
     // Calcula el multiplicador global actual basado en tu Cordura
     fun getPrestigeMultiplier(): BigDecimal {
         val bonus = residualSanity.multiply(BONUS_PER_POINT)
@@ -48,3 +72,15 @@ class PrestigeManager @Inject constructor() {
         residualSanity = residualSanity.add(amount)
     }
 }
+
+/**
+ * El ritmo de la Ascensión: la Cordura del siguiente punto y la del doble de lo que
+ * ganarías ahora, con el Conocimiento generado que hace falta para cada una. Sin
+ * puntos todavía no hay "doble" (es null).
+ */
+data class PrestigePacing(
+    val nextGain: BigDecimal = BigDecimal.ONE,
+    val nextAt: BigDecimal = BigDecimal("1000000"),
+    val doubleGain: BigDecimal? = null,
+    val doubleAt: BigDecimal? = null
+)

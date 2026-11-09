@@ -164,6 +164,8 @@ fun MainScreen(
                             activeBuffMultiplier = uiState.activeBuffMultiplier,
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
+                            nextGoal = uiState.nextGoal,
+                            onNextGoalClick = { showAchievementsDialog = true },
                             onManualClick = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
                                 if (result.knowledgeGained > BigDecimal.ZERO && uiState.isFloatingTextEnabled) {
@@ -193,11 +195,13 @@ fun MainScreen(
                             currentKnowledge = uiState.rawKnowledge, currentEchoes = uiState.echoes,
                             globalMultiplier = uiState.globalMultiplier, buildingCalculator = buildingCalculator,
                             buildingCostMultiplier = uiState.buildingCostMultiplier,
+                            buildingMilestones = viewModel.buildingMilestones,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
                             onBuyAllUpgrades = { viewModel.onBuyAllUpgrades() },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
+                            doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -258,6 +262,13 @@ fun MainScreen(
             if (showAscendConfirmation) {
                 AscendDialog(
                     sanityGainFormatted = uiState.potentialPrestigeFormatted,
+                    pacing = AscendPacing(
+                        generated = uiState.knowledgeThisRunFormatted,
+                        nextGain = uiState.nextSanityGainFormatted,
+                        nextAt = uiState.nextSanityAtFormatted,
+                        doubleGain = uiState.doubleSanityGainFormatted,
+                        doubleAt = uiState.doubleSanityAtFormatted
+                    ),
                     onConfirm = {
                         viewModel.onAscendClicked()
                         showAscendConfirmation = false

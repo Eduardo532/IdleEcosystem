@@ -24,6 +24,44 @@ class PrestigeManagerTest {
     }
 
     @Test
+    fun `pacing shows the next point and the doubling point`() {
+        // 9,5M generados -> 3 puntos. El 4.º llega con 16M y el doble (6) con 36M.
+        val pacing = manager.pacing(BigDecimal("9500000"))
+        assertEquals(0, BigDecimal(4).compareTo(pacing.nextGain))
+        assertEquals(0, BigDecimal("16000000").compareTo(pacing.nextAt))
+        assertEquals(0, BigDecimal(6).compareTo(pacing.doubleGain))
+        assertEquals(0, BigDecimal("36000000").compareTo(pacing.doubleAt))
+    }
+
+    @Test
+    fun `doubling always needs four times the knowledge`() {
+        listOf("1000000", "4000000", "2.5e9", "1e40").forEach { knowledge ->
+            val points = manager.calculatePotentialPrestige(BigDecimal(knowledge))
+            val pacing = manager.pacing(BigDecimal(knowledge))
+            val ratio = pacing.doubleAt!!.divide(manager.knowledgeForPoints(points))
+            assertEquals(knowledge, 0, BigDecimal(4).compareTo(ratio))
+            // Y con ese Conocimiento se gana justo el doble
+            assertEquals(knowledge, 0, points.multiply(BigDecimal(2)).compareTo(manager.calculatePotentialPrestige(pacing.doubleAt)))
+        }
+    }
+
+    @Test
+    fun `before the first point there is no doubling`() {
+        val pacing = manager.pacing(BigDecimal("250000"))
+        assertEquals(0, BigDecimal.ONE.compareTo(pacing.nextGain))
+        assertEquals(0, BigDecimal("1000000").compareTo(pacing.nextAt))
+        assertEquals(null, pacing.doubleAt)
+    }
+
+    @Test
+    fun `the shop bonus multiplies the points, not the knowledge needed`() {
+        val pacing = manager.pacing(BigDecimal("4000000"), gainMultiplier = BigDecimal("1.5"))
+        assertEquals(0, BigDecimal("4.5").compareTo(pacing.nextGain))
+        assertEquals(0, BigDecimal("9000000").compareTo(pacing.nextAt))
+        assertEquals(0, BigDecimal(6).compareTo(pacing.doubleGain))
+    }
+
+    @Test
     fun `does not crash with huge numbers`() {
         // Before: Math.sqrt(Infinity) -> BigDecimal(Infinity) threw NumberFormatException
         val result = manager.calculatePotentialPrestige(BigDecimal("1e500"))

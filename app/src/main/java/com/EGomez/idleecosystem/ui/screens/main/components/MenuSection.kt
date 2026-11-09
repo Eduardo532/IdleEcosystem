@@ -5,6 +5,8 @@ import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
@@ -59,6 +62,7 @@ fun MenuSection(
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
     buildingCostMultiplier: Double, // NUEVO PARÁMETRO
+    buildingMilestones: Map<String, List<Int>> = emptyMap(),
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
     onBuyAllUpgrades: () -> Unit = {},
@@ -66,6 +70,7 @@ fun MenuSection(
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
+    doubleSanityAtFormatted: String? = null,
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -93,14 +98,21 @@ fun MenuSection(
 
         if (menuWeight > 0.2f) {
             if (selectedTabIndex == 0) {
+                val milestoneLabel = stringResource(R.string.buy_milestone_chip)
+                // Seis opciones no caben en pantallas angostas: la fila se desplaza
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    listOf(1, 5, 10, 100, -1).forEach { mult ->
-                        val label = if (mult == -1) "MAX" else "x$mult"
+                    listOf(1, 5, 10, 100, BuildingMilestones.BUY_TO_MILESTONE, -1).forEach { mult ->
+                        val label = when (mult) {
+                            -1 -> "MAX"
+                            BuildingMilestones.BUY_TO_MILESTONE -> milestoneLabel
+                            else -> "x$mult"
+                        }
                         FilterChip(
                             selected = buyMultiplier == mult,
                             onClick = { onBuyMultiplierChanged(mult) },
@@ -155,6 +167,7 @@ fun MenuSection(
                                 calculator = buildingCalculator,
                                 buyMultiplier = buyMultiplier,
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
+                                milestones = buildingMilestones[building.id].orEmpty(),
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -292,6 +305,14 @@ fun MenuSection(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // Cuándo conviene ascender: el punto en que la recompensa se duplica
+                        if (canPrestige && doubleSanityAtFormatted != null) {
+                            Text(
+                                stringResource(R.string.sanity_double_short, doubleSanityAtFormatted),
+                                color = Color.Gray,
+                                fontSize = 9.sp
+                            )
+                        }
                     }
                     Row {
                         Button(

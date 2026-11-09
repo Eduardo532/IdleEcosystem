@@ -76,6 +76,9 @@ class MainViewModel @Inject constructor(
 
     val buildingsState: StateFlow<List<Building>> = engine.buildings
 
+    /** Hitos de cada edificio, para el botón "Hito" y la barra de cada tarjeta. */
+    val buildingMilestones: Map<String, List<Int>> = engine.buildingMilestones
+
     private val _showPurchasedState = MutableStateFlow(false)
     val showPurchasedState: StateFlow<Boolean> = _showPurchasedState.asStateFlow()
 
@@ -108,6 +111,9 @@ class MainViewModel @Inject constructor(
         }
         viewModelScope.launch {
             engine.achievementProgress.collect { progress -> _uiState.update { it.withAchievements(progress) } }
+        }
+        viewModelScope.launch {
+            engine.nextGoal.collect { goal -> _uiState.update { it.copy(nextGoal = goal) } }
         }
         viewModelScope.launch {
             engine.prestigeUpgrades.collect { upgrades -> _uiState.update { it.copy(prestigeUpgrades = upgrades) } }
@@ -157,6 +163,11 @@ class MainViewModel @Inject constructor(
         prestigeCurrencyFormatted = economy.sanity.toBeautifulString(),
         rawSanity = economy.sanity,
         potentialPrestigeFormatted = economy.potentialPrestige.toBeautifulString(),
+        knowledgeThisRunFormatted = economy.knowledgeThisRun.toBeautifulString(),
+        nextSanityGainFormatted = economy.prestigePacing.nextGain.toBeautifulString(),
+        nextSanityAtFormatted = economy.prestigePacing.nextAt.toBeautifulString(),
+        doubleSanityGainFormatted = economy.prestigePacing.doubleGain?.toBeautifulString(),
+        doubleSanityAtFormatted = economy.prestigePacing.doubleAt?.toBeautifulString(),
         canPrestige = economy.canPrestige,
         globalMultiplier = economy.globalMultiplier,
         buildingCostMultiplier = economy.buildingCostMultiplier,

@@ -11,6 +11,7 @@ import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
+import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
@@ -197,6 +198,32 @@ class GameEngineTest {
         assertTrue(bought.first { it.id == "u_click_1" }.isBought)
         val economy = await(engine.economy) { it.knowledge < BigDecimal(1_000) }
         assertTrue(economy.knowledge < BigDecimal(300))
+    }
+
+    @Test
+    fun `buying to the next milestone stops exactly on it`() = runBlocking {
+        engine.grantKnowledge(BigDecimal(100_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(100_000) }
+
+        // Notas: el primer hito es el logro de 10 y el siguiente, la escalera de 25
+        engine.buyBuilding(NOTES, BuildingMilestones.BUY_TO_MILESTONE)
+        await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned == 10 } }
+        engine.buyBuilding(NOTES, BuildingMilestones.BUY_TO_MILESTONE)
+        await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned == 25 } }
+        Unit // JUnit exige que el test devuelva void
+    }
+
+    @Test
+    fun `the next goal follows the most advanced achievement`() = runBlocking {
+        // Partida nueva: la primera meta es el primer logro de Conocimiento
+        assertEquals("k_1", await(engine.nextGoal) { it != null }!!.achievementId)
+
+        engine.grantKnowledge(BigDecimal(1_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(1_000) }
+        engine.buyBuilding(NOTES, 9)
+        // 9 de 10 Notas (90 %) supera a cualquier meta de Conocimiento
+        val goal = await(engine.nextGoal) { it?.achievementId == "b_not_1" }!!
+        assertTrue(goal.progress >= 0.9f)
     }
 
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =

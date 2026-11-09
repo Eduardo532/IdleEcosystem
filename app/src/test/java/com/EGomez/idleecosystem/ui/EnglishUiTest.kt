@@ -65,4 +65,18 @@ class EnglishUiTest {
         compose.onNodeWithText("Messy Notes").assertExists()
         compose.onNodeWithText("Frantic scribbles.").assertExists()
     }
+
+    @Test
+    fun `the next goal is translated`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.InfoSection(
+                knowledgeFormatted = "100", knowledgePerSecond = "1", globalMultiplier = java.math.BigDecimal.ONE,
+                activeBuffMultiplier = 1.0, buffTimeRemaining = 0, clickMultiplier = "1",
+                onManualClick = { _, _, _ -> },
+                nextGoal = com.EGomez.idleecosystem.domain.logic.NextGoal("b_not_2", "Notas II", "50 Notas", 0.68f)
+            )
+        }
+
+        compose.onNodeWithText("Next goal: 50 Notes (68%)").assertExists()
+    }
 }

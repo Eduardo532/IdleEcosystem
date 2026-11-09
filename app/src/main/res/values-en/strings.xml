@@ -11,9 +11,12 @@
     <string name="app_title">Arcane Ecosystem</string>
     <string name="arcane_knowledge">Arcane Knowledge</string>
     <string name="ascend">ASCEND</string>
+    <string name="ascend_double">To double it: +%1$s at %2$s</string>
     <string name="ascend_gain">You will gain +%1$s Residual Sanity</string>
+    <string name="ascend_generated">Generated this life: %1$s</string>
     <string name="ascend_keep">You keep achievements, Echoes, rituals and the Sanity Shop.</string>
     <string name="ascend_lose">You will lose your Knowledge, your buildings and the Grimoire upgrades.</string>
+    <string name="ascend_next_point">Next point: +%1$s at %2$s</string>
     <string name="ascend_question">ASCEND?</string>
     <string name="ascend_requirement">Req: %1$s generated</string>
     <string name="back">Back</string>
@@ -29,6 +32,7 @@
     <string name="buy_all">Buy all</string>
     <string name="buy_all_count">Buy all (%1$d)</string>
     <string name="buy_amount">Buy %1$s</string>
+    <string name="buy_milestone_chip">NEXT</string>
     <string name="cancel">CANCEL</string>
     <string name="cd_settings">Settings</string>
     <string name="cd_statistics">Statistics</string>
@@ -59,9 +63,11 @@
     <string name="load_data">LOAD DATA</string>
     <string name="locked_node">LOCKED (Requires a connected node)</string>
     <string name="madness_map">MADNESS MAP</string>
+    <string name="milestone_progress">Milestone %1$d · %2$d to go</string>
     <string name="milestones">Milestones (%1$s)</string>
     <string name="missing_sanity">%1$s Sanity missing</string>
     <string name="music">Music</string>
+    <string name="next_goal">Next goal: %1$s (%2$d%%)</string>
     <string name="no_secrets">No secrets yet...</string>
     <string name="notation_scientific">Scientific</string>
     <string name="notation_suffix">With names</string>
@@ -92,6 +98,7 @@
     <string name="ritual_missing_echoes">NOT ENOUGH ECHOES (%1$s)</string>
     <string name="ritual_time_left">Time left: %1$ds</string>
     <string name="sanity_amount">Sanity: %1$s</string>
+    <string name="sanity_double_short">x2 at %1$s generated</string>
     <string name="secret_revealed">SECRET REVEALED!</string>
     <string name="secrets_progress">Secrets: %1$d / %2$d</string>
     <string name="settings_danger">Danger zone</string>

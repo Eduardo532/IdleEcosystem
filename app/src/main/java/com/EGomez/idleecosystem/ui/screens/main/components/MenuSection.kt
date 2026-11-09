@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
@@ -71,11 +74,23 @@ fun MenuSection(
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
     doubleSanityAtFormatted: String? = null,
+    revealed: SystemReveal = SystemReveal(),
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf(stringResource(R.string.tab_research), stringResource(R.string.tab_grimoire), stringResource(R.string.tab_rituals))
+    // Un sistema sin descubrir se ve como "???" hasta cumplir su requisito
+    val tabs = listOf(
+        stringResource(R.string.tab_research),
+        if (revealed.grimoire) stringResource(R.string.tab_grimoire) else LOCKED_TITLE,
+        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE
+    )
+    val lockedTabText = when {
+        selectedTabIndex == 1 && !revealed.grimoire ->
+            stringResource(R.string.locked_grimoire, SystemReveal.GRIMOIRE_AT.toBeautifulString())
+        selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
+        else -> null
+    }
 
     Column(
         modifier = modifier
@@ -157,7 +172,9 @@ fun MenuSection(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             ) {
-                when (selectedTabIndex) {
+                if (lockedTabText != null) {
+                    item { LockedSystem(lockedTabText) }
+                } else when (selectedTabIndex) {
                     0 -> {
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
@@ -282,7 +299,18 @@ fun MenuSection(
                 }
             }
 
-            if (isMenuExpanded) {
+            if (isMenuExpanded && !revealed.ascension) {
+                HorizontalDivider(color = Color(0xFF333333))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF0D0D0D))
+                        .padding(12.dp)
+                        .testTag(LOCKED_ASCENSION_TAG)
+                ) {
+                    LockedSystem(stringResource(R.string.locked_ascension, BigDecimal("1000000").toBeautifulString()))
+                }
+            } else if (isMenuExpanded) {
                 HorizontalDivider(color = Color(0xFF333333))
                 Row(
                     modifier = Modifier
@@ -363,6 +391,25 @@ fun MenuSection(
                     .padding(bottom = 8.dp)
             )
         }
+    }
+}
+
+private const val LOCKED_TITLE = "???"
+const val LOCKED_ASCENSION_TAG = "locked_ascension"
+
+/** Un sistema sin descubrir: un candado y lo que falta para verlo. */
+@Composable
+private fun LockedSystem(requirement: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 12.dp)
+    ) {
+        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(requirement, color = Color.Gray, fontSize = 13.sp)
     }
 }
 

@@ -29,6 +29,7 @@ import com.EGomez.idleecosystem.domain.logic.SaveManager
 import com.EGomez.idleecosystem.domain.logic.SoundManager
 import com.EGomez.idleecosystem.domain.logic.SoundType
 import com.EGomez.idleecosystem.domain.logic.StatisticsManager
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.TutorialProgress
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
@@ -75,6 +76,8 @@ data class EconomyState(
     val knowledgeThisRun: BigDecimal = BigDecimal.ZERO,
     val prestigePacing: PrestigePacing = PrestigePacing(),
     val buildingCostMultiplier: Double = 1.0,
+    /** Pestañas y paneles que el jugador ya descubrió. */
+    val revealed: SystemReveal = SystemReveal(),
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
 
@@ -460,8 +463,10 @@ class GameEngine @Inject constructor(
     }
 
     fun onMenuTabSelected(index: Int) = post {
-        if (index == 1) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
-        if (index == 2 && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
+        // Una pestaña sin descubrir muestra su requisito, no su tutorial
+        val revealed = currentReveal()
+        if (index == 1 && revealed.grimoire) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
+        if (index == 2 && revealed.rituals && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
     }
 
     fun onPrestigeShopOpened() = post { tutorialManager.triggerStep(TutorialStep.PRESTIGE_SHOP) }
@@ -684,6 +689,16 @@ class GameEngine @Inject constructor(
 
     private fun currentClickPower(): BigDecimal = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
 
+    private fun currentReveal(): SystemReveal = SystemReveal.compute(
+        lifetimeKnowledge = statsManager.lifetimeKnowledge,
+        anyUpgradeBought = upgradeManager.availableUpgrades.any { it.isBought },
+        lifetimeEchoes = statsManager.totalEchoes,
+        echoes = echoes,
+        canAscend = potentialPrestige.signum() > 0,
+        ascensions = statsManager.totalPrestiges,
+        sanity = prestigeManager.residualSanity
+    )
+
     private fun echoChance(): Double = BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -810,6 +825,7 @@ class GameEngine @Inject constructor(
             knowledgeThisRun = knowledgeThisRun(),
             prestigePacing = prestigePacing,
             buildingCostMultiplier = costMultiplier,
+            revealed = currentReveal(),
             echoChance = echoChance()
         )
     }

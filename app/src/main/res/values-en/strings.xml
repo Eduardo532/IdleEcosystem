@@ -63,7 +63,10 @@
     <string name="import_title">Import Save</string>
     <string name="level">Level %1$d</string>
     <string name="load_data">LOAD DATA</string>
+    <string name="locked_ascension">Gather %1$s Knowledge in one life to discover what lies beyond.</string>
+    <string name="locked_grimoire">Gather %1$s Knowledge to discover the Grimoire.</string>
     <string name="locked_node">LOCKED (Requires a connected node)</string>
+    <string name="locked_rituals">Find your first Echo while researching to discover the Rituals.</string>
     <string name="madness_map">MADNESS MAP</string>
     <string name="milestone_progress">Milestone %1$d · %2$d to go</string>
     <string name="milestones">Milestones (%1$s)</string>

@@ -64,7 +64,10 @@
     <string name="import_title">Importar Partida</string>
     <string name="level">Nivel %1$d</string>
     <string name="load_data">CARGAR DATOS</string>
+    <string name="locked_ascension">Reúne %1$s de Conocimiento en una vida para descubrir qué hay más allá.</string>
+    <string name="locked_grimoire">Reúne %1$s de Conocimiento para descubrir el Grimorio.</string>
     <string name="locked_node">BLOQUEADO (Requiere conexión previa)</string>
+    <string name="locked_rituals">Encuentra tu primer Eco investigando para descubrir los Rituales.</string>
     <string name="madness_map">MAPA DE LOCURA</string>
     <string name="milestone_progress">Hito %1$d · faltan %2$d</string>
     <string name="milestones">Hitos (%1$s)</string>

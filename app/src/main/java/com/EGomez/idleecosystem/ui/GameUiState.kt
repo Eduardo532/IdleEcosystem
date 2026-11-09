@@ -3,6 +3,7 @@ package com.EGomez.idleecosystem.ui
 import com.EGomez.idleecosystem.core.locale.AppLanguage
 import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.NextGoal
+import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -57,6 +58,8 @@ data class GameUiState(
     val lastUnlockedAchievement: Achievement? = null,
     val achievementsProgress: String = "0 / 0",
     val nextGoal: NextGoal? = null,
+    /** Pestañas y paneles descubiertos (los demás se ven como "???"). */
+    val revealed: SystemReveal = SystemReveal(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

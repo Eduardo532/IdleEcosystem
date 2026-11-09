@@ -201,6 +201,7 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
+                            revealed = uiState.revealed,
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true

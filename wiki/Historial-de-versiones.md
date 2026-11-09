@@ -2,7 +2,7 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
-## v0.14.x · "Metas a la Vista" y "Lazos y Secretos" *(en pruebas)*
+## v0.14.2 · "Metas a la Vista" *(oficial, 9 nov 2026)*
 
 Primera etapa del plan de retención: que el juego siempre muestre una meta y que los edificios viejos sigan importando.
 

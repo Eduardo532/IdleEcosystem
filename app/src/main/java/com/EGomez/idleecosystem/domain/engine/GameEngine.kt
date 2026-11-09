@@ -12,6 +12,7 @@ import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
+import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
@@ -33,6 +34,7 @@ import com.EGomez.idleecosystem.domain.model.EffectType
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.Ritual
+import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.TutorialStep
@@ -213,9 +215,32 @@ class GameEngine @Inject constructor(
 
     fun buyUpgrade(upgradeId: String) = post {
         val upgrade = upgradeManager.availableUpgrades.find { it.id == upgradeId } ?: return@post
+        // Una mejora que todavía no aparece en el Grimorio no se puede comprar
+        if (!upgradeManager.isUnlocked(upgrade, buildingManager.availableBuildings)) return@post
         if (upgradeManager.tryBuyUpgrade(upgradeId, knowledge)) {
             soundManager.playSound(SoundType.BUY)
             knowledge = knowledge.subtract(upgrade.cost)
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /**
+     * Compra, de la más barata a la más cara, todas las mejoras del Grimorio que
+     * alcance el Conocimiento actual. Un solo recálculo y un solo guardado al final.
+     */
+    fun buyAllAffordableUpgrades() = post {
+        val unlocked = upgradeManager.availableUpgrades
+            .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
+        var bought = 0
+        for (upgrade in GrimoireShopping.plan(unlocked, knowledge)) {
+            if (upgradeManager.tryBuyUpgrade(upgrade.id, knowledge)) {
+                knowledge = knowledge.subtract(upgrade.cost)
+                bought++
+            }
+        }
+        if (bought > 0) {
+            soundManager.playSound(SoundType.BUY)
             recalculate()
             requestSave()
         }
@@ -238,6 +263,12 @@ class GameEngine @Inject constructor(
             val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return@post
             soundManager.playSound(SoundType.BUY)
             echoes = echoes.subtract(ritual.baseCost)
+            if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
+                // Producción base, igual que los saltos de tiempo de las runas: los
+                // potenciadores activos no se multiplican sobre este regalo
+                val gain = baseProductionPerSecond.multiply(BigDecimal.valueOf(ritual.effectValue))
+                if (gain.signum() > 0) addKnowledge(gain, isManual = false)
+            }
             recalculate()
         }
     }
@@ -466,6 +497,9 @@ class GameEngine @Inject constructor(
             tutorialManager.triggerStep(TutorialStep.WELCOME)
         }
 
+        // Una cadena de eventos abierta sigue donde quedó
+        saved.pendingFollowUpEventId?.let { eventScheduler.restoreFollowUp(it, System.currentTimeMillis()) }
+
         // Rituales: se restauran descontando el tiempo que la app estuvo cerrada
         if (saved.rituals.isNotEmpty() && saved.ritualsSavedAtMillis > 0) {
             val elapsedSeconds = ((System.currentTimeMillis() - saved.ritualsSavedAtMillis) / 1000).coerceAtLeast(0)
@@ -537,7 +571,7 @@ class GameEngine @Inject constructor(
         if (buildingManager.availableBuildings.sumOf { it.amountOwned } >= 5) tutorialManager.triggerStep(TutorialStep.BUY_MULTIPLIERS)
         if (statsManager.getActivePlayTime() > 5) tutorialManager.triggerStep(TutorialStep.TOP_BAR_INFO)
 
-        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity)?.let { onEventShown() }
+        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)?.let { onEventShown() }
 
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
@@ -590,7 +624,7 @@ class GameEngine @Inject constructor(
                     }
                     is RuneReward.SanityBonus -> applySanityPercent(reward.percent)
                     is RuneReward.TriggerRandomEvent -> {
-                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity)
+                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)
                             ?.let { onEventShown() }
                     }
                 }
@@ -709,7 +743,10 @@ class GameEngine @Inject constructor(
      */
     private fun publishCollections() {
         _buildings.value = buildingManager.availableBuildings.filter { it.isVisible }.map { it.copy() }
-        _upgrades.value = upgradeManager.availableUpgrades.sortedBy { it.cost }.map { it.copy() }
+        _upgrades.value = upgradeManager.availableUpgrades
+            .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
+            .sortedBy { it.cost }
+            .map { it.copy() }
 
         val all = achievementManager.availableAchievements
         _achievements.value = all.filter { !it.isSecret || it.isUnlocked }.sortedBy { it.order }.map { it.copy() }
@@ -749,7 +786,8 @@ class GameEngine @Inject constructor(
                 snapshot = buildSnapshot(),
                 rituals = ritualManager.snapshot(),
                 takenAtMillis = System.currentTimeMillis(),
-                replace = replace
+                replace = replace,
+                pendingFollowUpEventId = eventScheduler.followUpToPersist()
             )
         )
     }

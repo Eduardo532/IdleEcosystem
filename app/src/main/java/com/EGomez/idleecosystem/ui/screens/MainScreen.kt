@@ -1,5 +1,9 @@
 package com.EGomez.idleecosystem.ui.screens
 
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -82,6 +86,9 @@ fun MainScreen(
         val achievements by viewModel.achievementsState.collectAsStateWithLifecycle()
         val rituals by viewModel.ritualsState.collectAsStateWithLifecycle()
         val showPurchased by viewModel.showPurchasedState.collectAsStateWithLifecycle()
+        // Se resuelve aquí: el clic se maneja fuera de la composición
+        val floatingEchoText = stringResource(R.string.floating_echo)
+        val activity = LocalContext.current as? Activity
 
         var showAchievementsDialog by rememberSaveable { mutableStateOf(false) }
         var showPrestigeShopDialog by rememberSaveable { mutableStateOf(false) }
@@ -163,7 +170,7 @@ fun MainScreen(
                                     spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White, clickOffset.x, clickOffset.y - 80f)
                                 }
                                 if (result.echoFound && uiState.isFloatingTextEnabled) {
-                                    spawnFloatingText("+1 ECO", Color(0xFF00E5FF), buttonCenter.x, buttonCenter.y - 120f)
+                                    spawnFloatingText(floatingEchoText, Color(0xFF00E5FF), buttonCenter.x, buttonCenter.y - 120f)
                                 }
                                 if (uiState.areParticlesEnabled) {
                                     if (result.knowledgeGained > BigDecimal.ZERO) particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.KNOWLEDGE, baseRadius = buttonRadius)
@@ -187,6 +194,7 @@ fun MainScreen(
                             globalMultiplier = uiState.globalMultiplier, buildingCalculator = buildingCalculator,
                             buildingCostMultiplier = uiState.buildingCostMultiplier,
                             onBuyBuilding = { viewModel.onBuyBuilding(it) }, onBuyUpgrade = { viewModel.onBuyUpgrade(it) },
+                            onBuyAllUpgrades = { viewModel.onBuyAllUpgrades() },
                             onActivateRitual = { viewModel.onActivateRitual(it) },
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
@@ -269,6 +277,15 @@ fun MainScreen(
                     onToggleSfx = { viewModel.toggleSfx() },
                     onToggleParticles = { viewModel.toggleParticles() },
                     onToggleFloatingText = { viewModel.toggleFloatingText() },
+                    onNotationSelected = { viewModel.setNumberNotation(it) },
+                    onLanguageSelected = { language ->
+                        if (language != uiState.language) {
+                            viewModel.setLanguage(language)
+                            // Se recrea la Activity para cargar los textos del idioma nuevo;
+                            // los diálogos abiertos y la sección se conservan (rememberSaveable)
+                            activity?.recreate()
+                        }
+                    },
                     onExportClick = { viewModel.onExportSaveClicked() },
                     onImportClick = { viewModel.onConfirmImportClicked(); showSettingsDialog = false },
                     onCancelImport = { viewModel.clearExportString() },
@@ -278,8 +295,8 @@ fun MainScreen(
                 )
             }
 
-            if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, uiState.secretsProgress) { showAchievementsDialog = false }
-            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
+            if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null) { showAchievementsDialog = false }
+            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
             uiState.currentEvent?.let { EventDialog(it, uiState.eventResultText) { opt -> viewModel.onEventOptionSelected(opt) } }
@@ -305,11 +322,15 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>) {
             val remainingSeconds = ((buff.expirationTime - System.currentTimeMillis()) / 1000).coerceAtLeast(0)
 
             val labelText = when {
-                buff.costReduction > 0 -> "-${(buff.costReduction * 100).toInt()}% Costos"
-                buff.isAutoClick -> if(buff.multiplier > 1.0) "x${buff.multiplier.toInt()} + Auto" else "AutoClick"
-                buff.echoChanceBonus > 0 -> "+Suerte Ecos"
-                buff.multiplier > 1.0 -> "x${buff.multiplier.toInt()} Prod"
-                else -> "Activo"
+                buff.costReduction > 0 -> stringResource(R.string.buff_costs, (buff.costReduction * 100).toInt())
+                buff.isAutoClick -> when {
+                    buff.multiplier > 1.0 -> stringResource(R.string.buff_prod_auto, buff.multiplier.toInt())
+                    buff.clickMultiplier > 1.0 -> stringResource(R.string.buff_click_auto, buff.clickMultiplier.toInt())
+                    else -> stringResource(R.string.buff_autoclick)
+                }
+                buff.echoChanceBonus > 0 -> stringResource(R.string.buff_echo_luck)
+                buff.multiplier > 1.0 -> stringResource(R.string.buff_prod, buff.multiplier.toInt())
+                else -> stringResource(R.string.buff_active)
             }
 
             val borderColor = when {

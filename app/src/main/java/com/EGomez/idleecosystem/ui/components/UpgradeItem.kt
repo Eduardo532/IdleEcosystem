@@ -1,5 +1,8 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,7 +57,7 @@ fun UpgradeItem(
             Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 if (isBought){
                     Text(
-                        text = upgrade.name,
+                        text = tr(upgrade.name),
                         color = infoGreen,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -64,7 +67,7 @@ fun UpgradeItem(
                 }
                 else{
                     Text(
-                        text = upgrade.name,
+                        text = tr(upgrade.name),
                         color = ArcanePurple,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -77,7 +80,7 @@ fun UpgradeItem(
 
 
                 Text(
-                    text = upgrade.description,
+                    text = tr(upgrade.description),
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Italic,
@@ -105,7 +108,7 @@ fun UpgradeItem(
 
                 Row (verticalAlignment = Alignment.CenterVertically){
                     Text(
-                        text = "Efecto: x$multString",
+                        text = stringResource(R.string.upgrade_effect, multString),
                         color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
@@ -115,7 +118,7 @@ fun UpgradeItem(
 
             if (isBought) {
                 Text(
-                    text = "COMPRADO",
+                    text = stringResource(R.string.bought_label),
                     color = infoGreen, // CAMBIO: Texto Gris solicitado
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,

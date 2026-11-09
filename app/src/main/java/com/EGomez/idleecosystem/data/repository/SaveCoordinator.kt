@@ -28,7 +28,8 @@ data class LoadedGame(
     val prestigeUpgrades: List<PrestigeUpgradeEntity>,
     val statistics: GameStatisticsEntity?,
     val rituals: List<RitualSnapshot>,
-    val ritualsSavedAtMillis: Long
+    val ritualsSavedAtMillis: Long,
+    val pendingFollowUpEventId: String? = null
 )
 
 /**
@@ -42,7 +43,9 @@ data class SaveRequest(
     val snapshot: GameSnapshot,
     val rituals: List<RitualSnapshot>,
     val takenAtMillis: Long,
-    val replace: Boolean
+    val replace: Boolean,
+    // Continuación de una cadena de eventos abierta (preferencias del dispositivo)
+    val pendingFollowUpEventId: String? = null
 ) {
     companion object {
         /**
@@ -105,7 +108,8 @@ class SaveCoordinator @Inject constructor(
             prestigeUpgrades = repository.loadPrestigeUpgrades(),
             statistics = repository.gameStatistics.firstOrNull(),
             rituals = rituals,
-            ritualsSavedAtMillis = ritualsSavedAt
+            ritualsSavedAtMillis = ritualsSavedAt,
+            pendingFollowUpEventId = preferences.pendingFollowUpEventId
         )
     }
 
@@ -116,6 +120,7 @@ class SaveCoordinator @Inject constructor(
     private suspend fun write(request: SaveRequest) {
         try {
             preferences.saveRituals(request.rituals, request.takenAtMillis)
+            preferences.pendingFollowUpEventId = request.pendingFollowUpEventId
             if (request.replace) {
                 repository.replaceWithSnapshot(request.snapshot)
             } else {

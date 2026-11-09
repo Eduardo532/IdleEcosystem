@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -66,59 +68,59 @@ fun StatisticsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Registro Akáshico", color = AncientGold, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.Gray) }
+                    Text(stringResource(R.string.stats_title), color = AncientGold, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = Color.Gray) }
                 }
 
                 HorizontalDivider(color = AncientGold.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 8.dp))
 
                 Column(modifier = Modifier.weight(1f).verticalScroll(scrollState)) {
 
-                    StatSection("Tiempo y Existencia") {
-                        StatRow("Inicio de la Obsesión", formatDate(stats.startTime))
-                        StatRow("Tiempo Activo (App Abierta)", formatTime(stats.activePlayTimeSeconds))
-                        StatRow("Tiempo en el Vacío (Offline)", formatTime(stats.totalOfflineSeconds))
-                        StatRow("Existencia Total", formatTime(stats.totalPlayTimeSeconds))
-                        StatRow("Tiempo en esta Vida", formatTime(stats.runTimeSeconds))
+                    StatSection(stringResource(R.string.stats_time)) {
+                        StatRow(stringResource(R.string.stats_start), formatDate(stats.startTime))
+                        StatRow(stringResource(R.string.stats_active_time), formatTime(stats.activePlayTimeSeconds))
+                        StatRow(stringResource(R.string.stats_offline_time), formatTime(stats.totalOfflineSeconds))
+                        StatRow(stringResource(R.string.stats_total_time), formatTime(stats.totalPlayTimeSeconds))
+                        StatRow(stringResource(R.string.stats_run_time), formatTime(stats.runTimeSeconds))
                     }
 
-                    StatSection("Conocimiento Prohibido") {
-                        StatRow("Generado (Histórico)", stats.lifetimeKnowledge.toBeautifulString())
-                        StatRow("Generado (Esta Vida)", stats.runKnowledge.toBeautifulString())
-                        StatRow("Mayor Producción/seg", stats.maxKnowledgePerSecond.toBeautifulString())
+                    StatSection(stringResource(R.string.stats_knowledge)) {
+                        StatRow(stringResource(R.string.stats_lifetime), stats.lifetimeKnowledge.toBeautifulString())
+                        StatRow(stringResource(R.string.stats_this_run), stats.runKnowledge.toBeautifulString())
+                        StatRow(stringResource(R.string.stats_peak), stats.maxKnowledgePerSecond.toBeautifulString())
                     }
 
-                    StatSection("Interacción") {
-                        StatRow("Clics Realizados", stats.totalClicks.toString())
-                        StatRow("Conocimiento Manual", stats.manualKnowledgeGenerated.toBeautifulString())
+                    StatSection(stringResource(R.string.stats_interaction)) {
+                        StatRow(stringResource(R.string.stats_clicks), stats.totalClicks.toString())
+                        StatRow(stringResource(R.string.stats_manual), stats.manualKnowledgeGenerated.toBeautifulString())
                         val total = stats.lifetimeKnowledge
                         val manual = stats.manualKnowledgeGenerated
                         val percent = if (total > java.math.BigDecimal.ZERO) {
                             manual.multiply(java.math.BigDecimal(100)).divide(total, 2, java.math.RoundingMode.HALF_UP)
                         } else java.math.BigDecimal.ZERO
-                        StatRow("Porcentaje Manual", "$percent%")
+                        StatRow(stringResource(R.string.stats_manual_percent), "$percent%")
                     }
 
-                    StatSection("Maestría Rúnica") {
-                        StatRow("Runas Cortadas (Tier 1)", stats.runesSevered.toString())
-                        StatRow("Runas Estabilizadas (Tier 2)", stats.runesStabilized.toString())
-                        StatRow("Runas Inscritas (Tier 3)", stats.runesInscribed.toString())
+                    StatSection(stringResource(R.string.stats_runes)) {
+                        StatRow(stringResource(R.string.stats_runes_t1), stats.runesSevered.toString())
+                        StatRow(stringResource(R.string.stats_runes_t2), stats.runesStabilized.toString())
+                        StatRow(stringResource(R.string.stats_runes_t3), stats.runesInscribed.toString())
                     }
 
-                    StatSection("Locura y Ascensión") {
-                        StatRow("Veces Ascendido", stats.totalPrestiges.toString())
-                        StatRow("Cordura Obtenida", stats.lifetimeSanity.toBeautifulString())
-                        StatRow("Cordura Gastada", stats.spentSanity.toBeautifulString())
+                    StatSection(stringResource(R.string.stats_ascension)) {
+                        StatRow(stringResource(R.string.stats_ascensions), stats.totalPrestiges.toString())
+                        StatRow(stringResource(R.string.stats_sanity_gained), stats.lifetimeSanity.toBeautifulString())
+                        StatRow(stringResource(R.string.stats_sanity_spent), stats.spentSanity.toBeautifulString())
                     }
 
-                    StatSection("Misterios") {
-                        StatRow("Eventos Encontrados", stats.totalEventsFound.toString())
-                        StatRow("Ecos Hallados", stats.totalEchoes.toBeautifulString())
+                    StatSection(stringResource(R.string.stats_mysteries)) {
+                        StatRow(stringResource(R.string.stats_events), stats.totalEventsFound.toString())
+                        StatRow(stringResource(R.string.stats_echoes), stats.totalEchoes.toBeautifulString())
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "\"El tiempo es un círculo plano...\"",
+                        text = stringResource(R.string.stats_quote),
                         color = Color.DarkGray,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,

@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -37,7 +39,7 @@ fun MainTopBar(
             // Solo mostramos el título si el menú no ocupa casi toda la pantalla
             if (!isMenuExpanded || menuWeight < 0.8f) {
                 Text(
-                    "Ecosistema Arcano",
+                    stringResource(R.string.app_title),
                     color = ArcanePurple,
                     fontWeight = FontWeight.Bold
                 )
@@ -47,10 +49,10 @@ fun MainTopBar(
         navigationIcon = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onSettingsClick) {
-                    Icon(Icons.Default.Settings, "Configuración", tint = Color.Gray)
+                    Icon(Icons.Default.Settings, stringResource(R.string.cd_settings), tint = Color.Gray)
                 }
                 IconButton(onClick = onStatsClick) {
-                    Icon(Icons.Default.Assessment, "Estadísticas", tint = AncientGold)
+                    Icon(Icons.Default.Assessment, stringResource(R.string.cd_statistics), tint = AncientGold)
                 }
             }
         },
@@ -72,7 +74,7 @@ fun MainTopBar(
                 ) {
                     Icon(
                         Icons.Default.EmojiEvents,
-                        "Logros",
+                        stringResource(R.string.achievements),
                         tint = iconColor,
                         modifier = Modifier.size(16.dp)
                     )

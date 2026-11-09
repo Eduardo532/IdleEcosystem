@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui
 
+import com.EGomez.idleecosystem.core.locale.AppLanguage
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -16,6 +18,7 @@ data class GameUiState(
     val rawKnowledge: BigDecimal = BigDecimal.ZERO,
     val clickMultiplier: String = "1.0",
     val prestigeCurrencyFormatted: String = "0",
+    val rawSanity: BigDecimal = BigDecimal.ZERO,
     val potentialPrestigeFormatted: String = "0",
     val globalMultiplier: BigDecimal = BigDecimal.ONE,
 
@@ -46,7 +49,8 @@ data class GameUiState(
     val eventResultText: String? = null,
     val lastUnlockedAchievement: Achievement? = null,
     val achievementsProgress: String = "0 / 0",
-    val secretsProgress: String? = null,
+    val secretsFound: Int = 0,
+    val secretsTotal: Int = 0,
 
     // Tienda de Prestigio
     val prestigeUpgrades: List<PrestigeUpgrade> = emptyList(),
@@ -61,7 +65,7 @@ data class GameUiState(
     // Sistema de Guardado
     val saveStringExport: String = "",
     val pendingImportString: String = "",
-    val importError: String? = null,
+    val importFailed: Boolean = false,
     val exportPreview: SavePreview? = null,
     val importPreview: SavePreview? = null,
 
@@ -69,7 +73,9 @@ data class GameUiState(
     val isMusicEnabled: Boolean = true,
     val isSfxEnabled: Boolean = true,
     val areParticlesEnabled: Boolean = true,
-    val isFloatingTextEnabled: Boolean = true
+    val isFloatingTextEnabled: Boolean = true,
+    val numberNotation: NumberNotation = NumberNotation.SCIENTIFIC,
+    val language: AppLanguage = AppLanguage.SPANISH
 )
 
 data class SavePreview(

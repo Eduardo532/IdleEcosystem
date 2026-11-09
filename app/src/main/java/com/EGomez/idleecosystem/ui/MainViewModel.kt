@@ -3,6 +3,9 @@ package com.EGomez.idleecosystem.ui
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.EGomez.idleecosystem.core.locale.AppLanguage
+import com.EGomez.idleecosystem.core.math.NumberFormatting
+import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.core.math.formatSecondsToTime
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.data.preferences.GamePreferences
@@ -64,7 +67,9 @@ class MainViewModel @Inject constructor(
             isMusicEnabled = soundManager.isMusicEnabled,
             isSfxEnabled = soundManager.isSfxEnabled,
             areParticlesEnabled = preferences.areParticlesEnabled,
-            isFloatingTextEnabled = preferences.isFloatingTextEnabled
+            isFloatingTextEnabled = preferences.isFloatingTextEnabled,
+            numberNotation = preferences.numberNotation,
+            language = AppLanguage.fromTag(preferences.languageTag) ?: AppLanguage.systemDefault()
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -85,6 +90,7 @@ class MainViewModel @Inject constructor(
     val statisticsState: StateFlow<GameStatistics> = engine.statistics
 
     init {
+        NumberFormatting.notation = preferences.numberNotation
         observeEngine()
         engine.start(viewModelScope)
         if (GameEngine.DEBUG_RUNES) startDebugRuneCycle()
@@ -149,6 +155,7 @@ class MainViewModel @Inject constructor(
         rawKnowledge = economy.knowledge,
         clickMultiplier = economy.clickPower.toBeautifulString(),
         prestigeCurrencyFormatted = economy.sanity.toBeautifulString(),
+        rawSanity = economy.sanity,
         potentialPrestigeFormatted = economy.potentialPrestige.toBeautifulString(),
         canPrestige = economy.canPrestige,
         globalMultiplier = economy.globalMultiplier,
@@ -159,7 +166,8 @@ class MainViewModel @Inject constructor(
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
         achievementsProgress = "${progress.unlocked} / ${progress.total}",
-        secretsProgress = if (progress.secretsFound > 0) "Secretos: ${progress.secretsFound} / ${progress.secretsTotal}" else null
+        secretsFound = progress.secretsFound,
+        secretsTotal = progress.secretsTotal
     )
 
     private fun onEngineEffect(effect: EngineEffect) {
@@ -209,6 +217,8 @@ class MainViewModel @Inject constructor(
     fun onBuyBuilding(buildingId: String) = engine.buyBuilding(buildingId, _uiState.value.buyMultiplier)
 
     fun onBuyUpgrade(upgradeId: String) = engine.buyUpgrade(upgradeId)
+
+    fun onBuyAllUpgrades() = engine.buyAllAffordableUpgrades()
 
     fun onBuyPrestigeUpgrade(id: String) = engine.buyPrestigeUpgrade(id)
 
@@ -273,6 +283,20 @@ class MainViewModel @Inject constructor(
         _uiState.update { it.copy(areParticlesEnabled = newState) }
     }
 
+    /** Guarda el idioma; la pantalla recrea la Activity para aplicarlo. */
+    fun setLanguage(language: AppLanguage) {
+        preferences.languageTag = language.tag
+        _uiState.update { it.copy(language = language) }
+    }
+
+    fun setNumberNotation(notation: NumberNotation) {
+        preferences.numberNotation = notation
+        NumberFormatting.notation = notation
+        // Los textos ya formateados se rehacen al instante (con el juego en pausa el
+        // motor no vuelve a publicar la economía hasta reanudar)
+        _uiState.update { it.copy(numberNotation = notation).withEconomy(engine.economy.value) }
+    }
+
     fun toggleFloatingText() {
         val newState = !_uiState.value.isFloatingTextEnabled
         preferences.isFloatingTextEnabled = newState
@@ -289,7 +313,7 @@ class MainViewModel @Inject constructor(
                 money = exported.knowledge.toBeautifulString(),
                 achievements = "${exported.unlockedAchievements} / ${exported.totalAchievements}"
             )
-            _uiState.update { it.copy(saveStringExport = exported.code, exportPreview = preview, importError = null) }
+            _uiState.update { it.copy(saveStringExport = exported.code, exportPreview = preview, importFailed = false) }
         }
     }
 
@@ -297,7 +321,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val data = saveManager.importSave(saveString)
             if (data == null) {
-                _uiState.update { it.copy(importError = INVALID_CODE, importPreview = null, pendingImportString = "") }
+                _uiState.update { it.copy(importFailed = true, importPreview = null, pendingImportString = "") }
                 return@launch
             }
             val known = engine.countKnownAchievements(data.achievements)
@@ -307,7 +331,7 @@ class MainViewModel @Inject constructor(
                 money = data.knowledge.toBeautifulString(),
                 achievements = "$known / $total"
             )
-            _uiState.update { it.copy(importPreview = preview, pendingImportString = saveString, importError = null) }
+            _uiState.update { it.copy(importPreview = preview, pendingImportString = saveString, importFailed = false) }
         }
     }
 
@@ -317,7 +341,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val data = saveManager.importSave(saveString)
             if (data == null) {
-                _uiState.update { it.copy(importError = INVALID_CODE) }
+                _uiState.update { it.copy(importFailed = true) }
                 return@launch
             }
             engine.importSave(data)
@@ -326,7 +350,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun clearExportString() = _uiState.update {
-        it.copy(saveStringExport = "", exportPreview = null, importPreview = null, pendingImportString = "", importError = null)
+        it.copy(saveStringExport = "", exportPreview = null, importPreview = null, pendingImportString = "", importFailed = false)
     }
 
     private fun formatDate(millis: Long): String =
@@ -359,6 +383,5 @@ class MainViewModel @Inject constructor(
 
     private companion object {
         const val ACHIEVEMENT_POPUP_MS = 4_000L
-        const val INVALID_CODE = "Código inválido o corrupto."
     }
 }

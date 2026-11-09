@@ -1,5 +1,8 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +15,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -22,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
+import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.BuildingType
 import com.EGomez.idleecosystem.domain.model.Ritual
@@ -31,6 +36,7 @@ import com.EGomez.idleecosystem.domain.model.Upgrade
 import com.EGomez.idleecosystem.domain.model.UpgradeType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.components.UpgradeItem
+import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 import java.math.BigDecimal
 
@@ -55,6 +61,7 @@ fun MenuSection(
     buildingCostMultiplier: Double, // NUEVO PARÁMETRO
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
+    onBuyAllUpgrades: () -> Unit = {},
     onActivateRitual: (String) -> Unit,
     prestigeCurrencyFormatted: String,
     canPrestige: Boolean,
@@ -63,7 +70,7 @@ fun MenuSection(
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Investigación", "Grimorio", "Rituales")
+    val tabs = listOf(stringResource(R.string.tab_research), stringResource(R.string.tab_grimoire), stringResource(R.string.tab_rituals))
 
     Column(
         modifier = modifier
@@ -155,6 +162,10 @@ fun MenuSection(
                     }
                     1 -> {
                         item {
+                            // Cuántas mejoras alcanzan, compradas de la más barata a la más cara
+                            val affordableCount = remember(upgrades, currentKnowledge) {
+                                GrimoireShopping.affordableCount(upgrades, currentKnowledge)
+                            }
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -162,8 +173,27 @@ fun MenuSection(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.End
                             ) {
+                                Button(
+                                    onClick = onBuyAllUpgrades,
+                                    enabled = affordableCount > 0,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = AncientGold,
+                                        contentColor = Color.Black,
+                                        disabledContainerColor = Color(0xFF333333),
+                                        disabledContentColor = Color.Gray
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text(
+                                        if (affordableCount > 0) stringResource(R.string.buy_all_count, affordableCount) else stringResource(R.string.buy_all),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
                                 Text(
-                                    "Ver Comprados",
+                                    stringResource(R.string.show_purchased),
                                     color = Color.Gray,
                                     fontSize = 12.sp,
                                     modifier = Modifier.padding(end = 8.dp)
@@ -188,18 +218,18 @@ fun MenuSection(
                                         .padding(32.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("No hay secretos...", color = Color.Gray)
+                                    Text(stringResource(R.string.no_secrets), color = Color.Gray)
                                 }
                             }
                         } else {
                             items(upgrades, key = { it.id }) { upgrade ->
-                                val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) "Tu Mente"
-                                else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) "Todo"
-                                else buildings.find { it.id == upgrade.targetBuildingId }?.name ?: "?"
+                                val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) stringResource(R.string.target_mind)
+                                else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) stringResource(R.string.target_all)
+                                else buildings.find { it.id == upgrade.targetBuildingId }?.name?.let { tr(it) } ?: "?"
 
                                 UpgradeItem(
                                     upgrade = upgrade,
-                                    targetInfo = "Afecta: $targetName",
+                                    targetInfo = stringResource(R.string.affects, targetName),
                                     currentFunds = currentKnowledge,
                                     onBuy = { onBuyUpgrade(upgrade.id) }
                                 )
@@ -218,7 +248,7 @@ fun MenuSection(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Ecos Disponibles: ${currentEchoes.toBeautifulString()}",
+                                    text = stringResource(R.string.echoes_available, currentEchoes.toBeautifulString()),
                                     color = Color(0xFF00E5FF),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
@@ -251,7 +281,7 @@ fun MenuSection(
                 ) {
                     Column {
                         Text(
-                            "CORDURA RESIDUAL",
+                            stringResource(R.string.residual_sanity_title),
                             color = Color(0xFFCF6679),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
@@ -273,7 +303,7 @@ fun MenuSection(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
-                            Text("TIENDA", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.shop_button), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = onAscendClicked,
@@ -287,7 +317,7 @@ fun MenuSection(
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("ASCENDER", fontWeight = FontWeight.Black)
+                                Text(stringResource(R.string.ascend), fontWeight = FontWeight.Black)
                                 if (canPrestige) {
                                     Text(
                                         "+$potentialPrestigeFormatted",
@@ -295,7 +325,7 @@ fun MenuSection(
                                         fontWeight = FontWeight.Bold
                                     )
                                 } else {
-                                    Text("Req: 1.00e+06 generado", fontSize = 9.sp)
+                                    Text(stringResource(R.string.ascend_requirement, BigDecimal("1000000").toBeautifulString()), fontSize = 9.sp)
                                 }
                             }
                         }
@@ -304,7 +334,7 @@ fun MenuSection(
             }
         } else {
             Text(
-                "Desliza para ver contenido",
+                stringResource(R.string.swipe_hint),
                 color = Color.Gray,
                 fontSize = 12.sp,
                 modifier = Modifier

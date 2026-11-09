@@ -1,5 +1,8 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -88,7 +91,7 @@ fun TutorialOverlay(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = currentStep.title,
+                                text = tr(currentStep.title),
                                 color = AncientGold,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
@@ -103,7 +106,7 @@ fun TutorialOverlay(
                             )
 
                             Text(
-                                text = currentStep.message,
+                                text = tr(currentStep.message),
                                 color = Color.White,
                                 fontSize = 15.sp,
                                 lineHeight = 22.sp,
@@ -125,7 +128,7 @@ fun TutorialOverlay(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = if (isButtonEnabled) "ENTENDIDO" else "LEYENDO...",
+                                    text = if (isButtonEnabled) stringResource(R.string.tutorial_ok) else stringResource(R.string.tutorial_reading),
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )

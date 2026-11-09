@@ -6,6 +6,7 @@ plugins {
     // KSP reemplaza a kapt para Room y Hilt: compila más rápido y no genera stubs de Java
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -21,8 +22,8 @@ android {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 13
-        versionName = "0.11.1"
+        versionCode = 19
+        versionName = "0.13.4"
 
         // Nombre visible de la app (las builds de prueba lo reemplazan)
         manifestPlaceholders["appLabel"] = "@string/app_name"
@@ -133,6 +134,10 @@ dependencies {
     // Tests de migración de Room con Robolectric
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core.ktx)
+
+    // Tests de interfaz de Compose sobre Robolectric (sin emulador)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4)
 }
 
 // Tipos externos que Compose puede tratar como estables (ver el archivo)
@@ -141,7 +146,10 @@ composeCompiler {
 }
 
 // Room exporta el esquema de cada versión de la base de datos a app/schemas.
-// Esos JSON se versionan en git y permiten escribir tests de migración exactos.
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
+// Se usa el plugin de Room y no el argumento "room.schemaLocation" de KSP: con el
+// argumento, cada variante (debug, preview) escribía el MISMO archivo en paralelo y
+// una podía leerlo a medio escribir ("Empty schema file"). El plugin genera el
+// esquema por variante y lo copia con una tarea propia.
+room {
+    schemaDirectory("$projectDir/schemas")
 }

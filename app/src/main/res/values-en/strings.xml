@@ -161,6 +161,7 @@
     <string name="tutorial_reading">READING...</string>
     <string name="upgrade_button">UPGRADE</string>
     <string name="upgrade_effect">Effect: x%1$s</string>
+    <string name="upgrade_effect_synergy">Effect: +1%% per %1$s owned</string>
     <string name="view_stats">VIEW STATISTICS</string>
     <string name="your_file">YOUR CURRENT FILE</string>
 </resources>

@@ -162,6 +162,7 @@
     <string name="tutorial_reading">LEYENDO...</string>
     <string name="upgrade_button">MEJORAR</string>
     <string name="upgrade_effect">Efecto: x%1$s</string>
+    <string name="upgrade_effect_synergy">Efecto: +1%% por unidad de %1$s</string>
     <string name="view_stats">VER ESTADÍSTICAS</string>
     <string name="your_file">TU ARCHIVO ACTUAL</string>
 </resources>

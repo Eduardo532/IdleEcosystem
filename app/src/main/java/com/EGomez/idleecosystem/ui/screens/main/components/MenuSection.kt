@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
@@ -83,6 +84,7 @@ fun MenuSection(
     onToggleAutoBuildings: () -> Unit = {},
     onToggleAutoGrimoire: () -> Unit = {},
     onToggleAutoRitual: (String) -> Unit = {},
+    onOpenAutomation: () -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -137,6 +139,15 @@ fun MenuSection(
                             onClick = onToggleAutoBuildings,
                             modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
                         )
+                        // Panel de automatización: qué edificios, presupuesto, Ascensión automática
+                        IconButton(
+                            onClick = onOpenAutomation,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .testTag(AUTOMATION_SETTINGS_TAG)
+                        ) {
+                            Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
+                        }
                     }
                     listOf(1, 5, 10, 100, BuildingMilestones.BUY_TO_MILESTONE, -1).forEach { mult ->
                         val label = when (mult) {
@@ -427,6 +438,7 @@ fun MenuSection(
 private const val LOCKED_TITLE = "???"
 const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
+const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
 @Composable

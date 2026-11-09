@@ -200,6 +200,14 @@ class MainViewModel @Inject constructor(
             is EngineEffect.LegacyRefund -> _uiState.update {
                 it.copy(showRefundDialog = true, refundAmountString = effect.amount.toBeautifulString())
             }
+            is EngineEffect.AutoAscended -> {
+                val gain = effect.sanity.toBeautifulString()
+                _uiState.update { it.copy(autoAscensionNotice = gain) }
+                viewModelScope.launch {
+                    delay(AUTO_ASCENSION_NOTICE_MS)
+                    _uiState.update { if (it.autoAscensionNotice == gain) it.copy(autoAscensionNotice = null) else it }
+                }
+            }
             is EngineEffect.AchievementUnlocked -> {
                 val achievement = effect.achievement
                 _uiState.update { it.copy(lastUnlockedAchievement = achievement) }
@@ -302,6 +310,18 @@ class MainViewModel @Inject constructor(
     /** Elige el ritual automático; tocar el mismo otra vez lo apaga. */
     fun toggleAutoRitual(ritualId: String) =
         updateAutomation { it.copy(ritualId = if (it.ritualId == ritualId) null else ritualId) }
+
+    fun selectAutoRitual(ritualId: String?) = updateAutomation { it.copy(ritualId = ritualId) }
+
+    fun setAutomationBudget(percent: Int) = updateAutomation { it.copy(budgetPercent = percent) }
+
+    fun toggleAutoAscend() = updateAutomation { it.copy(autoAscend = !it.autoAscend) }
+
+    /** Marca o desmarca un edificio para el autocomprador. */
+    fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {
+        val excluded = it.excludedBuildings
+        it.copy(excludedBuildings = if (buildingId in excluded) excluded - buildingId else excluded + buildingId)
+    }
 
     private fun updateAutomation(change: (AutomationSettings) -> AutomationSettings) {
         val settings = change(_uiState.value.automation)
@@ -416,5 +436,7 @@ class MainViewModel @Inject constructor(
 
     private companion object {
         const val ACHIEVEMENT_POPUP_MS = 4_000L
+
+        const val AUTO_ASCENSION_NOTICE_MS = 4_000L
     }
 }

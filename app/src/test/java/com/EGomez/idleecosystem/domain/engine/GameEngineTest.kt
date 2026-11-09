@@ -302,6 +302,28 @@ class GameEngineTest {
         Unit // JUnit exige que el test devuelva void
     }
 
+    @Test
+    fun `the autobuyer skips the buildings the player unchecked`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.setAutomation(AutomationSettings(grimoire = false, excludedBuildings = setOf(NOTES)))
+        engine.grantKnowledge(BigDecimal(1_000))
+
+        await(engine.buildings) { list -> list.any { it.id == SYNAPSE && it.amountOwned > 0 } }
+        assertEquals(0, engine.buildings.value.first { it.id == NOTES }.amountOwned)
+    }
+
+    @Test
+    fun `automatic ascension happens when the gain doubles the sanity`() = runBlocking {
+        stats.totalPrestiges = 10
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, autoAscend = true))
+        // 9M generados -> 3 puntos de Cordura, más que los 0 que hay
+        engine.grantKnowledge(BigDecimal("9000000"))
+
+        val economy = await(engine.economy) { it.sanity.signum() > 0 }
+        assertEquals(0, BigDecimal(3).compareTo(economy.sanity))
+        assertTrue(economy.knowledge < BigDecimal("9000000"))
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 

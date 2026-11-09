@@ -102,6 +102,8 @@ sealed interface EngineEffect {
     data class OfflineGains(val gains: BigDecimal, val seconds: Long) : EngineEffect
     data class LegacyRefund(val amount: BigDecimal) : EngineEffect
     data class AchievementUnlocked(val achievement: Achievement) : EngineEffect
+    /** La automatización ascendió sola y ganó [sanity] de Cordura. */
+    data class AutoAscended(val sanity: BigDecimal) : EngineEffect
 }
 
 data class ExportedSave(
@@ -336,18 +338,26 @@ class GameEngine @Inject constructor(
             val ready = ritualManager.rituals.value.find { it.id == ritualId }?.state == RitualState.READY
             if (ready) changed = performRitual(ritualId) || changed
         }
-        if (changed) {
-            recalculate()
-            requestSave()
+        if (changed) recalculate()
+
+        // Ascensión automática: al duplicar la Cordura (desde el hito del Grimorio)
+        if (automation.autoAscend && AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions) &&
+            AutomationSettings.shouldAutoAscend(potentialPrestige, prestigeManager.residualSanity)
+        ) {
+            performAscension()?.let { _effects.trySend(EngineEffect.AutoAscended(it)) }
+            return
         }
+        if (changed) requestSave()
     }
 
     /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
     private fun autoBuyBuildings(): Boolean {
-        var budget = knowledge.multiply(BigDecimal.valueOf(AutomationSettings.BUDGET_FRACTION))
+        var budget = knowledge.multiply(BigDecimal.valueOf(automation.budgetFraction))
         val discount = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
         var bought = false
-        val candidates = buildingManager.availableBuildings.filter { it.isVisible }.reversed()
+        val candidates = buildingManager.availableBuildings
+            .filter { it.isVisible && it.id !in automation.excludedBuildings }
+            .reversed()
         for (building in candidates) {
             val cost = buildingManager.getCost(building.id, 1, knowledge, discount)
             if (cost.signum() <= 0 || cost > budget) continue
@@ -362,7 +372,7 @@ class GameEngine @Inject constructor(
 
     /** Las mejoras del Grimorio que entren en el presupuesto, de la más barata a la más cara. */
     private fun autoBuyUpgrades(): Boolean {
-        val budget = knowledge.multiply(BigDecimal.valueOf(AutomationSettings.BUDGET_FRACTION))
+        val budget = knowledge.multiply(BigDecimal.valueOf(automation.budgetFraction))
         val unlocked = upgradeManager.availableUpgrades
             .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
         var bought = false
@@ -400,11 +410,15 @@ class GameEngine @Inject constructor(
     }
 
     fun ascend() = post {
+        if (performAscension() != null) soundManager.playSound(SoundType.BUY)
+    }
+
+    /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
+    private fun performAscension(): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(prestigeShopManager.getPrestigeGainMultiplier())
-        if (finalPotential.signum() <= 0) return@post
+        if (finalPotential.signum() <= 0) return null
 
-        soundManager.playSound(SoundType.BUY)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
 
@@ -422,6 +436,7 @@ class GameEngine @Inject constructor(
         recalculate()
         // Reemplazo completo: no quedan filas de edificios o mejoras de la vida anterior
         requestSave(replace = true)
+        return finalPotential
     }
 
     fun hardReset() = post {

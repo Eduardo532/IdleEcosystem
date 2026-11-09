@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -63,7 +65,7 @@ fun RitualItem(
                 )
 
                 if (ritual.state == RitualState.ACTIVE) {
-                    Text("ACTIVO", color = Color(0xFF4CAF50), fontWeight = FontWeight.Black, fontSize = 10.sp)
+                    Text(stringResource(R.string.active_label), color = Color(0xFF4CAF50), fontWeight = FontWeight.Black, fontSize = 10.sp)
                 }
             }
 
@@ -97,9 +99,9 @@ fun RitualItem(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         if (canAfford) {
-                            Text("INVOCAR (${ritual.baseCost.toBeautifulString()} Ecos)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text(stringResource(R.string.ritual_invoke, ritual.baseCost.toBeautifulString()), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         } else {
-                            Text("FALTAN ECOS (${ritual.baseCost.toBeautifulString()})", fontSize = 11.sp)
+                            Text(stringResource(R.string.ritual_missing_echoes, ritual.baseCost.toBeautifulString()), fontSize = 11.sp)
                         }
                     }
                 }
@@ -109,9 +111,9 @@ fun RitualItem(
                     val animatedProgress by animateFloatAsState(targetValue = progress, label = "Progress")
                     val barColor = if (ritual.state == RitualState.ACTIVE) Color(0xFF4CAF50) else Color.Gray
                     val label = if (ritual.state == RitualState.ACTIVE)
-                        "Tiempo restante: ${ritual.timeRemaining}s"
+                        stringResource(R.string.ritual_time_left, ritual.timeRemaining)
                     else
-                        "Enfriamiento: ${ritual.timeRemaining}s"
+                        stringResource(R.string.ritual_cooldown, ritual.timeRemaining)
 
                     Column {
                         Row(

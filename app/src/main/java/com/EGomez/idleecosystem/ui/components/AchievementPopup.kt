@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,7 +59,7 @@ fun AchievementPopup(achievement: Achievement) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if(achievement.isSecret) "¡SECRETO REVELADO!" else "¡LOGRO DESBLOQUEADO!",
+                    text = if (achievement.isSecret) stringResource(R.string.secret_revealed) else stringResource(R.string.achievement_unlocked),
                     color = if(achievement.isSecret) ArcanePurple else AncientGold,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -73,7 +75,7 @@ fun AchievementPopup(achievement: Achievement) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Bonus Global: x${achievement.bonusMultiplier}",
+                    text = stringResource(R.string.global_bonus, achievement.bonusMultiplier.toString()),
                     color = Color(0xFF81C784),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold

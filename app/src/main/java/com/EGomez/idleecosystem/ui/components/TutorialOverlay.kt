@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -125,7 +127,7 @@ fun TutorialOverlay(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = if (isButtonEnabled) "ENTENDIDO" else "LEYENDO...",
+                                    text = if (isButtonEnabled) stringResource(R.string.tutorial_ok) else stringResource(R.string.tutorial_reading),
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(vertical = 4.dp)
                                 )

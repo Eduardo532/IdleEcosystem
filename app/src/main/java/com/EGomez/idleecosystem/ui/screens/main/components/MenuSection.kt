@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -67,7 +69,7 @@ fun MenuSection(
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Investigación", "Grimorio", "Rituales")
+    val tabs = listOf(stringResource(R.string.tab_research), stringResource(R.string.tab_grimoire), stringResource(R.string.tab_rituals))
 
     Column(
         modifier = modifier
@@ -183,14 +185,14 @@ fun MenuSection(
                                     modifier = Modifier.height(32.dp)
                                 ) {
                                     Text(
-                                        if (affordableCount > 0) "Comprar todas ($affordableCount)" else "Comprar todas",
+                                        if (affordableCount > 0) stringResource(R.string.buy_all_count, affordableCount) else stringResource(R.string.buy_all),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
                                 Spacer(modifier = Modifier.weight(1f))
                                 Text(
-                                    "Ver Comprados",
+                                    stringResource(R.string.show_purchased),
                                     color = Color.Gray,
                                     fontSize = 12.sp,
                                     modifier = Modifier.padding(end = 8.dp)
@@ -215,18 +217,18 @@ fun MenuSection(
                                         .padding(32.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("No hay secretos...", color = Color.Gray)
+                                    Text(stringResource(R.string.no_secrets), color = Color.Gray)
                                 }
                             }
                         } else {
                             items(upgrades, key = { it.id }) { upgrade ->
-                                val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) "Tu Mente"
-                                else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) "Todo"
+                                val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) stringResource(R.string.target_mind)
+                                else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) stringResource(R.string.target_all)
                                 else buildings.find { it.id == upgrade.targetBuildingId }?.name ?: "?"
 
                                 UpgradeItem(
                                     upgrade = upgrade,
-                                    targetInfo = "Afecta: $targetName",
+                                    targetInfo = stringResource(R.string.affects, targetName),
                                     currentFunds = currentKnowledge,
                                     onBuy = { onBuyUpgrade(upgrade.id) }
                                 )
@@ -245,7 +247,7 @@ fun MenuSection(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Ecos Disponibles: ${currentEchoes.toBeautifulString()}",
+                                    text = stringResource(R.string.echoes_available, currentEchoes.toBeautifulString()),
                                     color = Color(0xFF00E5FF),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
@@ -278,7 +280,7 @@ fun MenuSection(
                 ) {
                     Column {
                         Text(
-                            "CORDURA RESIDUAL",
+                            stringResource(R.string.residual_sanity_title),
                             color = Color(0xFFCF6679),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
@@ -300,7 +302,7 @@ fun MenuSection(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
-                            Text("TIENDA", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.shop_button), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                         }
                         Button(
                             onClick = onAscendClicked,
@@ -314,7 +316,7 @@ fun MenuSection(
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("ASCENDER", fontWeight = FontWeight.Black)
+                                Text(stringResource(R.string.ascend), fontWeight = FontWeight.Black)
                                 if (canPrestige) {
                                     Text(
                                         "+$potentialPrestigeFormatted",
@@ -322,7 +324,7 @@ fun MenuSection(
                                         fontWeight = FontWeight.Bold
                                     )
                                 } else {
-                                    Text("Req: 1.00e+06 generado", fontSize = 9.sp)
+                                    Text(stringResource(R.string.ascend_requirement, BigDecimal("1000000").toBeautifulString()), fontSize = 9.sp)
                                 }
                             }
                         }
@@ -331,7 +333,7 @@ fun MenuSection(
             }
         } else {
             Text(
-                "Desliza para ver contenido",
+                stringResource(R.string.swipe_hint),
                 color = Color.Gray,
                 fontSize = 12.sp,
                 modifier = Modifier

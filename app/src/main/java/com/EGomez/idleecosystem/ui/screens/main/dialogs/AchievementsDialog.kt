@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,10 +46,10 @@ fun AchievementsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Hitos ($achievementsProgress)", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text(stringResource(R.string.milestones, achievementsProgress), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                         secretsProgress?.let { Text(it, color = ArcanePurple, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                     }
-                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Cerrar", tint = Color.Gray) }
+                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.Gray) }
                 }
                 HorizontalDivider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
@@ -74,7 +76,7 @@ fun AchievementsDialog(
                 }
 
                 LazyColumn(modifier = Modifier.weight(1f)) {
-                    if (achievements.isEmpty()) { item { Text("Vacío...", color = Color.Gray) } }
+                    if (achievements.isEmpty()) { item { Text(stringResource(R.string.empty), color = Color.Gray) } }
                     else { items(displayList, key = { it.first.id }) { (ach, isRevealed) -> AchievementItem(achievement = ach, isRevealed = isRevealed) } }
                 }
             }

@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import java.math.BigDecimal
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -57,10 +59,10 @@ fun PrestigeShopDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("MAPA DE LOCURA", color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Text("Cordura: $currencyFormatted", color = ArcanePurple, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.madness_map), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text(stringResource(R.string.sanity_amount, currencyFormatted), color = ArcanePurple, fontWeight = FontWeight.Bold)
                     }
-                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Cerrar", tint = Color.White) }
+                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.White) }
                 }
             }
             if (selectedNode != null) {
@@ -79,13 +81,13 @@ fun PrestigeShopDialog(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(node.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            if (node.level > 0) Text("Nivel ${node.level}", color = AncientGold, fontWeight = FontWeight.Bold)
+                            if (node.level > 0) Text(stringResource(R.string.level, node.level), color = AncientGold, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(node.description, color = Color.LightGray, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Efecto Actual: ", color = Color.Gray, fontSize = 12.sp)
+                            Text(stringResource(R.string.current_effect), color = Color.Gray, fontSize = 12.sp)
                             Text(node.currentEffectDisplay, color = Color(0xFF81C784), fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(16.dp))
@@ -106,11 +108,11 @@ fun PrestigeShopDialog(
                                 )
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("MEJORAR", fontWeight = FontWeight.Bold)
-                                    Text("Coste: ${cost.toBeautifulString()} Cordura", fontSize = 10.sp)
+                                    Text(stringResource(R.string.upgrade_button), fontWeight = FontWeight.Bold)
+                                    Text(stringResource(R.string.cost_sanity, cost.toBeautifulString()), fontSize = 10.sp)
                                     if (!canAfford) {
                                         Text(
-                                            "Faltan ${cost.subtract(currency).toBeautifulString()} Cordura",
+                                            stringResource(R.string.missing_sanity, cost.subtract(currency).toBeautifulString()),
                                             fontSize = 10.sp,
                                             color = Color(0xFFE57373)
                                         )
@@ -122,13 +124,13 @@ fun PrestigeShopDialog(
                                 onClick = {}, enabled = false,
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray)
-                            ) { Text("BLOQUEADO (Requiere conexión previa)", color = Color.Gray) }
+                            ) { Text(stringResource(R.string.locked_node), color = Color.Gray) }
                         }
                     }
                 }
             } else {
                 Text(
-                    "Toca una estrella para ver detalles",
+                    stringResource(R.string.tap_star),
                     color = Color.Gray,
                     fontSize = 12.sp,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp)

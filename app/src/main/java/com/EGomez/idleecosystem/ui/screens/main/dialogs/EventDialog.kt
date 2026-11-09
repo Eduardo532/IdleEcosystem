@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -96,7 +98,7 @@ fun EventDialog(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     if (option.effects.all { it.type == EffectType.NOTHING }) {
-                                        Text("Sin consecuencias", color = Color.Gray, fontSize = 11.sp)
+                                        Text(stringResource(R.string.event_no_effect), color = Color.Gray, fontSize = 11.sp)
                                     } else {
                                         option.effects.forEachIndexed { i, effect ->
                                             if (i > 0) Spacer(modifier = Modifier.width(12.dp))
@@ -106,7 +108,7 @@ fun EventDialog(
                                                     val percent = (effect.value * 100).toInt()
                                                     val color = if (percent >= 0) Color(0xFF81C784) else Color(0xFFE57373)
                                                     Text(
-                                                        "${if (percent >= 0) "+" else ""}$percent% Conocimiento",
+                                                        stringResource(R.string.event_knowledge, "${if (percent >= 0) "+" else ""}$percent"),
                                                         color = color.copy(alpha = alpha),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold
@@ -116,7 +118,7 @@ fun EventDialog(
                                                     val percent = (effect.value * 100).toInt()
                                                     val color = if (percent >= 0) Color(0xFF64B5F6) else Color(0xFFE57373)
                                                     Text(
-                                                        "${if (percent >= 0) "+" else ""}$percent% Cordura",
+                                                        stringResource(R.string.event_sanity, "${if (percent >= 0) "+" else ""}$percent"),
                                                         color = color.copy(alpha = alpha),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold
@@ -124,7 +126,7 @@ fun EventDialog(
                                                 }
                                                 EffectType.GLOBAL_BUFF -> {
                                                     Text(
-                                                        "Potenciador x${effect.value}",
+                                                        stringResource(R.string.event_buff, effect.value.toString()),
                                                         color = AncientGold.copy(alpha = alpha),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold

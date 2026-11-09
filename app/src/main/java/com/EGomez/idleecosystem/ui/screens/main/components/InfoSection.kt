@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import androidx.compose.ui.res.stringResource
+import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -51,7 +53,7 @@ fun InfoSection(
         // --- 1. CABECERA ---
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Conocimiento Arcano",
+                text = stringResource(R.string.arcane_knowledge),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.Gray
             )
@@ -62,7 +64,7 @@ fun InfoSection(
                 color = ArcanePurple
             )
             Text(
-                text = "+$knowledgePerSecond/seg",
+                text = stringResource(R.string.per_second, knowledgePerSecond),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFF4CAF50)
             )
@@ -79,7 +81,7 @@ fun InfoSection(
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 Text(
-                    text = "Global: x${globalMultiplier.toBeautifulString()}",
+                    text = stringResource(R.string.global_multiplier, globalMultiplier.toBeautifulString()),
                     color = AncientGold,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -102,7 +104,7 @@ fun InfoSection(
                     Icon(Icons.Default.Star, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "BONUS ACTIVO: x$activeBuffMultiplier (${buffTimeRemaining}s)",
+                        text = stringResource(R.string.active_bonus, activeBuffMultiplier.toString(), buffTimeRemaining),
                         color = Color(0xFF81C784),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
@@ -173,7 +175,7 @@ fun InfoSection(
                     val size = maxWidth
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "INVESTIGAR",
+                            text = stringResource(R.string.research_button),
                             color = ArcanePurple,
                             fontWeight = FontWeight.Bold,
                             fontSize = (size.value * 0.13f).sp

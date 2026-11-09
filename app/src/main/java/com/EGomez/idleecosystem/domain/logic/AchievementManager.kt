@@ -121,7 +121,7 @@ class AchievementManager @Inject constructor() {
         Achievement("b_tem_1", "Templos I", "Ruinas.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("5"), BigDecimal("1.03"), groupId = "4_build_tem", order = 66, requirement = "5 Templos"),
         Achievement("b_tem_2", "Templos II", "Restauración.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("15"), BigDecimal("1.04"), groupId = "4_build_tem", order = 67, requirement = "15 Templos"),
         Achievement("b_tem_3", "Templos III", "Culto.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("30"), BigDecimal("1.05"), groupId = "4_build_tem", order = 68, requirement = "30 Templos"),
-        Achievement("b_tem_4", "Templos IIV", "Peregrinación.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("60"), BigDecimal("1.06"), groupId = "4_build_tem", order = 69, requirement = "60 Templos"),
+        Achievement("b_tem_4", "Templos IV", "Peregrinación.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("60"), BigDecimal("1.06"), groupId = "4_build_tem", order = 69, requirement = "60 Templos"),
         Achievement("b_tem_5", "Templos V", "R'lyeh.", AchievementType.BUILDING_OWNED, "b_temple", BigDecimal("100"), BigDecimal("1.07"), groupId = "4_build_tem", order = 70, requirement = "100 Templos"),
 
         // 11. PORTAL

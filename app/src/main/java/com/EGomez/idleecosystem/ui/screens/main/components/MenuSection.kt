@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.background
@@ -224,7 +225,7 @@ fun MenuSection(
                             items(upgrades, key = { it.id }) { upgrade ->
                                 val targetName = if (upgrade.type == UpgradeType.CLICK_MULTIPLIER) stringResource(R.string.target_mind)
                                 else if (upgrade.type == UpgradeType.GLOBAL_MULTIPLIER) stringResource(R.string.target_all)
-                                else buildings.find { it.id == upgrade.targetBuildingId }?.name ?: "?"
+                                else buildings.find { it.id == upgrade.targetBuildingId }?.name?.let { tr(it) } ?: "?"
 
                                 UpgradeItem(
                                     upgrade = upgrade,

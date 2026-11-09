@@ -51,4 +51,18 @@ class EnglishUiTest {
         compose.onNodeWithText("Español").performClick()
         assertEquals(AppLanguage.SPANISH, chosen)
     }
+
+    @Test
+    fun `game content is shown in english`() {
+        val notes = com.EGomez.idleecosystem.domain.logic.BuildingCatalog.create().first { it.id == "b_notes" }
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.components.BuildingItem(
+                notes, java.math.BigDecimal(100), java.math.BigDecimal.ONE,
+                com.EGomez.idleecosystem.domain.logic.BuildingCalculator(), buyMultiplier = 1
+            ) {}
+        }
+
+        compose.onNodeWithText("Messy Notes").assertExists()
+        compose.onNodeWithText("Frantic scribbles.").assertExists()
+    }
 }

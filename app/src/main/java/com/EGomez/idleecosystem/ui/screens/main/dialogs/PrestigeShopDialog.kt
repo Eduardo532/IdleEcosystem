@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import java.math.BigDecimal
@@ -80,11 +81,11 @@ fun PrestigeShopDialog(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(node.name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(tr(node.name), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             if (node.level > 0) Text(stringResource(R.string.level, node.level), color = AncientGold, fontWeight = FontWeight.Bold)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(node.description, color = Color.LightGray, fontSize = 14.sp)
+                        Text(tr(node.description), color = Color.LightGray, fontSize = 14.sp)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.current_effect), color = Color.Gray, fontSize = 12.sp)

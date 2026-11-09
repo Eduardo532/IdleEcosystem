@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.components
 
+import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
@@ -67,7 +68,7 @@ fun AchievementPopup(achievement: Achievement) {
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = achievement.name,
+                    text = tr(achievement.name),
                     color = Color.White,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 16.sp,

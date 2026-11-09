@@ -136,6 +136,7 @@ fun MainScreen(
                         menuWeight = menuWeight,
                         achievements = achievements,
                         achievementsProgress = uiState.achievementsProgress,
+                        nextGoalProgress = uiState.nextGoal?.progress,
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -164,8 +165,6 @@ fun MainScreen(
                             activeBuffMultiplier = uiState.activeBuffMultiplier,
                             buffTimeRemaining = uiState.buffTimeRemaining,
                             clickMultiplier = uiState.clickMultiplier,
-                            nextGoal = uiState.nextGoal,
-                            onNextGoalClick = { showAchievementsDialog = true },
                             onManualClick = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
                                 if (result.knowledgeGained > BigDecimal.ZERO && uiState.isFloatingTextEnabled) {
@@ -306,7 +305,15 @@ fun MainScreen(
                 )
             }
 
-            if (showAchievementsDialog) AchievementsDialog(achievements, uiState.achievementsProgress, if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null) { showAchievementsDialog = false }
+            if (showAchievementsDialog) {
+                AchievementsDialog(
+                    achievements = achievements,
+                    achievementsProgress = uiState.achievementsProgress,
+                    secretsProgress = if (uiState.secretsFound > 0) stringResource(R.string.secrets_progress, uiState.secretsFound, uiState.secretsTotal) else null,
+                    nextGoal = uiState.nextGoal,
+                    onDismiss = { showAchievementsDialog = false }
+                )
+            }
             if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }

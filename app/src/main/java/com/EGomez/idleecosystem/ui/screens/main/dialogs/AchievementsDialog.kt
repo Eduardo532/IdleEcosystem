@@ -20,7 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
+import com.EGomez.idleecosystem.domain.logic.NextGoal
 import com.EGomez.idleecosystem.domain.model.Achievement
+import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.ui.components.AchievementItem
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
@@ -30,6 +34,7 @@ fun AchievementsDialog(
     achievements: List<Achievement>,
     achievementsProgress: String,
     secretsProgress: String?,
+    nextGoal: NextGoal? = null,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -51,6 +56,7 @@ fun AchievementsDialog(
                     }
                     IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.Gray) }
                 }
+                nextGoal?.let { NextGoalCard(it) }
                 HorizontalDivider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
                 val displayList = remember(achievements) {
@@ -83,3 +89,33 @@ fun AchievementsDialog(
         }
     }
 }
+
+/** La meta más cercana, con su avance, arriba de la lista de logros. */
+@Composable
+private fun NextGoalCard(goal: NextGoal) {
+    val percent = (goal.progress * 100).toInt().coerceIn(0, 99)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .testTag(NEXT_GOAL_TAG)
+    ) {
+        Text(
+            text = stringResource(R.string.next_goal, tr(goal.requirement), percent),
+            color = Color.LightGray,
+            fontSize = 13.sp
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        LinearProgressIndicator(
+            progress = { goal.progress },
+            color = AncientGold,
+            trackColor = Color.White.copy(alpha = 0.1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+        )
+    }
+}
+
+const val NEXT_GOAL_TAG = "next_goal"

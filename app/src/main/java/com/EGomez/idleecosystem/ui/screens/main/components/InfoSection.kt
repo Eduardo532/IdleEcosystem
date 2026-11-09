@@ -10,9 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,15 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.core.math.toBeautifulString
-import com.EGomez.idleecosystem.domain.logic.NextGoal
-import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 import java.math.BigDecimal
@@ -49,9 +43,7 @@ fun InfoSection(
     clickMultiplier: String,
     // CAMBIO: Añadido parámetro `buttonRadius`
     onManualClick: (clickOffset: Offset, buttonCenter: Offset, buttonRadius: Float) -> Unit,
-    modifier: Modifier = Modifier,
-    nextGoal: NextGoal? = null,
-    onNextGoalClick: () -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -76,7 +68,6 @@ fun InfoSection(
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFF4CAF50)
             )
-            if (nextGoal != null) NextGoalLine(nextGoal, onNextGoalClick)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -201,41 +192,3 @@ fun InfoSection(
         }
     }
 }
-
-/**
- * La meta más cercana, siempre a la vista: responde "¿y ahora qué?" sin abrir los
- * logros. Al tocarla se abre la lista de logros.
- */
-@Composable
-private fun NextGoalLine(goal: NextGoal, onClick: () -> Unit) {
-    val percent = (goal.progress * 100).toInt().coerceIn(0, 99)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = 6.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .testTag(NEXT_GOAL_TAG)
-    ) {
-        Text(
-            text = stringResource(R.string.next_goal, tr(goal.requirement), percent),
-            color = Color.LightGray,
-            fontSize = 12.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        LinearProgressIndicator(
-            progress = { goal.progress },
-            color = AncientGold,
-            trackColor = Color.White.copy(alpha = 0.1f),
-            modifier = Modifier
-                .width(160.dp)
-                .height(3.dp)
-                .clip(RoundedCornerShape(2.dp))
-        )
-    }
-}
-
-const val NEXT_GOAL_TAG = "next_goal"

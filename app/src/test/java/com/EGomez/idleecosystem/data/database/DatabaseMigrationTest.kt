@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -67,6 +68,11 @@ class DatabaseMigrationTest {
                 assertTrue(dao.getAllUpgrades().single { it.upgradeId == "u_click_1" }.isBought)
                 assertEquals(2, dao.getAllPrestigeUpgrades().single { it.id == "pu_core" }.level)
                 assertTrue(dao.getAllAchievements().single { it.id == "ach_first" }.isUnlocked)
+                // v12: los contadores de logros empiezan vacíos y las estadísticas se conservan
+                val stats = dao.getGameStatistics().first()
+                assertNotNull(stats)
+                assertEquals(30L, stats!!.totalClicks)
+                assertEquals("", stats.counters)
             }
         } finally {
             db.close()

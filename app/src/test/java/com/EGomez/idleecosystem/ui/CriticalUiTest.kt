@@ -22,6 +22,9 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
+import com.EGomez.idleecosystem.domain.model.Achievement
+import com.EGomez.idleecosystem.domain.model.AchievementType
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AttentionDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ATTENTION_ADD_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.ATTENTION_BAR_TAG
@@ -286,6 +289,27 @@ class CriticalUiTest {
         compose.onNodeWithText("Hito 25 · faltan 6").assertExists()
         compose.onNodeWithText("Comprar +6", substring = true).assertIsEnabled().performClick()
         assertEquals(1, bought)
+    }
+
+    @Test
+    fun `achievements can be filtered by category`() {
+        fun ach(id: String, name: String, group: String) = Achievement(
+            id, name, "d", AchievementType.STAT, null, BigDecimal.ONE, BigDecimal("1.01"),
+            isUnlocked = true, groupId = group, order = id.length, requirement = "r", stat = "ascensions"
+        )
+        compose.setContent {
+            AchievementsDialog(
+                achievements = listOf(ach("a1", "Primer Umbral", "6_asc"), ach("a22", "El Escéptico", "7_pact_none_1")),
+                achievementsProgress = "2 / 2", secretsProgress = null, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Primer Umbral").assertExists()
+        compose.onNodeWithTag(ACHIEVEMENT_CATEGORY_TAG + "PANTHEON").performClick()
+        compose.onNodeWithText("El Escéptico").assertExists()
+        compose.onNodeWithText("Primer Umbral").assertDoesNotExist()
+        compose.onNodeWithTag(ACHIEVEMENT_CATEGORY_TAG + "all").performClick()
+        compose.onNodeWithText("Primer Umbral").assertExists()
     }
 
     @Test

@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.18.x · "Segunda Capa" *(en pruebas)*
+
+- **v0.18.0:** Trascender: con 50 Ascensiones en el ciclo se reinicia casi todo a cambio de Éter, que compra seis mejoras eternas; 13 logros propios.
+
 ## v0.17.4 · "Desafíos y Riesgo" *(oficial, 10 nov 2026)*
 
 Cuarta etapa del plan de retención: retos voluntarios y decisiones con riesgo.

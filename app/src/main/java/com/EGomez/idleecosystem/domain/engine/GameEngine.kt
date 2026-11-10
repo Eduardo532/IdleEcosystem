@@ -1297,9 +1297,15 @@ class GameEngine @Inject constructor(
 
     private fun totalAscensionsEver(): Int = statsManager.counter(AchievementStat.ASCENSIONS_PAST).toInt() + cycleAscensions()
 
+    /** Cordura ganada en el ciclo; en el primero, toda la histórica (se registraba desde antes). */
+    private fun cycleSanity(): BigDecimal {
+        val counted = statsManager.counter(AchievementStat.CYCLE_SANITY)
+        return if (statsManager.counter(AchievementStat.TRANSCENDENCES).signum() == 0) counted.max(statsManager.lifetimeSanity) else counted
+    }
+
     private fun etherGainNow(): Int = Transcendence.etherGain(
         cycleAscensions(),
-        statsManager.counter(AchievementStat.CYCLE_SANITY),
+        cycleSanity(),
         Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO))
     )
 

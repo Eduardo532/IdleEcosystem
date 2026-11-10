@@ -3,6 +3,10 @@ package com.EGomez.idleecosystem.ui.components
 import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.clickable
 import com.EGomez.idleecosystem.domain.logic.Consecration
@@ -104,25 +108,33 @@ fun BuildingItem(
     val borderStroke = BorderStroke(1.dp, tierColor.copy(alpha = 0.6f))
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceGrey),
         shape = RoundedCornerShape(8.dp),
         border = borderStroke
     ) {
+        // Tarjeta compacta (v0.18.2): la descripción se despliega al tocar el nombre
+        var showDescription by rememberSaveable(building.id) { mutableStateOf(false) }
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable { showDescription = !showDescription }
+                        .testTag(BUILDING_NAME_TAG + building.id)
+                ) {
                     Text(
                         text = tr(building.name),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
 
                     if (hasSpecificMultiplier) {
@@ -171,20 +183,21 @@ fun BuildingItem(
                     Text(
                         text = stringResource(R.string.owned_line, building.amountOwned, prodLabel, productionToShow.toBeautifulString(), prodSuffix),
                         color = if (hasSpecificMultiplier) Color(0xFF81C784) else Color.Gray,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Text(
-                    text = tr(building.description),
-                    color = Color.DarkGray,
-                    fontSize = 10.sp,
-                    lineHeight = 12.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (showDescription) {
+                    Text(
+                        text = tr(building.description),
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
+                        modifier = Modifier.testTag(BUILDING_DESCRIPTION_TAG + building.id)
+                    )
+                }
 
                 // Consagración: el próximo nivel, cuántas unidades pide y su costo en Éter
                 if (consecrationRevealed && consecration < Consecration.MAX_LEVEL) {
@@ -210,7 +223,7 @@ fun BuildingItem(
                 if (milestones.isNotEmpty()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     ) {
                         LinearProgressIndicator(
                             progress = { milestoneProgress },
@@ -235,10 +248,12 @@ fun BuildingItem(
             Button(
                 onClick = onBuyClick,
                 enabled = canAfford,
-                colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black, disabledContainerColor = Color(0xFF333333), disabledContentColor = Color.White.copy(alpha = 0.6f))
+                colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black, disabledContainerColor = Color(0xFF333333), disabledContentColor = Color.White.copy(alpha = 0.6f)),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier.heightIn(min = 40.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(R.string.buy_amount, amountToBuyLabel), maxLines = 1)
+                    Text(text = stringResource(R.string.buy_amount, amountToBuyLabel), maxLines = 1, fontSize = 13.sp)
 
                     if (hasDiscount) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -267,3 +282,5 @@ fun BuildingItem(
 
 const val CONSECRATE_TAG = "consecrate_"
 const val CONSECRATION_BADGE_TAG = "consecration_badge_"
+const val BUILDING_NAME_TAG = "building_name_"
+const val BUILDING_DESCRIPTION_TAG = "building_description_"

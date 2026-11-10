@@ -60,6 +60,8 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.ui.screens.ActiveBuffsDisplay
 import com.EGomez.idleecosystem.ui.screens.main.components.RESEARCH_BUTTON_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.COMPACT_RESEARCH_BUTTON_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
 import androidx.compose.runtime.Composable
 import org.junit.Assert.assertTrue
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.NEXT_GOAL_TAG
@@ -412,6 +414,16 @@ class CriticalUiTest {
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "fire").performScrollTo().performClick()
         assertEquals("fire", bought)
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "trials").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the compact research button clicks like the big one`() {
+        var clicks = 0
+        compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }
+
+        compose.onNodeWithText("+12").assertExists()
+        compose.onNodeWithTag(COMPACT_RESEARCH_BUTTON_TAG).performClick()
+        assertEquals(1, clicks)
     }
 
     @Test

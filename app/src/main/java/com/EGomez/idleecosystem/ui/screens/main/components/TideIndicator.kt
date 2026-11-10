@@ -30,11 +30,17 @@ private fun mmss(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds 
 
 /** La fase de la Marea, cuánto le queda y cuál viene. Al tocarla se explican las tres. */
 @Composable
-fun TideIndicator(tide: TidePhase, secondsLeft: Int, onClick: () -> Unit) {
+fun TideIndicator(
+    tide: TidePhase,
+    secondsLeft: Int,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
+    onClick: () -> Unit
+) {
     val next = TidePhase.entries[(tide.ordinal + 1) % TidePhase.entries.size]
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
@@ -48,7 +54,7 @@ fun TideIndicator(tide: TidePhase, secondsLeft: Int, onClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
         )
-        Text(stringResource(R.string.tide_next, tr(next.title)), color = Color.Gray, fontSize = 10.sp)
+        if (!compact) Text(stringResource(R.string.tide_next, tr(next.title)), color = Color.Gray, fontSize = 10.sp)
     }
 }
 

@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
+import androidx.compose.ui.geometry.Offset
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
 import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
@@ -163,6 +165,8 @@ fun MainScreen(
                         achievements = achievements,
                         achievementsProgress = uiState.achievementsProgress,
                         nextGoalProgress = uiState.nextGoal?.progress,
+                        knowledgeFormatted = uiState.knowledgeFormatted,
+                        knowledgePerSecond = uiState.knowledgePerSecond,
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -179,30 +183,8 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        if (uiState.activeRuneBuffs.isNotEmpty()) {
-                            ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        // Medidor de Locura (desde la quinta Ascensión)
-                        uiState.madness?.let { value ->
-                            MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        // Fases de la Marea (desde la décima Ascensión)
-                        uiState.tide?.let { tide ->
-                            TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-
-                        InfoSection(
-                            knowledgeFormatted = uiState.knowledgeFormatted,
-                            knowledgePerSecond = uiState.knowledgePerSecond,
-                            globalMultiplier = uiState.globalMultiplier,
-                            activeBuffMultiplier = uiState.activeBuffMultiplier,
-                            buffTimeRemaining = uiState.buffTimeRemaining,
-                            clickMultiplier = uiState.clickMultiplier,
-                            onManualClick = { clickOffset, buttonCenter, buttonRadius ->
+                        // El clic manual (INVESTIGAR grande o compacto)
+                        val onManualClick: (Offset, Offset, Float) -> Unit = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
                                 if (result.knowledgeGained > BigDecimal.ZERO && uiState.isFloatingTextEnabled) {
                                     spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White, clickOffset.x, clickOffset.y - 80f)
@@ -214,9 +196,58 @@ fun MainScreen(
                                     if (result.knowledgeGained > BigDecimal.ZERO) particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.KNOWLEDGE, baseRadius = buttonRadius)
                                     if (result.echoFound) particleSystem.spawnExplosion(buttonCenter.x, buttonCenter.y, ParticleType.ECHO, count = 30, baseRadius = buttonRadius)
                                 }
-                            },
-                            modifier = Modifier.weight(1f - menuWeight)
-                        )
+                            }
+
+                        if (isMenuExpanded) {
+                            // Cabecera compacta (v0.18.2): potenciadores, Locura, Marea e INVESTIGAR
+                            // en dos filas finas; el Conocimiento va en la barra superior
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (uiState.activeRuneBuffs.isNotEmpty()) ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                CompactResearchButton(uiState.clickMultiplier, onManualClick)
+                            }
+                            if (uiState.madness != null || uiState.tide != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                    uiState.madness?.let { value ->
+                                        MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding, Modifier.weight(1f), compact = true) { showMadnessInfo = true }
+                                    }
+                                    if (uiState.madness != null && uiState.tide != null) Spacer(modifier = Modifier.width(8.dp))
+                                    uiState.tide?.let { tide ->
+                                        TideIndicator(tide, uiState.tideSecondsLeft, Modifier.weight(1f), compact = true) { showTideInfo = true }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                        } else {
+                            if (uiState.activeRuneBuffs.isNotEmpty()) {
+                                ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            // Medidor de Locura (desde la quinta Ascensión)
+                            uiState.madness?.let { value ->
+                                MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                            // Fases de la Marea (desde la décima Ascensión)
+                            uiState.tide?.let { tide ->
+                                TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+
+                            InfoSection(
+                                knowledgeFormatted = uiState.knowledgeFormatted,
+                                knowledgePerSecond = uiState.knowledgePerSecond,
+                                globalMultiplier = uiState.globalMultiplier,
+                                activeBuffMultiplier = uiState.activeBuffMultiplier,
+                                buffTimeRemaining = uiState.buffTimeRemaining,
+                                clickMultiplier = uiState.clickMultiplier,
+                                onManualClick = onManualClick,
+                                modifier = Modifier.weight(1f - menuWeight)
+                            )
+                        }
 
                         MenuSection(
                             isMenuExpanded = isMenuExpanded, onToggleMenu = { isMenuExpanded = !isMenuExpanded },
@@ -277,7 +308,8 @@ fun MainScreen(
                                 showPrestigeShopDialog = true
                                 viewModel.onPrestigeShopOpened()
                             },
-                            modifier = Modifier.weight(menuWeight)
+                            // Con el menú abierto, la lista ocupa todo lo que deja la cabecera compacta
+                            modifier = if (isMenuExpanded) Modifier.weight(1f) else Modifier.weight(menuWeight)
                         )
                     }
 

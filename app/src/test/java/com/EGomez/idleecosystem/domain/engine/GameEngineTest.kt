@@ -431,6 +431,22 @@ class GameEngineTest {
     }
 
     @Test
+    fun `madness rises with clicks and collapses at 100`() = runBlocking {
+        // Oculto hasta la quinta Ascensión
+        assertEquals(null, engine.economy.value.madness)
+        stats.totalPrestiges = 5
+        engine.click(false)
+        val rising = await(engine.economy) { (it.madness ?: 0.0) > 0.0 }
+        assertTrue(rising.globalMultiplier.signum() >= 0)
+
+        // 5.100 clics (x0,02) llenan el medidor aunque baje 0,2 por segundo
+        repeat(5_100) { engine.click(false) }
+        val collapsed = await(engine.economy) { it.collapseSeconds > 0 }
+        assertTrue((collapsed.madness ?: 100.0) < 10.0)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.MADNESS_COLLAPSES)))
+    }
+
+    @Test
     fun `abandoning a trial lifts its rules without a reward`() = runBlocking {
         stats.totalPrestiges = 2
         engine.grantKnowledge(BigDecimal("10000000"))

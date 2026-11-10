@@ -21,6 +21,8 @@ import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
 import androidx.compose.ui.platform.testTag
 import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
@@ -113,6 +115,7 @@ fun MainScreen(
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
         var abandonPath by rememberSaveable { mutableStateOf(false) }
         var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
+        var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -175,6 +178,12 @@ fun MainScreen(
                         if (uiState.activeRuneBuffs.isNotEmpty()) {
                             ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
                             Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // Medidor de Locura (desde la quinta Ascensión)
+                        uiState.madness?.let { value ->
+                            MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
 
                         InfoSection(
@@ -403,6 +412,37 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            if (showMadnessInfo) {
+                MadnessInfoDialog(uiState.madness ?: 0.0) { showMadnessInfo = false }
+            }
+
+            // Presagios y colapso de la Locura
+            uiState.madnessNotice?.let { notice ->
+                val text = when {
+                    notice.collapse -> stringResource(R.string.madness_notice_collapse)
+                    notice.possessedBuilding != null -> stringResource(R.string.madness_notice_possessed, tr(notice.possessedBuilding))
+                    else -> stringResource(R.string.madness_notice_echoes, notice.echoesLost ?: "0")
+                }
+                Surface(
+                    color = Color(0xFF2A0A0A),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFD50000)),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 190.dp)
+                        .zIndex(5f)
+                        .testTag(MADNESS_NOTICE_TAG)
+                ) {
+                    Text(
+                        text,
+                        color = Color(0xFFFF5252),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
             // Prueba de Locura superada
             uiState.trialNotice?.let { trial ->
                 Surface(
@@ -532,3 +572,4 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
 private const val BUFF_TICK_MS = 250L
 
 const val TRIAL_NOTICE_TAG = "trial_notice"
+const val MADNESS_NOTICE_TAG = "madness_notice"

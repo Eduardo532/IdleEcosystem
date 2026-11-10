@@ -81,6 +81,11 @@ data class GameUiState(
     val deliriumMultiplier: Double = 1.0,
     val earlyPacts: Set<Pact> = emptySet(),
     val trialNotice: Trial? = null,
+    /** Medidor de Locura (null = oculto), colapso, edificio poseído y el último presagio. */
+    val madness: Double? = null,
+    val collapseSeconds: Int = 0,
+    val possessedBuilding: String? = null,
+    val madnessNotice: MadnessNotice? = null,
     /** Espacios de Runa: cuántos hay, las grabadas y cuántas veces se atrapó cada runa. */
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
@@ -120,4 +125,11 @@ data class SavePreview(
     val date: String,
     val money: String,
     val achievements: String
+)
+
+/** Aviso breve de la Locura: un edificio poseído, Ecos dispersos o el colapso. */
+data class MadnessNotice(
+    val possessedBuilding: String? = null,
+    val echoesLost: String? = null,
+    val collapse: Boolean = false
 )

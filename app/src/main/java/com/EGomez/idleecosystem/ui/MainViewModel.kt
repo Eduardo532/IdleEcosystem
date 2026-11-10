@@ -191,6 +191,9 @@ class MainViewModel @Inject constructor(
         completedTrials = economy.completedTrials,
         deliriumMultiplier = economy.deliriumMultiplier,
         earlyPacts = economy.earlyPacts,
+        madness = economy.madness,
+        collapseSeconds = economy.collapseSeconds,
+        possessedBuilding = economy.possessedBuilding?.let { id -> engine.buildings.value.firstOrNull { it.id == id }?.name ?: id },
         runeSlots = economy.runeSlots,
         engravedRunes = economy.engravedRunes,
         runeCatches = economy.runeCatches
@@ -224,6 +227,10 @@ class MainViewModel @Inject constructor(
                     _uiState.update { if (it.autoAscensionNotice == gain) it.copy(autoAscensionNotice = null) else it }
                 }
             }
+            is EngineEffect.MadnessOmen -> showMadnessNotice(
+                MadnessNotice(possessedBuilding = effect.possessedBuilding, echoesLost = effect.echoesLost?.toBeautifulString())
+            )
+            EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
             is EngineEffect.TrialCompleted -> {
                 val trial = effect.trial
                 _uiState.update { it.copy(trialNotice = trial) }
@@ -242,6 +249,14 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun showMadnessNotice(notice: MadnessNotice) {
+        _uiState.update { it.copy(madnessNotice = notice) }
+        viewModelScope.launch {
+            delay(MADNESS_NOTICE_MS)
+            _uiState.update { if (it.madnessNotice == notice) it.copy(madnessNotice = null) else it }
         }
     }
 
@@ -493,5 +508,6 @@ class MainViewModel @Inject constructor(
 
         const val AUTO_ASCENSION_NOTICE_MS = 4_000L
         const val TRIAL_NOTICE_MS = 5_000L
+        const val MADNESS_NOTICE_MS = 4_000L
     }
 }

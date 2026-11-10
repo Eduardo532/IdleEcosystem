@@ -7,6 +7,7 @@ import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
+import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.RuneCatalog
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.TutorialStep
@@ -30,7 +31,8 @@ class ContentTranslationsTest {
         "Runas" to RuneTier.entries.flatMap { RuneCatalog.getVariantsForTier(it) }.flatMap { listOf(it.name, it.description) },
         "Rituales" to RitualManager().rituals.value.flatMap { listOf(it.name, it.description) },
         "Tienda de Cordura" to PrestigeShopManager().upgrades.flatMap { listOf(it.name, it.description) },
-        "Tutoriales" to TutorialStep.entries.flatMap { listOf(it.title, it.message) }
+        "Tutoriales" to TutorialStep.entries.flatMap { listOf(it.title, it.message) },
+        "Panteón" to Pact.entries.flatMap { listOf(it.godName, it.epithet, it.lore) }
     )
 
     @Test

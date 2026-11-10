@@ -28,8 +28,15 @@ data class Ritual(
     // Estado Dinámico
     val state: RitualState = RitualState.READY,
     val timeRemaining: Long = 0,
-    val totalTimeForProgress: Long = 1
+    val totalTimeForProgress: Long = 1,
+    /** Multiplicador de costo del pacto activo. */
+    val costMultiplier: Double = 1.0
 ) {
+    /** Lo que cuesta invocarlo ahora (con el pacto), redondeado hacia arriba. */
+    val cost: BigDecimal
+        get() = if (costMultiplier == 1.0) baseCost
+        else baseCost.multiply(BigDecimal.valueOf(costMultiplier)).setScale(0, java.math.RoundingMode.CEILING)
+
     /**
      * Producción que entrega, en segundos de producción base: un multiplicador xN
      * durante D segundos aporta (N - 1) x D (los potenciadores se suman); el

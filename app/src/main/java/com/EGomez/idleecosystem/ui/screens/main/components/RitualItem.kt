@@ -34,7 +34,7 @@ fun RitualItem(
     onToggleAuto: () -> Unit = {},
     onActivate: () -> Unit
 ) {
-    val canAfford = currentFunds >= ritual.baseCost
+    val canAfford = currentFunds >= ritual.cost
     val isReady = ritual.state == RitualState.READY
 
     // Configuración de colores según estado
@@ -110,9 +110,9 @@ fun RitualItem(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         if (canAfford) {
-                            Text(stringResource(R.string.ritual_invoke, ritual.baseCost.toBeautifulString()), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text(stringResource(R.string.ritual_invoke, ritual.cost.toBeautifulString()), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         } else {
-                            Text(stringResource(R.string.ritual_missing_echoes, ritual.baseCost.toBeautifulString()), fontSize = 11.sp)
+                            Text(stringResource(R.string.ritual_missing_echoes, ritual.cost.toBeautifulString()), fontSize = 11.sp)
                         }
                     }
                 }

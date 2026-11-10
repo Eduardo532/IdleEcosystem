@@ -96,11 +96,14 @@ class RitualManager @Inject constructor() {
             }
             remaining -= current.timeRemaining
             current = when (current.state) {
-                RitualState.ACTIVE -> current.copy(
-                    state = RitualState.COOLDOWN,
-                    timeRemaining = current.cooldownSeconds,
-                    totalTimeForProgress = current.cooldownSeconds
-                )
+                RitualState.ACTIVE -> {
+                    val cooldown = scaled(current.cooldownSeconds, cooldownMultiplier)
+                    current.copy(
+                        state = RitualState.COOLDOWN,
+                        timeRemaining = cooldown,
+                        totalTimeForProgress = cooldown
+                    )
+                }
                 else -> current.copy(
                     state = RitualState.READY,
                     timeRemaining = 0,
@@ -111,17 +114,31 @@ class RitualManager @Inject constructor() {
         return current
     }
 
+    private var durationMultiplier = 1.0
+    private var cooldownMultiplier = 1.0
+
+    /** Aplica el pacto activo: costo, duración y recarga de los rituales. */
+    fun applyPact(cost: Double, duration: Double, cooldown: Double) {
+        durationMultiplier = duration
+        cooldownMultiplier = cooldown
+        _rituals.update { list -> list.map { it.copy(costMultiplier = cost) } }
+    }
+
+    private fun scaled(seconds: Long, multiplier: Double): Long =
+        (seconds * multiplier).toLong().coerceAtLeast(1)
+
     fun tryActivateRitual(ritualId: String, currentFunds: BigDecimal): Boolean {
         val ritual = _rituals.value.find { it.id == ritualId } ?: return false
 
-        if (ritual.state == RitualState.READY && currentFunds >= ritual.baseCost) {
+        if (ritual.state == RitualState.READY && currentFunds >= ritual.cost) {
             _rituals.update { currentList ->
                 currentList.map {
                     if (it.id == ritualId) {
+                        val duration = scaled(it.durationSeconds, durationMultiplier)
                         it.copy(
                             state = RitualState.ACTIVE,
-                            timeRemaining = it.durationSeconds,
-                            totalTimeForProgress = it.durationSeconds
+                            timeRemaining = duration,
+                            totalTimeForProgress = duration
                         )
                     } else it
                 }

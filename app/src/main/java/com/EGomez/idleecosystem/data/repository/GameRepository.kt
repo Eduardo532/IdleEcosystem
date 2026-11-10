@@ -18,7 +18,9 @@ data class GameSnapshot(
     val upgrades: List<UpgradeEntity>,
     val unlockedAchievements: List<AchievementEntity>,
     val prestigeUpgrades: List<PrestigeUpgradeEntity>,
-    val statistics: GameStatisticsEntity
+    val statistics: GameStatisticsEntity,
+    /** El pacto de la vida actual ("" = sin pacto). */
+    val activePact: String = ""
 )
 
 @Singleton
@@ -72,7 +74,8 @@ class GameRepository @Inject constructor(
         prestige: BigDecimal,
         echoes: BigDecimal,
         tutorialEnabled: Boolean,
-        completedSteps: String
+        completedSteps: String,
+        activePact: String
     ) {
         // Recuperamos el tiempo de juego para no perderlo
         val current = gameDao.getGameStateOnce()
@@ -87,7 +90,8 @@ class GameRepository @Inject constructor(
             lastLoginTime = System.currentTimeMillis(),
             totalPlayTime = currentPlayTime,
             tutorialEnabled = tutorialEnabled,
-            completedTutorialSteps = completedSteps
+            completedTutorialSteps = completedSteps,
+            activePact = activePact
         )
         gameDao.saveGame(entity)
     }
@@ -105,7 +109,8 @@ class GameRepository @Inject constructor(
                 snapshot.sanity,
                 snapshot.echoes,
                 snapshot.tutorialEnabled,
-                snapshot.completedTutorialSteps
+                snapshot.completedTutorialSteps,
+                snapshot.activePact
             )
             gameDao.insertBuildings(snapshot.buildings)
             gameDao.insertUpgrades(snapshot.upgrades)

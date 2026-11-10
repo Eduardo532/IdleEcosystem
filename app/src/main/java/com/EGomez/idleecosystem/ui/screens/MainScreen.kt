@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Scaffold
@@ -101,6 +103,11 @@ fun MainScreen(
         var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
         var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
         var showAutomationDialog by rememberSaveable { mutableStateOf(false) }
+        // Ficha del Panteón abierta y pacto elegido para la próxima vida (por id)
+        var pactDetailId by rememberSaveable { mutableStateOf<String?>(null) }
+        var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
+        // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
+        val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
         // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
         var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -213,6 +220,9 @@ fun MainScreen(
                             onToggleAutoGrimoire = { viewModel.toggleAutoGrimoire() },
                             onToggleAutoRitual = { viewModel.toggleAutoRitual(it) },
                             onOpenAutomation = { showAutomationDialog = true },
+                            activePact = uiState.activePact,
+                            chaosMultiplier = uiState.chaosMultiplier,
+                            onPactSelected = { pactDetailId = it.id },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -281,8 +291,13 @@ fun MainScreen(
                         doubleAt = uiState.doubleSanityAtFormatted
                     ),
                     ascensions = uiState.ascensions,
+                    pacts = Pact.available(uiState.ascensions + 1),
+                    selectedPact = Pact.fromId(nextPactId ?: uiState.activePact.id),
+                    onPactSelected = { nextPactId = it.id },
+                    buildingNames = buildingNames,
                     onConfirm = {
-                        viewModel.onAscendClicked()
+                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id))
+                        nextPactId = null
                         showAscendConfirmation = false
                     },
                     onDismiss = { showAscendConfirmation = false }
@@ -315,6 +330,16 @@ fun MainScreen(
                     onPasteClick = { viewModel.onPasteSaveClicked(it) },
                     onHardResetClick = { showHardResetConfirmation = true },
                     onToggleTutorial = { viewModel.toggleTutorial(it) }
+                )
+            }
+
+            pactDetailId?.let { id ->
+                val pact = Pact.fromId(id)
+                PactDetailDialog(
+                    pact = pact,
+                    active = pact == uiState.activePact,
+                    buildingNames = buildingNames,
+                    onDismiss = { pactDetailId = null }
                 )
             }
 

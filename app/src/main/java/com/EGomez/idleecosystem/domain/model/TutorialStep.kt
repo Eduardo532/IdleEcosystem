@@ -160,5 +160,13 @@ enum class TutorialStep(
         "Manos Ajenas",
         "Tus sectarios ya saben qué hacer. El botón 'AUTO' sobre las pestañas compra edificios solo, una unidad por segundo, sin gastar más de la mitad de tu Conocimiento. El engranaje de al lado abre el panel de automatización: qué edificios comprar y cuánto gastar.",
         "Al alcanzar el hito del autocomprador de edificios (5 Ascensiones)"
+    ),
+
+    // --- FASE 7: EL PANTEÓN (v0.16) ---
+    PACTS(
+        "pacts",
+        "Pactos con los Dioses",
+        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
+        "Al poder Ascender por primera vez"
     )
 }

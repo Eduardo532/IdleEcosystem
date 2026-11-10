@@ -18,6 +18,10 @@ import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.PactDetailDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.PACT_CHOICE_TAG
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AutomationDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_ASCEND_TAG
 import androidx.compose.ui.test.onAllNodesWithText
@@ -435,6 +439,63 @@ class CriticalUiTest {
         compose.onNodeWithTag(AUTO_ASCEND_TAG).assertExists()
         compose.onNodeWithText("25%").performClick()
         assertEquals(25, chosen)
+    }
+
+    @Test
+    fun `the pantheon shows unlocked gods and hides the rest`() {
+        compose.setContent { Menu(selectedTab = 3, revealed = SystemReveal(), ascensions = 0) }
+
+        // En la primera Ascensión ya se puede elegir a Cthulhu
+        compose.onNodeWithText("Cthulhu").assertExists()
+        compose.onNodeWithText("Azathoth").assertDoesNotExist()
+        compose.onNodeWithText("Se revela con 50 Ascensiones").assertExists()
+        compose.onNodeWithText("Dioses Exteriores").assertExists()
+    }
+
+    @Test
+    fun `a god's page tells its myth and its pact`() {
+        compose.setContent {
+            PactDetailDialog(
+                pact = Pact.HASTUR, active = true,
+                buildingNames = BuildingCatalog.create().associate { it.id to it.name },
+                onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("El Rey de Amarillo").assertExists()
+        compose.onNodeWithText("Pacto de esta vida").assertExists()
+        compose.onNodeWithText("+ Producción x2").assertExists()
+        compose.onNodeWithText("− Cordura ganada al Ascender x0.75").assertExists()
+    }
+
+    @Test
+    fun `building pacts name the buildings they change`() {
+        compose.setContent {
+            PactDetailDialog(
+                pact = Pact.NUG, active = false,
+                buildingNames = BuildingCatalog.create().associate { it.id to it.name },
+                onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("+ Sectario Novato, Sacerdote Demente, Santuario Subterráneo, Altar de Hueso: x4").assertExists()
+        compose.onNodeWithText("− Clic x0.5").assertExists()
+    }
+
+    @Test
+    fun `the ascend dialog lets the player choose the next pact`() {
+        var chosen: Pact? = null
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                pacts = Pact.available(1), selectedPact = Pact.NONE, onPactSelected = { chosen = it }
+            )
+        }
+
+        compose.onNodeWithText("Pacto para la próxima vida").assertExists()
+        compose.onNodeWithText("+ Cordura ganada al Ascender x1.25").assertExists()
+        compose.onNodeWithTag("${PACT_CHOICE_TAG}cthulhu").performClick()
+        assertEquals(Pact.CTHULHU, chosen)
     }
 }
 

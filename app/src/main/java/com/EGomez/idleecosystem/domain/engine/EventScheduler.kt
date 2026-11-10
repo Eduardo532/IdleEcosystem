@@ -42,8 +42,15 @@ class EventScheduler @Inject constructor(
 
     val buffMultiplier: Double get() = _state.value.buffMultiplier
 
+    /** Frecuencia de los eventos según el pacto (2 = el doble de seguido). */
+    var frequencyMultiplier: Double = 1.0
+
+    /** Fuerza de los potenciadores de eventos según el pacto. */
+    var buffPower: Double = 1.0
+
     fun scheduleNext(nowMillis: Long, random: Random = Random) {
-        nextEventAtMillis = nowMillis + random.nextLong(MIN_DELAY_MS, MAX_DELAY_MS)
+        val delay = random.nextLong(MIN_DELAY_MS, MAX_DELAY_MS) / frequencyMultiplier.coerceAtLeast(0.1)
+        nextEventAtMillis = nowMillis + delay.toLong()
     }
 
     /**
@@ -93,7 +100,7 @@ class EventScheduler @Inject constructor(
         var buff = current.buffMultiplier
         var remaining = current.buffSecondsRemaining
         option.effects.filter { it.type == EffectType.GLOBAL_BUFF }.forEach { effect ->
-            buff = effect.value
+            buff = 1.0 + (effect.value - 1.0) * buffPower
             remaining = effect.durationSeconds
             buffExpiresAtMillis = nowMillis + effect.durationSeconds * 1000L
         }

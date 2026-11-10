@@ -7,6 +7,7 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -81,6 +82,9 @@ data class GameUiState(
     val deliriumMultiplier: Double = 1.0,
     val earlyPacts: Set<Pact> = emptySet(),
     val trialNotice: Trial? = null,
+    /** Fase de la Marea (null = oculta) y segundos que le quedan. */
+    val tide: TidePhase? = null,
+    val tideSecondsLeft: Int = 0,
     /** Medidor de Locura (null = oculto), colapso, edificio poseído y el último presagio. */
     val madness: Double? = null,
     val collapseSeconds: Int = 0,

@@ -28,8 +28,8 @@ class MadnessMeter(value: Double = 0.0) {
     }
 
     /** La Locura baja sola con el tiempo (también sin conexión). */
-    fun decay(seconds: Long) {
-        if (seconds > 0) calm(DECAY_PER_SECOND * seconds)
+    fun decay(seconds: Long, multiplier: Double = 1.0) {
+        if (seconds > 0) calm(DECAY_PER_SECOND * seconds * multiplier)
     }
 
     fun reset() {

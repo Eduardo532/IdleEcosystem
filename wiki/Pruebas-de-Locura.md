@@ -17,7 +17,7 @@ Las **Pruebas de Locura** son vidas voluntarias con **una regla alterada** y una
 | Prueba | Regla | Meta | Se abre con | Recompensa |
 |---|---|---|---|---|
 | Ceguera | No aparece ninguna runa | 1B | 3 Ascensiones | Frecuencia de las runas x1,25 · **1 espacio de runa** |
-| Manos Atadas | El clic no produce Conocimiento | 1B | 3 | Clic x3 · **Nyarlathotep** sin esperar sus Ascensiones |
+| Manos Atadas | El clic no produce Conocimiento; empiezas con 10 Notas Desordenadas | 1B | 3 | Clic x3 · **Nyarlathotep** sin esperar sus Ascensiones |
 | Hambre | Los edificios cuestan x10 | 1B | 3 | Costo de los edificios x0,9 · **Shub-Niggurath** sin esperar |
 | Grimorio Quemado | No se pueden comprar mejoras del Grimorio | 1B | 5 | Producción x1,2 · **Yog-Sothoth** sin esperar |
 | Silencio | No hay rituales ni Ecos | 1B | 5 | Recarga de los rituales x0,75 · **1 espacio de runa** |

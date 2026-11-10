@@ -1,6 +1,6 @@
 # Logros
 
-Hay **329 logros**: 113 originales y **216 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **339 logros**: 113 originales y **226 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -17,7 +17,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 | Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
 | Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
-| Arcanos | Rituales, Convergencia, runas, Espacios de Runa, Medidor de Locura, eventos y Ecos |
+| Arcanos | Rituales, Convergencia, runas, Espacios de Runa, Medidor de Locura, Marea, eventos y Ecos |
 | Secretos | No se dicen. Solo cuentan los que ya encontraste |
 
 ## La regla: cada mecánica trae sus logros
@@ -88,7 +88,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Cartógrafo de la Locura | Suma 10 niveles en el Mapa de Locura | +1 % |
 | Constelación Propia | Suma 50 niveles en el Mapa de Locura | +1 % |
 | Firmamento Dominado | Suma 150 niveles en el Mapa de Locura | +2 % |
-| El Mapa Completo | Ten al menos 1 nivel en los 17 nodos del Mapa | +2 % |
+| El Mapa Completo | Ten al menos 1 nivel en los 18 nodos del Mapa | +2 % |
 | Obsesión Estelar | Sube un nodo del Mapa a nivel 10 | +1 % |
 | La Estrella Final | Compra Ascensión Cósmica | +1 % |
 | Piloto Automático | Asciende 1 vez de forma automática | +1 % |
@@ -254,8 +254,17 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | La Máscara Pálida | Colapsa en una vida con Hastur | +1 % |
 | Fiebre Verde | Llega al 80% de Locura en una vida con Tulzscha | +1 % |
 | Mano Temblorosa | Colapsa 3 veces en una vida recorriendo la Senda de la Mano | +1 % |
+| Ritmo del Mar | Vive 10 cambios de Marea | +1 % |
+| Hijo de las Mareas | Vive 100 cambios de Marea | +2 % |
+| Pesca de Runas | Atrapa 50 runas durante la Marea Alta | +1 % |
+| Ritos en Calma Chicha | Invoca 25 rituales durante la Marea Muerta | +1 % |
+| Ola Convergente | Invoca la Convergencia durante la Marea Alta | +1 % |
+| Contemplación | Pasa una Marea Baja entera sin hacer clic | +1 % |
+| Las Aguas de R'lyeh | Vive 3 cambios de Marea en una vida con Cthulhu | +1 % |
+| El Tiempo Fluye | Vive 6 cambios de Marea en una vida con Yog-Sothoth | +1 % |
+| Mareas del Sueño | Vive 3 cambios de Marea recorriendo la Senda del Sueño | +1 % |
 
-Además hay **19 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **20 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

@@ -23,6 +23,8 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
+import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
+import com.EGomez.idleecosystem.ui.screens.main.components.TideInfoDialog
 import androidx.compose.ui.platform.testTag
 import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
@@ -116,6 +118,7 @@ fun MainScreen(
         var abandonPath by rememberSaveable { mutableStateOf(false) }
         var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
         var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
+        var showTideInfo by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -183,6 +186,11 @@ fun MainScreen(
                         // Medidor de Locura (desde la quinta Ascensión)
                         uiState.madness?.let { value ->
                             MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                        // Fases de la Marea (desde la décima Ascensión)
+                        uiState.tide?.let { tide ->
+                            TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
                             Spacer(modifier = Modifier.height(4.dp))
                         }
 
@@ -412,6 +420,10 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            if (showTideInfo) {
+                uiState.tide?.let { TideInfoDialog(it) { showTideInfo = false } } ?: run { showTideInfo = false }
+            }
+
             if (showMadnessInfo) {
                 MadnessInfoDialog(uiState.madness ?: 0.0) { showMadnessInfo = false }
             }

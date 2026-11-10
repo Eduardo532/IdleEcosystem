@@ -192,6 +192,8 @@ class MainViewModel @Inject constructor(
         deliriumMultiplier = economy.deliriumMultiplier,
         earlyPacts = economy.earlyPacts,
         madness = economy.madness,
+        tide = economy.tide,
+        tideSecondsLeft = economy.tideSecondsLeft,
         collapseSeconds = economy.collapseSeconds,
         possessedBuilding = economy.possessedBuilding?.let { id -> engine.buildings.value.firstOrNull { it.id == id }?.name ?: id },
         runeSlots = economy.runeSlots,

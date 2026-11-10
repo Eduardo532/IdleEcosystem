@@ -28,6 +28,7 @@ import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
@@ -444,6 +445,46 @@ class GameEngineTest {
         val collapsed = await(engine.economy) { it.collapseSeconds > 0 }
         assertTrue((collapsed.madness ?: 100.0) < 10.0)
         assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.MADNESS_COLLAPSES)))
+    }
+
+    @Test
+    fun `bound hands starts with notes so the life can move without clicks`() = runBlocking {
+        stats.totalPrestiges = 2
+        // Legado del Culto a nivel 1: +5 Notas en cada vida (la Prueba da 10, se queda el mayor)
+        shop.upgrades.first { it.id == "pu_core" }.level = 1
+        shop.upgrades.first { it.id == PrestigeShopManager.STARTING_NOTES_ID }.level = 1
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(nextTrial = Trial.BOUND_HANDS)
+
+        val buildings = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        assertTrue(buildings.first { it.id == "b_scrolls" }.isVisible)
+        val economy = await(engine.economy) { it.activeTrial == Trial.BOUND_HANDS && it.productionPerSecond.signum() > 0 }
+        assertTrue(economy.productionPerSecond.signum() > 0)
+    }
+
+    @Test
+    fun `the legacy of the cult gives notes at the start of every life`() = runBlocking {
+        shop.upgrades.first { it.id == "pu_core" }.level = 1
+        shop.upgrades.first { it.id == PrestigeShopManager.STARTING_NOTES_ID }.level = 2
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend()
+
+        val buildings = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        assertEquals(10, buildings.first { it.id == "b_notes" }.amountOwned)
+    }
+
+    @Test
+    fun `the tide appears with the tenth ascension and follows play time`() = runBlocking {
+        assertEquals(null, engine.economy.value.tide)
+        stats.totalPrestiges = 10
+        stats.totalPlayTimeSeconds = 650 // ya en la Marea Baja
+        val economy = await(engine.economy) { it.tide != null }
+        assertEquals(TidePhase.LOW, economy.tide)
+        assertTrue(economy.tideSecondsLeft in 1..600)
     }
 
     @Test

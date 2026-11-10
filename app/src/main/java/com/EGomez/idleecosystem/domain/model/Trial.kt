@@ -28,7 +28,9 @@ data class TrialRules(
     /** La producción salta al azar cada 30 s (ver [Trial.DELIRIUM_STEPS]). */
     val delirium: Boolean = false,
     /** La Cordura Residual y el Mapa de Locura no dan bono. */
-    val noSanityBonus: Boolean = false
+    val noSanityBonus: Boolean = false,
+    /** Edificios con los que empieza la vida de la Prueba (id -> unidades). */
+    val startingBuildings: Map<String, Int> = emptyMap()
 )
 
 /**
@@ -74,9 +76,9 @@ enum class Trial(
     ),
     BOUND_HANDS(
         "bound_hands", "Manos Atadas",
-        "El clic no produce Conocimiento.",
+        "El clic no produce Conocimiento. Empiezas con 10 Notas Desordenadas.",
         3, BigDecimal("1e9"),
-        TrialRules(noClickKnowledge = true),
+        TrialRules(noClickKnowledge = true, startingBuildings = mapOf("b_notes" to 10)),
         TrialReward(click = 3.0, pact = Pact.NYARLATHOTEP)
     ),
     HUNGER(

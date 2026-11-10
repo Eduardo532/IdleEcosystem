@@ -42,6 +42,9 @@ class PrestigeShopManager @Inject constructor() {
         // META
         PrestigeUpgrade("pu_star_final", "Ascensión Cósmica", "El Multiplicador Supremo.", BigDecimal("5000"), BigDecimal("5.0"), BigDecimal("1.00"), UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.05f, parentId = "pu_mind_4"),
 
+        // LEGADO (v0.17.4): cada vida empieza con Notas Desordenadas
+        PrestigeUpgrade(STARTING_NOTES_ID, "Legado del Culto", "Cada vida empieza con 5 Notas Desordenadas por nivel.", BigDecimal("3"), BigDecimal("2.0"), BigDecimal(NOTES_PER_LEVEL), UpgradeType.BUILDING_MULTIPLIER, x = 0.22f, y = 0.9f, parentId = "pu_core"),
+
         // SENDAS (excluyentes: solo una puede tener niveles, ver MadnessPaths)
         PrestigeUpgrade(MadnessPaths.HAND, "Senda de la Mano", "Senda excluyente. +300% de clic por nivel.", BigDecimal("2000"), BigDecimal("2.5"), BigDecimal("3.0"), UpgradeType.CLICK_MULTIPLIER, x = 0.24f, y = 0.1f, parentId = "pu_click_4"),
         PrestigeUpgrade(MadnessPaths.GEARS, "Senda del Engranaje", "Senda excluyente. +100% a todos los edificios por nivel.", BigDecimal("2000"), BigDecimal("2.5"), BigDecimal("1.0"), UpgradeType.BUILDING_MULTIPLIER, x = 0.95f, y = 0.68f, parentId = "pu_idle_2"),
@@ -199,5 +202,13 @@ class PrestigeShopManager @Inject constructor() {
         return refund
     }
 
+    /** Legado del Culto: Notas Desordenadas con las que empieza cada vida. */
+    fun getStartingNotes(): Int = (upgrades.find { it.id == STARTING_NOTES_ID }?.level ?: 0) * NOTES_PER_LEVEL
+
     fun getStartingKnowledgeBonus(): BigDecimal = BigDecimal.ZERO
+
+    companion object {
+        const val STARTING_NOTES_ID = "pu_legacy"
+        const val NOTES_PER_LEVEL = 5
+    }
 }

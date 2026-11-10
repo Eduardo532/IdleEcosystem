@@ -93,6 +93,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Bono: `1 + 0,01 × Locura`, como potenciador temporal. Presagios desde el 50 %: probabilidad por segundo `(Locura − 50) / 500`.
 - Colapso al 100 %: se pierden los potenciadores y la producción queda x0,5 durante 60 s. Nunca se pierden recursos. *(Código: `MadnessMeter`.)*
 
+## Fases de la Marea
+
+- Cada fase dura 600 s de juego, en orden Alta, Baja, Muerta. Se calcula del tiempo jugado. *(Código: `TidePhase`; test: `TidePhaseTest`.)*
+- Alta: runas y eventos x1,5, Locura sube x1,5. Baja: producción x1,25, Locura baja x2. Muerta: rituales x0,7 de costo y recarga, Ecos x1,5.
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

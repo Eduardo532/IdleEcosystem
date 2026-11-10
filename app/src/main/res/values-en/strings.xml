@@ -286,4 +286,10 @@
     <string name="madness_notice_collapse">☠ COLLAPSE: you lose your boosts</string>
     <string name="madness_notice_possessed">☠ %1$s is possessed</string>
     <string name="madness_notice_echoes">☠ Your Echoes scatter: -%1$s</string>
+    <string name="tide_bar">🌊 %1$s · %2$s</string>
+    <string name="tide_next">Next: %1$s</string>
+    <string name="tide_title">Tide Phases</string>
+    <string name="tide_intro">The Tide changes every 10 minutes of play, in this order. It only moves while you play.</string>
+    <string name="tide_madness_gain">Madness rises %1$s</string>
+    <string name="tide_madness_decay">Madness falls %1$s faster</string>
 </resources>

@@ -28,6 +28,7 @@ import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
@@ -545,6 +546,33 @@ class GameEngineTest {
         assertEquals(null, after.consecrations["b_scrolls"])
         val notes = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.currentMultiplier.signum() > 0 } }
         assertTrue(notes.first { it.id == "b_notes" }.currentMultiplier.signum() > 0)
+    }
+
+    @Test
+    fun `an offered mutation shapes the next life and only offered ones count`() = runBlocking {
+        val saved = StatisticsManager().apply { count(AchievementStat.TRANSCENDENCES) }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("10000000"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canPrestige && it.mutationOffer.size == Mutation.OFFER_SIZE }
+        assertEquals(null, before.activeMutation)
+        val chosen = before.mutationOffer.first()
+
+        engine.ascend(nextMutation = chosen)
+
+        val after = await(engine.economy) { it.activeMutation == chosen }
+        assertEquals(1, after.mutationsSeen)
+        // La oferta cambia con cada Ascensión, y una mutación no ofrecida se ignora
+        val notOffered = Mutation.entries.first { it !in after.mutationOffer }
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(nextMutation = notOffered)
+        val third = await(engine.economy) { it.activeMutation == null && it.mutationsSeen == 1 }
+        assertTrue(third.mutationsRevealed)
     }
 
     @Test

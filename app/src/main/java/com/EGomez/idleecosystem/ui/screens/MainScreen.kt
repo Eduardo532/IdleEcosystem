@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
 import androidx.compose.ui.geometry.Offset
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
@@ -119,6 +120,7 @@ fun MainScreen(
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
         var abandonPath by rememberSaveable { mutableStateOf(false) }
         var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
+        var nextMutationId by rememberSaveable { mutableStateOf<String?>(null) }
         var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
         var showTideInfo by rememberSaveable { mutableStateOf(false) }
         var showTranscend by rememberSaveable { mutableStateOf(false) }
@@ -294,6 +296,7 @@ fun MainScreen(
                             onEngraveRune = { viewModel.onEngraveRune(it) },
                             onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
                             runeMastery = uiState.runeMastery,
+                            activeMutation = uiState.activeMutation,
                             transcendRevealed = uiState.transcendRevealed,
                             ether = uiState.ether,
                             onOpenTranscend = { showTranscend = true },
@@ -380,10 +383,17 @@ fun MainScreen(
                     completedTrials = uiState.completedTrials,
                     selectedTrial = Trial.fromId(nextTrialId),
                     onTrialSelected = { nextTrialId = it?.id },
+                    mutationOffer = uiState.mutationOffer,
+                    selectedMutation = Mutation.fromId(nextMutationId)?.takeIf { it in uiState.mutationOffer },
+                    onMutationSelected = { nextMutationId = it?.id },
                     onConfirm = {
-                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId))
+                        viewModel.onAscendClicked(
+                            Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId),
+                            Mutation.fromId(nextMutationId)?.takeIf { it in uiState.mutationOffer }
+                        )
                         nextPactId = null
                         nextTrialId = null
+                        nextMutationId = null
                         abandonPath = false
                         showAscendConfirmation = false
                     },

@@ -23,6 +23,7 @@ import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -192,6 +193,9 @@ class MainViewModel @Inject constructor(
         deliriumMultiplier = economy.deliriumMultiplier,
         earlyPacts = economy.earlyPacts,
         madness = economy.madness,
+        activeMutation = economy.activeMutation,
+        mutationOffer = economy.mutationOffer,
+        mutationsSeen = economy.mutationsSeen,
         transcendRevealed = economy.transcendRevealed,
         cycleAscensions = economy.cycleAscensions,
         etherGain = economy.etherGain,
@@ -310,8 +314,8 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) =
-        engine.ascend(nextPact, abandonPath, nextTrial)
+    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null, nextMutation: Mutation? = null) =
+        engine.ascend(nextPact, abandonPath, nextTrial, nextMutation)
 
     fun onAbandonTrial() = engine.abandonTrial()
 

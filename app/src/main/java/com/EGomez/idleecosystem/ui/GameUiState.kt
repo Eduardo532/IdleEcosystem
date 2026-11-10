@@ -7,6 +7,7 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
@@ -93,6 +94,10 @@ data class GameUiState(
     /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
     val consecrations: Map<String, Int> = emptyMap(),
+    /** Mutaciones (v0.18.4): la de esta vida, la oferta de la próxima Ascensión y las descubiertas. */
+    val activeMutation: Mutation? = null,
+    val mutationOffer: List<Mutation> = emptyList(),
+    val mutationsSeen: Int = 0,
     /** Fase de la Marea (null = oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.ui.theme.AncientGold
@@ -224,6 +225,29 @@ private fun TrialChip(label: String, selected: Boolean, tag: String, onClick: ()
         modifier = Modifier.testTag(tag)
     )
 }
+
+/** Elegir la mutación de la próxima vida (v0.18.4): tres al azar o ninguna. */
+@Composable
+fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutation?) -> Unit) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(stringResource(R.string.mutation_choose_title), color = MutationGreen, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 6.dp)
+    ) {
+        TrialChip(stringResource(R.string.mutation_none), selected == null, MUTATION_CHOICE_TAG + "none") { onSelect(null) }
+        offer.forEach { mutation ->
+            TrialChip("🧬 " + tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
+        }
+    }
+    selected?.let { Text(tr(it.description), color = MutationGreen, fontSize = 12.sp) }
+}
+
+val MutationGreen = Color(0xFF9CCC65)
+const val MUTATION_CHOICE_TAG = "mutation_choice_"
 
 /** Vistas de la pestaña Panteón: los dioses, las Pruebas y el Altar de Runas. */
 enum class PantheonView { GODS, TRIALS, RUNES }

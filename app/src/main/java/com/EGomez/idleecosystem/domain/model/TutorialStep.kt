@@ -238,5 +238,12 @@ enum class TutorialStep(
         "Maestría de Runas",
         "Desde tu primera Trascendencia, cada runa que atrapas suma a su maestría, que nunca se pierde. Cada nivel (hasta 5 estrellas) alarga su potenciador un 10% y, si está grabada, su bono es un 20% más fuerte. Mira las estrellas en la vista Runas del Panteón.",
         "Al atrapar una runa tras la primera Trascendencia"
+    ),
+
+    MUTATIONS(
+        "mutations",
+        "Mutaciones",
+        "Tras Trascender, la realidad se vuelve maleable. Cada Ascensión te ofrece tres mutaciones al azar para la vida siguiente: cada una multiplica mucho un edificio (o algo más) y cobra un precio en otra cosa. Elige una en la confirmación de Ascender, o ninguna. Descubrirlas todas tiene su recompensa.",
+        "Tras la primera Trascendencia"
     )
 }

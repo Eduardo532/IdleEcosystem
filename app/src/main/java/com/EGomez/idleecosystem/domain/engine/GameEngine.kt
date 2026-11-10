@@ -14,6 +14,8 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
+import com.EGomez.idleecosystem.domain.logic.Transcendence
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -111,6 +113,13 @@ data class EconomyState(
     val deliriumMultiplier: Double = 1.0,
     /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
     val earlyPacts: Set<Pact> = emptySet(),
+    /** Trascender: si ya se ve, Ascensiones del ciclo, Éter que daría y Éter disponible. */
+    val transcendRevealed: Boolean = false,
+    val cycleAscensions: Int = 0,
+    val etherGain: Int = 0,
+    val ether: Int = 0,
+    val transcendences: Int = 0,
+    val eternalLevels: Map<String, Int> = emptyMap(),
     /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,
@@ -145,6 +154,8 @@ sealed interface EngineEffect {
     data class TrialCompleted(val trial: Trial) : EngineEffect
     /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
     data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
+    /** Se Trascendió y se ganó [ether] de Éter. */
+    data class Transcended(val ether: Int) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -519,6 +530,7 @@ class GameEngine @Inject constructor(
 
         // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
         recordFinishedLife(finalPotential, abandonPath)
+        statsManager.count(AchievementStat.CYCLE_SANITY, finalPotential)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
         if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
@@ -588,7 +600,9 @@ class GameEngine @Inject constructor(
         }
 
         val ascensions = statsManager.totalPrestiges
-        put(AchievementStat.ASCENSIONS, ascensions)
+        // Ascensiones de todos los ciclos: los logros de Ascensiones no retroceden al Trascender
+        put(AchievementStat.ASCENSIONS, totalAscensionsEver())
+        put(AchievementStat.ETERNAL_LEVELS, EternalUpgrade.entries.sumOf { eternalLevel(it) })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
         val upgrades = upgradeManager.availableUpgrades
@@ -1051,6 +1065,7 @@ class GameEngine @Inject constructor(
         if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
         if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
         if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
+        if (transcendRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCEND)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1269,6 +1284,108 @@ class GameEngine @Inject constructor(
         }
     }
 
+    // =====================================================================
+    // TRASCENDER (v0.18.0)
+    // Todo vive en los contadores: Éter, mejoras eternas y datos del ciclo.
+    // =====================================================================
+
+    private fun eternalLevel(upgrade: EternalUpgrade): Int = statsManager.counter(AchievementStat.eternal(upgrade.id)).toInt()
+
+    private fun cycleStart(): Int = statsManager.counter(AchievementStat.CYCLE_START).toInt()
+
+    private fun cycleAscensions(): Int = (statsManager.totalPrestiges - cycleStart()).coerceAtLeast(0)
+
+    private fun totalAscensionsEver(): Int = statsManager.counter(AchievementStat.ASCENSIONS_PAST).toInt() + cycleAscensions()
+
+    private fun etherGainNow(): Int = Transcendence.etherGain(
+        cycleAscensions(),
+        statsManager.counter(AchievementStat.CYCLE_SANITY),
+        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO))
+    )
+
+    private fun transcendRevealed(): Boolean =
+        cycleAscensions() >= Transcendence.REQUIRED_ASCENSIONS || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+
+    /** Compra un nivel de una mejora eterna con Éter. */
+    fun buyEternal(id: String) = post {
+        val upgrade = EternalUpgrade.fromId(id) ?: return@post
+        val level = eternalLevel(upgrade)
+        if (upgrade.isMaxed(level)) return@post
+        val cost = BigDecimal(upgrade.cost(level))
+        val ether = statsManager.counter(AchievementStat.ETHER)
+        if (ether < cost) return@post
+        statsManager.counters[AchievementStat.ETHER] = ether.subtract(cost)
+        if (statsManager.counters[AchievementStat.ETHER]!!.signum() == 0) statsManager.counters.remove(AchievementStat.ETHER)
+        statsManager.counters[AchievementStat.eternal(upgrade.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /**
+     * Trascender: con 50 Ascensiones en el ciclo se reinicia casi todo a cambio de Éter.
+     * Se conservan los logros, las estadísticas, el Éter y las mejoras eternas; las
+     * Pruebas y las runas grabadas solo si se compró la mejora que las recuerda.
+     */
+    fun transcend() = post {
+        val gain = etherGainNow()
+        if (gain <= 0) return@post
+        val cycle = cycleAscensions()
+
+        // Logros: con qué pacto y Senda se Trascendió
+        statsManager.flag(AchievementStat.transcendWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.transcendPath(it.id)) }
+        if (cycle == Transcendence.REQUIRED_ASCENSIONS) statsManager.flag(AchievementStat.FEAT_EXACT_THRESHOLD)
+        statsManager.count(AchievementStat.TRANSCENDENCES)
+        statsManager.count(AchievementStat.ETHER, BigDecimal(gain))
+        statsManager.count(AchievementStat.ETHER_EARNED, BigDecimal(gain))
+        statsManager.record(AchievementStat.MAX_ETHER_GAIN, BigDecimal(gain))
+        statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
+
+        // El ciclo nuevo
+        val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY
+        statsManager.trackPrestige(BigDecimal.ZERO)
+        statsManager.totalPrestiges = start
+        statsManager.resetRunCounters()
+        statsManager.counters.remove(AchievementStat.CYCLE_SANITY)
+        statsManager.counters.remove(AchievementStat.CYCLE_START)
+        if (start > 0) statsManager.counters[AchievementStat.CYCLE_START] = BigDecimal(start)
+        if (eternalLevel(EternalUpgrade.REMEMBERED_TRIALS) == 0) {
+            statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.TRIAL_PREFIX) }
+        }
+        if (eternalLevel(EternalUpgrade.ETERNAL_RUNES) == 0) {
+            statsManager.counters.keys.removeAll {
+                it.startsWith(AchievementStat.RUNE_CATCH_PREFIX) || it.startsWith(AchievementStat.ENGRAVE_PREFIX)
+            }
+        }
+
+        knowledge = BigDecimal.ZERO
+        echoes = BigDecimal.ZERO
+        prestigeManager.residualSanity = BigDecimal.ZERO
+        prestigeShopManager.upgrades.forEach { it.level = 0 }
+        buildingManager.resetForPrestige()
+        upgradeManager.resetForPrestige()
+        runeManager.hideRune()
+        runeManager.clearBuffs()
+        ritualManager.reset()
+        eventScheduler.clearBuff()
+        madness.reset()
+        syncMadness()
+        loadMadness()
+        deliriumMultiplier = 1.0
+        setPact(Pact.NONE)
+        if (AscensionMilestone.STARTING_SYNAPSES.isReached(start)) {
+            buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
+                ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
+        }
+        applyStartingBuildings()
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Transcended(gain))
+        recalculate()
+        requestSave(replace = true)
+    }
+
     private fun setPact(newPact: Pact) {
         activePact = newPact
         chaosMultiplier = 1
@@ -1389,7 +1506,9 @@ class GameEngine @Inject constructor(
 
     /** Lo que multiplica la Cordura ganada al Ascender: Mapa de Locura y pacto de esta vida. */
     private fun sanityGainMultiplier(): BigDecimal =
-        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(pact.sanityGain * trialReward().sanityGain))
+        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(
+            pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY))
+        ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
 
@@ -1426,7 +1545,10 @@ class GameEngine @Inject constructor(
         val shopGlobal = if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getPermanentGlobalMultiplier()
         costMultiplier = buildingCostFactor()
         val pactProduction = BigDecimal.valueOf(pact.production * if (pact.chaos) chaosMultiplier else 1)
-        val trialProduction = BigDecimal.valueOf(rules.production * reward.production * deliriumMultiplier)
+        val trialProduction = BigDecimal.valueOf(
+            rules.production * reward.production * deliriumMultiplier *
+                Transcendence.productionMultiplier(eternalLevel(EternalUpgrade.ETERNAL_FIRE))
+        )
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -1551,6 +1673,12 @@ class GameEngine @Inject constructor(
             deliriumMultiplier = deliriumMultiplier,
             earlyPacts = earlyPacts(),
             madness = if (madnessRevealed()) madness.value else null,
+            transcendRevealed = transcendRevealed(),
+            cycleAscensions = cycleAscensions(),
+            etherGain = etherGainNow(),
+            ether = statsManager.counter(AchievementStat.ETHER).toInt(),
+            transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
+            eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             tide = currentTide(),
             tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
             collapseSeconds = collapseSeconds,

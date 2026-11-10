@@ -192,6 +192,12 @@ class MainViewModel @Inject constructor(
         deliriumMultiplier = economy.deliriumMultiplier,
         earlyPacts = economy.earlyPacts,
         madness = economy.madness,
+        transcendRevealed = economy.transcendRevealed,
+        cycleAscensions = economy.cycleAscensions,
+        etherGain = economy.etherGain,
+        ether = economy.ether,
+        transcendences = economy.transcendences,
+        eternalLevels = economy.eternalLevels,
         tide = economy.tide,
         tideSecondsLeft = economy.tideSecondsLeft,
         collapseSeconds = economy.collapseSeconds,
@@ -233,6 +239,14 @@ class MainViewModel @Inject constructor(
                 MadnessNotice(possessedBuilding = effect.possessedBuilding, echoesLost = effect.echoesLost?.toBeautifulString())
             )
             EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
+            is EngineEffect.Transcended -> {
+                val gain = effect.ether
+                _uiState.update { it.copy(transcendNotice = gain) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null) else it }
+                }
+            }
             is EngineEffect.TrialCompleted -> {
                 val trial = effect.trial
                 _uiState.update { it.copy(trialNotice = trial) }
@@ -297,6 +311,10 @@ class MainViewModel @Inject constructor(
         engine.ascend(nextPact, abandonPath, nextTrial)
 
     fun onAbandonTrial() = engine.abandonTrial()
+
+    fun onTranscend() = engine.transcend()
+
+    fun onBuyEternal(id: String) = engine.buyEternal(id)
 
     fun onEngraveRune(runeId: String) = engine.engraveRune(runeId)
 

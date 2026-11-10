@@ -22,6 +22,8 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.TranscendDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ETERNAL_BUY_TAG
 import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
@@ -390,6 +392,26 @@ class CriticalUiTest {
         compose.onNodeWithText("Luego: Marea Baja").assertExists()
         compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
         compose.onNodeWithText("Marea Muerta").assertExists()
+    }
+
+    @Test
+    fun `transcending asks for a second tap`() {
+        var transcended = 0
+        var bought: String? = null
+        compose.setContent {
+            TranscendDialog(
+                cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
+                onBuyEternal = { bought = it }, onTranscend = { transcended++ }, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Trascender (+14 Éter)").performClick()
+        assertEquals(0, transcended)
+        compose.onNodeWithText("Toca otra vez para Trascender").performClick()
+        assertEquals(1, transcended)
+        compose.onNodeWithTag(ETERNAL_BUY_TAG + "fire").performScrollTo().performClick()
+        assertEquals("fire", bought)
+        compose.onNodeWithTag(ETERNAL_BUY_TAG + "trials").assertDoesNotExist()
     }
 
     @Test

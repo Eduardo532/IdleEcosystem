@@ -17,6 +17,7 @@
 | [Logros](Logros) | Logros, conjuntos y la próxima meta |
 | [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura) | Reiniciar a cambio de Cordura y gastarla |
 | [Panteón](Panteon) | Los 14 pactos con los dioses, uno por vida |
+| [Atención](Atencion) | Puntos que repartes gratis entre edificios, Sueño y Vigilia |
 | [Ajustes](Ajustes) | Idioma, notación, sonido y partidas |
 
 ## Para el desarrollo

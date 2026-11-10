@@ -42,7 +42,10 @@ class BuffMathTest {
 
     @Test
     fun `convergence is capped and never worse than adding`() {
-        assertEquals(0, BigDecimal(1_000).compareTo(BuffMath.converged(listOf(777.0, 500.0))))
+        // x50 × x40 = x2.000 -> tope x1.000
+        assertEquals(0, BigDecimal(1_000).compareTo(BuffMath.converged(listOf(50.0, 40.0))))
+        // x777 + x500 sumados ya dan x1.276: el tope no baja de la suma
+        assertEquals(0, BigDecimal(1_276).compareTo(BuffMath.converged(listOf(777.0, 500.0))))
         // Un solo potenciador (o ninguno) vale lo mismo que sumado
         assertEquals(0, BigDecimal(10).compareTo(BuffMath.converged(listOf(10.0, 1.0))))
         assertEquals(0, BigDecimal.ONE.compareTo(BuffMath.converged(emptyList())))

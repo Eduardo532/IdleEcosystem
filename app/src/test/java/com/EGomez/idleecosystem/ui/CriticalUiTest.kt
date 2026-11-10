@@ -207,12 +207,13 @@ class CriticalUiTest {
         val hand = PrestigeUpgrade(
             id = MadnessPaths.HAND, name = "Senda de la Mano", description = "Prueba",
             baseCost = BigDecimal(5), costMultiplier = BigDecimal(2), effectMultiplier = BigDecimal.ONE,
-            type = UpgradeType.CLICK_MULTIPLIER, x = 0.2f, y = 0.2f, level = 1
+            type = UpgradeType.CLICK_MULTIPLIER, x = 0.02f, y = 0.02f, level = 1
         )
         val gears = hand.copy(id = MadnessPaths.GEARS, name = "Senda del Engranaje", x = 0.5f, y = 0.5f, level = 0)
         var bought = 0
         compose.setContent {
-            PrestigeShopDialog(listOf(hand, gears), "100", BigDecimal(100), { bought++ }, {})
+            // La Senda tocada va primero: el mapa elige el primer nodo dentro del radio de toque
+            PrestigeShopDialog(listOf(gears, hand), "100", BigDecimal(100), { bought++ }, {})
         }
 
         compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }

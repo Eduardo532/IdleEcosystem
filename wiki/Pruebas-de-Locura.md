@@ -16,18 +16,18 @@ Las **Pruebas de Locura** son vidas voluntarias con **una regla alterada** y una
 
 | Prueba | Regla | Meta | Se abre con | Recompensa |
 |---|---|---|---|---|
-| Ceguera | No aparece ninguna runa | 1B | 3 Ascensiones | Frecuencia de las runas x1,25 |
+| Ceguera | No aparece ninguna runa | 1B | 3 Ascensiones | Frecuencia de las runas x1,25 · **1 espacio de runa** |
 | Manos Atadas | El clic no produce Conocimiento | 1B | 3 | Clic x3 · **Nyarlathotep** sin esperar sus Ascensiones |
 | Hambre | Los edificios cuestan x10 | 1B | 3 | Costo de los edificios x0,9 · **Shub-Niggurath** sin esperar |
 | Grimorio Quemado | No se pueden comprar mejoras del Grimorio | 1B | 5 | Producción x1,2 · **Yog-Sothoth** sin esperar |
-| Silencio | No hay rituales ni Ecos | 1B | 5 | Recarga de los rituales x0,75 |
+| Silencio | No hay rituales ni Ecos | 1B | 5 | Recarga de los rituales x0,75 · **1 espacio de runa** |
 | Insomnio | Sin progreso sin conexión y producción a la mitad | 1B | 5 | Progreso sin conexión x2 |
 | Monomanía | Solo 3 tipos de edificio, además de la Sinapsis | 100M | 10 | +1 punto de Atención |
-| Amnesia | Los logros y sus conjuntos no dan bono | 1T | 10 | Cordura ganada al Ascender x1,1 |
+| Amnesia | Los logros y sus conjuntos no dan bono | 1T | 10 | Cordura ganada al Ascender x1,1 · **1 espacio de runa** |
 | Delirio | La producción salta al azar entre x0,1 y x3 cada 30 s | 1T | 20 | Producción x1,1 · **Azathoth** sin esperar |
-| Mortalidad | La Cordura Residual y el Mapa de Locura no dan bono | 1T | 20 | Producción x1,25 |
+| Mortalidad | La Cordura Residual y el Mapa de Locura no dan bono | 1T | 20 | Producción x1,25 · **1 espacio de runa** |
 
-Las recompensas se multiplican entre sí. El punto de Atención de Monomanía se suma a los de las Ascensiones (puedes llegar a 11).
+Las recompensas se multiplican entre sí. Los espacios de runa sirven para grabar runas (ver [Runas](Runas#espacios-de-runa-v0172)). El punto de Atención de Monomanía se suma a los de las Ascensiones (puedes llegar a 11).
 
 ## Los Dioses Exteriores, antes de tiempo
 

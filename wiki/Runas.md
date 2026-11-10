@@ -61,3 +61,38 @@ Dentro de cada nivel, unas runas son más comunes que otras.
 - **Efectos activos:** aparecen como etiquetas bajo el contador, con su tiempo restante.
 - Los efectos de las runas **se suman** con los de rituales y eventos (ver [Ecos y Rituales](Ecos-y-Rituales#cómo-se-combinan-los-efectos-temporales)).
 - Cada nivel tiene un **valor fijo**, medido en segundos de producción. Ver [Reglas de balance](Reglas-de-balance#runas).
+
+## Espacios de Runa *(v0.17.2)*
+
+Una runa que ya atrapaste varias veces se puede **grabar** en un espacio del **Altar de Runas** (pestaña Panteón → vista **Runas**). Mientras está grabada da un **bono pasivo permanente**, distinto para cada runa.
+
+- **Espacios:** se ganan superando Pruebas de Locura. Ceguera, Silencio, Amnesia y Mortalidad dan uno cada una (hasta **4**).
+- **Para grabar una runa** hay que haberla atrapado: **10 veces** las de nivel 1, **5** las de nivel 2 y **3** los sigilos de nivel 3. Las capturas se cuentan desde la v0.17.2.
+- **Cambiar es gratis:** quita una runa y graba otra cuando quieras.
+- Los bonos de las runas grabadas se **multiplican** con el pacto de la vida actual y entre sí.
+
+| Runa | Bono grabada |
+|---|---|
+| Runa de Sangre | Producción x1,15 |
+| Runa de Ceniza | Progreso sin conexión x1,3 |
+| Runa de Sal | Duración de los rituales x1,2 |
+| Runa de Hueso | Costo de los edificios x0,95 |
+| Runa de Sombra | Frecuencia de las runas x1,15 |
+| Runa de Susurro | Clic x1,5 |
+| Runa de Óxido | Costo de los rituales x0,9 |
+| Runa de Escarcha | Recarga de los rituales x0,9 |
+| Runa de Plaga | Frecuencia de los eventos x1,2 |
+| Runa de Grieta | Progreso sin conexión x1,5 |
+| Runa de Vacío Menor | Probabilidad de Eco x1,2 |
+| Runa del Tiempo | Clic x2 |
+| Runa de Gravedad | Producción x1,3 |
+| Runa de Barrera | Costo de los edificios x0,9 |
+| Runa de Marea | Fuerza de los potenciadores de eventos x1,5 |
+| Runa de Mente | Cordura ganada al Ascender x1,1 |
+| Runa de Visión | Frecuencia de los eventos x1,4 |
+| Runa de Entropía | Frecuencia de las runas x1,3 |
+| Sigilo de Cthulhu | Producción x1,5 |
+| El Caos Reptante | Clic x4 |
+| Sigilo de Azathoth | Probabilidad de Eco x2 |
+
+Con los Espacios de Runa llegan **16 logros** (categoría Arcanos): espacios ganados, runas grabadas, atrapar las 21 runas distintas, grabar sigilos y retos con un dios (por ejemplo, tener grabado el Sigilo de Cthulhu durante una vida con Cthulhu).

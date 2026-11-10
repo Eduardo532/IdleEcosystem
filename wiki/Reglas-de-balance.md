@@ -81,6 +81,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Se superan al generar su meta de Conocimiento en la vida en que se eligieron; la regla se levanta al superarla.
 - Las recompensas se multiplican entre sí y son permanentes. Cuatro adelantan a un Dios Exterior. *(Código: `Trial`; test: `TrialTest`.)*
 
+## Espacios de Runa
+
+- Grabar una runa pide atraparla 10 veces (nivel 1), 5 (nivel 2) o 3 (nivel 3). Hay hasta 4 espacios, uno por cada Prueba que los da.
+- Cada runa grabada da un bono pasivo propio que se multiplica con el pacto. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

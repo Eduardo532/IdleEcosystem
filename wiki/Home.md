@@ -12,9 +12,9 @@
 | [Edificios](Edificios) | Los 16 edificios, hitos y el botón HITO |
 | [Grimorio](Grimorio) | Mejoras, escalera del Grimorio y sinergias |
 | [Ecos y Rituales](Ecos-y-Rituales) | La segunda moneda y los 5 rituales |
-| [Runas](Runas) | Las runas que aparecen en pantalla y sus efectos |
+| [Runas](Runas) | Las runas, sus efectos y los Espacios de Runa |
 | [Eventos](Eventos) | Eventos aleatorios, cadenas y memorias de Ascensión |
-| [Logros](Logros) | Los 297 logros, sus categorías, conjuntos y la próxima meta |
+| [Logros](Logros) | Los 313 logros, sus categorías, conjuntos y la próxima meta |
 | [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura) | Reiniciar a cambio de Cordura y gastarla |
 | [Panteón](Panteon) | Los 14 pactos con los dioses, uno por vida |
 | [Atención](Atencion) | Puntos que repartes gratis entre edificios, Sueño y Vigilia |

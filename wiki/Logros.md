@@ -1,6 +1,6 @@
 # Logros
 
-Hay **297 logros**: 113 originales y **184 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **313 logros**: 113 originales y **200 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -17,7 +17,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 | Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
 | Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
-| Arcanos | Rituales, Convergencia, runas, eventos y Ecos |
+| Arcanos | Rituales, Convergencia, runas, Espacios de Runa, eventos y Ecos |
 | Secretos | No se dicen. Solo cuentan los que ya encontraste |
 
 ## La regla: cada mecánica trae sus logros
@@ -225,8 +225,23 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Resonancia Infinita | Encuentra 10.000 Ecos en total | +2 % |
 | Avaro de Ecos | Ten 250 Ecos a la vez | +1 % |
 | Bóveda Resonante | Ten 1.000 Ecos a la vez | +2 % |
+| Primer Altar | Consigue 1 espacio de runa | +1 % |
+| Altar Doble | Consigue 2 espacios de runa | +1 % |
+| Altar Completo | Consigue los 4 espacios de runa | +2 % |
+| Primer Grabado | Graba 1 runa | +1 % |
+| Piel de Runas | Ten 4 runas grabadas a la vez | +2 % |
+| Bestiario Rúnico | Atrapa 11 runas distintas | +1 % |
+| Enciclopedia Rúnica | Atrapa las 21 runas distintas | +2 % |
+| Grabador | Graba 5 runas distintas (en total) | +1 % |
+| Maestro Grabador | Graba 10 runas distintas (en total) | +1 % |
+| Sello Mayor | Graba un sigilo de nivel 3 | +1 % |
+| Favor del Sultán | Atrapa 10 veces el Sigilo de Azathoth | +1 % |
+| El Sello de R'lyeh | Ten grabado el Sigilo de Cthulhu durante una vida con Cthulhu | +1 % |
+| Máscara Propia | Ten grabado El Caos Reptante durante una vida con Nyarlathotep | +1 % |
+| Eco del Sultán | Ten grabado el Sigilo de Azathoth durante una vida con Azathoth | +1 % |
+| Reloj de la Mano | Ten grabada la Runa del Tiempo recorriendo la Senda de la Mano | +1 % |
 
-Además hay **16 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **17 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

@@ -14,6 +14,7 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
 import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
@@ -107,7 +108,11 @@ data class EconomyState(
     /** Delirio: el multiplicador de producción actual. */
     val deliriumMultiplier: Double = 1.0,
     /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
-    val earlyPacts: Set<Pact> = emptySet()
+    val earlyPacts: Set<Pact> = emptySet(),
+    /** Espacios de Runa: cuántos hay, qué runas están grabadas y cuántas veces se atrapó cada una. */
+    val runeSlots: Int = 0,
+    val engravedRunes: List<String> = emptyList(),
+    val runeCatches: Map<String, Int> = emptyMap()
 )
 
 data class AchievementProgress(
@@ -187,7 +192,9 @@ class GameEngine @Inject constructor(
     /** Delirio (Prueba): multiplicador de producción que cambia cada 30 s. */
     private var deliriumMultiplier = 1.0
     private var deliriumSeconds = 0
-    private val pact: PactEffects get() = activePact.effects
+    /** Efectos del pacto de esta vida combinados con las runas grabadas (v0.17.2). */
+    private var pactWithRunes = PactEffects()
+    private val pact: PactEffects get() = pactWithRunes
     private var costMultiplier = 1.0
 
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
@@ -564,6 +571,12 @@ class GameEngine @Inject constructor(
         val attention = effectiveAttention()
         put(AchievementStat.ATTENTION_POINTS, attentionPoints())
         put(AchievementStat.TRIALS_COMPLETED, completedTrials().size)
+        val engraved = engravedRunes()
+        put(AchievementStat.RUNE_SLOTS, runeSlots())
+        put(AchievementStat.ENGRAVED, engraved.size)
+        put(AchievementStat.ENGRAVED_T3, engraved.count { RuneEngraving.variant(it)?.tier == RuneTier.TIER_3_TRACE })
+        put(AchievementStat.RUNE_KINDS, RuneEngraving.ALL.count { statsManager.counter(AchievementStat.runeCatches(it.id)).signum() > 0 })
+        put(AchievementStat.ENGRAVED_KINDS, statsManager.counters.keys.count { it.startsWith(AchievementStat.ENGRAVED_EVER_PREFIX) })
         put(AchievementStat.ATTENTION_USED, Attention.used(attention))
         put(AchievementStat.ATTENTION_DREAM, attention[Attention.DREAM] ?: 0)
         put(AchievementStat.ATTENTION_VIGIL, attention[Attention.VIGIL] ?: 0)
@@ -983,6 +996,7 @@ class GameEngine @Inject constructor(
         if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
         // Las Pruebas se eligen al Ascender: se presentan cuando la próxima ya puede tener una
         if (ascensions + 1 >= Trial.REVEAL_AT) tutorialManager.triggerStep(TutorialStep.TRIALS)
+        if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1057,7 +1071,7 @@ class GameEngine @Inject constructor(
         statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
         if (statsManager.runTimeSeconds < FAST_TRIAL_SECONDS) statsManager.flag(AchievementStat.FEAT_TRIAL_FAST)
         deliriumMultiplier = 1.0
-        applyPactModifiers()
+        refreshEngravings()
         soundManager.playSound(SoundType.ACHIEVEMENT)
         _effects.trySend(EngineEffect.TrialCompleted(trial))
         recalculate()
@@ -1083,7 +1097,55 @@ class GameEngine @Inject constructor(
     private fun setPact(newPact: Pact) {
         activePact = newPact
         chaosMultiplier = 1
+        refreshEngravings()
+    }
+
+    // =====================================================================
+    // ESPACIOS DE RUNA (v0.17.2)
+    // =====================================================================
+
+    private fun runeSlots(): Int = trialReward().runeSlots
+
+    /** Las runas grabadas, en el orden en que se grabaron y ajustadas a los espacios. */
+    private fun engravedRunes(): List<String> = statsManager.counters.entries
+        .filter { it.key.startsWith(AchievementStat.ENGRAVE_PREFIX) }
+        .sortedBy { it.value }
+        .map { it.key.removePrefix(AchievementStat.ENGRAVE_PREFIX) }
+        .filter { RuneEngraving.variant(it) != null }
+        .take(runeSlots())
+
+    private fun runeCatches(): Map<String, Int> = RuneEngraving.ALL.associate {
+        it.id to statsManager.counter(AchievementStat.runeCatches(it.id)).toInt()
+    }
+
+    /** Recalcula el pacto con las runas grabadas y lo aplica a runas, eventos y rituales. */
+    private fun refreshEngravings() {
+        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes()))
         applyPactModifiers()
+    }
+
+    /** Graba una runa en un espacio libre (si se atrapó las veces necesarias). */
+    fun engraveRune(runeId: String) = post {
+        val current = engravedRunes()
+        if (runeId in current || current.size >= runeSlots()) return@post
+        if (!RuneEngraving.canEngrave(runeId, statsManager.counter(AchievementStat.runeCatches(runeId)).toInt())) return@post
+        // Las grabadas que sobraban (sin espacio) se descartan al grabar una nueva
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.ENGRAVE_PREFIX) && it.removePrefix(AchievementStat.ENGRAVE_PREFIX) !in current }
+        val order = (statsManager.counters.filterKeys { it.startsWith(AchievementStat.ENGRAVE_PREFIX) }.values.maxOrNull() ?: BigDecimal.ZERO).add(BigDecimal.ONE)
+        statsManager.counters[AchievementStat.engraved(runeId)] = order
+        statsManager.flag(AchievementStat.ENGRAVED_EVER_PREFIX + runeId)
+        soundManager.playSound(SoundType.BUY)
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
+    /** Quita una runa de su espacio. Es gratis: se puede volver a grabar cuando quieras. */
+    fun removeEngraving(runeId: String) = post {
+        if (statsManager.counters.remove(AchievementStat.engraved(runeId)) == null) return@post
+        refreshEngravings()
+        recalculate()
+        requestSave()
     }
 
     private fun effectiveAttention(): Map<String, Int> =
@@ -1278,6 +1340,9 @@ class GameEngine @Inject constructor(
             completedTrials = completedTrials(),
             deliriumMultiplier = deliriumMultiplier,
             earlyPacts = earlyPacts(),
+            runeSlots = runeSlots(),
+            engravedRunes = engravedRunes(),
+            runeCatches = runeCatches(),
             echoChance = echoChance()
         )
     }

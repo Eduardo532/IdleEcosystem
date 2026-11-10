@@ -26,6 +26,8 @@ import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.ui.screens.main.components.TrialList
+import com.EGomez.idleecosystem.ui.screens.main.components.RuneAltar
+import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
@@ -333,6 +335,28 @@ class CriticalUiTest {
         compose.onNodeWithText("La Cordura Residual y el Mapa de Locura no dan bono.").assertDoesNotExist()
         compose.onNodeWithTag(TRIAL_ABANDON_TAG).performScrollTo().performClick()
         assertEquals(1, abandoned)
+    }
+
+    @Test
+    fun `a rune caught enough times can be engraved`() {
+        var engraved: String? = null
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                RuneAltar(
+                    slots = 1, engraved = emptyList(),
+                    catches = mapOf("t1_blood" to 10, "t1_ash" to 3),
+                    onEngrave = { engraved = it }, onRemove = {}
+                )
+            }
+        }
+
+        compose.onNodeWithText("Espacios de Runa: 0 de 1").assertExists()
+        compose.onNodeWithText("Atrapadas: 3 de 10").assertExists()
+        compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_ash").assertDoesNotExist()
+        compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_blood").performScrollTo().performClick()
+        assertEquals("t1_blood", engraved)
     }
 
     @Test

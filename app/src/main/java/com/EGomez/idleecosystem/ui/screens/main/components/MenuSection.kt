@@ -107,6 +107,11 @@ fun MenuSection(
     deliriumMultiplier: Double = 1.0,
     earlyPacts: Set<Pact> = emptySet(),
     onAbandonTrial: () -> Unit = {},
+    runeSlots: Int = 0,
+    engravedRunes: List<String> = emptyList(),
+    runeCatches: Map<String, Int> = emptyMap(),
+    onEngraveRune: (String) -> Unit = {},
+    onRemoveEngraving: (String) -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -131,7 +136,7 @@ fun MenuSection(
         else -> null
     }
     // Pestaña Panteón: los dioses o las Pruebas de Locura
-    var showTrials by rememberSaveable { mutableStateOf(false) }
+    var pantheonView by rememberSaveable { mutableStateOf(PantheonView.GODS) }
     val trialsRevealed = ascensions + 1 >= Trial.REVEAL_AT
 
     Column(
@@ -240,7 +245,7 @@ fun MenuSection(
             // Prueba de Locura en curso: barra fija con su avance; abre la lista de Pruebas
             if (selectedTabIndex == 0 && activeTrial != null) {
                 TrialBar(activeTrial, trialProgress, deliriumMultiplier) {
-                    showTrials = true
+                    pantheonView = PantheonView.TRIALS
                     onTabSelected(3)
                 }
             }
@@ -392,15 +397,17 @@ fun MenuSection(
                         if (trialsRevealed) {
                             item {
                                 PantheonViewChips(
-                                    showTrials,
-                                    stringResource(R.string.pantheon_view_trials, completedTrials.size, Trial.entries.size)
-                                ) { showTrials = it }
+                                    pantheonView,
+                                    stringResource(R.string.pantheon_view_trials, completedTrials.size, Trial.entries.size),
+                                    stringResource(R.string.pantheon_view_runes, engravedRunes.size, runeSlots)
+                                ) { pantheonView = it }
                             }
                         }
-                        if (trialsRevealed && showTrials) {
-                            item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
-                        } else {
-                            item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
+                        val view = if (trialsRevealed) pantheonView else PantheonView.GODS
+                        when (view) {
+                            PantheonView.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
+                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving) }
+                            PantheonView.GODS -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
                         }
                     }
                 }

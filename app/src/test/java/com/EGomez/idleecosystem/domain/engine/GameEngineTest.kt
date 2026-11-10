@@ -28,6 +28,7 @@ import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -397,6 +398,36 @@ class GameEngineTest {
         assertEquals(null, passed.activeTrial)
         assertEquals(0.9, passed.buildingCostMultiplier, 1e-9)
         assertTrue(Pact.SHUB_NIGGURATH in passed.earlyPacts)
+    }
+
+    @Test
+    fun `a caught rune can be engraved in a slot won by a trial`() = runBlocking {
+        // Partida importada: Ceguera superada (1 espacio) y la Runa de Hueso atrapada 10 veces
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 3
+            flag(AchievementStat.trial("blindness"))
+            count(AchievementStat.runeCatches("t1_bone"), BigDecimal(10))
+            count(AchievementStat.runeCatches("t2_gravity"), BigDecimal(2))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.runeSlots == 1 }
+
+        engine.engraveRune("t2_gravity") // solo 2 de 5: no se puede
+        engine.engraveRune("t1_bone")
+
+        // La Runa de Hueso grabada: los edificios cuestan un 5 % menos
+        val after = await(engine.economy) { it.engravedRunes == listOf("t1_bone") }
+        assertEquals(0.95, after.buildingCostMultiplier, 1e-9)
+
+        engine.removeEngraving("t1_bone")
+        val removed = await(engine.economy) { it.engravedRunes.isEmpty() }
+        assertEquals(1.0, removed.buildingCostMultiplier, 1e-9)
     }
 
     @Test

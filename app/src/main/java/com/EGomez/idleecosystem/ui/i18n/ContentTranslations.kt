@@ -47,6 +47,8 @@ object ContentTranslations {
         "Mortalidad" to "Mortality",
         "La Cordura Residual y el Mapa de Locura no dan bono." to "Residual Sanity and the Map of Madness give no bonus.",
         "Pruebas de Locura" to "Trials of Madness",
+        "El Altar de Runas" to "The Rune Altar",
+        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto." to "Passing the Trial gave you a Rune Slot. In the Pantheon tab, Runes view, engrave a rune you have caught several times: its bonus stays active forever and changing it is free. Every rune gives a different bonus.",
         "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas." to "You can now face Trials of Madness: lives with an altered rule and a Knowledge goal. Choose one when you Ascend, along with your pact. If you reach the goal, the Trial is passed and its reward is yours forever; some bring the Outer Gods early. The Pantheon tab shows every Trial."
     )
 

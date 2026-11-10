@@ -262,4 +262,15 @@
     <string name="trial_reward_pact">%1$s without waiting for its Ascensions</string>
     <string name="pantheon_view_gods">Gods</string>
     <string name="pantheon_view_trials">Trials %1$d/%2$d</string>
+    <string name="pantheon_view_runes">Runes %1$d/%2$d</string>
+    <string name="rune_altar_intro">Engrave in a slot a rune you have caught several times: its bonus stays active forever. Changing it is free.</string>
+    <string name="rune_altar_slots">Rune Slots: %1$d of %2$d</string>
+    <string name="rune_altar_no_slots">You have no slots yet. They come from the Blindness, Silence, Amnesia and Mortality Trials.</string>
+    <string name="rune_tier_1">Tier 1 runes (catch %1$d)</string>
+    <string name="rune_tier_2">Tier 2 runes (catch %1$d)</string>
+    <string name="rune_tier_3">Tier 3 sigils (catch %1$d)</string>
+    <string name="rune_caught">Caught: %1$d of %2$d</string>
+    <string name="rune_engrave">Engrave</string>
+    <string name="rune_remove">Remove</string>
+    <string name="trial_reward_rune_slot">+%1$d rune slot</string>
 </resources>

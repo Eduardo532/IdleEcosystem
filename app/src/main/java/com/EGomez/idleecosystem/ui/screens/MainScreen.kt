@@ -239,6 +239,11 @@ fun MainScreen(
                             deliriumMultiplier = uiState.deliriumMultiplier,
                             earlyPacts = uiState.earlyPacts,
                             onAbandonTrial = { viewModel.onAbandonTrial() },
+                            runeSlots = uiState.runeSlots,
+                            engravedRunes = uiState.engravedRunes,
+                            runeCatches = uiState.runeCatches,
+                            onEngraveRune = { viewModel.onEngraveRune(it) },
+                            onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true

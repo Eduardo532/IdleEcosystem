@@ -196,5 +196,12 @@ enum class TutorialStep(
         "Pruebas de Locura",
         "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas.",
         "Al poder elegir la primera Prueba"
+    ),
+
+    RUNE_SLOTS(
+        "rune_slots",
+        "El Altar de Runas",
+        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
+        "Al ganar el primer espacio de runa"
     )
 }

@@ -155,6 +155,8 @@ class RuneManager @Inject constructor(
             RuneTier.TIER_2_HOLD -> statisticsManager.trackRuneStabilized()
             RuneTier.TIER_3_TRACE -> statisticsManager.trackRuneInscribed()
         }
+        // Espacios de Runa: cada runa cuenta por separado para poder grabarla
+        statisticsManager.count(AchievementStat.runeCatches(rune.id))
 
         // El ciclo se reinicia ANTES de aplicar el efecto: antes se reiniciaba después
         // y anulaba a la Runa de Entropía.

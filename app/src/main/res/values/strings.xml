@@ -263,4 +263,15 @@
     <string name="trial_reward_pact">%1$s sin esperar sus Ascensiones</string>
     <string name="pantheon_view_gods">Dioses</string>
     <string name="pantheon_view_trials">Pruebas %1$d/%2$d</string>
+    <string name="pantheon_view_runes">Runas %1$d/%2$d</string>
+    <string name="rune_altar_intro">Graba en un espacio una runa que ya atrapaste varias veces: su bono queda activo para siempre. Cambiarla es gratis.</string>
+    <string name="rune_altar_slots">Espacios de Runa: %1$d de %2$d</string>
+    <string name="rune_altar_no_slots">Todavía no tienes espacios. Los dan las Pruebas Ceguera, Silencio, Amnesia y Mortalidad.</string>
+    <string name="rune_tier_1">Runas de nivel 1 (atrapa %1$d)</string>
+    <string name="rune_tier_2">Runas de nivel 2 (atrapa %1$d)</string>
+    <string name="rune_tier_3">Sigilos de nivel 3 (atrapa %1$d)</string>
+    <string name="rune_caught">Atrapadas: %1$d de %2$d</string>
+    <string name="rune_engrave">Grabar</string>
+    <string name="rune_remove">Quitar</string>
+    <string name="trial_reward_rune_slot">+%1$d espacio de runa</string>
 </resources>

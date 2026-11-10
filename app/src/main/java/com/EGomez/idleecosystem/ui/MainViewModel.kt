@@ -190,7 +190,10 @@ class MainViewModel @Inject constructor(
         trialProgress = economy.trialProgress,
         completedTrials = economy.completedTrials,
         deliriumMultiplier = economy.deliriumMultiplier,
-        earlyPacts = economy.earlyPacts
+        earlyPacts = economy.earlyPacts,
+        runeSlots = economy.runeSlots,
+        engravedRunes = economy.engravedRunes,
+        runeCatches = economy.runeCatches
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -277,6 +280,10 @@ class MainViewModel @Inject constructor(
         engine.ascend(nextPact, abandonPath, nextTrial)
 
     fun onAbandonTrial() = engine.abandonTrial()
+
+    fun onEngraveRune(runeId: String) = engine.engraveRune(runeId)
+
+    fun onRemoveEngraving(runeId: String) = engine.removeEngraving(runeId)
 
     fun onHardResetClicked() = engine.hardReset()
 

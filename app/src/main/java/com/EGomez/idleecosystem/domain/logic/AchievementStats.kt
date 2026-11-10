@@ -54,6 +54,8 @@ object AchievementStat {
     const val ENGRAVED_T3 = "engraved_t3"
     const val RUNE_KINDS = "rune_kinds"
     const val ENGRAVED_KINDS = "engraved_kinds"
+    /** Medidor de Locura (v0.17.3): el valor actual (se guarda como contador). */
+    const val MADNESS = "madness"
     /** "owned.b_temple": unidades de un edificio. */
     const val OWNED_PREFIX = "owned."
 
@@ -63,7 +65,7 @@ object AchievementStat {
         ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED,
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
-        TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS
+        TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS
     )
 
     // --- Contadores guardados ---
@@ -112,6 +114,15 @@ object AchievementStat {
     const val ENGRAVED_EVER_PREFIX = "engraved_ever."
 
     fun runeCatches(runeId: String) = RUNE_CATCH_PREFIX + runeId
+
+    // --- Medidor de Locura (v0.17.3) ---
+    const val MAX_MADNESS = "max.madness"
+    const val MAX_MADNESS_STREAK = "max.madness_streak"
+    const val MADNESS_COLLAPSES = "madness_collapses"
+    const val MADNESS_OMENS = "madness_omens"
+    const val RUN_COLLAPSES = "run.collapses"
+    const val FEAT_STEEL_NERVES = "feat.steel_nerves"
+    const val FEAT_EDGE = "feat.edge99"
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -121,6 +132,7 @@ object AchievementStat {
         RITUALS, MAX_SANITY_GAIN, MAX_CONVERGENCE, MAX_CONVERGENCE_BUFFS, AUTO_ASCENSIONS, AUTO_UNITS,
         PATHS_ABANDONED, FEAT_SILENT_LIFE, FEAT_FAST_15, FEAT_FAST_5, FEAT_ASCETIC, FEAT_BLIND,
         FEAT_BLANK_MIND, FEAT_LONG_PATH, FEAT_CHAOS_20, FEAT_CHAOS_1, FEAT_TRIAL_FAST, TRIALS_STARTED,
+        MAX_MADNESS, MAX_MADNESS_STREAK, MADNESS_COLLAPSES, MADNESS_OMENS, RUN_COLLAPSES, FEAT_STEEL_NERVES, FEAT_EDGE,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )

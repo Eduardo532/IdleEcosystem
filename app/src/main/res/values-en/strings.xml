@@ -273,4 +273,17 @@
     <string name="rune_engrave">Engrave</string>
     <string name="rune_remove">Remove</string>
     <string name="trial_reward_rune_slot">+%1$d rune slot</string>
+    <string name="madness_bar">☠ Madness %1$d%% · production %2$s</string>
+    <string name="madness_collapse_bar">☠ COLLAPSE · production halved %1$d s</string>
+    <string name="madness_possessed_short">%1$s possessed</string>
+    <string name="madness_title">Madness Meter</string>
+    <string name="madness_current">Madness: %1$d%% · production %2$s</string>
+    <string name="madness_info_rise">It rises when you play hard: every click, every rune caught and every ritual (the Convergence, much more).</string>
+    <string name="madness_info_fall">It falls by itself over time, offline too. The Litany of Calm lowers it by 40 points at once.</string>
+    <string name="madness_info_omens">Each point gives +1% production. From 50% omens appear: a possessed building stops producing for 30 s, or part of your Echoes scatter.</string>
+    <string name="madness_info_collapse">At 100% the mind collapses: you lose your active boosts and production is halved for 1 minute. You never lose Knowledge or progress.</string>
+    <string name="madness_close">Got it</string>
+    <string name="madness_notice_collapse">☠ COLLAPSE: you lose your boosts</string>
+    <string name="madness_notice_possessed">☠ %1$s is possessed</string>
+    <string name="madness_notice_echoes">☠ Your Echoes scatter: -%1$s</string>
 </resources>

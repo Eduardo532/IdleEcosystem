@@ -203,5 +203,12 @@ enum class TutorialStep(
         "El Altar de Runas",
         "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
         "Al ganar el primer espacio de runa"
+    ),
+
+    MADNESS(
+        "madness",
+        "El Medidor de Locura",
+        "Tu mente ya no es la de antes. La barra de Locura sube cuando juegas fuerte (clics, runas, rituales) y baja sola con el tiempo. Cada punto da +1% de producción, pero desde la mitad llegan presagios y al 100% la mente colapsa: pierdes tus potenciadores y produces la mitad un minuto. Tócala para ver los detalles; la Letanía de Calma la baja de golpe.",
+        "Al tener 5 Ascensiones"
     )
 }

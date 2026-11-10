@@ -13,7 +13,9 @@ enum class RitualEffectType {
     CLICK_MULTIPLIER,
     INSTANT_KNOWLEDGE,
     /** Mientras dura, los potenciadores temporales se multiplican en vez de sumarse. */
-    CONVERGENCE
+    CONVERGENCE,
+    /** Al instante: baja el Medidor de Locura (v0.17.3). */
+    CALM
 }
 
 data class Ritual(
@@ -49,7 +51,7 @@ data class Ritual(
         get() = when (effectType) {
             RitualEffectType.PRODUCTION_MULTIPLIER -> ((effectValue - 1.0) * durationSeconds).toLong()
             RitualEffectType.INSTANT_KNOWLEDGE -> effectValue.toLong()
-            RitualEffectType.CLICK_MULTIPLIER, RitualEffectType.CONVERGENCE -> 0L
+            RitualEffectType.CLICK_MULTIPLIER, RitualEffectType.CONVERGENCE, RitualEffectType.CALM -> 0L
         }
 
     fun getProgress(): Float {

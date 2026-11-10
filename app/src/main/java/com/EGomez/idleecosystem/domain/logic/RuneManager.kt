@@ -200,6 +200,11 @@ class RuneManager @Inject constructor(
         }
     }
 
+    /** Colapso de la mente: se pierden los potenciadores de las runas. */
+    fun clearBuffs() {
+        _activeBuffs.value = emptyList()
+    }
+
     fun hideRune() {
         _runeState.value = RuneState.HIDDEN
         _currentRune.value = null

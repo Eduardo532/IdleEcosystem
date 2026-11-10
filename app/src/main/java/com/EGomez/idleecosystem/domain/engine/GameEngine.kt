@@ -14,6 +14,7 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
 import com.EGomez.idleecosystem.domain.logic.AchievementStat
@@ -109,6 +110,10 @@ data class EconomyState(
     val deliriumMultiplier: Double = 1.0,
     /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
     val earlyPacts: Set<Pact> = emptySet(),
+    /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
+    val madness: Double? = null,
+    val collapseSeconds: Int = 0,
+    val possessedBuilding: String? = null,
     /** Espacios de Runa: cuántos hay, qué runas están grabadas y cuántas veces se atrapó cada una. */
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
@@ -134,6 +139,10 @@ sealed interface EngineEffect {
     data class AutoAscended(val sanity: BigDecimal) : EngineEffect
     /** Se superó una Prueba de Locura. */
     data class TrialCompleted(val trial: Trial) : EngineEffect
+    /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
+    data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
+    /** La Locura llegó a 100: la mente colapsó. */
+    object MadnessCollapse : EngineEffect
 }
 
 data class ExportedSave(
@@ -192,6 +201,16 @@ class GameEngine @Inject constructor(
     /** Delirio (Prueba): multiplicador de producción que cambia cada 30 s. */
     private var deliriumMultiplier = 1.0
     private var deliriumSeconds = 0
+
+    // Medidor de Locura (v0.17.3)
+    private var madness = MadnessMeter()
+    private var collapseSeconds = 0
+    private var possessedBuildingId: String? = null
+    private var possessedSeconds = 0
+    private var madnessHighStreak = 0
+    private var lastRecalcMadness = 0.0
+    /** Runas atrapadas por nivel en el último segundo (para sumar Locura). */
+    private var lastRuneCounts: Triple<Int, Int, Int>? = null
     /** Efectos del pacto de esta vida combinados con las runas grabadas (v0.17.2). */
     private var pactWithRunes = PactEffects()
     private val pact: PactEffects get() = pactWithRunes
@@ -362,6 +381,12 @@ class GameEngine @Inject constructor(
             statsManager.count(AchievementStat.RITUALS)
             statsManager.count(AchievementStat.ritual(ritualId))
             statsManager.count(StatisticsManager.RUN_RITUALS)
+            // Locura: los rituales la suben (la Convergencia mucho); la Letanía la calma
+            when (ritual.effectType) {
+                RitualEffectType.CALM -> { madness.calm(ritual.effectValue); syncMadness() }
+                RitualEffectType.CONVERGENCE -> addMadness(MadnessMeter.PER_CONVERGENCE)
+                else -> addMadness(MadnessMeter.PER_RITUAL)
+            }
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
                 // Producción base, igual que los saltos de tiempo de las runas: los
                 // potenciadores activos no se multiplican sobre este regalo
@@ -488,7 +513,11 @@ class GameEngine @Inject constructor(
         recordFinishedLife(finalPotential, abandonPath)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
         statsManager.resetRunCounters()
+        madness.reset()
+        syncMadness()
+        loadMadness()
         deliriumMultiplier = 1.0
         // La Prueba de la vida nueva (una bloqueada no se puede elegir)
         if (nextTrial != null && nextTrial.isUnlocked(statsManager.totalPrestiges)) startTrial(nextTrial)
@@ -571,6 +600,7 @@ class GameEngine @Inject constructor(
         val attention = effectiveAttention()
         put(AchievementStat.ATTENTION_POINTS, attentionPoints())
         put(AchievementStat.TRIALS_COMPLETED, completedTrials().size)
+        put(AchievementStat.MADNESS, BigDecimal.valueOf(madness.value))
         val engraved = engravedRunes()
         put(AchievementStat.RUNE_SLOTS, runeSlots())
         put(AchievementStat.ENGRAVED, engraved.size)
@@ -619,6 +649,7 @@ class GameEngine @Inject constructor(
         achievementManager.resetAchievements()
         prestigeShopManager.upgrades.forEach { it.level = 0 }
         statsManager.hardReset()
+        loadMadness()
         tutorialManager.resetTutorial()
         runeManager.hideRune()
         ritualManager.reset()
@@ -649,6 +680,7 @@ class GameEngine @Inject constructor(
             upgrade.level = data.prestigeUpgrades.find { it.id == upgrade.id }?.level ?: 0
         }
         statsManager.loadFromEntity(data.statistics)
+        loadMadness()
         setPact(Pact.fromId(data.activePact))
 
         // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
@@ -749,6 +781,7 @@ class GameEngine @Inject constructor(
         val entity = saved.state
 
         statsManager.loadFromEntity(saved.statistics)
+        loadMadness()
 
         val tutorialEnabled = entity?.tutorialEnabled ?: true
         val tutorialSteps = entity?.completedTutorialSteps?.split(",")?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
@@ -819,6 +852,11 @@ class GameEngine @Inject constructor(
 
     private fun grantOfflineGains(diffMillis: Long) {
         val diffSeconds = diffMillis / 1000
+        // La Locura también baja mientras no juegas
+        if (diffSeconds > 0) {
+            madness.decay(diffSeconds)
+            syncMadness()
+        }
         recalculate()
         // Producción base: los potenciadores temporales no se extienden al tiempo fuera
         val gains = baseProductionPerSecond
@@ -869,6 +907,7 @@ class GameEngine @Inject constructor(
         ritualManager.tick(1)
         rollChaos()
         checkTrial()
+        madnessTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -957,6 +996,7 @@ class GameEngine @Inject constructor(
         val rules = trialRules()
         // Manos Atadas: el clic no produce
         if (!rules.noClickKnowledge) addKnowledge(currentClickPower(), isManual = true)
+        addMadness(MadnessMeter.PER_CLICK)
 
         // Silencio: no hay Ecos
         if (echoFound && !rules.noRituals) {
@@ -997,6 +1037,7 @@ class GameEngine @Inject constructor(
         // Las Pruebas se eligen al Ascender: se presentan cuando la próxima ya puede tener una
         if (ascensions + 1 >= Trial.REVEAL_AT) tutorialManager.triggerStep(TutorialStep.TRIALS)
         if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
+        if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1092,6 +1133,106 @@ class GameEngine @Inject constructor(
         val target = buildings.find { it.id == buildingId } ?: return false
         if (target.type == BuildingType.CLICK || target.amountOwned > 0) return true
         return buildings.count { it.type != BuildingType.CLICK && it.amountOwned > 0 } < limit
+    }
+
+    // =====================================================================
+    // MEDIDOR DE LOCURA (v0.17.3)
+    // =====================================================================
+
+    private fun madnessRevealed(): Boolean = statsManager.totalPrestiges >= MadnessMeter.REVEAL_AT
+
+    /** Bono de la Locura y castigo del colapso, sobre la producción. */
+    private fun madnessFactor(): Double {
+        if (!madnessRevealed()) return 1.0
+        val collapse = if (collapseSeconds > 0) MadnessMeter.COLLAPSE_PRODUCTION else 1.0
+        return madness.productionBonus() * collapse
+    }
+
+    private fun syncMadness() {
+        statsManager.counters.remove(AchievementStat.MADNESS)
+        if (madness.value > 0.0) statsManager.counters[AchievementStat.MADNESS] =
+            BigDecimal.valueOf(madness.value).setScale(2, java.math.RoundingMode.HALF_UP)
+        statsManager.record(AchievementStat.MAX_MADNESS, BigDecimal.valueOf(madness.value))
+        if (madness.value >= EDGE_MADNESS && madness.value < MadnessMeter.MAX) statsManager.flag(AchievementStat.FEAT_EDGE)
+    }
+
+    private fun loadMadness() {
+        madness = MadnessMeter(statsManager.counter(AchievementStat.MADNESS).toDouble())
+        collapseSeconds = 0
+        possessedBuildingId = null
+        possessedSeconds = 0
+        madnessHighStreak = 0
+        lastRuneCounts = null
+    }
+
+    /** Suma Locura por jugar fuerte; si llega a 100, la mente colapsa. */
+    private fun addMadness(amount: Double) {
+        if (!madnessRevealed()) return
+        if (madness.add(amount)) collapse() else syncMadness()
+    }
+
+    /** El colapso (leve): se pierden los potenciadores y la producción baja a la mitad 1 minuto. */
+    private fun collapse() {
+        syncMadness()
+        runeManager.clearBuffs()
+        ritualManager.endActive()
+        eventScheduler.clearBuff()
+        madness.reset()
+        syncMadness()
+        collapseSeconds = MadnessMeter.COLLAPSE_SECONDS
+        statsManager.count(AchievementStat.MADNESS_COLLAPSES)
+        statsManager.count(AchievementStat.RUN_COLLAPSES)
+        soundManager.playSound(SoundType.EVENT_APPEAR)
+        _effects.trySend(EngineEffect.MadnessCollapse)
+        recalculate()
+    }
+
+    /** Una vez por segundo: runas atrapadas, la Locura baja, presagios y castigos. */
+    private fun madnessTick() {
+        if (!madnessRevealed()) return
+        val counts = Triple(statsManager.runesSevered, statsManager.runesStabilized, statsManager.runesInscribed)
+        lastRuneCounts?.let { last ->
+            val gained = (counts.first - last.first).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_1_SWIPE) +
+                (counts.second - last.second).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_2_HOLD) +
+                (counts.third - last.third).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_3_TRACE)
+            if (gained > 0) addMadness(gained)
+        }
+        lastRuneCounts = counts
+
+        var changed = false
+        if (collapseSeconds > 0 && --collapseSeconds == 0) changed = true
+        if (possessedSeconds > 0 && --possessedSeconds == 0) {
+            possessedBuildingId = null
+            changed = true
+        }
+        madness.decay(1)
+        if (madness.rollOmen()) {
+            omen()
+            changed = true
+        }
+        madnessHighStreak = if (madness.value >= HIGH_MADNESS) madnessHighStreak + 1 else 0
+        statsManager.record(AchievementStat.MAX_MADNESS_STREAK, BigDecimal(madnessHighStreak))
+        syncMadness()
+        if (changed || kotlin.math.abs(madness.value - lastRecalcMadness) >= MADNESS_RECALC_STEP) {
+            lastRecalcMadness = madness.value
+            recalculate()
+        }
+    }
+
+    /** Un presagio malo: un edificio poseído deja de producir, o se dispersan Ecos. */
+    private fun omen() {
+        statsManager.count(AchievementStat.MADNESS_OMENS)
+        val owned = buildingManager.availableBuildings.filter { it.type != BuildingType.CLICK && it.amountOwned > 0 }
+        if (owned.isNotEmpty() && (echoes < BigDecimal.ONE || kotlin.random.Random.nextBoolean())) {
+            val building = owned.random()
+            possessedBuildingId = building.id
+            possessedSeconds = MadnessMeter.POSSESSION_SECONDS
+            _effects.trySend(EngineEffect.MadnessOmen(building.name, null))
+        } else if (echoes >= BigDecimal.ONE) {
+            val lost = echoes.multiply(BigDecimal.valueOf(MadnessMeter.SCATTERED_ECHOES)).setScale(0, java.math.RoundingMode.CEILING)
+            echoes = echoes.subtract(lost).max(BigDecimal.ZERO)
+            _effects.trySend(EngineEffect.MadnessOmen(null, lost))
+        }
     }
 
     private fun setPact(newPact: Pact) {
@@ -1229,10 +1370,12 @@ class GameEngine @Inject constructor(
         val temporaryBuffs = listOf(eventScheduler.buffMultiplier) +
             ritualManager.getActiveProductionMultipliers() +
             runeManager.getActiveProductionMultipliers()
-        val temporaryMult = BuffMath.combine(temporaryBuffs, convergence)
+        val boostMult = BuffMath.combine(temporaryBuffs, convergence)
+        // La Locura (bono y colapso) cuenta como temporal: no se extiende al tiempo sin conexión
+        val temporaryMult = boostMult.multiply(BigDecimal.valueOf(madnessFactor()))
         if (convergence) {
             // Logros de la Convergencia: el mejor combo logrado
-            statsManager.record(AchievementStat.MAX_CONVERGENCE, temporaryMult)
+            statsManager.record(AchievementStat.MAX_CONVERGENCE, boostMult)
             statsManager.record(AchievementStat.MAX_CONVERGENCE_BUFFS, BigDecimal(temporaryBuffs.count { it > 1.0 }))
         }
         val temporaryClickMult = BuffMath.combine(
@@ -1268,6 +1411,8 @@ class GameEngine @Inject constructor(
                     .multiply(if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getBuildingTierMultiplier(index))
                     .multiply(setMult)
                     .multiply(BigDecimal.valueOf(pact.buildingMultiplier(building.id)))
+                    // Presagio de la Locura: el edificio poseído no produce
+                    .multiply(if (building.id == possessedBuildingId) BigDecimal.ZERO else BigDecimal.ONE)
             }
             building.currentMultiplier = specificMult.multiply(globalMultiplier, MathContext.DECIMAL64)
         }
@@ -1340,6 +1485,9 @@ class GameEngine @Inject constructor(
             completedTrials = completedTrials(),
             deliriumMultiplier = deliriumMultiplier,
             earlyPacts = earlyPacts(),
+            madness = if (madnessRevealed()) madness.value else null,
+            collapseSeconds = collapseSeconds,
+            possessedBuilding = possessedBuildingId,
             runeSlots = runeSlots(),
             engravedRunes = engravedRunes(),
             runeCatches = runeCatches(),
@@ -1420,5 +1568,8 @@ class GameEngine @Inject constructor(
         private const val BLANK_MIND_POINTS = 4
         private const val FAST_TRIAL_SECONDS = 20 * 60L
         private val NO_TRIAL_RULES = TrialRules()
+        private const val HIGH_MADNESS = 90.0
+        private const val EDGE_MADNESS = 99.0
+        private const val MADNESS_RECALC_STEP = 0.5
     }
 }

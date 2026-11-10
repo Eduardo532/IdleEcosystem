@@ -274,4 +274,17 @@
     <string name="rune_engrave">Grabar</string>
     <string name="rune_remove">Quitar</string>
     <string name="trial_reward_rune_slot">+%1$d espacio de runa</string>
+    <string name="madness_bar">☠ Locura %1$d%% · producción %2$s</string>
+    <string name="madness_collapse_bar">☠ COLAPSO · producción a la mitad %1$d s</string>
+    <string name="madness_possessed_short">%1$s poseído</string>
+    <string name="madness_title">Medidor de Locura</string>
+    <string name="madness_current">Locura: %1$d%% · producción %2$s</string>
+    <string name="madness_info_rise">Sube cuando juegas fuerte: cada clic, cada runa atrapada y cada ritual (la Convergencia, mucho más).</string>
+    <string name="madness_info_fall">Baja sola con el tiempo, también sin conexión. La Letanía de Calma la baja 40 puntos de golpe.</string>
+    <string name="madness_info_omens">Cada punto da +1% de producción. Desde el 50% aparecen presagios: un edificio poseído deja de producir 30 s, o se dispersa una parte de tus Ecos.</string>
+    <string name="madness_info_collapse">Al llegar a 100% la mente colapsa: pierdes los potenciadores activos y la producción queda a la mitad durante 1 minuto. Nunca pierdes Conocimiento ni progreso.</string>
+    <string name="madness_close">Entendido</string>
+    <string name="madness_notice_collapse">☠ COLAPSO: pierdes tus potenciadores</string>
+    <string name="madness_notice_possessed">☠ %1$s está poseído</string>
+    <string name="madness_notice_echoes">☠ Tus Ecos se dispersan: -%1$s</string>
 </resources>

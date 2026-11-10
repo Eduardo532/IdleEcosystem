@@ -48,6 +48,8 @@ object ContentTranslations {
         "La Cordura Residual y el Mapa de Locura no dan bono." to "Residual Sanity and the Map of Madness give no bonus.",
         "Pruebas de Locura" to "Trials of Madness",
         "El Altar de Runas" to "The Rune Altar",
+        "El Medidor de Locura" to "The Madness Meter",
+        "Tu mente ya no es la de antes. La barra de Locura sube cuando juegas fuerte (clics, runas, rituales) y baja sola con el tiempo. Cada punto da +1% de producción, pero desde la mitad llegan presagios y al 100% la mente colapsa: pierdes tus potenciadores y produces la mitad un minuto. Tócala para ver los detalles; la Letanía de Calma la baja de golpe." to "Your mind is not what it used to be. The Madness bar rises when you play hard (clicks, runes, rituals) and falls by itself over time. Each point gives +1% production, but from halfway omens arrive and at 100% the mind collapses: you lose your boosts and produce half for a minute. Tap it for details; the Litany of Calm lowers it at once.",
         "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto." to "Passing the Trial gave you a Rune Slot. In the Pantheon tab, Runes view, engrave a rune you have caught several times: its bonus stays active forever and changing it is free. Every rune gives a different bonus.",
         "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas." to "You can now face Trials of Madness: lives with an altered rule and a Knowledge goal. Choose one when you Ascend, along with your pact. If you reach the goal, the Trial is passed and its reward is yours forever; some bring the Outer Gods early. The Pantheon tab shows every Trial."
     )
@@ -242,6 +244,8 @@ object ContentTranslations {
         "Un instante de eficiencia imposible. x20 a la producción." to "An instant of impossible efficiency. x20 production.",
         "Convergencia" to "Convergence",
         "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000)." to "For one minute boosts multiply each other instead of adding up (capped at x1,000).",
+        "Letanía de Calma" to "Litany of Calm",
+        "Una plegaria lenta que aquieta la mente: baja 40 puntos el Medidor de Locura." to "A slow prayer that quiets the mind: lowers the Madness Meter by 40 points.",
         "Vigilia Eterna" to "Eternal Vigil",
         "Dos minutos sin dormir, sin parpadear. x6 a la producción." to "Two minutes without sleep, without blinking. x6 production."
     )

@@ -19,6 +19,7 @@ class RitualManager @Inject constructor() {
 
     companion object {
         const val CONVERGENCE_ID = "rit_convergence"
+        const val CALM_ID = "rit_calm"
     }
 
     init {
@@ -46,6 +47,16 @@ class RitualManager @Inject constructor() {
                 cooldownSeconds = 120,
                 effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
                 effectValue = 3.0
+            ),
+            Ritual(
+                id = CALM_ID,
+                name = "Letanía de Calma",
+                description = "Una plegaria lenta que aquieta la mente: baja 40 puntos el Medidor de Locura.",
+                baseCost = BigDecimal("10"),
+                durationSeconds = 1,
+                cooldownSeconds = 300,
+                effectType = RitualEffectType.CALM,
+                effectValue = MadnessMeter.CALM_AMOUNT
             ),
             Ritual(
                 id = "rit_knowledge_offering",
@@ -193,6 +204,19 @@ class RitualManager @Inject constructor() {
             }
         }
         tick(elapsedSeconds)
+    }
+
+    /** Colapso de la mente: los rituales activos terminan y pasan a recargar. */
+    fun endActive() {
+        _rituals.update { list ->
+            list.map {
+                if (it.state != RitualState.ACTIVE) it
+                else {
+                    val cooldown = scaled(it.cooldownSeconds, cooldownMultiplier)
+                    it.copy(state = RitualState.COOLDOWN, timeRemaining = cooldown, totalTimeForProgress = cooldown)
+                }
+            }
+        }
     }
 
     fun reset() {

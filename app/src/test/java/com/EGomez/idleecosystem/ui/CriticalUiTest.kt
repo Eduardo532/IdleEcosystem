@@ -27,6 +27,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.ui.screens.main.components.TrialList
 import com.EGomez.idleecosystem.ui.screens.main.components.RuneAltar
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
+import com.EGomez.idleecosystem.ui.screens.main.components.MADNESS_METER_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
@@ -357,6 +359,19 @@ class CriticalUiTest {
         compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_ash").assertDoesNotExist()
         compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_blood").performScrollTo().performClick()
         assertEquals("t1_blood", engraved)
+    }
+
+    @Test
+    fun `the madness meter shows its bonus and the collapse`() {
+        var opened = 0
+        var collapse by mutableStateOf(0)
+        compose.setContent { MadnessMeterBar(63.0, collapse, null) { opened++ } }
+
+        compose.onNodeWithText("Locura 63%", substring = true).assertExists()
+        compose.onNodeWithTag(MADNESS_METER_TAG).performClick()
+        assertEquals(1, opened)
+        collapse = 42
+        compose.onNodeWithText("COLAPSO", substring = true).assertExists()
     }
 
     @Test

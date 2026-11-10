@@ -1,6 +1,6 @@
 # Logros
 
-Hay **372 logros**: 113 originales y **259 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **385 logros**: 113 originales y **272 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -211,6 +211,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Velo Cerrado | Supera Ceguera con Daoloth | +1 % |
 | Prueba Relámpago | Supera una Prueba en menos de 20 minutos | +1 % |
 | Penitente | Empieza 25 Pruebas de Locura | +1 % |
+| Escritura Febril | Supera Manos Atadas con la mutación Notas Febriles | +1 % |
 
 ### Arcanos
 
@@ -293,8 +294,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Mensajero Reconoce su Rostro | Ten maestría 3 de El Caos Reptante durante una vida con Nyarlathotep | +1 % |
 | Sello del Durmiente | Ten maestría 3 del Sigilo de Cthulhu durante una vida con Cthulhu | +1 % |
 | Entropía Domada | Ten maestría 3 de la Runa de Entropía durante una vida con Daoloth | +1 % |
+| Primera Mutación | Elige una mutación al Ascender | +1 % |
+| Carne Maleable | Descubre 10 mutaciones distintas | +1 % |
+| Bestiario de lo Imposible | Descubre las 20 mutaciones | +2 % |
+| Linaje Mutante | Termina 10 vidas con una mutación | +1 % |
+| Evolución Abominable | Termina 50 vidas con una mutación | +2 % |
+| La Ciudad Emerge | Termina una vida con Cthulhu y la mutación R'lyeh Emerge | +1 % |
+| El Sultán Tiene Hambre | Termina una vida con Azathoth y la mutación Vacío Hambriento | +1 % |
+| Mil Crías | Termina una vida con Shub-Niggurath y la mutación Eclosión Shoggoth | +1 % |
+| Genio sin Dios | Termina una vida Sin Pacto con la mutación Genio Loco | +1 % |
+| Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
+| Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **23 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **24 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

@@ -536,6 +536,7 @@ class GameEngine @Inject constructor(
             buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
                 ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
+        applyStartingBuildings()
         knowledge = prestigeShopManager.getStartingKnowledgeBonus()
         eventScheduler.clearBuff()
 
@@ -1100,6 +1101,23 @@ class GameEngine @Inject constructor(
         applyPactModifiers()
         recalculate()
         requestSave()
+    }
+
+    /**
+     * Edificios con los que empieza la vida: el Legado del Culto (Mapa de Locura) y la
+     * Prueba activa (Manos Atadas). Sin ellos, una vida sin clic no podría arrancar.
+     */
+    private fun applyStartingBuildings() {
+        val start = HashMap<String, Int>()
+        val notes = prestigeShopManager.getStartingNotes()
+        if (notes > 0) start["b_notes"] = notes
+        trialRules().startingBuildings.forEach { (id, n) -> start[id] = maxOf(start[id] ?: 0, n) }
+        start.forEach { (id, n) ->
+            val building = buildingManager.availableBuildings.find { it.id == id } ?: return@forEach
+            building.amountOwned = maxOf(building.amountOwned, n)
+            building.isVisible = true
+        }
+        if (start.isNotEmpty()) buildingManager.checkUnlocks(knowledge)
     }
 
     /** Una vez por segundo: la Prueba se supera al llegar a su meta en esta vida. */

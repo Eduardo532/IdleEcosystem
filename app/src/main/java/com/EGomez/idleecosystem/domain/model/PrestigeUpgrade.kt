@@ -25,7 +25,9 @@ data class PrestigeUpgrade(
 
     val currentEffectDisplay: String
         get() {
-            if (level == 0) return "x1.00"
+            if (level == 0) return if (id == "pu_legacy") "+0" else "x1.00"
+            // Legado del Culto: no multiplica, da edificios al empezar
+            if (id == "pu_legacy") return "+${effectMultiplier.toInt() * level}"
 
             val bonus = effectMultiplier.multiply(BigDecimal(level))
             val total = BigDecimal.ONE.add(bonus)

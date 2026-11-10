@@ -161,48 +161,25 @@ fun MenuSection(
         if (menuWeight > 0.2f) {
             if (selectedTabIndex == 0) {
                 val milestoneLabel = stringResource(R.string.buy_milestone_chip)
-                // Seis opciones no caben en pantallas angostas: la fila se desplaza
+                // Solo los multiplicadores de compra: seis botones del mismo ancho que
+                // siempre caben (lo automático vive en la barra fija bajo las pestañas)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    // Autocomprador de edificios (hito de Ascensión)
-                    if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
-                        AutoChip(
-                            selected = automation.buildings,
-                            onClick = onToggleAutoBuildings,
-                            modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
-                        )
-                        // Panel de automatización: qué edificios, presupuesto, Ascensión automática
-                        IconButton(
-                            onClick = onOpenAutomation,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .testTag(AUTOMATION_SETTINGS_TAG)
-                        ) {
-                            Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
-                        }
-                    }
                     listOf(1, 5, 10, 100, BuildingMilestones.BUY_TO_MILESTONE, -1).forEach { mult ->
                         val label = when (mult) {
                             -1 -> "MAX"
                             BuildingMilestones.BUY_TO_MILESTONE -> milestoneLabel
                             else -> "x$mult"
                         }
-                        FilterChip(
+                        BuyMultiplierChip(
+                            label = label,
                             selected = buyMultiplier == mult,
                             onClick = { onBuyMultiplierChanged(mult) },
-                            label = { Text(label) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = ArcanePurple,
-                                selectedLabelColor = Color.Black,
-                                containerColor = Color(0xFF333333),
-                                labelColor = Color.Gray
-                            ),
-                            border = null
+                            modifier = Modifier.weight(1f).testTag(BUY_MULTIPLIER_TAG + mult)
                         )
                     }
                 }
@@ -232,14 +209,41 @@ fun MenuSection(
                 }
             }
 
-            // Atención: barra fija sobre la lista de edificios (no se desplaza con ella)
-            if (selectedTabIndex == 0 && lockedTabText == null && attentionPoints > 0) {
-                AttentionBar(
-                    attention = attention,
-                    points = attentionPoints,
-                    buildings = buildings,
-                    onClick = onOpenAttention
-                )
+            // Barra fija sobre la lista de edificios (no se desplaza con ella): la Atención
+            // y, con el hito de Ascensión, el autocomprador y su panel
+            val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)
+            if (selectedTabIndex == 0 && lockedTabText == null && (attentionPoints > 0 || autobuyer)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 8.dp)
+                ) {
+                    if (attentionPoints > 0) {
+                        AttentionBar(
+                            attention = attention,
+                            points = attentionPoints,
+                            buildings = buildings,
+                            onClick = onOpenAttention,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    if (autobuyer) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        AutoChip(
+                            selected = automation.buildings,
+                            onClick = onToggleAutoBuildings,
+                            modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
+                        )
+                        // Panel de automatización: qué edificios, presupuesto, Ascensión automática
+                        IconButton(
+                            onClick = onOpenAutomation,
+                            modifier = Modifier.size(36.dp).testTag(AUTOMATION_SETTINGS_TAG)
+                        ) {
+                            Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
+                        }
+                    }
+                }
             }
 
             // Prueba de Locura en curso: barra fija con su avance; abre la lista de Pruebas
@@ -526,13 +530,39 @@ const val ACTIVE_PACT_TAG = "active_pact"
 const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
+/** Botón de multiplicador de compra: compacto y del mismo ancho que los demás. */
+@Composable
+private fun BuyMultiplierChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = if (selected) ArcanePurple else Color(0xFF333333),
+        modifier = modifier.height(32.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                label,
+                color = if (selected) Color.Black else Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Clip
+            )
+        }
+    }
+}
+
+const val BUY_MULTIPLIER_TAG = "buy_multiplier_"
+
 /** Barra fija de la Atención: puntos usados y a dónde apuntan; al tocarla abre el reparto. */
 @Composable
 private fun AttentionBar(
     attention: Map<String, Int>,
     points: Int,
     buildings: List<Building>,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val used = Attention.used(attention)
     val dream = stringResource(R.string.attention_dream)
@@ -558,10 +588,7 @@ private fun AttentionBar(
             1.dp,
             if (free > 0) AncientGold.copy(alpha = 0.7f) else ArcanePurple.copy(alpha = 0.35f)
         ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
-            .testTag(ATTENTION_BAR_TAG)
+        modifier = modifier.testTag(ATTENTION_BAR_TAG)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

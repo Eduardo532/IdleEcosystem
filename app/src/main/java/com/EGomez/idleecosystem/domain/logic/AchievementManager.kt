@@ -202,7 +202,10 @@ class AchievementManager @Inject constructor() {
         Achievement("sec_11", "Locura Infinita", "La mente se disuelve.", AchievementType.RESOURCE_REACHED, null, BigDecimal("1000000000000000000000000000000000000"), BigDecimal("1.30"), groupId = "5_secret", order = 111, requirement = "1 Undecillón Conocimiento", isSecret = true),
         Achievement("sec_12", "El Fin", "El universo parpadea.", AchievementType.RESOURCE_REACHED, null, BigDecimal("1000000000000000000000000000000000000000"), BigDecimal("1.40"), groupId = "5_secret", order = 112, requirement = "1 Duodecillón Conocimiento", isSecret = true),
         Achievement("sec_13", "Nuevo Comienzo", "Crearás algo nuevo.", AchievementType.RESOURCE_REACHED, null, BigDecimal("1000000000000000000000000000000000000000000"), BigDecimal("2.00"), groupId = "5_secret", order = 113, requirement = "1 Tredecillón Conocimiento", isSecret = true)
-    )
+    ).apply {
+        // v0.17: logros de las mecánicas nuevas (Ascensión, Panteón, Sendas, rituales...)
+        addAll(MechanicAchievements.create())
+    }
 
     fun loadFromSave(saved: List<AchievementEntity>) {
         availableAchievements.forEach { it.isUnlocked = false }
@@ -211,7 +214,11 @@ class AchievementManager @Inject constructor() {
         }
     }
 
-    fun checkAchievements(currentKnowledge: BigDecimal, buildings: List<Building>): List<Achievement> {
+    fun checkAchievements(
+        currentKnowledge: BigDecimal,
+        buildings: List<Building>,
+        context: AchievementContext = AchievementContext.EMPTY
+    ): List<Achievement> {
         val newlyUnlocked = mutableListOf<Achievement>()
         availableAchievements.filter { !it.isUnlocked }.forEach { achievement ->
             val unlocked = when (achievement.conditionType) {
@@ -220,6 +227,7 @@ class AchievementManager @Inject constructor() {
                     val building = buildings.find { it.id == achievement.targetId }
                     building != null && BigDecimal(building.amountOwned) >= achievement.targetValue
                 }
+                AchievementType.STAT -> statProgress(achievement, context) >= achievement.targetValue
             }
             if (unlocked) {
                 achievement.isUnlocked = true
@@ -229,6 +237,7 @@ class AchievementManager @Inject constructor() {
         return newlyUnlocked
     }
 
+    /** Bono de todos los logros desbloqueados, en un solo número (para las pruebas y la wiki). */
     fun getGlobalAchievementMultiplier(): BigDecimal {
         var multiplier = BigDecimal.ONE
         availableAchievements.filter { it.isUnlocked }.forEach {
@@ -237,6 +246,19 @@ class AchievementManager @Inject constructor() {
             multiplier = multiplier.multiply(it.bonusMultiplier, MathContext.DECIMAL64)
         }
         return multiplier
+    }
+
+    companion object {
+        /**
+         * Valor actual de un logro STAT; 0 si exige un pacto o una Senda que no están
+         * activos (así no se desbloquea ni suma progreso fuera de su vida).
+         */
+        fun statProgress(achievement: Achievement, context: AchievementContext): BigDecimal {
+            val key = achievement.stat ?: return BigDecimal.ZERO
+            if (achievement.pact != null && achievement.pact != context.pactId) return BigDecimal.ZERO
+            if (achievement.path != null && achievement.path != context.pathId) return BigDecimal.ZERO
+            return context.value(key)
+        }
     }
 
     fun resetAchievements() {

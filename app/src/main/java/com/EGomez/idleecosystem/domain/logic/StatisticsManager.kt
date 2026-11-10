@@ -39,6 +39,12 @@ class StatisticsManager @Inject constructor() {
 
     var totalEchoes: BigDecimal = BigDecimal.ZERO
 
+    /**
+     * Contadores de los logros (v0.17): "clave -> valor". Las claves que empiezan con
+     * [RUN_PREFIX] cuentan solo la vida actual y se borran al Ascender.
+     */
+    val counters: MutableMap<String, BigDecimal> = sortedMapOf()
+
     // --- CARGA Y GUARDADO ---
 
     fun loadFromEntity(entity: GameStatisticsEntity?) {
@@ -67,6 +73,9 @@ class StatisticsManager @Inject constructor() {
         runesSevered = entity.runesSevered
         runesStabilized = entity.runesStabilized
         runesInscribed = entity.runesInscribed
+
+        counters.clear()
+        counters.putAll(decodeCounters(entity.counters))
     }
 
     fun getEntityForSave(): GameStatisticsEntity {
@@ -88,7 +97,8 @@ class StatisticsManager @Inject constructor() {
             totalEchoes = totalEchoes.toString(),
             runesSevered = runesSevered,
             runesStabilized = runesStabilized,
-            runesInscribed = runesInscribed
+            runesInscribed = runesInscribed,
+            counters = encodeCounters(counters)
         )
     }
 
@@ -121,6 +131,7 @@ class StatisticsManager @Inject constructor() {
     }
 
     fun trackOfflineTime(seconds: Long) {
+        if (seconds > 0) count(RUN_OFFLINE, BigDecimal(seconds))
         totalOfflineSeconds += seconds
         totalPlayTimeSeconds += seconds
         runTimeSeconds += seconds
@@ -139,7 +150,10 @@ class StatisticsManager @Inject constructor() {
         }
     }
 
-    fun trackClick() { totalClicks++ }
+    fun trackClick() {
+        totalClicks++
+        count(RUN_CLICKS)
+    }
 
     fun trackProductionPeak(currentProduction: BigDecimal) {
         if (currentProduction > maxKnowledgePerSecond) {
@@ -155,22 +169,53 @@ class StatisticsManager @Inject constructor() {
     }
 
     fun trackSanitySpent(amount: BigDecimal) { spentSanity = spentSanity.add(amount) }
-    fun trackEventFound() { totalEventsFound++ }
+    fun trackEventFound() {
+        totalEventsFound++
+        count(RUN_EVENTS)
+    }
 
     fun trackEchoesFound(amount: BigDecimal) {
         totalEchoes = totalEchoes.add(amount)
+        count(RUN_ECHOES, amount)
     }
 
     fun trackRuneSevered() {
         runesSevered++
+        count(RUN_RUNES)
     }
 
     fun trackRuneStabilized() {
         runesStabilized++
+        count(RUN_RUNES)
     }
 
     fun trackRuneInscribed() {
         runesInscribed++
+        count(RUN_RUNES)
+    }
+
+    // --- CONTADORES DE LOGROS ---
+
+    fun counter(key: String): BigDecimal = counters[key] ?: BigDecimal.ZERO
+
+    fun count(key: String, amount: BigDecimal = BigDecimal.ONE) {
+        if (amount.signum() <= 0) return
+        counters[key] = counter(key).add(amount)
+    }
+
+    /** Guarda el mayor valor visto (por ejemplo, el mejor multiplicador de la Convergencia). */
+    fun record(key: String, value: BigDecimal) {
+        if (value > counter(key)) counters[key] = value
+    }
+
+    /** Marca algo que pasó al menos una vez. */
+    fun flag(key: String) {
+        if (counter(key).signum() == 0) counters[key] = BigDecimal.ONE
+    }
+
+    /** Al Ascender: se borran los contadores de la vida que termina. */
+    fun resetRunCounters() {
+        counters.keys.removeAll { it.startsWith(RUN_PREFIX) }
     }
 
     private fun parseBigDecimal(value: String): BigDecimal {
@@ -195,5 +240,35 @@ class StatisticsManager @Inject constructor() {
         runesSevered = 0
         runesStabilized = 0
         runesInscribed = 0
+        counters.clear()
+    }
+
+    companion object {
+        const val RUN_PREFIX = "run."
+        const val RUN_CLICKS = "run.clicks"
+        const val RUN_EVENTS = "run.events"
+        const val RUN_ECHOES = "run.echoes"
+        const val RUN_RUNES = "run.runes"
+        const val RUN_OFFLINE = "run.offline"
+        const val RUN_RITUALS = "run.rituals"
+
+        private val KEY = Regex("[a-z0-9_.]+")
+
+        /** "clave=valor;clave=valor". Las entradas inválidas se ignoran. */
+        fun decodeCounters(text: String?): Map<String, BigDecimal> {
+            if (text.isNullOrBlank()) return emptyMap()
+            val result = sortedMapOf<String, BigDecimal>()
+            text.split(';').forEach { entry ->
+                val parts = entry.split('=')
+                if (parts.size != 2 || !KEY.matches(parts[0])) return@forEach
+                val value = parts[1].toBigDecimalOrNull() ?: return@forEach
+                if (value.signum() > 0) result[parts[0]] = value
+            }
+            return result
+        }
+
+        fun encodeCounters(counters: Map<String, BigDecimal>): String =
+            counters.entries.filter { KEY.matches(it.key) && it.value.signum() > 0 }
+                .joinToString(";") { "${it.key}=${it.value.toPlainString()}" }
     }
 }

@@ -239,4 +239,11 @@
     <string name="path_exclusive">Senda excluyente: al recorrerla se sellan las otras dos.</string>
     <string name="path_sealed">Sellada: ya recorres la %1$s. Puedes abandonarla al Ascender.</string>
     <string name="path_sealed_button">Sellada</string>
+    <string name="achievements_cat_all">Todos</string>
+    <string name="achievements_cat_progress">Progreso</string>
+    <string name="achievements_cat_buildings">Edificios</string>
+    <string name="achievements_cat_ascension">Ascensión</string>
+    <string name="achievements_cat_pantheon">Panteón</string>
+    <string name="achievements_cat_arcane">Arcanos</string>
+    <string name="achievements_cat_secret">Secretos</string>
 </resources>

@@ -21,7 +21,8 @@ object ContentTranslations {
 
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
-            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?: ladderName(text)
+            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?:
+            MECHANIC_ACHIEVEMENTS_EN[text] ?: ladderName(text)
 
     /** El Panteón ([Pact]): nombres, epítetos y mitos. */
     private val PACTS = mapOf(

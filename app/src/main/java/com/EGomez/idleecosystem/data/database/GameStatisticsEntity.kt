@@ -34,6 +34,9 @@ data class GameStatisticsEntity(
 
     // OTROS
     val totalEventsFound: Int,
-    val totalEchoes: String = "0"
+    val totalEchoes: String = "0",
+
+    // LOGROS (v0.17): contadores "clave=valor;clave=valor"
+    val counters: String = ""
 
 )

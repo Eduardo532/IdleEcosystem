@@ -14,6 +14,8 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.AchievementContext
+import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
@@ -306,6 +308,7 @@ class GameEngine @Inject constructor(
             soundManager.playSound(SoundType.BUY)
             prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
             statsManager.trackSanitySpent(cost)
+            if (MadnessPaths.isPath(id)) statsManager.flag(AchievementStat.walked(id))
             recalculate()
             requestSave()
         }
@@ -329,6 +332,9 @@ class GameEngine @Inject constructor(
         if (ritualManager.tryActivateRitual(ritualId, echoes)) {
             val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return false
             echoes = echoes.subtract(ritual.cost)
+            statsManager.count(AchievementStat.RITUALS)
+            statsManager.count(AchievementStat.ritual(ritualId))
+            statsManager.count(StatisticsManager.RUN_RITUALS)
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
                 // Producción base, igual que los saltos de tiempo de las runas: los
                 // potenciadores activos no se multiplican sobre este regalo
@@ -366,7 +372,10 @@ class GameEngine @Inject constructor(
         if (automation.autoAscend && AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions) &&
             AutomationSettings.shouldAutoAscend(potentialPrestige, prestigeManager.residualSanity)
         ) {
-            performAscension(activePact)?.let { _effects.trySend(EngineEffect.AutoAscended(it)) }
+            performAscension(activePact)?.let {
+                statsManager.count(AchievementStat.AUTO_ASCENSIONS)
+                _effects.trySend(EngineEffect.AutoAscended(it))
+            }
             return
         }
         if (changed) requestSave()
@@ -387,6 +396,7 @@ class GameEngine @Inject constructor(
                 knowledge = knowledge.subtract(cost)
                 budget = budget.subtract(cost)
                 bought = true
+                statsManager.count(AchievementStat.AUTO_UNITS)
             }
         }
         return bought
@@ -445,8 +455,11 @@ class GameEngine @Inject constructor(
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
+        // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
+        recordFinishedLife(finalPotential, abandonPath)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        statsManager.resetRunCounters()
         // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
         if (abandonPath) {
             prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
@@ -469,6 +482,92 @@ class GameEngine @Inject constructor(
         // Reemplazo completo: no quedan filas de edificios o mejoras de la vida anterior
         requestSave(replace = true)
         return finalPotential
+    }
+
+    /** Cuenta para los logros la vida que termina: con qué pacto y Senda, y sus hazañas. */
+    private fun recordFinishedLife(sanityGained: BigDecimal, abandonPath: Boolean) {
+        val path = MadnessPaths.active(prestigeShopManager.upgrades)
+        statsManager.count(AchievementStat.life(activePact.id))
+        if (path != null) {
+            statsManager.count(AchievementStat.lifeOnPath(path.id))
+            statsManager.count(AchievementStat.lifeWith(activePact.id, path.id))
+            if (abandonPath) {
+                statsManager.count(AchievementStat.PATHS_ABANDONED)
+                if (path.level >= LONG_PATH_LEVEL) statsManager.flag(AchievementStat.FEAT_LONG_PATH)
+            }
+        }
+        statsManager.record(AchievementStat.MAX_SANITY_GAIN, sanityGained)
+
+        val runSeconds = statsManager.runTimeSeconds
+        if (runSeconds < FAST_LIFE_SECONDS) statsManager.flag(AchievementStat.FEAT_FAST_15)
+        if (runSeconds < FASTEST_LIFE_SECONDS) statsManager.flag(AchievementStat.FEAT_FAST_5)
+        if (statsManager.counter(StatisticsManager.RUN_CLICKS).signum() == 0) statsManager.flag(AchievementStat.FEAT_SILENT_LIFE)
+        if (upgradeManager.availableUpgrades.none { it.isBought }) statsManager.flag(AchievementStat.FEAT_ASCETIC)
+        if (statsManager.counter(StatisticsManager.RUN_RUNES).signum() == 0 && knowledgeThisRun() >= BLIND_LIFE_KNOWLEDGE) {
+            statsManager.flag(AchievementStat.FEAT_BLIND)
+        }
+        val points = Attention.available(statsManager.totalPrestiges)
+        if (points >= BLANK_MIND_POINTS && Attention.used(effectiveAttention()) == 0) statsManager.flag(AchievementStat.FEAT_BLANK_MIND)
+    }
+
+    /** Las claves de los logros STAT: lo que se calcula al momento y los contadores guardados. */
+    private fun achievementContext(): AchievementContext {
+        val stats = HashMap<String, BigDecimal>(statsManager.counters)
+        fun put(key: String, value: Number) {
+            stats[key] = if (value is BigDecimal) value else BigDecimal(value.toString())
+        }
+
+        val ascensions = statsManager.totalPrestiges
+        put(AchievementStat.ASCENSIONS, ascensions)
+        put(AchievementStat.SANITY, prestigeManager.residualSanity)
+        put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
+        val upgrades = upgradeManager.availableUpgrades
+        put(AchievementStat.SYNERGIES, upgrades.count { it.type == UpgradeType.SYNERGY && it.isBought })
+        put(AchievementStat.GRIMOIRE, upgrades.count { it.isBought })
+        put(AchievementStat.SETS, AchievementSets.completed(achievementManager.availableAchievements).size)
+
+        val shop = prestigeShopManager.upgrades
+        val baseNodes = shop.filter { !MadnessPaths.isPath(it.id) }
+        put(AchievementStat.MAP_LEVELS, shop.sumOf { it.level })
+        put(AchievementStat.MAP_NODES, baseNodes.count { it.level > 0 })
+        put(AchievementStat.MAP_MAX_LEVEL, shop.maxOfOrNull { it.level } ?: 0)
+        put(AchievementStat.MAP_STAR, shop.firstOrNull { it.id == "pu_star_final" }?.level ?: 0)
+        val path = MadnessPaths.active(shop)
+        put(AchievementStat.PATH_LEVEL, path?.level ?: 0)
+        put(AchievementStat.PATHS_WALKED, MadnessPaths.IDS.count { statsManager.counter(AchievementStat.walked(it)).signum() > 0 })
+
+        val attention = effectiveAttention()
+        put(AchievementStat.ATTENTION_POINTS, Attention.available(ascensions))
+        put(AchievementStat.ATTENTION_USED, Attention.used(attention))
+        put(AchievementStat.ATTENTION_DREAM, attention[Attention.DREAM] ?: 0)
+        put(AchievementStat.ATTENTION_VIGIL, attention[Attention.VIGIL] ?: 0)
+        put(AchievementStat.ATTENTION_FOCUS, attention.values.maxOrNull() ?: 0)
+        put(AchievementStat.ATTENTION_TARGETS, attention.count { it.value > 0 })
+
+        put(AchievementStat.PACTS_UNLOCKED, Pact.available(ascensions).count { it != Pact.NONE })
+        put(AchievementStat.PACTS_LIVED, Pact.entries.count { statsManager.counter(AchievementStat.life(it.id)).signum() > 0 })
+
+        put(AchievementStat.CLICKS, statsManager.totalClicks)
+        put(AchievementStat.RUNES_T1, statsManager.runesSevered)
+        put(AchievementStat.RUNES_T2, statsManager.runesStabilized)
+        put(AchievementStat.RUNES_T3, statsManager.runesInscribed)
+        put(AchievementStat.RUNES, statsManager.runesSevered + statsManager.runesStabilized + statsManager.runesInscribed)
+        put(AchievementStat.EVENTS, statsManager.totalEventsFound)
+        put(AchievementStat.ECHOES_FOUND, statsManager.totalEchoes)
+        put(AchievementStat.ECHOES_HELD, echoes)
+        put(AchievementStat.PLAY_TIME, statsManager.totalPlayTimeSeconds)
+        put(AchievementStat.OFFLINE_TIME, statsManager.totalOfflineSeconds)
+        put(AchievementStat.KPS_MAX, statsManager.maxKnowledgePerSecond)
+        put(AchievementStat.RUN_KNOWLEDGE, knowledgeThisRun())
+        put(AchievementStat.CHAOS, if (pact.chaos) chaosMultiplier else 0)
+        put(AchievementStat.ACTIVE_RITUALS, ritualManager.rituals.value.count { it.state == RitualState.ACTIVE })
+
+        val buildings = buildingManager.availableBuildings
+        put(AchievementStat.BUILDINGS_TOTAL, buildings.sumOf { it.amountOwned })
+        put(AchievementStat.BUILDING_TYPES, buildings.count { it.amountOwned > 0 })
+        buildings.forEach { put(AchievementStat.owned(it.id), it.amountOwned) }
+
+        return AchievementContext(stats, activePact.id, path?.id)
     }
 
     fun hardReset() = post {
@@ -744,7 +843,7 @@ class GameEngine @Inject constructor(
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
         buildingManager.checkUnlocks(knowledge)
-        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings)
+        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings, achievementContext())
         if (newUnlocks.isNotEmpty()) {
             soundManager.playSound(SoundType.ACHIEVEMENT)
             requestSave()
@@ -898,6 +997,8 @@ class GameEngine @Inject constructor(
         chaosSeconds++
         if (chaosSeconds % PactEffects.CHAOS_PERIOD_SECONDS != 0) return
         chaosMultiplier = Random.nextInt(PactEffects.CHAOS_MIN, PactEffects.CHAOS_MAX + 1)
+        if (chaosMultiplier == PactEffects.CHAOS_MAX) statsManager.count(AchievementStat.FEAT_CHAOS_20)
+        if (chaosMultiplier == PactEffects.CHAOS_MIN) statsManager.count(AchievementStat.FEAT_CHAOS_1)
         recalculate()
     }
 
@@ -947,12 +1048,15 @@ class GameEngine @Inject constructor(
         // Los permanentes se siguen multiplicando.
         // Con el ritual Convergencia activo se MULTIPLICAN (con tope).
         val convergence = ritualManager.isConvergenceActive()
-        val temporaryMult = BuffMath.combine(
-            listOf(eventScheduler.buffMultiplier) +
-                ritualManager.getActiveProductionMultipliers() +
-                runeManager.getActiveProductionMultipliers(),
-            convergence
-        )
+        val temporaryBuffs = listOf(eventScheduler.buffMultiplier) +
+            ritualManager.getActiveProductionMultipliers() +
+            runeManager.getActiveProductionMultipliers()
+        val temporaryMult = BuffMath.combine(temporaryBuffs, convergence)
+        if (convergence) {
+            // Logros de la Convergencia: el mejor combo logrado
+            statsManager.record(AchievementStat.MAX_CONVERGENCE, temporaryMult)
+            statsManager.record(AchievementStat.MAX_CONVERGENCE_BUFFS, BigDecimal(temporaryBuffs.count { it > 1.0 }))
+        }
         val temporaryClickMult = BuffMath.combine(
             ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers(),
             convergence
@@ -1026,7 +1130,7 @@ class GameEngine @Inject constructor(
             setsCompleted = AchievementSets.completed(all).size,
             setsTotal = AchievementSets.byBuilding(all).size
         )
-        _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings)
+        _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings, achievementContext())
         _prestigeUpgrades.value = prestigeShopManager.upgrades.map { it.copy() }
         _statistics.value = statsManager.snapshot()
     }
@@ -1118,5 +1222,12 @@ class GameEngine @Inject constructor(
         private const val OFFLINE_THRESHOLD_MS = 10_000L
         private const val RUNE_SUCCESS_DISPLAY_MS = 2_000L
         private const val EVENT_RESULT_DISPLAY_MS = 2_500L
+
+        // Hazañas de los logros (v0.17)
+        private const val LONG_PATH_LEVEL = 5
+        private const val FAST_LIFE_SECONDS = 15 * 60L
+        private const val FASTEST_LIFE_SECONDS = 5 * 60L
+        private val BLIND_LIFE_KNOWLEDGE = BigDecimal("1000000000")
+        private const val BLANK_MIND_POINTS = 4
     }
 }

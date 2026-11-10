@@ -12,6 +12,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import com.EGomez.idleecosystem.domain.logic.AchievementCategory
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -72,7 +79,11 @@ fun AchievementsDialog(
                 }
                 HorizontalDivider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
-                val displayList = remember(achievements) {
+                // Categorías: con cientos de logros, la lista se filtra (null = todos)
+                var category by rememberSaveable { mutableStateOf<AchievementCategory?>(null) }
+                CategoryChips(achievements, category) { category = it }
+
+                val displayList = remember(achievements, category) {
                     val result = mutableListOf<Pair<Achievement, Boolean>>()
                     val grouped = achievements.filter { it.groupId != null }.groupBy { it.groupId!! }
                     grouped.values.forEach { chain ->
@@ -92,6 +103,7 @@ fun AchievementsDialog(
                     }
                     achievements.filter { it.groupId == null }.forEach { result.add(it to false) }
                     result.sortedBy { it.first.order }
+                        .filter { category == null || AchievementCategory.of(it.first) == category }
                 }
 
                 LazyColumn(modifier = Modifier.weight(1f)) {
@@ -102,6 +114,67 @@ fun AchievementsDialog(
         }
     }
 }
+
+/** Fila de filtros: "Todos" y una categoría por tipo, con logrados / total. */
+@Composable
+private fun CategoryChips(
+    achievements: List<Achievement>,
+    selected: AchievementCategory?,
+    onSelect: (AchievementCategory?) -> Unit
+) {
+    val counts = remember(achievements) {
+        achievements.groupBy { AchievementCategory.of(it) }
+            .mapValues { (_, list) -> list.count { it.isUnlocked } to list.size }
+    }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(bottom = 6.dp)
+    ) {
+        CategoryChip(stringResource(R.string.achievements_cat_all), selected == null, Modifier.testTag(ACHIEVEMENT_CATEGORY_TAG + "all")) {
+            onSelect(null)
+        }
+        AchievementCategory.entries.forEach { cat ->
+            val (done, total) = counts[cat] ?: return@forEach
+            // Los secretos solo cuentan los encontrados: el total los revelaría
+            val label = if (cat == AchievementCategory.SECRET) "${categoryName(cat)} $done" else "${categoryName(cat)} $done/$total"
+            CategoryChip(label, selected == cat, Modifier.testTag(ACHIEVEMENT_CATEGORY_TAG + cat.name)) { onSelect(cat) }
+        }
+    }
+}
+
+@Composable
+private fun CategoryChip(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, fontSize = 12.sp) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AncientGold,
+            selectedLabelColor = Color.Black,
+            containerColor = Color(0xFF2A2A2A),
+            labelColor = Color.LightGray
+        ),
+        border = null,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun categoryName(category: AchievementCategory): String = stringResource(
+    when (category) {
+        AchievementCategory.PROGRESS -> R.string.achievements_cat_progress
+        AchievementCategory.BUILDINGS -> R.string.achievements_cat_buildings
+        AchievementCategory.ASCENSION -> R.string.achievements_cat_ascension
+        AchievementCategory.PANTHEON -> R.string.achievements_cat_pantheon
+        AchievementCategory.ARCANE -> R.string.achievements_cat_arcane
+        AchievementCategory.SECRET -> R.string.achievements_cat_secret
+    }
+)
+
+const val ACHIEVEMENT_CATEGORY_TAG = "achievement_category_"
 
 /** La meta más cercana, con su avance, arriba de la lista de logros. */
 @Composable

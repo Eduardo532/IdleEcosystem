@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PrestigeUpgradeEntity::class,
         GameStatisticsEntity::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -92,6 +92,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v0.17: contadores de los logros nuevos. La tabla principal sigue siendo game_save. */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `game_statistics` ADD COLUMN `counters` TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         val ALL_MIGRATIONS = arrayOf(
             MIGRATION_3_4,
             MIGRATION_4_5,
@@ -100,7 +107,8 @@ abstract class AppDatabase : RoomDatabase() {
             MIGRATION_7_8,
             MIGRATION_8_9,
             MIGRATION_9_10,
-            MIGRATION_10_11
+            MIGRATION_10_11,
+            MIGRATION_11_12
         )
     }
 }

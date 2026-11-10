@@ -238,4 +238,11 @@
     <string name="path_exclusive">Exclusive path: walking it seals the other two.</string>
     <string name="path_sealed">Sealed: you already walk the %1$s. You can abandon it when you Ascend.</string>
     <string name="path_sealed_button">Sealed</string>
+    <string name="achievements_cat_all">All</string>
+    <string name="achievements_cat_progress">Progress</string>
+    <string name="achievements_cat_buildings">Buildings</string>
+    <string name="achievements_cat_ascension">Ascension</string>
+    <string name="achievements_cat_pantheon">Pantheon</string>
+    <string name="achievements_cat_arcane">Arcana</string>
+    <string name="achievements_cat_secret">Secrets</string>
 </resources>

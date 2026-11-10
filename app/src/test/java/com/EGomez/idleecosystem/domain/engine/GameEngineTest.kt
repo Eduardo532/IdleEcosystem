@@ -17,6 +17,7 @@ import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
 import com.EGomez.idleecosystem.domain.logic.RuneManager
@@ -359,6 +360,22 @@ class GameEngineTest {
         assertEquals(0, BigDecimal("7003.75").compareTo(economy.sanity))
         val hand = await(engine.prestigeUpgrades) { list -> list.any { it.id == MadnessPaths.HAND && it.level == 0 } }
         assertEquals(0, hand.first { it.id == MadnessPaths.HAND }.level)
+    }
+
+    @Test
+    fun `ascending counts the finished life for the achievements and saves it`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(Pact.HASTUR)
+
+        // La vida que terminó fue Sin Pacto: cuenta para "El Escéptico" y para el primer umbral
+        val achievements = await(engine.achievements) { list -> list.any { it.id == "a_asc_1" && it.isUnlocked } }
+        assertTrue(achievements.first { it.id == "a_asc_1" }.isUnlocked)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.life("none"))))
+        engine.save()
+        val saved = eventually { repository.gameStatistics.first()?.takeIf { it.counters.contains("life.none=1") } }
+        assertTrue(saved.counters.contains("life.none=1"))
     }
 
     @Test

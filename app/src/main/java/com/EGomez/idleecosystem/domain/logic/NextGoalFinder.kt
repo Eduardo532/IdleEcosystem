@@ -26,12 +26,17 @@ data class NextGoal(
  */
 object NextGoalFinder {
 
-    fun find(achievements: List<Achievement>, knowledge: BigDecimal, buildings: List<Building>): NextGoal? {
+    fun find(
+        achievements: List<Achievement>,
+        knowledge: BigDecimal,
+        buildings: List<Building>,
+        context: AchievementContext = AchievementContext.EMPTY
+    ): NextGoal? {
         val owned = buildings.associate { it.id to it.amountOwned }
         return achievements
             .asSequence()
             .filter { !it.isUnlocked && !it.isSecret }
-            .map { it to progressOf(it, knowledge, owned) }
+            .map { it to progressOf(it, knowledge, owned, context) }
             .sortedWith(compareByDescending<Pair<Achievement, Float>> { it.second }.thenBy { it.first.order })
             .firstOrNull()
             ?.let { (achievement, progress) ->
@@ -39,10 +44,16 @@ object NextGoalFinder {
             }
     }
 
-    private fun progressOf(achievement: Achievement, knowledge: BigDecimal, owned: Map<String, Int>): Float {
+    private fun progressOf(
+        achievement: Achievement,
+        knowledge: BigDecimal,
+        owned: Map<String, Int>,
+        context: AchievementContext
+    ): Float {
         val current = when (achievement.conditionType) {
             AchievementType.RESOURCE_REACHED -> knowledge
             AchievementType.BUILDING_OWNED -> BigDecimal(owned[achievement.targetId] ?: 0)
+            AchievementType.STAT -> AchievementManager.statProgress(achievement, context)
         }
         if (achievement.targetValue.signum() <= 0) return 1f
         val ratio = current.divide(achievement.targetValue, MathContext.DECIMAL64)

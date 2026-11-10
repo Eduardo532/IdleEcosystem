@@ -212,12 +212,13 @@ class CriticalUiTest {
         val gears = hand.copy(id = MadnessPaths.GEARS, name = "Senda del Engranaje", x = 0.5f, y = 0.5f, level = 0)
         var bought = 0
         compose.setContent {
-            // La Senda tocada va primero: el mapa elige el primer nodo dentro del radio de toque
+            // La Senda tocada va primero: el mapa elige el primer nodo dentro del radio de toque.
+            // (La tarjeta del nodo es clicable y fusiona sus textos: la nota se busca sin fusionar.)
             PrestigeShopDialog(listOf(gears, hand), "100", BigDecimal(100), { bought++ }, {})
         }
 
         compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }
-        compose.onNodeWithTag(PATH_NOTE_TAG).assertTextContains("Senda de la Mano", substring = true)
+        compose.onNodeWithTag(PATH_NOTE_TAG, useUnmergedTree = true).assertTextContains("Senda de la Mano", substring = true)
         compose.onNodeWithText("Sellada").assertIsNotEnabled()
         assertEquals(0, bought)
     }

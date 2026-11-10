@@ -22,6 +22,12 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.domain.model.Trial
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.foundation.verticalScroll
+import com.EGomez.idleecosystem.ui.screens.main.components.TrialList
+import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.AchievementType
@@ -289,6 +295,44 @@ class CriticalUiTest {
         compose.onNodeWithText("Hito 25 · faltan 6").assertExists()
         compose.onNodeWithText("Comprar +6", substring = true).assertIsEnabled().performClick()
         assertEquals(1, bought)
+    }
+
+    @Test
+    fun `the ascend dialog lets you pick a trial and shows its rule`() {
+        var chosen by mutableStateOf<Trial?>(null)
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                trials = listOf(Trial.BLINDNESS, Trial.HUNGER), completedTrials = setOf(Trial.BLINDNESS),
+                selectedTrial = chosen, onTrialSelected = { chosen = it }
+            )
+        }
+
+        compose.onNodeWithTag(TRIAL_CHOICE_TAG + "hunger").performClick()
+        assertEquals(Trial.HUNGER, chosen)
+        compose.onNodeWithText("Los edificios cuestan x10.").assertExists()
+        compose.onNodeWithText("✓ Ceguera").assertExists()
+        compose.onNodeWithTag(TRIAL_CHOICE_TAG + "none").performClick()
+        assertEquals(null, chosen)
+    }
+
+    @Test
+    fun `the active trial shows its progress and can be abandoned`() {
+        var abandoned = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER)) { abandoned++ }
+            }
+        }
+
+        compose.onNodeWithText("En curso: 40%").assertExists()
+        compose.onNodeWithText("✓ Superada").assertExists()
+        // Mortalidad pide 20 Ascensiones: todavía no se ve su regla
+        compose.onNodeWithText("La Cordura Residual y el Mapa de Locura no dan bono.").assertDoesNotExist()
+        compose.onNodeWithTag(TRIAL_ABANDON_TAG).performScrollTo().performClick()
+        assertEquals(1, abandoned)
     }
 
     @Test

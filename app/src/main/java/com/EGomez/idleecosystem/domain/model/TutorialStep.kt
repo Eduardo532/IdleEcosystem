@@ -189,5 +189,12 @@ enum class TutorialStep(
         "Convergencia",
         "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez.",
         "Al reunir 75 Ecos"
+    ),
+
+    TRIALS(
+        "trials",
+        "Pruebas de Locura",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas.",
+        "Al poder elegir la primera Prueba"
     )
 }

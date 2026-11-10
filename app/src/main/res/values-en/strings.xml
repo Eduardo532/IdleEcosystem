@@ -245,4 +245,21 @@
     <string name="achievements_cat_pantheon">Pantheon</string>
     <string name="achievements_cat_arcane">Arcana</string>
     <string name="achievements_cat_secret">Secrets</string>
+    <string name="achievements_cat_trials">Trials</string>
+    <string name="trials_intro">Lives with an altered rule. Choose one when you Ascend, along with your pact: if you reach the goal in that life, the reward is yours forever.</string>
+    <string name="trial_goal">Goal: generate %1$s Knowledge in that life</string>
+    <string name="trial_reward_title">Reward</string>
+    <string name="trial_status_completed">✓ Passed</string>
+    <string name="trial_status_active">In progress: %1$d%%</string>
+    <string name="trial_locked">At %1$d Ascensions</string>
+    <string name="trial_abandon">Abandon the Trial</string>
+    <string name="trial_choose_title">Trial of Madness</string>
+    <string name="trial_none">No Trial</string>
+    <string name="trial_repeat">Already passed: you can repeat it, with no new reward.</string>
+    <string name="trial_bar">⚔ %1$s · %2$d%%</string>
+    <string name="trial_completed_notice">⚔ Trial passed: %1$s</string>
+    <string name="trial_reward_attention">+%1$d Attention point</string>
+    <string name="trial_reward_pact">%1$s without waiting for its Ascensions</string>
+    <string name="pantheon_view_gods">Gods</string>
+    <string name="pantheon_view_trials">Trials %1$d/%2$d</string>
 </resources>

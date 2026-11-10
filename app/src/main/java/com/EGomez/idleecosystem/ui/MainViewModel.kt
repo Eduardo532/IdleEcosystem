@@ -22,6 +22,7 @@ import com.EGomez.idleecosystem.domain.logic.SoundType
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -184,7 +185,12 @@ class MainViewModel @Inject constructor(
         activePact = economy.activePact,
         chaosMultiplier = economy.chaosMultiplier,
         attention = economy.attention,
-        attentionPoints = economy.attentionPoints
+        attentionPoints = economy.attentionPoints,
+        activeTrial = economy.activeTrial,
+        trialProgress = economy.trialProgress,
+        completedTrials = economy.completedTrials,
+        deliriumMultiplier = economy.deliriumMultiplier,
+        earlyPacts = economy.earlyPacts
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -213,6 +219,14 @@ class MainViewModel @Inject constructor(
                 viewModelScope.launch {
                     delay(AUTO_ASCENSION_NOTICE_MS)
                     _uiState.update { if (it.autoAscensionNotice == gain) it.copy(autoAscensionNotice = null) else it }
+                }
+            }
+            is EngineEffect.TrialCompleted -> {
+                val trial = effect.trial
+                _uiState.update { it.copy(trialNotice = trial) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.trialNotice == trial) it.copy(trialNotice = null) else it }
                 }
             }
             is EngineEffect.AchievementUnlocked -> {
@@ -259,7 +273,10 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false) = engine.ascend(nextPact, abandonPath)
+    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) =
+        engine.ascend(nextPact, abandonPath, nextTrial)
+
+    fun onAbandonTrial() = engine.abandonTrial()
 
     fun onHardResetClicked() = engine.hardReset()
 
@@ -468,5 +485,6 @@ class MainViewModel @Inject constructor(
         const val ACHIEVEMENT_POPUP_MS = 4_000L
 
         const val AUTO_ASCENSION_NOTICE_MS = 4_000L
+        const val TRIAL_NOTICE_MS = 5_000L
     }
 }

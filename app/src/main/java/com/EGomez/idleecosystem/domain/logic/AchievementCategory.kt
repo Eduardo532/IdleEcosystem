@@ -7,7 +7,7 @@ import com.EGomez.idleecosystem.domain.model.Achievement
  * de servir: el diálogo filtra por categoría. Se deduce del grupo del logro.
  */
 enum class AchievementCategory {
-    PROGRESS, BUILDINGS, ASCENSION, PANTHEON, ARCANE, SECRET;
+    PROGRESS, BUILDINGS, ASCENSION, PANTHEON, TRIALS, ARCANE, SECRET;
 
     companion object {
         fun of(achievement: Achievement): AchievementCategory {
@@ -17,6 +17,7 @@ enum class AchievementCategory {
                 group.startsWith("4_build") -> BUILDINGS
                 group.startsWith("3_prest") || group.startsWith("6_") -> ASCENSION
                 group.startsWith("7_") -> PANTHEON
+                group.startsWith("t_") -> TRIALS
                 group.startsWith("8_") -> ARCANE
                 else -> PROGRESS
             }

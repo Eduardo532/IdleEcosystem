@@ -36,7 +36,7 @@ import java.util.Locale
  * faltan. Tocar uno desbloqueado abre su ficha.
  */
 @Composable
-fun PantheonGallery(ascensions: Int, activePact: Pact, onPactSelected: (Pact) -> Unit) {
+fun PantheonGallery(ascensions: Int, activePact: Pact, onPactSelected: (Pact) -> Unit, early: Set<Pact> = emptySet()) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
         Text(stringResource(R.string.pantheon_intro), color = Color.Gray, fontSize = 12.sp)
         listOf(PactTier.NONE, PactTier.GREAT_OLD_ONE, PactTier.OUTER_GOD).forEach { tier ->
@@ -52,7 +52,7 @@ fun PantheonGallery(ascensions: Int, activePact: Pact, onPactSelected: (Pact) ->
                     row.forEach { pact ->
                         PactCard(
                             pact = pact,
-                            unlocked = pact.isUnlocked(ascensions + 1),
+                            unlocked = pact.isUnlocked(ascensions + 1, early),
                             active = pact == activePact,
                             onClick = { onPactSelected(pact) },
                             modifier = Modifier.weight(1f)

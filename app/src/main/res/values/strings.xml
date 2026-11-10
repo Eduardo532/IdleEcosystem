@@ -246,4 +246,21 @@
     <string name="achievements_cat_pantheon">Panteón</string>
     <string name="achievements_cat_arcane">Arcanos</string>
     <string name="achievements_cat_secret">Secretos</string>
+    <string name="achievements_cat_trials">Pruebas</string>
+    <string name="trials_intro">Vidas con una regla alterada. Elige una al Ascender, junto con el pacto: si llegas a la meta en esa vida, la recompensa es tuya para siempre.</string>
+    <string name="trial_goal">Meta: generar %1$s de Conocimiento en esa vida</string>
+    <string name="trial_reward_title">Recompensa</string>
+    <string name="trial_status_completed">✓ Superada</string>
+    <string name="trial_status_active">En curso: %1$d%%</string>
+    <string name="trial_locked">Con %1$d Ascensiones</string>
+    <string name="trial_abandon">Abandonar la Prueba</string>
+    <string name="trial_choose_title">Prueba de Locura</string>
+    <string name="trial_none">Sin Prueba</string>
+    <string name="trial_repeat">Ya la superaste: puedes repetirla, sin recompensa nueva.</string>
+    <string name="trial_bar">⚔ %1$s · %2$d%%</string>
+    <string name="trial_completed_notice">⚔ Prueba superada: %1$s</string>
+    <string name="trial_reward_attention">+%1$d punto de Atención</string>
+    <string name="trial_reward_pact">%1$s sin esperar sus Ascensiones</string>
+    <string name="pantheon_view_gods">Dioses</string>
+    <string name="pantheon_view_trials">Pruebas %1$d/%2$d</string>
 </resources>

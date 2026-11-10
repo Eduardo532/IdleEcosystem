@@ -20,6 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
+import androidx.compose.ui.platform.testTag
+import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import androidx.compose.material3.Surface
@@ -109,6 +112,7 @@ fun MainScreen(
         var pactDetailId by rememberSaveable { mutableStateOf<String?>(null) }
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
         var abandonPath by rememberSaveable { mutableStateOf(false) }
+        var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -229,6 +233,12 @@ fun MainScreen(
                             attention = uiState.attention,
                             attentionPoints = uiState.attentionPoints,
                             onOpenAttention = { showAttentionDialog = true },
+                            activeTrial = uiState.activeTrial,
+                            trialProgress = uiState.trialProgress,
+                            completedTrials = uiState.completedTrials,
+                            deliriumMultiplier = uiState.deliriumMultiplier,
+                            earlyPacts = uiState.earlyPacts,
+                            onAbandonTrial = { viewModel.onAbandonTrial() },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -297,16 +307,21 @@ fun MainScreen(
                         doubleAt = uiState.doubleSanityAtFormatted
                     ),
                     ascensions = uiState.ascensions,
-                    pacts = Pact.available(uiState.ascensions + 1),
+                    pacts = Pact.available(uiState.ascensions + 1, uiState.earlyPacts),
                     selectedPact = Pact.fromId(nextPactId ?: uiState.activePact.id),
                     onPactSelected = { nextPactId = it.id },
                     buildingNames = buildingNames,
                     activePath = MadnessPaths.active(uiState.prestigeUpgrades),
                     abandonPath = abandonPath,
                     onAbandonPathChanged = { abandonPath = it },
+                    trials = Trial.entries.filter { it.isUnlocked(uiState.ascensions + 1) },
+                    completedTrials = uiState.completedTrials,
+                    selectedTrial = Trial.fromId(nextTrialId),
+                    onTrialSelected = { nextTrialId = it?.id },
                     onConfirm = {
-                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath)
+                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId))
                         nextPactId = null
+                        nextTrialId = null
                         abandonPath = false
                         showAscendConfirmation = false
                     },
@@ -383,6 +398,28 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            // Prueba de Locura superada
+            uiState.trialNotice?.let { trial ->
+                Surface(
+                    color = Color(0xFF2A1218),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCF6679)),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(5f)
+                        .testTag(TRIAL_NOTICE_TAG)
+                ) {
+                    Text(
+                        stringResource(R.string.trial_completed_notice, tr(trial.title)),
+                        color = Color(0xFFCF6679),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
             uiState.autoAscensionNotice?.let { gain ->
                 Surface(
                     color = Color(0xFF2A1A2E),
@@ -488,3 +525,5 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
 
 /** Cada cuánto se refresca la cuenta regresiva de las runas. */
 private const val BUFF_TICK_MS = 250L
+
+const val TRIAL_NOTICE_TAG = "trial_notice"

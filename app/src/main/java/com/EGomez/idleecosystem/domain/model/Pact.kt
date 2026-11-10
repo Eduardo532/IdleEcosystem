@@ -181,12 +181,15 @@ enum class Pact(
         0xFFE1BEE7
     );
 
-    fun isUnlocked(totalAscensions: Int) = totalAscensions >= unlockAscensions
+    /** [early]: dioses que una Prueba de Locura superada adelanta (v0.17.1). */
+    fun isUnlocked(totalAscensions: Int, early: Set<Pact> = emptySet()) =
+        totalAscensions >= unlockAscensions || this in early
 
     companion object {
         fun fromId(id: String?): Pact = entries.firstOrNull { it.id == id } ?: NONE
 
         /** Los pactos que se pueden elegir en la Ascensión número [ascensionNumber]. */
-        fun available(ascensionNumber: Int): List<Pact> = entries.filter { it.isUnlocked(ascensionNumber) }
+        fun available(ascensionNumber: Int, early: Set<Pact> = emptySet()): List<Pact> =
+            entries.filter { it.isUnlocked(ascensionNumber, early) }
     }
 }

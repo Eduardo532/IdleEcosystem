@@ -32,7 +32,8 @@ class ContentTranslationsTest {
         "Rituales" to RitualManager().rituals.value.flatMap { listOf(it.name, it.description) },
         "Tienda de Cordura" to PrestigeShopManager().upgrades.flatMap { listOf(it.name, it.description) },
         "Tutoriales" to TutorialStep.entries.flatMap { listOf(it.title, it.message) },
-        "Panteón" to Pact.entries.flatMap { listOf(it.godName, it.epithet, it.lore) }
+        "Panteón" to Pact.entries.flatMap { listOf(it.godName, it.epithet, it.lore) },
+        "Pruebas de Locura" to com.EGomez.idleecosystem.domain.model.Trial.entries.flatMap { listOf(it.title, it.rule) }
     )
 
     @Test

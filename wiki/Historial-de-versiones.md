@@ -10,6 +10,7 @@ Cuarta etapa del plan de retención: retos voluntarios y decisiones con riesgo.
 - **v0.17.1:** 10 Pruebas de Locura (vidas con una regla alterada y una meta) con recompensas permanentes, cuatro que adelantan a los Dioses Exteriores y 22 logros propios.
 - **v0.17.2:** Espacios de Runa: grabar una runa atrapada varias veces da un bono pasivo permanente; los espacios los dan cuatro Pruebas. 16 logros propios.
 - **v0.17.3:** Medidor de Locura: jugar fuerte da hasta x2 de producción, con presagios desde el 50 % y un colapso leve al 100 %; ritual Letanía de Calma; 14 logros propios.
+- **v0.17.4:** Fases de la Marea (Alta, Baja y Muerta, cada 10 minutos de juego) con 10 logros; los multiplicadores de compra caben en una fila y el autocomprador pasa a la barra fija; Manos Atadas empieza con 10 Notas y el nodo nuevo Legado del Culto da Notas al empezar cada vida.
 
 ## v0.16.2 · "El Panteón" *(oficial, 10 nov 2026)*
 

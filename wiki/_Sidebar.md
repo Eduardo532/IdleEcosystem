@@ -13,6 +13,7 @@
 - [Atención](Atencion)
 - [Pruebas de Locura](Pruebas-de-Locura)
 - [Medidor de Locura](Medidor-de-Locura)
+- [Fases de la Marea](Marea)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

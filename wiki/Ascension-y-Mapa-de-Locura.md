@@ -61,7 +61,7 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 
 ## Mapa de Locura
 
-La tienda de Cordura: una constelación de **20 nodos** (17 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
+La tienda de Cordura: una constelación de **21 nodos** (18 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
 
@@ -88,6 +88,10 @@ La tienda de Cordura: una constelación de **20 nodos** (17 nodos más las 3 Sen
 | Ascensión Cósmica | Producción global | +100 % | 5000 | x5.0 | Omnisciencia |
 
 Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %). Entre nodos distintos, los bonos se multiplican.
+
+### Legado del Culto *(v0.17.4)*
+
+Nodo nuevo junto a El Despertar: **cada vida empieza con 5 Notas Desordenadas por nivel**. Cuesta 3 de Cordura y se duplica por nivel. Sirve para arrancar más rápido y para las vidas en las que el clic no produce.
 
 ### Sendas *(v0.16.2)*
 

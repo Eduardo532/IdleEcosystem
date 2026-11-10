@@ -15,6 +15,7 @@
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)
+- [Consagrar Edificios](Consagracion)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

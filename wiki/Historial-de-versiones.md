@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.18.x · "Segunda Capa" *(en pruebas)*
 
 - **v0.18.0:** Trascender: con 50 Ascensiones en el ciclo se reinicia casi todo a cambio de Éter, que compra seis mejoras eternas; 13 logros propios.
+- **v0.18.1:** Consagrar edificios: con Éter y 100 unidades por nivel, cada edificio sube hasta la Consagración V (x3 por nivel, para siempre); 10 logros propios.
 
 ## v0.17.4 · "Desafíos y Riesgo" *(oficial, 10 nov 2026)*
 

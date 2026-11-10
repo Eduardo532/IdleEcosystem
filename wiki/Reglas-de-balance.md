@@ -104,6 +104,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Mejoras eternas: costo `base × crecimiento^nivel`, redondeado hacia arriba. Fuego Eterno x2, Cordura Primordial x1,5 por nivel.
 - Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
 
+## Consagrar edificios
+
+- Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*
+- Producción del edificio x3 por nivel (x243 en el V). Eterno: no se pierde al Ascender ni al Trascender.
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

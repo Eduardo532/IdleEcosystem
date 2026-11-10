@@ -14,6 +14,7 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.Consecration
 import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
 import com.EGomez.idleecosystem.domain.logic.Transcendence
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
@@ -120,6 +121,9 @@ data class EconomyState(
     val ether: Int = 0,
     val transcendences: Int = 0,
     val eternalLevels: Map<String, Int> = emptyMap(),
+    /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
+    val consecrationRevealed: Boolean = false,
+    val consecrations: Map<String, Int> = emptyMap(),
     /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,
@@ -603,6 +607,10 @@ class GameEngine @Inject constructor(
         // Ascensiones de todos los ciclos: los logros de Ascensiones no retroceden al Trascender
         put(AchievementStat.ASCENSIONS, totalAscensionsEver())
         put(AchievementStat.ETERNAL_LEVELS, EternalUpgrade.entries.sumOf { eternalLevel(it) })
+        val consecrations = buildingManager.availableBuildings.map { consecrationLevel(it.id) }
+        put(AchievementStat.CONSECRATION_LEVELS, consecrations.sum())
+        put(AchievementStat.CONSECRATED_BUILDINGS, consecrations.count { it > 0 })
+        put(AchievementStat.CONSECRATED_MAX, consecrations.count { it >= Consecration.MAX_LEVEL })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
         val upgrades = upgradeManager.availableUpgrades
@@ -1066,6 +1074,7 @@ class GameEngine @Inject constructor(
         if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
         if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
         if (transcendRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCEND)
+        if (consecrationRevealed()) tutorialManager.triggerStep(TutorialStep.CONSECRATION)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1311,6 +1320,32 @@ class GameEngine @Inject constructor(
 
     private fun transcendRevealed(): Boolean =
         cycleAscensions() >= Transcendence.REQUIRED_ASCENSIONS || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+
+    // =====================================================================
+    // CONSAGRAR EDIFICIOS (v0.18.1)
+    // =====================================================================
+
+    private fun consecrationRevealed(): Boolean = statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+
+    private fun consecrationLevel(buildingId: String): Int =
+        statsManager.counter(AchievementStat.consecrated(buildingId)).toInt()
+
+    /** Consagra un edificio un nivel más: pide unidades en esta vida y Éter. */
+    fun consecrate(buildingId: String) = post {
+        if (!consecrationRevealed()) return@post
+        val building = buildingManager.availableBuildings.find { it.id == buildingId } ?: return@post
+        val level = consecrationLevel(buildingId)
+        val ether = statsManager.counter(AchievementStat.ETHER).toInt()
+        if (!Consecration.canConsecrate(level, building.amountOwned, ether)) return@post
+        val left = ether - Consecration.etherCost(level)
+        statsManager.counters.remove(AchievementStat.ETHER)
+        if (left > 0) statsManager.counters[AchievementStat.ETHER] = BigDecimal(left)
+        statsManager.counters[AchievementStat.consecrated(buildingId)] = BigDecimal(level + 1)
+        statsManager.flag(AchievementStat.consecratedWith(activePact.id, buildingId))
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
 
     /** Compra un nivel de una mejora eterna con Éter. */
     fun buyEternal(id: String) = post {
@@ -1592,6 +1627,8 @@ class GameEngine @Inject constructor(
         buildings.forEachIndexed { index, building ->
             val setMult = AchievementSets.multiplier(building.id, completedSets)
                 .multiply(BigDecimal.valueOf(Attention.multiplier(attention[building.id] ?: 0)))
+                // Consagración (eterna): x3 por nivel, también para la Sinapsis
+                .multiply(BigDecimal.valueOf(Consecration.multiplier(consecrationLevel(building.id))))
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
@@ -1685,6 +1722,8 @@ class GameEngine @Inject constructor(
             ether = statsManager.counter(AchievementStat.ETHER).toInt(),
             transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
+            consecrationRevealed = consecrationRevealed(),
+            consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },
             tide = currentTide(),
             tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
             collapseSeconds = collapseSeconds,

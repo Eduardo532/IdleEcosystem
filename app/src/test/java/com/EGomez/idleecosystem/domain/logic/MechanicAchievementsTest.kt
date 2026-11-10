@@ -41,6 +41,7 @@ class MechanicAchievementsTest {
         "Medidor de Locura" to { it.stat == AchievementStat.MADNESS || it.stat?.contains("madness") == true || it.stat == AchievementStat.RUN_COLLAPSES || it.stat == AchievementStat.ritual(RitualManager.CALM_ID) },
         "Fases de la Marea" to { it.stat?.contains("tide") == true || it.stat == AchievementStat.FEAT_TSUNAMI },
         "Trascender" to { it.stat == AchievementStat.TRANSCENDENCES || it.stat?.contains("ether") == true || it.stat?.startsWith("transcend") == true || it.stat == AchievementStat.ETERNAL_LEVELS },
+        "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
         "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 

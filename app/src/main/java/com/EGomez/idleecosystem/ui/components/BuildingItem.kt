@@ -3,6 +3,9 @@ package com.EGomez.idleecosystem.ui.components
 import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
+import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.clickable
+import com.EGomez.idleecosystem.domain.logic.Consecration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +41,11 @@ fun BuildingItem(
     milestones: List<Int> = emptyList(),
     /** Puntos de Atención puestos en este edificio. */
     attentionPoints: Int = 0,
+    /** Consagración (v0.18.1): nivel actual, si ya se ve el sistema y el Éter disponible. */
+    consecration: Int = 0,
+    consecrationRevealed: Boolean = false,
+    ether: Int = 0,
+    onConsecrate: () -> Unit = {},
     onBuyClick: () -> Unit
 ) {
     // 1. Calcular Costo Base (Sin descuento)
@@ -129,6 +137,19 @@ fun BuildingItem(
                             )
                         }
                     }
+                    // Consagración
+                    if (consecration > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(color = Color(0xFF12202A), shape = RoundedCornerShape(4.dp)) {
+                            Text(
+                                text = "✦ ${Consecration.roman(consecration)}",
+                                color = Color(0xFFB3E5FC),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp).testTag(CONSECRATION_BADGE_TAG + building.id)
+                            )
+                        }
+                    }
                     // La Atención puesta en este edificio
                     if (attentionPoints > 0) {
                         Spacer(modifier = Modifier.width(6.dp))
@@ -164,6 +185,26 @@ fun BuildingItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                // Consagración: el próximo nivel, cuántas unidades pide y su costo en Éter
+                if (consecrationRevealed && consecration < Consecration.MAX_LEVEL) {
+                    val needed = Consecration.requiredOwned(consecration)
+                    val cost = Consecration.etherCost(consecration)
+                    val ready = Consecration.canConsecrate(consecration, owned, ether)
+                    Text(
+                        text = if (owned >= needed) stringResource(R.string.consecrate_ready, Consecration.roman(consecration + 1), cost)
+                        else stringResource(R.string.consecrate_hint, Consecration.roman(consecration + 1), needed, cost),
+                        color = if (ready) Color(0xFFB3E5FC) else Color.Gray,
+                        fontSize = 10.sp,
+                        fontWeight = if (ready) FontWeight.Bold else FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(top = 2.dp)
+                            .clickable(enabled = ready, onClick = onConsecrate)
+                            .testTag(CONSECRATE_TAG + building.id)
+                    )
+                }
 
                 // Cuánto falta para el siguiente hito (escalón del Grimorio o logro)
                 if (milestones.isNotEmpty()) {
@@ -223,3 +264,6 @@ fun BuildingItem(
         }
     }
 }
+
+const val CONSECRATE_TAG = "consecrate_"
+const val CONSECRATION_BADGE_TAG = "consecration_badge_"

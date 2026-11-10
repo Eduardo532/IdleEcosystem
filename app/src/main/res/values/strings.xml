@@ -306,4 +306,6 @@
     <string name="eternal_level">Nivel %1$d</string>
     <string name="eternal_maxed">MÁXIMO</string>
     <string name="eternal_cost">%1$d Éter</string>
+    <string name="consecrate_ready">✦ Consagrar %1$s · %2$d Éter</string>
+    <string name="consecrate_hint">✦ Consagración %1$s: con %2$d (%3$d Éter)</string>
 </resources>

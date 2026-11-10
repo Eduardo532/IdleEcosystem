@@ -265,6 +265,9 @@ fun MainScreen(
                             transcendRevealed = uiState.transcendRevealed,
                             ether = uiState.ether,
                             onOpenTranscend = { showTranscend = true },
+                            consecrationRevealed = uiState.consecrationRevealed,
+                            consecrations = uiState.consecrations,
+                            onConsecrate = { viewModel.onConsecrate(it) },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true

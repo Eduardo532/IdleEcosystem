@@ -1,6 +1,6 @@
 # Logros
 
-Hay **353 logros**: 113 originales y **240 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **363 logros**: 113 originales y **250 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -14,7 +14,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 |---|---|
 | Progreso | Conocimiento, clics, tiempo de juego, producción por segundo, edificios en total, Grimorio, sinergias y conjuntos |
 | Edificios | Los 5 logros de cantidad de cada edificio (forman los conjuntos) |
-| Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención, automatización y Trascender |
+| Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención, automatización, Trascender y Consagración |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
 | Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
 | Arcanos | Rituales, Convergencia, runas, Espacios de Runa, Medidor de Locura, Marea, eventos y Ecos |
@@ -133,6 +133,15 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | La Puerta Final | Trasciende durante una vida con Yog-Sothoth | +1 % |
 | Sin Dioses | Trasciende durante una vida Sin Pacto | +1 % |
 | Despertar del Sueño | Trasciende recorriendo la Senda del Sueño | +1 % |
+| Primera Consagración | Consagra un edificio | +1 % |
+| Templos Sagrados | Suma 10 niveles de consagración | +1 % |
+| Arquitecto Divino | Suma 40 niveles de consagración | +1 % |
+| Todo es Sagrado | Consagra los 16 edificios hasta el nivel V | +2 % |
+| Bendición Completa | Consagra los 16 edificios al menos una vez | +2 % |
+| Consagración Absoluta | Consagra un edificio hasta el nivel V | +1 % |
+| Altar del Durmiente | Consagra el Templo de R'lyeh durante una vida con Cthulhu | +1 % |
+| Sacerdocio del Primogénito | Consagra los Sacerdotes Dementes durante una vida con Nug | +1 % |
+| Garabatos Sagrados | Consagra las Notas Desordenadas durante una vida con Ubbo-Sathla | +1 % |
 
 ### Panteón
 
@@ -277,7 +286,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Tiempo Fluye | Vive 6 cambios de Marea en una vida con Yog-Sothoth | +1 % |
 | Mareas del Sueño | Vive 3 cambios de Marea recorriendo la Senda del Sueño | +1 % |
 
-Además hay **21 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **22 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

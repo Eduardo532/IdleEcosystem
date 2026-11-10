@@ -1,6 +1,6 @@
 # Logros
 
-Hay **275 logros**: 113 originales y **162 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **297 logros**: 113 originales y **184 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -16,6 +16,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 | Edificios | Los 5 logros de cantidad de cada edificio (forman los conjuntos) |
 | Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
+| Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
 | Arcanos | Rituales, Convergencia, runas, eventos y Ecos |
 | Secretos | No se dicen. Solo cuentan los que ya encontraste |
 
@@ -26,7 +27,7 @@ Desde la v0.17, **toda mecánica nueva llega con una serie de varios logros** (a
 ## Bonos
 
 - Logros originales: normalmente entre x1,01 y x1,10; los secretos, más.
-- Logros de las mecánicas *(v0.17)*: **+1 %** cada uno, **+2 %** el último escalón de cada serie y los retos combinados, **+5 %** los secretos. Todos juntos dan unas **x12**.
+- Logros de las mecánicas *(v0.17)*: **+1 %** cada uno, **+2 %** el último escalón de cada serie y los retos combinados, **+5 %** los secretos. En promedio, cada logro nuevo da menos de +2 %.
 
 ## Logros de las mecánicas *(v0.17)*
 
@@ -164,6 +165,31 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Más Allá de la Puerta | Pasa 24 horas sin conexión en una vida con Yog-Sothoth y la Senda del Sueño | +2 % |
 | La Obra en Escena | Genera 1Qa de Conocimiento con Hastur y la Senda del Engranaje | +2 % |
 
+### Pruebas
+
+| Logro | Requisito | Bono |
+|---|---|---|
+| Primera Prueba | Supera 1 Prueba de Locura | +1 % |
+| Probado | Supera 3 Pruebas de Locura | +1 % |
+| Templado en Locura | Supera 5 Pruebas de Locura | +1 % |
+| Maestro de las Pruebas | Supera las 10 Pruebas de Locura | +2 % |
+| Ojos Cerrados | Supera la Prueba Ceguera | +1 % |
+| Sin Manos | Supera la Prueba Manos Atadas | +1 % |
+| Ayuno Sagrado | Supera la Prueba Hambre | +1 % |
+| Cenizas del Saber | Supera la Prueba Grimorio Quemado | +1 % |
+| Voto de Silencio | Supera la Prueba Silencio | +1 % |
+| Vigilia Forzada | Supera la Prueba Insomnio | +1 % |
+| Idea Fija | Supera la Prueba Monomanía | +1 % |
+| Sin Recuerdos | Supera la Prueba Amnesia | +1 % |
+| Fiebre Lúcida | Supera la Prueba Delirio | +1 % |
+| Simple Mortal | Supera la Prueba Mortalidad | +1 % |
+| Mensajero Maniatado | Supera Manos Atadas con Nyarlathotep | +1 % |
+| Padre Hambriento | Supera Hambre con Abhoth | +1 % |
+| El Durmiente Despierto | Supera Insomnio con Cthulhu | +1 % |
+| Velo Cerrado | Supera Ceguera con Daoloth | +1 % |
+| Prueba Relámpago | Supera una Prueba en menos de 20 minutos | +1 % |
+| Penitente | Empieza 25 Pruebas de Locura | +1 % |
+
 ### Arcanos
 
 | Logro | Requisito | Bono |
@@ -200,7 +226,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Avaro de Ecos | Ten 250 Ecos a la vez | +1 % |
 | Bóveda Resonante | Ten 1.000 Ecos a la vez | +2 % |
 
-Además hay **14 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **16 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

@@ -14,10 +14,11 @@
 | [Ecos y Rituales](Ecos-y-Rituales) | La segunda moneda y los 5 rituales |
 | [Runas](Runas) | Las runas que aparecen en pantalla y sus efectos |
 | [Eventos](Eventos) | Eventos aleatorios, cadenas y memorias de Ascensión |
-| [Logros](Logros) | Los 275 logros, sus categorías, conjuntos y la próxima meta |
+| [Logros](Logros) | Los 297 logros, sus categorías, conjuntos y la próxima meta |
 | [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura) | Reiniciar a cambio de Cordura y gastarla |
 | [Panteón](Panteon) | Los 14 pactos con los dioses, uno por vida |
 | [Atención](Atencion) | Puntos que repartes gratis entre edificios, Sueño y Vigilia |
+| [Pruebas de Locura](Pruebas-de-Locura) | 10 vidas con reglas alteradas y recompensas permanentes |
 | [Ajustes](Ajustes) | Idioma, notación, sonido y partidas |
 
 ## Para el desarrollo

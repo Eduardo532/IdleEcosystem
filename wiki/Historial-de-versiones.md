@@ -7,6 +7,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 Cuarta etapa del plan de retención: retos voluntarios y decisiones con riesgo.
 
 - **v0.17.0:** 162 logros nuevos de todas las mecánicas (Ascensión, Mapa de Locura, Sendas, Atención, automatización, Panteón, rituales, Convergencia, runas, eventos y Ecos), incluidos retos propios de cada dios y de cada combinación de dios y Senda; filtros por categoría en la lista de logros.
+- **v0.17.1:** 10 Pruebas de Locura (vidas con una regla alterada y una meta) con recompensas permanentes, cuatro que adelantan a los Dioses Exteriores y 22 logros propios.
 
 ## v0.16.2 · "El Panteón" *(oficial, 10 nov 2026)*
 

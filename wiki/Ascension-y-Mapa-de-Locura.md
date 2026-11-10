@@ -17,7 +17,7 @@ Ascender **reinicia la partida** a cambio de **Cordura Residual**, una moneda pe
 
 Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimiento**. La confirmación de Ascender *(v0.14)* muestra lo generado en esta vida, cuándo llega el siguiente punto y cuánto falta para duplicar. El panel de Cordura también indica cuándo se duplica.
 
-Al Ascender también eliges el **pacto** de tu próxima vida (ver [Panteón](Panteon)) y, si recorres una **Senda**, puedes abandonarla (ver [Sendas](#sendas-v0162)).
+Al Ascender también eliges el **pacto** de tu próxima vida (ver [Panteón](Panteon)) y, si recorres una **Senda**, puedes abandonarla (ver [Sendas](#sendas-v0162)). Desde la tercera Ascensión también puedes elegir una **Prueba de Locura** (ver [Pruebas de Locura](Pruebas-de-Locura)).
 
 ### Qué se pierde y qué se conserva
 

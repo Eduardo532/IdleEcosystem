@@ -2,6 +2,7 @@ package com.EGomez.idleecosystem.data.preferences
 
 import android.content.Context
 import com.EGomez.idleecosystem.core.math.NumberNotation
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.RitualSnapshot
 import com.EGomez.idleecosystem.domain.model.RitualState
@@ -77,6 +78,11 @@ class GamePreferences @Inject constructor(
             .apply { if (value.ritualId == null) remove(KEY_AUTO_RITUAL) else putString(KEY_AUTO_RITUAL, value.ritualId) }
             .apply()
 
+    /** Reparto de la Atención ("b_notes:2,vigil:1"); se puede mover gratis. */
+    var attention: Map<String, Int>
+        get() = Attention.decode(prefs.getString(KEY_ATTENTION, null))
+        set(value) = prefs.edit().putString(KEY_ATTENTION, Attention.encode(value)).apply()
+
     fun saveRituals(snapshots: List<RitualSnapshot>, savedAtMillis: Long) {
         prefs.edit()
             .putString(KEY_RITUALS, encodeRituals(snapshots))
@@ -111,6 +117,7 @@ class GamePreferences @Inject constructor(
         private const val KEY_AUTO_EXCLUDED = "auto_excluded_buildings"
         private const val KEY_AUTO_BUDGET = "auto_budget_percent"
         private const val KEY_AUTO_ASCEND = "auto_ascend"
+        private const val KEY_ATTENTION = "attention"
 
         /** Lectura sin Hilt, para attachBaseContext de la Activity. */
         fun readLanguageTag(context: Context): String? =

@@ -38,6 +38,7 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.ui.components.sigilColor
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.ui.components.AutoChip
 import com.EGomez.idleecosystem.domain.model.Building
@@ -91,6 +92,9 @@ fun MenuSection(
     activePact: Pact = Pact.NONE,
     chaosMultiplier: Int = 1,
     onPactSelected: (Pact) -> Unit = {},
+    attention: Map<String, Int> = emptyMap(),
+    attentionPoints: Int = 0,
+    onOpenAttention: () -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -142,6 +146,24 @@ fun MenuSection(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    // Atención: puntos repartidos / disponibles (desde la primera Ascensión)
+                    if (attentionPoints > 0) {
+                        AssistChip(
+                            onClick = onOpenAttention,
+                            label = {
+                                Text(
+                                    stringResource(R.string.attention_chip, Attention.used(attention), attentionPoints),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(containerColor = Color(0xFF2A1A3A), labelColor = AncientGold),
+                            border = null,
+                            modifier = Modifier
+                                .height(28.dp)
+                                .testTag(ATTENTION_CHIP_TAG)
+                        )
+                    }
                     // Autocomprador de edificios (hito de Ascensión)
                     if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
                         AutoChip(
@@ -222,6 +244,7 @@ fun MenuSection(
                                 buyMultiplier = buyMultiplier,
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
                                 milestones = buildingMilestones[building.id].orEmpty(),
+                                attentionPoints = attention[building.id] ?: 0,
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -463,6 +486,7 @@ const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
+const val ATTENTION_CHIP_TAG = "attention_chip"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
 @Composable

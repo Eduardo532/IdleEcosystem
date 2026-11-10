@@ -11,6 +11,7 @@ import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.AchievementSets
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
@@ -89,6 +90,9 @@ data class EconomyState(
     /** El pacto de esta vida y, con Azathoth, el multiplicador de caos actual. */
     val activePact: Pact = Pact.NONE,
     val chaosMultiplier: Int = 1,
+    /** Atención repartida (ya ajustada a los puntos disponibles) y puntos totales. */
+    val attention: Map<String, Int> = emptyMap(),
+    val attentionPoints: Int = 0,
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
 
@@ -161,6 +165,8 @@ class GameEngine @Inject constructor(
     private var prestigePacing = PrestigePacing()
     private var automation = AutomationSettings()
     private var activePact = Pact.NONE
+    /** El reparto que eligió el jugador; se ajusta a los puntos al usarlo. */
+    private var wantedAttention: Map<String, Int> = emptyMap()
     private var chaosMultiplier = 1
     private val pact: PactEffects get() = activePact.effects
     private var costMultiplier = 1.0
@@ -306,6 +312,13 @@ class GameEngine @Inject constructor(
 
     fun activateRitual(ritualId: String) = post {
         if (performRitual(ritualId)) soundManager.playSound(SoundType.BUY)
+    }
+
+    /** Reparte la Atención. Lo que no alcance con los puntos actuales se ignora. */
+    fun setAttention(allocation: Map<String, Int>) = post {
+        wantedAttention = allocation
+        applyPactModifiers()
+        recalculate()
     }
 
     /** Elige qué automatizaciones están encendidas (solo actúan con su hito alcanzado). */
@@ -665,6 +678,7 @@ class GameEngine @Inject constructor(
         val gains = baseProductionPerSecond
             .multiply(prestigeShopManager.getOfflinePrestigeMultiplier())
             .multiply(BigDecimal.valueOf(pact.offline))
+            .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal(diffSeconds))
 
         if (gains.signum() > 0) {
@@ -822,6 +836,7 @@ class GameEngine @Inject constructor(
         if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
+        if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
     }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
@@ -847,8 +862,15 @@ class GameEngine @Inject constructor(
         applyPactModifiers()
     }
 
+    private fun effectiveAttention(): Map<String, Int> =
+        Attention.clamp(wantedAttention, Attention.available(statsManager.totalPrestiges))
+
+    private fun attentionMultiplier(target: String): Double =
+        Attention.multiplier(effectiveAttention()[target] ?: 0)
+
     private fun applyPactModifiers() {
-        runeManager.spawnFrequency = pact.runeFrequency
+        // Las runas: el pacto y la Atención puesta en la Vigilia
+        runeManager.spawnFrequency = pact.runeFrequency * attentionMultiplier(Attention.VIGIL)
         eventScheduler.frequencyMultiplier = pact.eventFrequency
         eventScheduler.buffPower = pact.eventBuffPower
         ritualManager.applyPact(pact.ritualCost, pact.ritualDuration, pact.ritualCooldown)
@@ -926,9 +948,11 @@ class GameEngine @Inject constructor(
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
         val completedSets = AchievementSets.completed(achievementManager.availableAchievements)
+        val attention = effectiveAttention()
         val buildings = buildingManager.availableBuildings
         buildings.forEachIndexed { index, building ->
             val setMult = AchievementSets.multiplier(building.id, completedSets)
+                .multiply(BigDecimal.valueOf(Attention.multiplier(attention[building.id] ?: 0)))
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
@@ -1004,6 +1028,8 @@ class GameEngine @Inject constructor(
             ascensions = statsManager.totalPrestiges,
             activePact = activePact,
             chaosMultiplier = chaosMultiplier,
+            attention = effectiveAttention(),
+            attentionPoints = Attention.available(statsManager.totalPrestiges),
             echoChance = echoChance()
         )
     }

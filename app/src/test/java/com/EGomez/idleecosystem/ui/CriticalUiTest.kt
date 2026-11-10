@@ -20,7 +20,7 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AttentionDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ATTENTION_ADD_TAG
-import com.EGomez.idleecosystem.ui.screens.main.components.ATTENTION_CHIP_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.ATTENTION_BAR_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.PactDetailDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.PACT_CHOICE_TAG
 import com.EGomez.idleecosystem.domain.model.Pact
@@ -518,25 +518,32 @@ class CriticalUiTest {
     }
 
     @Test
-    fun `the attention chip appears after the first ascension`() {
+    fun `the attention bar appears after the first ascension and opens the dialog`() {
         var points by mutableStateOf(0)
+        var tab by mutableStateOf(0)
+        var opened = 0
         compose.setContent {
             MenuSection(
                 isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
-                selectedTabIndex = 0, onTabSelected = {},
+                selectedTabIndex = tab, onTabSelected = {},
                 buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
                 buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
                 currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
                 buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
                 onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
                 prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
-                attentionPoints = points, onAscendClicked = {}, onShowPrestigeShop = {}
+                attentionPoints = points, onOpenAttention = { opened++ },
+                attention = mapOf("notes" to 1), onAscendClicked = {}, onShowPrestigeShop = {}
             )
         }
 
-        compose.onNodeWithTag(ATTENTION_CHIP_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(ATTENTION_BAR_TAG).assertDoesNotExist()
         points = 1
-        compose.onNodeWithTag(ATTENTION_CHIP_TAG).assertExists()
+        compose.onNodeWithTag(ATTENTION_BAR_TAG).assertExists().performClick()
+        assertEquals(1, opened)
+        // Solo vive en la pestaña Investigación
+        tab = 2
+        compose.onNodeWithTag(ATTENTION_BAR_TAG).assertDoesNotExist()
     }
 }
 

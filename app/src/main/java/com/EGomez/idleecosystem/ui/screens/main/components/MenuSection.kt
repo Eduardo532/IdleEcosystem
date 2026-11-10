@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
@@ -146,24 +147,6 @@ fun MenuSection(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Atención: puntos repartidos / disponibles (desde la primera Ascensión)
-                    if (attentionPoints > 0) {
-                        AssistChip(
-                            onClick = onOpenAttention,
-                            label = {
-                                Text(
-                                    stringResource(R.string.attention_chip, Attention.used(attention), attentionPoints),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = Color(0xFF2A1A3A), labelColor = AncientGold),
-                            border = null,
-                            modifier = Modifier
-                                .height(28.dp)
-                                .testTag(ATTENTION_CHIP_TAG)
-                        )
-                    }
                     // Autocomprador de edificios (hito de Ascensión)
                     if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
                         AutoChip(
@@ -225,6 +208,16 @@ fun MenuSection(
                         unselectedContentColor = Color.Gray
                     )
                 }
+            }
+
+            // Atención: barra fija sobre la lista de edificios (no se desplaza con ella)
+            if (selectedTabIndex == 0 && lockedTabText == null && attentionPoints > 0) {
+                AttentionBar(
+                    attention = attention,
+                    points = attentionPoints,
+                    buildings = buildings,
+                    onClick = onOpenAttention
+                )
             }
 
             LazyColumn(
@@ -486,9 +479,81 @@ const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
-const val ATTENTION_CHIP_TAG = "attention_chip"
+const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
+/** Barra fija de la Atención: puntos usados y a dónde apuntan; al tocarla abre el reparto. */
+@Composable
+private fun AttentionBar(
+    attention: Map<String, Int>,
+    points: Int,
+    buildings: List<Building>,
+    onClick: () -> Unit
+) {
+    val used = Attention.used(attention)
+    val dream = stringResource(R.string.attention_dream)
+    val vigil = stringResource(R.string.attention_vigil)
+    val names = buildings.associate { it.id to tr(it.name) }
+    val targets = attention.filterValues { it > 0 }.entries
+        .sortedByDescending { it.value }
+        .joinToString(" · ") { (id, n) ->
+            val name = when (id) {
+                Attention.DREAM -> dream
+                Attention.VIGIL -> vigil
+                else -> names[id] ?: id
+            }
+            "$name +${(n * Attention.BONUS_PER_POINT * 100).toInt()}%"
+        }
+    val free = points - used
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF221530),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (free > 0) AncientGold.copy(alpha = 0.7f) else ArcanePurple.copy(alpha = 0.35f)
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+            .testTag(ATTENTION_BAR_TAG)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("◎", color = AncientGold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.attention_bar_title, used, points),
+                    color = AncientGold,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    when {
+                        targets.isEmpty() -> stringResource(R.string.attention_bar_empty)
+                        free > 0 -> stringResource(R.string.attention_bar_free, targets, free)
+                        else -> targets
+                    },
+                    color = if (targets.isEmpty()) Color.LightGray else Color(0xFFBFA9D9),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
 @Composable
 private fun LockedSystem(requirement: String) {
     Row(

@@ -25,7 +25,9 @@
     <string name="ascension_count">Esta será tu Ascensión n.º %1$d.</string>
     <string name="ascension_milestones_title">Hitos de Ascensión</string>
     <string name="attention_bonus">+%1$d%%</string>
-    <string name="attention_chip">◎ %1$d/%2$d</string>
+    <string name="attention_bar_empty">Toca para repartir tus puntos</string>
+    <string name="attention_bar_free">%1$s · %2$d libres</string>
+    <string name="attention_bar_title">Atención %1$d/%2$d</string>
     <string name="attention_clear">Liberar todo</string>
     <string name="attention_click_effect">Clic</string>
     <string name="attention_dream">Sueño</string>

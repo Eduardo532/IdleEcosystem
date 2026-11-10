@@ -114,6 +114,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Niveles por capturas de siempre: nivel 1 de runa 25/100/250/500/1.000; nivel 2 10/40/100/200/400; nivel 3 5/15/40/80/150.
 - Cada nivel: duración del potenciador `x(1 + 0,1·n)` y bono grabado escalado `1 + (b − 1)·(1 + 0,2·n)`. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
 
+## Mutaciones
+
+- Tras la primera Trascendencia. Oferta: 3 de 20 sin repetir, barajadas con la semilla `Ascensiones totales × 7919 + 17` (determinista: no se puede volver a tirar). *(Código: `Mutation.offer`; test: `MutationTest`.)*
+- Las de edificio: ese edificio x10 y otro x0,5 (o un precio global de x0,5–x1,5). Las globales: entre x1,5 y x5 de beneficio con un precio de x0,75–x0,9.
+- Dura una vida (contador `run.mutation.<id>`); se combina con el pacto, las runas grabadas y la Marea mediante `PactEffects.combinedWith`.
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

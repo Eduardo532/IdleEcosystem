@@ -310,4 +310,6 @@
     <string name="rune_mastery_intro">Mastery: each rune levels up the more times you catch it, ever. Each star makes its boost last 10% longer and its engraved bonus 20% stronger.</string>
     <string name="rune_mastery_line">Mastery %1$s · %2$d of %3$d</string>
     <string name="rune_mastery_max">Mastery %1$s · maxed</string>
+    <string name="mutation_choose_title">Mutation for the next life</string>
+    <string name="mutation_none">No mutation</string>
 </resources>

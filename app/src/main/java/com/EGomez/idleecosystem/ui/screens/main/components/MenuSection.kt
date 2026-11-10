@@ -114,6 +114,7 @@ fun MenuSection(
     onEngraveRune: (String) -> Unit = {},
     onRemoveEngraving: (String) -> Unit = {},
     runeMastery: Map<String, Int> = emptyMap(),
+    activeMutation: com.EGomez.idleecosystem.domain.model.Mutation? = null,
     transcendRevealed: Boolean = false,
     ether: Int = 0,
     onOpenTranscend: () -> Unit = {},
@@ -474,6 +475,17 @@ fun MenuSection(
                                 )
                                 if (transcendRevealed) Spacer(modifier = Modifier.width(8.dp))
                             }
+                            // La mutación de esta vida (v0.18.4)
+                            activeMutation?.let {
+                                Text(
+                                    "🧬 " + tr(it.title),
+                                    color = MutationGreen,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    modifier = Modifier.padding(end = 8.dp).testTag(ACTIVE_MUTATION_TAG)
+                                )
+                            }
                             // Trascender (v0.18.0): el Éter y el acceso a la segunda capa
                             if (transcendRevealed) {
                                 Text(
@@ -551,6 +563,7 @@ const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
 const val TRANSCEND_LINK_TAG = "transcend_link"
+const val ACTIVE_MUTATION_TAG = "active_mutation"
 const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */

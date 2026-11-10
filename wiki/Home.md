@@ -23,6 +23,7 @@
 | [Fases de la Marea](Marea) | Un ciclo de 30 minutos de juego que cambia las reglas |
 | [Trascender](Trascender) | La segunda capa: reiniciar casi todo a cambio de Éter |
 | [Consagrar Edificios](Consagracion) | Multiplicar para siempre la producción de cada edificio con Éter |
+| [Mutaciones](Mutaciones) | Tres mutaciones al azar en cada Ascensión: un gran bono con un precio |
 | [Ajustes](Ajustes) | Idioma, notación, sonido y partidas |
 
 ## Para el desarrollo

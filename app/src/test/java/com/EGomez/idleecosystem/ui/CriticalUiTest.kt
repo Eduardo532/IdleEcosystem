@@ -37,6 +37,8 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.ui.screens.main.components.MADNESS_METER_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MUTATION_CHOICE_TAG
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -325,6 +327,25 @@ class CriticalUiTest {
         compose.onNodeWithText("Los edificios cuestan x10.").assertExists()
         compose.onNodeWithText("✓ Ceguera").assertExists()
         compose.onNodeWithTag(TRIAL_CHOICE_TAG + "none").performClick()
+        assertEquals(null, chosen)
+    }
+
+    @Test
+    fun `the ascend dialog offers mutations and explains the chosen one`() {
+        var chosen by mutableStateOf<Mutation?>(null)
+        val offer = listOf(Mutation.FEVERISH_NOTES, Mutation.BURNING_SYNAPSE, Mutation.HUNGRY_VOID)
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                mutationOffer = offer, selectedMutation = chosen, onMutationSelected = { chosen = it }
+            )
+        }
+
+        compose.onNodeWithText("Mutación de la próxima vida").assertExists()
+        compose.onNodeWithTag(MUTATION_CHOICE_TAG + "burning_synapse").performClick()
+        assertEquals(Mutation.BURNING_SYNAPSE, chosen)
+        compose.onNodeWithText("El clic x5, pero toda la producción x0,75.").assertExists()
+        compose.onNodeWithTag(MUTATION_CHOICE_TAG + "none").performClick()
         assertEquals(null, chosen)
     }
 

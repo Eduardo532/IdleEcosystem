@@ -8,6 +8,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 - **v0.18.1:** Consagrar edificios: con Éter y 100 unidades por nivel, cada edificio sube hasta la Consagración V (x3 por nivel, para siempre); 10 logros propios.
 - **v0.18.2:** pantalla principal reorganizada: con el menú abierto, cabecera compacta (Conocimiento arriba, INVESTIGAR pequeño, Locura y Marea en una fila), panel de Cordura en una fila y tarjetas de edificios compactas con la descripción al tocar el nombre.
 - **v0.18.3:** Maestría de runas: tras la primera Trascendencia, cada runa sube hasta 5 estrellas según sus capturas de siempre; alarga su potenciador y fortalece su bono grabado. 9 logros propios.
+- **v0.18.4:** Mutaciones: tras la primera Trascendencia, cada Ascensión ofrece tres de 20 mutaciones al azar para la vida siguiente (un edificio x10 a cambio de un precio, o efectos globales); 13 logros propios.
 
 ## v0.17.4 · "Desafíos y Riesgo" *(oficial, 10 nov 2026)*
 

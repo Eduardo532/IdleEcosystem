@@ -57,6 +57,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.domain.model.TrialRules
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.model.PactEffects
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -127,6 +128,11 @@ data class EconomyState(
     /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,
+    /** Mutaciones (v0.18.4): la de esta vida, las que ofrece la próxima Ascensión y las descubiertas. */
+    val mutationsRevealed: Boolean = false,
+    val activeMutation: Mutation? = null,
+    val mutationOffer: List<Mutation> = emptyList(),
+    val mutationsSeen: Int = 0,
     /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
     val madness: Double? = null,
     val collapseSeconds: Int = 0,
@@ -524,18 +530,25 @@ class GameEngine @Inject constructor(
      * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
      * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
      */
-    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) = post {
-        if (performAscension(nextPact ?: activePact, abandonPath, nextTrial) != null) soundManager.playSound(SoundType.BUY)
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null, nextMutation: Mutation? = null) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath, nextTrial, nextMutation) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false, nextTrial: Trial? = null): BigDecimal? {
+    private fun performAscension(
+        nextPact: Pact,
+        abandonPath: Boolean = false,
+        nextTrial: Trial? = null,
+        nextMutation: Mutation? = null
+    ): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
         // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
         recordFinishedLife(finalPotential, abandonPath)
+        // La mutación elegida tiene que estar entre las ofrecidas por esta Ascensión
+        val offeredMutations = mutationOffer()
         statsManager.count(AchievementStat.CYCLE_SANITY, finalPotential)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
@@ -547,6 +560,10 @@ class GameEngine @Inject constructor(
         deliriumMultiplier = 1.0
         // La Prueba de la vida nueva (una bloqueada no se puede elegir)
         if (nextTrial != null && nextTrial.isUnlocked(statsManager.totalPrestiges)) startTrial(nextTrial)
+        if (nextMutation != null && nextMutation in offeredMutations) {
+            statsManager.flag(AchievementStat.ACTIVE_MUTATION_PREFIX + nextMutation.id)
+            statsManager.flag(AchievementStat.MUTATION_SEEN_PREFIX + nextMutation.id)
+        }
         // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
         if (abandonPath) {
             prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
@@ -575,6 +592,11 @@ class GameEngine @Inject constructor(
     /** Cuenta para los logros la vida que termina: con qué pacto y Senda, y sus hazañas. */
     private fun recordFinishedLife(sanityGained: BigDecimal, abandonPath: Boolean) {
         val path = MadnessPaths.active(prestigeShopManager.upgrades)
+        activeMutation()?.let { mutation ->
+            statsManager.count(AchievementStat.MUTATION_LIVES)
+            statsManager.flag(AchievementStat.mutationWith(activePact.id, mutation.id))
+            if (path != null) statsManager.flag(AchievementStat.mutationPath(path.id, mutation.id))
+        }
         statsManager.count(AchievementStat.life(activePact.id))
         if (path != null) {
             statsManager.count(AchievementStat.lifeOnPath(path.id))
@@ -617,6 +639,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_LEVELS, mastery.sum())
         put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
+        put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
         val upgrades = upgradeManager.availableUpgrades
@@ -1082,6 +1105,7 @@ class GameEngine @Inject constructor(
         if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
         if (transcendRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCEND)
         if (consecrationRevealed()) tutorialManager.triggerStep(TutorialStep.CONSECRATION)
+        if (mutationsRevealed()) tutorialManager.triggerStep(TutorialStep.MUTATIONS)
         if (consecrationRevealed() && statsManager.counters.keys.any { it.startsWith(AchievementStat.MASTERY_PREFIX) }) {
             tutorialManager.triggerStep(TutorialStep.RUNE_MASTERY)
         }
@@ -1174,6 +1198,7 @@ class GameEngine @Inject constructor(
         statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
         statsManager.flag(AchievementStat.trial(trial.id))
         statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
+        activeMutation()?.let { statsManager.flag(AchievementStat.mutationTrial(trial.id, it.id)) }
         if (statsManager.runTimeSeconds < FAST_TRIAL_SECONDS) statsManager.flag(AchievementStat.FEAT_TRIAL_FAST)
         deliriumMultiplier = 1.0
         refreshEngravings()
@@ -1457,6 +1482,21 @@ class GameEngine @Inject constructor(
         .filter { RuneEngraving.variant(it) != null }
         .take(runeSlots())
 
+    // =====================================================================
+    // MUTACIONES (v0.18.4)
+    // La de la vida actual es un contador de la vida ("run.mutation.<id>").
+    // =====================================================================
+
+    private fun mutationsRevealed(): Boolean = consecrationRevealed()
+
+    private fun activeMutation(): Mutation? = statsManager.counters.keys
+        .firstOrNull { it.startsWith(AchievementStat.ACTIVE_MUTATION_PREFIX) }
+        ?.let { Mutation.fromId(it.removePrefix(AchievementStat.ACTIVE_MUTATION_PREFIX)) }
+
+    /** Las tres mutaciones que ofrece la próxima Ascensión (dependen de las Ascensiones de siempre). */
+    private fun mutationOffer(): List<Mutation> =
+        if (mutationsRevealed()) Mutation.offer(totalAscensionsEver().toLong() * 7919L + 17L) else emptyList()
+
     private var lastMasterySum = -1
 
     /** Si sube la maestría de una runa grabada, su bono se recalcula. */
@@ -1489,6 +1529,7 @@ class GameEngine @Inject constructor(
         pactWithRunes = activePact.effects
             .combinedWith(RuneEngraving.combined(engravedRunes()) { masteryLevel(it) })
             .combinedWith(tideEffects)
+            .combinedWith(activeMutation()?.effects ?: PactEffects())
         applyPactModifiers()
     }
 
@@ -1763,6 +1804,10 @@ class GameEngine @Inject constructor(
             tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
             collapseSeconds = collapseSeconds,
             possessedBuilding = possessedBuildingId,
+            mutationsRevealed = mutationsRevealed(),
+            activeMutation = activeMutation(),
+            mutationOffer = mutationOffer(),
+            mutationsSeen = Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 },
             runeSlots = runeSlots(),
             engravedRunes = engravedRunes(),
             runeCatches = runeCatches(),

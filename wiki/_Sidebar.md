@@ -16,6 +16,7 @@
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)
 - [Consagrar Edificios](Consagracion)
+- [Mutaciones](Mutaciones)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

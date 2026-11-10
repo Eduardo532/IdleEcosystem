@@ -311,4 +311,6 @@
     <string name="rune_mastery_intro">Maestría: cada runa sube de nivel cuantas más veces la atrapas, desde siempre. Cada estrella alarga su potenciador un 10% y hace su bono grabado un 20% más fuerte.</string>
     <string name="rune_mastery_line">Maestría %1$s · %2$d de %3$d</string>
     <string name="rune_mastery_max">Maestría %1$s · máxima</string>
+    <string name="mutation_choose_title">Mutación de la próxima vida</string>
+    <string name="mutation_none">Sin mutación</string>
 </resources>

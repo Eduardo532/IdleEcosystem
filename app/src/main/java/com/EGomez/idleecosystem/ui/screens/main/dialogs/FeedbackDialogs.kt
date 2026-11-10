@@ -10,6 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.ui.screens.main.components.MutationPicker
 import com.EGomez.idleecosystem.ui.screens.main.components.TrialPicker
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
@@ -86,7 +88,11 @@ fun AscendDialog(
     trials: List<Trial> = emptyList(),
     completedTrials: Set<Trial> = emptySet(),
     selectedTrial: Trial? = null,
-    onTrialSelected: (Trial?) -> Unit = {}
+    onTrialSelected: (Trial?) -> Unit = {},
+    /** Mutaciones que ofrece esta Ascensión (vacío = no mostrar). */
+    mutationOffer: List<Mutation> = emptyList(),
+    selectedMutation: Mutation? = null,
+    onMutationSelected: (Mutation?) -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -114,6 +120,7 @@ fun AscendDialog(
                 }
                 if (pacts.isNotEmpty()) PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
                 if (trials.isNotEmpty()) TrialPicker(trials, completedTrials, selectedTrial, onTrialSelected)
+                if (mutationOffer.isNotEmpty()) MutationPicker(mutationOffer, selectedMutation, onMutationSelected)
                 if (activePath != null) AbandonPathOption(activePath, abandonPath, onAbandonPathChanged)
                 if (ascensions != null) AscensionMilestoneList(ascensions)
             }

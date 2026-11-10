@@ -146,5 +146,19 @@ enum class TutorialStep(
         "Lazos Prohibidos",
         "Ha aparecido una Sinergia en el Grimorio. Una vez comprada, cada unidad de un edificio suma un 1% a la producción del siguiente: tus edificios antiguos vuelven a importar.",
         "Al aparecer la primera sinergia en el Grimorio"
+    ),
+
+    ASCENSION_MILESTONES(
+        "ascension_milestones",
+        "Hitos de Ascensión",
+        "Cada Ascensión te acerca a un hito. Con 1 empiezas cada vida con 10 Sinapsis, y más adelante conservarás mejoras y desbloquearás autocompradores. La confirmación de Ascender muestra la lista completa.",
+        "Tras la primera Ascensión"
+    ),
+
+    AUTOMATION(
+        "automation",
+        "Manos Ajenas",
+        "Tus sectarios ya saben qué hacer. El botón 'AUTO' sobre las pestañas compra edificios solo, una unidad por segundo, sin gastar más de la mitad de tu Conocimiento. El engranaje de al lado abre el panel de automatización: qué edificios comprar y cuánto gastar.",
+        "Al alcanzar el hito del autocomprador de edificios (5 Ascensiones)"
     )
 }

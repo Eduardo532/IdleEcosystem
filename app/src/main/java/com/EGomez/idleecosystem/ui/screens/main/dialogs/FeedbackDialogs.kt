@@ -1,9 +1,13 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,13 +55,15 @@ fun AscendDialog(
     sanityGainFormatted: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    pacing: AscendPacing? = null
+    pacing: AscendPacing? = null,
+    /** Ascensiones ya hechas (null = no mostrar los hitos). */
+    ascensions: Int? = null
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.ascend_question), color = AncientGold, fontWeight = FontWeight.Black) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 Text(stringResource(R.string.ascend_lose), color = Color.White)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(stringResource(R.string.ascend_keep), color = Color.Gray, fontSize = 13.sp)
@@ -77,6 +83,7 @@ fun AscendDialog(
                         Text(stringResource(R.string.ascend_double, pacing.doubleGain, pacing.doubleAt), color = Color.Gray, fontSize = 12.sp)
                     }
                 }
+                if (ascensions != null) AscensionMilestoneList(ascensions)
             }
         },
         containerColor = Color(0xFF1E1E1E),
@@ -150,3 +157,38 @@ data class AscendPacing(
     val doubleGain: String?,
     val doubleAt: String?
 )
+
+/**
+ * Los hitos de Ascensión, con lo que trae ESTA Ascensión resaltado. [ascensions] son
+ * las ya hechas: al confirmar se suma una.
+ */
+@Composable
+private fun AscensionMilestoneList(ascensions: Int) {
+    val afterThis = ascensions + 1
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(stringResource(R.string.ascension_milestones_title), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    Text(stringResource(R.string.ascension_count, afterThis), color = Color.Gray, fontSize = 11.sp)
+    AscensionMilestone.entries.forEach { milestone ->
+        val (mark, color) = when {
+            milestone.ascensions == afterThis -> "★" to AncientGold
+            milestone.isReached(ascensions) -> "✓" to Color(0xFF81C784)
+            else -> "·" to Color.Gray
+        }
+        Text(
+            "$mark ${milestone.ascensions}: ${stringResource(milestoneText(milestone))}",
+            color = color,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@StringRes
+fun milestoneText(milestone: AscensionMilestone): Int = when (milestone) {
+    AscensionMilestone.STARTING_SYNAPSES -> R.string.milestone_starting_synapses
+    AscensionMilestone.KEEP_CLICK_UPGRADES -> R.string.milestone_keep_click
+    AscensionMilestone.BUILDING_AUTOBUYER -> R.string.milestone_building_autobuyer
+    AscensionMilestone.GRIMOIRE_AUTOBUYER -> R.string.milestone_grimoire_autobuyer
+    AscensionMilestone.KEEP_SYNERGIES -> R.string.milestone_keep_synergies
+    AscensionMilestone.AUTO_RITUAL -> R.string.milestone_auto_ritual
+}
+

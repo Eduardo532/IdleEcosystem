@@ -18,9 +18,14 @@ import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AutomationDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_ASCEND_TAG
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertCountEquals
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
 import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.AUTO_BUILDINGS_TAG
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.ui.screens.ActiveBuffsDisplay
@@ -302,7 +307,8 @@ class CriticalUiTest {
         selectedTab: Int,
         revealed: SystemReveal,
         buildings: List<Building> = emptyList(),
-        upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList()
+        upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList(),
+        ascensions: Int = 0
     ) {
         MenuSection(
             isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
@@ -313,7 +319,7 @@ class CriticalUiTest {
             buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
             onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
             prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
-            revealed = revealed, onAscendClicked = {}, onShowPrestigeShop = {}
+            revealed = revealed, ascensions = ascensions, onAscendClicked = {}, onShowPrestigeShop = {}
         )
     }
 
@@ -358,6 +364,77 @@ class CriticalUiTest {
 
         compose.onNodeWithText("Efecto: +1% por unidad de Notas Desordenadas").assertExists()
         compose.onNodeWithText("Efecto: x1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the auto chip appears with the building autobuyer milestone`() {
+        var ascensions by mutableStateOf(4)
+        compose.setContent { Menu(selectedTab = 0, revealed = SystemReveal(), ascensions = ascensions) }
+
+        compose.onNodeWithTag(AUTO_BUILDINGS_TAG).assertDoesNotExist()
+        ascensions = 5
+        compose.onNodeWithTag(AUTO_BUILDINGS_TAG).assertExists()
+    }
+
+    @Test
+    fun `the ascend dialog lists the milestones and marks the next one`() {
+        compose.setContent { AscendDialog(sanityGainFormatted = "3", onConfirm = {}, onDismiss = {}, ascensions = 2) }
+
+        compose.onNodeWithText("Esta será tu Ascensión n.º 3.").assertExists()
+        compose.onNodeWithText("✓ 1: Empiezas cada vida con 10 Sinapsis.").assertExists()
+        compose.onNodeWithText("★ 3: Conservas las mejoras de clic del Grimorio.").assertExists()
+        compose.onNodeWithText("· 5: Autocomprador de edificios.").assertExists()
+    }
+
+    @Test
+    fun `the madness map shows the net effect of spending sanity`() {
+        val node = PrestigeUpgrade(
+            id = "pu_test", name = "Nodo de Prueba", description = "Prueba",
+            baseCost = BigDecimal.ONE, costMultiplier = BigDecimal("2"), effectMultiplier = BigDecimal("0.1"),
+            type = UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.5f
+        )
+        compose.setContent {
+            PrestigeShopDialog(upgrades = listOf(node), currencyFormatted = "20", currency = BigDecimal(20), onBuy = {}, onDismiss = {})
+        }
+
+        compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }
+        // Nodo x1,00 -> x1,10; Cordura 20 -> 19: bono x3,00 -> x2,90; neto 1,1 x 2,9 / 3 = 1,063
+        compose.onNodeWithText("Al mejorar: x1.00 → x1.10").assertExists()
+        compose.onNodeWithText("Bono de Cordura: x3.00 → x2.90").assertExists()
+        compose.onNodeWithText("Neto en producción: x1.06").assertExists()
+    }
+
+    @Composable
+    private fun Automation(ascensions: Int, onBudget: (Int) -> Unit = {}) {
+        AutomationDialog(
+            settings = com.EGomez.idleecosystem.domain.logic.AutomationSettings(),
+            ascensions = ascensions,
+            buildings = listOf(notes),
+            rituals = emptyList(),
+            onBudgetSelected = onBudget,
+            onToggleBuildings = {}, onToggleBuildingExcluded = {}, onToggleGrimoire = {},
+            onToggleAutoAscend = {}, onRitualSelected = {}, onDismiss = {}
+        )
+    }
+
+    @Test
+    fun `the automation panel opens each section with its milestone`() {
+        compose.setContent { Automation(ascensions = 5) }
+
+        compose.onNodeWithText("Notas Desordenadas").assertExists()
+        // La Ascensión automática llega con 10 Ascensiones
+        compose.onNodeWithTag(AUTO_ASCEND_TAG).assertDoesNotExist()
+        compose.onAllNodesWithText("Se desbloquea con 10 Ascensiones.").assertCountEquals(2)
+    }
+
+    @Test
+    fun `the automation budget can be changed`() {
+        var chosen = 0
+        compose.setContent { Automation(ascensions = 10, onBudget = { chosen = it }) }
+
+        compose.onNodeWithTag(AUTO_ASCEND_TAG).assertExists()
+        compose.onNodeWithText("25%").performClick()
+        assertEquals(25, chosen)
     }
 }
 

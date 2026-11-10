@@ -11,6 +11,7 @@ import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
@@ -60,6 +61,7 @@ class GameEngineTest {
     private lateinit var engineDispatcher: ExecutorCoroutineDispatcher
     private lateinit var scope: CoroutineScope
     private lateinit var engine: GameEngine
+    private lateinit var stats: StatisticsManager
 
     @Before
     fun setUp() {
@@ -67,7 +69,7 @@ class GameEngineTest {
         database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
         repository = GameRepository(database.gameDao(), database)
         val preferences = GamePreferences(context)
-        val stats = StatisticsManager()
+        stats = StatisticsManager()
         val sound = SoundManager(context, preferences)
 
         engineDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
@@ -251,6 +253,77 @@ class GameEngineTest {
         Unit // JUnit exige que el test devuelva void
     }
 
+    @Test
+    fun `the third ascension keeps click upgrades and starts with ten synapses`() = runBlocking {
+        stats.totalPrestiges = 2 // la próxima es la tercera
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.buyUpgrade("u_click_1")
+        engine.buyUpgrade("u_notes_1")
+        await(engine.upgrades) { list -> list.count { it.isBought } == 2 }
+
+        engine.ascend()
+
+        val buildings = await(engine.buildings) { list -> list.any { it.id == SYNAPSE && it.amountOwned == 10 } }
+        assertEquals(0, buildings.first { it.id == NOTES }.amountOwned)
+        val upgrades = await(engine.upgrades) { list -> list.none { it.id == "u_notes_1" && it.isBought } }
+        assertTrue(upgrades.first { it.id == "u_click_1" }.isBought)
+    }
+
+    @Test
+    fun `the building autobuyer works from five ascensions`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.grantKnowledge(BigDecimal(1_000))
+
+        // Sin tocar nada, compra edificios con la mitad del Conocimiento como tope
+        val list = await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned > 0 } }
+        assertTrue(list.first { it.id == NOTES }.amountOwned > 0)
+        assertTrue(engine.economy.value.knowledge > BigDecimal(400))
+    }
+
+    @Test
+    fun `the autobuyer stays off when the player turns it off`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        engine.grantKnowledge(BigDecimal(1_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(1_000) }
+
+        delay(2_500)
+        assertTrue(engine.buildings.value.all { it.amountOwned == 0 })
+    }
+
+    @Test
+    fun `a chosen ritual activates on its own from fifty ascensions`() = runBlocking {
+        stats.totalPrestiges = 50
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, ritualId = FRENZY))
+        repeat(5) { engine.click(echoFound = true) }
+
+        await(engine.rituals) { list -> list.first { it.id == FRENZY }.state != RitualState.READY }
+        Unit // JUnit exige que el test devuelva void
+    }
+
+    @Test
+    fun `the autobuyer skips the buildings the player unchecked`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.setAutomation(AutomationSettings(grimoire = false, excludedBuildings = setOf(NOTES)))
+        engine.grantKnowledge(BigDecimal(1_000))
+
+        await(engine.buildings) { list -> list.any { it.id == SYNAPSE && it.amountOwned > 0 } }
+        assertEquals(0, engine.buildings.value.first { it.id == NOTES }.amountOwned)
+    }
+
+    @Test
+    fun `automatic ascension happens when the gain doubles the sanity`() = runBlocking {
+        stats.totalPrestiges = 10
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, autoAscend = true))
+        // 9M generados -> 3 puntos de Cordura, más que los 0 que hay
+        engine.grantKnowledge(BigDecimal("9000000"))
+
+        val economy = await(engine.economy) { it.sanity.signum() > 0 }
+        assertEquals(0, BigDecimal(3).compareTo(economy.sanity))
+        assertTrue(economy.knowledge < BigDecimal("9000000"))
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 
@@ -268,6 +341,8 @@ class GameEngineTest {
     private companion object {
         const val NOTES = "b_notes"
         const val SCROLLS = "b_scrolls"
+        const val SYNAPSE = "b_synapse"
+        const val FRENZY = "rit_blood_frenzy"
         const val OFFERING = "rit_knowledge_offering"
         const val TIMEOUT_MS = 10_000L
     }

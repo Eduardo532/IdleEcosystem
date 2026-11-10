@@ -4,6 +4,7 @@ import com.EGomez.idleecosystem.core.locale.AppLanguage
 import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.NextGoal
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -60,6 +61,11 @@ data class GameUiState(
     val nextGoal: NextGoal? = null,
     /** Pestañas y paneles descubiertos (los demás se ven como "???"). */
     val revealed: SystemReveal = SystemReveal(),
+    /** Ascensiones totales (hitos) y automatizaciones elegidas. */
+    val ascensions: Int = 0,
+    val automation: AutomationSettings = AutomationSettings(),
+    /** Cordura ganada en la última Ascensión automática (aviso breve), o null. */
+    val autoAscensionNotice: String? = null,
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

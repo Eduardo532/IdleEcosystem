@@ -2,6 +2,7 @@ package com.EGomez.idleecosystem.data.preferences
 
 import android.content.Context
 import com.EGomez.idleecosystem.core.math.NumberNotation
+import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.RitualSnapshot
 import com.EGomez.idleecosystem.domain.model.RitualState
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -56,6 +57,26 @@ class GamePreferences @Inject constructor(
             if (value == null) remove(KEY_PENDING_EVENT) else putString(KEY_PENDING_EVENT, value)
         }.apply()
 
+    /** Automatizaciones encendidas (los hitos de Ascensión deciden si actúan). */
+    var automation: AutomationSettings
+        get() = AutomationSettings(
+            buildings = prefs.getBoolean(KEY_AUTO_BUILDINGS, true),
+            grimoire = prefs.getBoolean(KEY_AUTO_GRIMOIRE, true),
+            ritualId = prefs.getString(KEY_AUTO_RITUAL, null),
+            excludedBuildings = prefs.getString(KEY_AUTO_EXCLUDED, null)
+                ?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet(),
+            budgetPercent = prefs.getInt(KEY_AUTO_BUDGET, AutomationSettings.DEFAULT_BUDGET_PERCENT),
+            autoAscend = prefs.getBoolean(KEY_AUTO_ASCEND, false)
+        )
+        set(value) = prefs.edit()
+            .putBoolean(KEY_AUTO_BUILDINGS, value.buildings)
+            .putBoolean(KEY_AUTO_GRIMOIRE, value.grimoire)
+            .putString(KEY_AUTO_EXCLUDED, value.excludedBuildings.joinToString(","))
+            .putInt(KEY_AUTO_BUDGET, value.budgetPercent)
+            .putBoolean(KEY_AUTO_ASCEND, value.autoAscend)
+            .apply { if (value.ritualId == null) remove(KEY_AUTO_RITUAL) else putString(KEY_AUTO_RITUAL, value.ritualId) }
+            .apply()
+
     fun saveRituals(snapshots: List<RitualSnapshot>, savedAtMillis: Long) {
         prefs.edit()
             .putString(KEY_RITUALS, encodeRituals(snapshots))
@@ -84,6 +105,12 @@ class GamePreferences @Inject constructor(
         private const val KEY_PENDING_EVENT = "pending_follow_up_event"
         private const val KEY_NOTATION = "number_notation"
         private const val KEY_LANGUAGE = "app_language"
+        private const val KEY_AUTO_BUILDINGS = "auto_buildings"
+        private const val KEY_AUTO_GRIMOIRE = "auto_grimoire"
+        private const val KEY_AUTO_RITUAL = "auto_ritual"
+        private const val KEY_AUTO_EXCLUDED = "auto_excluded_buildings"
+        private const val KEY_AUTO_BUDGET = "auto_budget_percent"
+        private const val KEY_AUTO_ASCEND = "auto_ascend"
 
         /** Lectura sin Hilt, para attachBaseContext de la Activity. */
         fun readLanguageTag(context: Context): String? =

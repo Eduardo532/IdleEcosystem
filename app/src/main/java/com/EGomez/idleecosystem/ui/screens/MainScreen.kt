@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import com.EGomez.idleecosystem.ui.theme.AncientGold
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
@@ -97,6 +100,7 @@ fun MainScreen(
         var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
         var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
         var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
+        var showAutomationDialog by rememberSaveable { mutableStateOf(false) }
 
         // --- CAMBIO AQUI: Iniciamos en 'false' (contraído) ---
         var isMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -203,6 +207,12 @@ fun MainScreen(
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
                             revealed = uiState.revealed,
+                            ascensions = uiState.ascensions,
+                            automation = uiState.automation,
+                            onToggleAutoBuildings = { viewModel.toggleAutoBuildings() },
+                            onToggleAutoGrimoire = { viewModel.toggleAutoGrimoire() },
+                            onToggleAutoRitual = { viewModel.toggleAutoRitual(it) },
+                            onOpenAutomation = { showAutomationDialog = true },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -270,6 +280,7 @@ fun MainScreen(
                         doubleGain = uiState.doubleSanityGainFormatted,
                         doubleAt = uiState.doubleSanityAtFormatted
                     ),
+                    ascensions = uiState.ascensions,
                     onConfirm = {
                         viewModel.onAscendClicked()
                         showAscendConfirmation = false
@@ -305,6 +316,43 @@ fun MainScreen(
                     onHardResetClick = { showHardResetConfirmation = true },
                     onToggleTutorial = { viewModel.toggleTutorial(it) }
                 )
+            }
+
+            if (showAutomationDialog) {
+                AutomationDialog(
+                    settings = uiState.automation,
+                    ascensions = uiState.ascensions,
+                    buildings = buildings,
+                    rituals = rituals,
+                    onBudgetSelected = { viewModel.setAutomationBudget(it) },
+                    onToggleBuildings = { viewModel.toggleAutoBuildings() },
+                    onToggleBuildingExcluded = { viewModel.toggleBuildingAutobuy(it) },
+                    onToggleGrimoire = { viewModel.toggleAutoGrimoire() },
+                    onToggleAutoAscend = { viewModel.toggleAutoAscend() },
+                    onRitualSelected = { viewModel.selectAutoRitual(it) },
+                    onDismiss = { showAutomationDialog = false }
+                )
+            }
+
+            // Aviso breve de la Ascensión automática
+            uiState.autoAscensionNotice?.let { gain ->
+                Surface(
+                    color = Color(0xFF2A1A2E),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, AncientGold),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 96.dp)
+                        .zIndex(5f)
+                ) {
+                    Text(
+                        stringResource(R.string.auto_ascended, gain),
+                        color = AncientGold,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
             }
 
             if (showAchievementsDialog) {

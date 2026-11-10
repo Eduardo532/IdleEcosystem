@@ -293,6 +293,7 @@ fun MainScreen(
                             runeCatches = uiState.runeCatches,
                             onEngraveRune = { viewModel.onEngraveRune(it) },
                             onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
+                            runeMastery = uiState.runeMastery,
                             transcendRevealed = uiState.transcendRevealed,
                             ether = uiState.ether,
                             onOpenTranscend = { showTranscend = true },

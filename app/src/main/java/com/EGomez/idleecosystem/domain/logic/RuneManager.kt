@@ -157,6 +157,8 @@ class RuneManager @Inject constructor(
         }
         // Espacios de Runa: cada runa cuenta por separado para poder grabarla
         statisticsManager.count(AchievementStat.runeCatches(rune.id))
+        // Maestría (v0.18.3): todas las capturas, desde siempre
+        statisticsManager.count(AchievementStat.mastery(rune.id))
 
         // El ciclo se reinicia ANTES de aplicar el efecto: antes se reiniciaba después
         // y anulaba a la Runa de Entropía.
@@ -173,6 +175,8 @@ class RuneManager @Inject constructor(
 
         if (effect.durationMs > 0) {
             val now = System.currentTimeMillis()
+            // Maestría: el potenciador dura más (el autoclic, igual que siempre)
+            val duration = (effect.durationMs * masteryDuration(rune)).toLong()
             // Si el autoclic dura menos que el potenciador, va en un buff aparte
             val splitAutoClick = effect.isAutoClick && effect.effectiveAutoClickMs < effect.durationMs
             val buffs = mutableListOf(
@@ -182,7 +186,7 @@ class RuneManager @Inject constructor(
                     clickMultiplier = effect.clickMultiplier,
                     costReduction = effect.costReduction,
                     echoChanceBonus = effect.echoChance,
-                    expirationTime = now + effect.durationMs,
+                    expirationTime = now + duration,
                     isAutoClick = effect.isAutoClick && !splitAutoClick,
                     freezesBuffs = effect.freezesBuffs,
                     description = rune.description
@@ -198,6 +202,15 @@ class RuneManager @Inject constructor(
             }
             _activeBuffs.update { it + buffs }
         }
+    }
+
+    /** Maestría de runas (v0.18.3): la activa el motor tras la primera Trascendencia. */
+    var masteryEnabled = false
+
+    private fun masteryDuration(rune: RuneVariant): Double {
+        if (!masteryEnabled) return 1.0
+        val catches = statisticsManager.counter(AchievementStat.mastery(rune.id)).toInt()
+        return RuneEngraving.durationBonus(RuneEngraving.masteryLevel(rune.tier, catches))
     }
 
     /** Colapso de la mente: se pierden los potenciadores de las runas. */

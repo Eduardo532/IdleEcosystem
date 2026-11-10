@@ -134,7 +134,9 @@ data class EconomyState(
     /** Espacios de Runa: cuántos hay, qué runas están grabadas y cuántas veces se atrapó cada una. */
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
-    val runeCatches: Map<String, Int> = emptyMap()
+    val runeCatches: Map<String, Int> = emptyMap(),
+    /** Maestría de runas (v0.18.3): capturas de cada runa desde siempre (vacío = oculta). */
+    val runeMastery: Map<String, Int> = emptyMap()
 )
 
 data class AchievementProgress(
@@ -611,6 +613,10 @@ class GameEngine @Inject constructor(
         put(AchievementStat.CONSECRATION_LEVELS, consecrations.sum())
         put(AchievementStat.CONSECRATED_BUILDINGS, consecrations.count { it > 0 })
         put(AchievementStat.CONSECRATED_MAX, consecrations.count { it >= Consecration.MAX_LEVEL })
+        val mastery = RuneEngraving.ALL.map { RuneEngraving.masteryLevel(it.tier, statsManager.counter(AchievementStat.mastery(it.id)).toInt()) }
+        put(AchievementStat.MASTERY_LEVELS, mastery.sum())
+        put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
+        put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
         val upgrades = upgradeManager.availableUpgrades
@@ -941,6 +947,7 @@ class GameEngine @Inject constructor(
         checkTrial()
         madnessTick()
         tideTick()
+        masteryTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1075,6 +1082,9 @@ class GameEngine @Inject constructor(
         if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
         if (transcendRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCEND)
         if (consecrationRevealed()) tutorialManager.triggerStep(TutorialStep.CONSECRATION)
+        if (consecrationRevealed() && statsManager.counters.keys.any { it.startsWith(AchievementStat.MASTERY_PREFIX) }) {
+            tutorialManager.triggerStep(TutorialStep.RUNE_MASTERY)
+        }
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1447,6 +1457,28 @@ class GameEngine @Inject constructor(
         .filter { RuneEngraving.variant(it) != null }
         .take(runeSlots())
 
+    private var lastMasterySum = -1
+
+    /** Si sube la maestría de una runa grabada, su bono se recalcula. */
+    private fun masteryTick() {
+        if (!consecrationRevealed()) return
+        val sum = engravedRunes().sumOf { masteryLevel(it) }
+        if (sum == lastMasterySum) return
+        val first = lastMasterySum < 0
+        lastMasterySum = sum
+        if (!first) {
+            refreshEngravings()
+            recalculate()
+        }
+    }
+
+    /** Nivel de maestría de una runa (0 hasta la primera Trascendencia). */
+    private fun masteryLevel(runeId: String): Int {
+        if (!consecrationRevealed()) return 0
+        val rune = RuneEngraving.variant(runeId) ?: return 0
+        return RuneEngraving.masteryLevel(rune.tier, statsManager.counter(AchievementStat.mastery(runeId)).toInt())
+    }
+
     private fun runeCatches(): Map<String, Int> = RuneEngraving.ALL.associate {
         it.id to statsManager.counter(AchievementStat.runeCatches(it.id)).toInt()
     }
@@ -1454,7 +1486,9 @@ class GameEngine @Inject constructor(
     /** Recalcula el pacto con las runas grabadas y lo aplica a runas, eventos y rituales. */
     private fun refreshEngravings() {
         val tideEffects = currentTide()?.effects ?: PactEffects()
-        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes())).combinedWith(tideEffects)
+        pactWithRunes = activePact.effects
+            .combinedWith(RuneEngraving.combined(engravedRunes()) { masteryLevel(it) })
+            .combinedWith(tideEffects)
         applyPactModifiers()
     }
 
@@ -1521,6 +1555,7 @@ class GameEngine @Inject constructor(
     private fun applyPactModifiers() {
         // Las runas: el pacto y la Atención puesta en la Vigilia
         val reward = trialReward()
+        runeManager.masteryEnabled = consecrationRevealed()
         runeManager.spawnFrequency = if (trialRules().noRunes) 0.0
         else pact.runeFrequency * attentionMultiplier(Attention.VIGIL) * reward.runeFrequency
         eventScheduler.frequencyMultiplier = pact.eventFrequency
@@ -1731,6 +1766,9 @@ class GameEngine @Inject constructor(
             runeSlots = runeSlots(),
             engravedRunes = engravedRunes(),
             runeCatches = runeCatches(),
+            runeMastery = if (consecrationRevealed()) RuneEngraving.ALL.associate {
+                it.id to statsManager.counter(AchievementStat.mastery(it.id)).toInt()
+            } else emptyMap(),
             echoChance = echoChance()
         )
     }

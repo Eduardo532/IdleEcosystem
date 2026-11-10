@@ -308,4 +308,7 @@
     <string name="eternal_cost">%1$d Éter</string>
     <string name="consecrate_ready">✦ Consagrar %1$s · %2$d Éter</string>
     <string name="consecrate_hint">✦ Consagración %1$s: con %2$d (%3$d Éter)</string>
+    <string name="rune_mastery_intro">Maestría: cada runa sube de nivel cuantas más veces la atrapas, desde siempre. Cada estrella alarga su potenciador un 10% y hace su bono grabado un 20% más fuerte.</string>
+    <string name="rune_mastery_line">Maestría %1$s · %2$d de %3$d</string>
+    <string name="rune_mastery_max">Maestría %1$s · máxima</string>
 </resources>

@@ -427,6 +427,18 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the rune altar shows mastery stars`() {
+        compose.setContent {
+            RuneAltar(
+                slots = 0, engraved = emptyList(), catches = emptyMap(),
+                onEngrave = {}, onRemove = {}, mastery = mapOf("t1_blood" to 120)
+            )
+        }
+
+        compose.onNodeWithText("Maestría ★★☆☆☆ · 120 de 250").assertExists()
+    }
+
+    @Test
     fun `achievements can be filtered by category`() {
         fun ach(id: String, name: String, group: String) = Achievement(
             id, name, "d", AchievementType.STAT, null, BigDecimal.ONE, BigDecimal("1.01"),

@@ -46,6 +46,21 @@ data class PactEffects(
      * Estos efectos sumados a otros (runas grabadas, v0.17.2): los multiplicadores se
      * multiplican; los bonos por edificio y el caos se toman de ambos.
      */
+    /**
+     * Los mismos efectos más fuertes (o más débiles): cada multiplicador se aleja de 1
+     * según [factor]. Un x1,15 con factor 1,4 pasa a x1,21; un x0,9, a x0,86.
+     */
+    fun scaled(factor: Double): PactEffects {
+        fun s(v: Double) = (1.0 + (v - 1.0) * factor).coerceAtLeast(0.05)
+        return copy(
+            production = s(production), click = s(click), offline = s(offline),
+            runeFrequency = s(runeFrequency), ritualCost = s(ritualCost), ritualDuration = s(ritualDuration),
+            ritualCooldown = s(ritualCooldown), echoChance = s(echoChance), sanityGain = s(sanityGain),
+            eventFrequency = s(eventFrequency), eventBuffPower = s(eventBuffPower), buildingCost = s(buildingCost),
+            buildings = buildings.mapValues { s(it.value) }
+        )
+    }
+
     fun combinedWith(other: PactEffects): PactEffects = PactEffects(
         production = production * other.production,
         click = click * other.click,

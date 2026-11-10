@@ -366,7 +366,9 @@ class GameEngineTest {
         engine.setAttention(mapOf(NOTES to 5))
         val expected = before.multiply(BigDecimal("1.5"))
         await(engine.buildings) { list -> ratio(list).subtract(expected).abs() < BigDecimal("0.0001") }
-        assertEquals(mapOf(NOTES to 2), engine.economy.value.attention)
+        // Los edificios se publican antes que la economía: se espera a que llegue
+        val economy = await(engine.economy) { it.attention == mapOf(NOTES to 2) }
+        assertEquals(mapOf(NOTES to 2), economy.attention)
     }
 
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =

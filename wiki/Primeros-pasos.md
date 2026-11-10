@@ -35,3 +35,7 @@ El juego te explica cada sistema la primera vez que aparece, con una ventana que
 - Toca las **runas** que aparecen en pantalla: dan bonos temporales y Ecos.
 - No tengas prisa por Ascender. La Cordura crece con la raíz cuadrada del Conocimiento: para **duplicar** la recompensa hace falta **4 veces** más. La confirmación de Ascender te dice cuánto falta.
 - El juego sigue produciendo mientras está cerrado (ver [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura#progreso-sin-conexión)).
+
+## La pantalla con el menú abierto *(v0.18.2)*
+
+Cuando abres el menú de compras, la parte de arriba se compacta para dejar sitio a los edificios: el Conocimiento pasa a la barra superior, el botón **INVESTIGAR** se vuelve una píldora pequeña (que también puedes mantener pulsada) y la Locura y la Marea quedan en una sola fila. Toca el nombre de un edificio para ver su descripción.

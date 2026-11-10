@@ -530,6 +530,7 @@ fun MenuSection(
                         }
                     }
                 }
+            }
         } else {
             Text(
                 stringResource(R.string.swipe_hint),

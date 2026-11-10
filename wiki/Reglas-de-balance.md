@@ -72,6 +72,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
 
+## Atención
+
+- Puntos: `0` sin Ascensiones; luego `min(10, 1 + Ascensiones ÷ 3)`. *(Código: `Attention.available`.)*
+- Cada punto: +25 % al destino (edificio, Sueño o Vigilia); los puntos se suman. El reparto se ajusta siempre a los puntos disponibles. *(Código: `Attention.clamp`.)*
+
 ## Clic
 
 - Clic = `1 + producción total de la Sinapsis`.

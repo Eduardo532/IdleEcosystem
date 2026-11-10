@@ -54,6 +54,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.domain.model.TrialRules
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.model.PactEffects
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
@@ -110,6 +111,9 @@ data class EconomyState(
     val deliriumMultiplier: Double = 1.0,
     /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
     val earlyPacts: Set<Pact> = emptySet(),
+    /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
+    val tide: TidePhase? = null,
+    val tideSecondsLeft: Int = 0,
     /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
     val madness: Double? = null,
     val collapseSeconds: Int = 0,
@@ -381,10 +385,14 @@ class GameEngine @Inject constructor(
             statsManager.count(AchievementStat.RITUALS)
             statsManager.count(AchievementStat.ritual(ritualId))
             statsManager.count(StatisticsManager.RUN_RITUALS)
+            if (currentTide() == TidePhase.DEAD) statsManager.count(AchievementStat.TIDE_DEAD_RITUALS)
             // Locura: los rituales la suben (la Convergencia mucho); la Letanía la calma
             when (ritual.effectType) {
                 RitualEffectType.CALM -> { madness.calm(ritual.effectValue); syncMadness() }
-                RitualEffectType.CONVERGENCE -> addMadness(MadnessMeter.PER_CONVERGENCE)
+                RitualEffectType.CONVERGENCE -> {
+                    addMadness(MadnessMeter.PER_CONVERGENCE)
+                    if (currentTide() == TidePhase.HIGH) statsManager.count(AchievementStat.TIDE_HIGH_CONVERGENCE)
+                }
                 else -> addMadness(MadnessMeter.PER_RITUAL)
             }
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
@@ -602,6 +610,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.ATTENTION_POINTS, attentionPoints())
         put(AchievementStat.TRIALS_COMPLETED, completedTrials().size)
         put(AchievementStat.MADNESS, BigDecimal.valueOf(madness.value))
+        put(AchievementStat.TIDE_PHASE, currentTide()?.ordinal ?: -1)
         val engraved = engravedRunes()
         put(AchievementStat.RUNE_SLOTS, runeSlots())
         put(AchievementStat.ENGRAVED, engraved.size)
@@ -909,6 +918,7 @@ class GameEngine @Inject constructor(
         rollChaos()
         checkTrial()
         madnessTick()
+        tideTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -998,6 +1008,7 @@ class GameEngine @Inject constructor(
         // Manos Atadas: el clic no produce
         if (!rules.noClickKnowledge) addKnowledge(currentClickPower(), isManual = true)
         addMadness(MadnessMeter.PER_CLICK)
+        clicksThisTide++
 
         // Silencio: no hay Ecos
         if (echoFound && !rules.noRituals) {
@@ -1039,6 +1050,7 @@ class GameEngine @Inject constructor(
         if (ascensions + 1 >= Trial.REVEAL_AT) tutorialManager.triggerStep(TutorialStep.TRIALS)
         if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
         if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
+        if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1186,7 +1198,8 @@ class GameEngine @Inject constructor(
     /** Suma Locura por jugar fuerte; si llega a 100, la mente colapsa. */
     private fun addMadness(amount: Double) {
         if (!madnessRevealed()) return
-        if (madness.add(amount)) collapse() else syncMadness()
+        // Marea Alta: la Locura sube más rápido
+        if (madness.add(amount * (currentTide()?.madnessGain ?: 1.0))) collapse() else syncMadness()
     }
 
     /** El colapso (leve): se pierden los potenciadores y la producción baja a la mitad 1 minuto. */
@@ -1199,6 +1212,7 @@ class GameEngine @Inject constructor(
         syncMadness()
         collapseSeconds = MadnessMeter.COLLAPSE_SECONDS
         statsManager.count(AchievementStat.MADNESS_COLLAPSES)
+        if (currentTide() == TidePhase.HIGH) statsManager.flag(AchievementStat.FEAT_TSUNAMI)
         statsManager.count(AchievementStat.RUN_COLLAPSES)
         soundManager.playSound(SoundType.EVENT_APPEAR)
         _effects.trySend(EngineEffect.MadnessCollapse)
@@ -1214,6 +1228,8 @@ class GameEngine @Inject constructor(
                 (counts.second - last.second).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_2_HOLD) +
                 (counts.third - last.third).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_3_TRACE)
             if (gained > 0) addMadness(gained)
+            val caught = (counts.first - last.first) + (counts.second - last.second) + (counts.third - last.third)
+            if (caught > 0 && currentTide() == TidePhase.HIGH) statsManager.count(AchievementStat.TIDE_HIGH_RUNES, BigDecimal(caught))
         }
         lastRuneCounts = counts
 
@@ -1223,7 +1239,7 @@ class GameEngine @Inject constructor(
             possessedBuildingId = null
             changed = true
         }
-        madness.decay(1)
+        madness.decay(1, currentTide()?.madnessDecay ?: 1.0)
         if (madness.rollOmen()) {
             omen()
             changed = true
@@ -1279,8 +1295,39 @@ class GameEngine @Inject constructor(
 
     /** Recalcula el pacto con las runas grabadas y lo aplica a runas, eventos y rituales. */
     private fun refreshEngravings() {
-        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes()))
+        val tideEffects = currentTide()?.effects ?: PactEffects()
+        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes())).combinedWith(tideEffects)
         applyPactModifiers()
+    }
+
+    // =====================================================================
+    // FASES DE LA MAREA (v0.17.4)
+    // Se calcula del tiempo jugado: no hace falta guardarla.
+    // =====================================================================
+
+    private fun tidesRevealed(): Boolean = statsManager.totalPrestiges >= TidePhase.REVEAL_AT
+
+    private fun currentTide(): TidePhase? =
+        if (tidesRevealed()) TidePhase.at(statsManager.totalPlayTimeSeconds) else null
+
+    private var lastTide: TidePhase? = null
+    private var clicksThisTide = 0
+
+    /** Una vez por segundo: al cambiar de fase se aplican sus efectos y cuenta para los logros. */
+    private fun tideTick() {
+        val tide = currentTide()
+        if (tide == lastTide) return
+        val previous = lastTide
+        lastTide = tide
+        if (previous != null && tide != null) {
+            statsManager.count(AchievementStat.TIDES_PASSED)
+            statsManager.count(AchievementStat.RUN_TIDES)
+            // Una Marea Baja entera sin un solo clic
+            if (previous == TidePhase.LOW && clicksThisTide == 0) statsManager.flag(AchievementStat.FEAT_STILL_LOW_TIDE)
+        }
+        clicksThisTide = 0
+        refreshEngravings()
+        recalculate()
     }
 
     /** Graba una runa en un espacio libre (si se atrapó las veces necesarias). */
@@ -1504,6 +1551,8 @@ class GameEngine @Inject constructor(
             deliriumMultiplier = deliriumMultiplier,
             earlyPacts = earlyPacts(),
             madness = if (madnessRevealed()) madness.value else null,
+            tide = currentTide(),
+            tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
             collapseSeconds = collapseSeconds,
             possessedBuilding = possessedBuildingId,
             runeSlots = runeSlots(),

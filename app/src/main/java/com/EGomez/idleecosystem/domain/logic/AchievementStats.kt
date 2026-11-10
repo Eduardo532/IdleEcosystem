@@ -56,6 +56,8 @@ object AchievementStat {
     const val ENGRAVED_KINDS = "engraved_kinds"
     /** Medidor de Locura (v0.17.3): el valor actual (se guarda como contador). */
     const val MADNESS = "madness"
+    /** Fase de la Marea actual: 0 alta, 1 baja, 2 muerta (v0.17.4). */
+    const val TIDE_PHASE = "tide_phase"
     /** "owned.b_temple": unidades de un edificio. */
     const val OWNED_PREFIX = "owned."
 
@@ -65,7 +67,7 @@ object AchievementStat {
         ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED,
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
-        TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS
+        TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE
     )
 
     // --- Contadores guardados ---
@@ -123,6 +125,15 @@ object AchievementStat {
     const val RUN_COLLAPSES = "run.collapses"
     const val FEAT_STEEL_NERVES = "feat.steel_nerves"
     const val FEAT_EDGE = "feat.edge99"
+
+    // --- Fases de la Marea (v0.17.4) ---
+    const val TIDES_PASSED = "tides_passed"
+    const val RUN_TIDES = "run.tides"
+    const val TIDE_HIGH_RUNES = "tide.high_runes"
+    const val TIDE_DEAD_RITUALS = "tide.dead_rituals"
+    const val TIDE_HIGH_CONVERGENCE = "tide.high_convergence"
+    const val FEAT_STILL_LOW_TIDE = "feat.still_low_tide"
+    const val FEAT_TSUNAMI = "feat.tsunami"
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -133,6 +144,7 @@ object AchievementStat {
         PATHS_ABANDONED, FEAT_SILENT_LIFE, FEAT_FAST_15, FEAT_FAST_5, FEAT_ASCETIC, FEAT_BLIND,
         FEAT_BLANK_MIND, FEAT_LONG_PATH, FEAT_CHAOS_20, FEAT_CHAOS_1, FEAT_TRIAL_FAST, TRIALS_STARTED,
         MAX_MADNESS, MAX_MADNESS_STREAK, MADNESS_COLLAPSES, MADNESS_OMENS, RUN_COLLAPSES, FEAT_STEEL_NERVES, FEAT_EDGE,
+        TIDES_PASSED, RUN_TIDES, TIDE_HIGH_RUNES, TIDE_DEAD_RITUALS, TIDE_HIGH_CONVERGENCE, FEAT_STILL_LOW_TIDE, FEAT_TSUNAMI,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )

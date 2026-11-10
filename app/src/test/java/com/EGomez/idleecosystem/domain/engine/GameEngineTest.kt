@@ -28,6 +28,7 @@ import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
@@ -472,7 +473,18 @@ class GameEngineTest {
 
         engine.ascend()
 
-        await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        val buildings = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        assertEquals(10, buildings.first { it.id == "b_notes" }.amountOwned)
+    }
+
+    @Test
+    fun `the tide appears with the tenth ascension and follows play time`() = runBlocking {
+        assertEquals(null, engine.economy.value.tide)
+        stats.totalPrestiges = 10
+        stats.totalPlayTimeSeconds = 650 // ya en la Marea Baja
+        val economy = await(engine.economy) { it.tide != null }
+        assertEquals(TidePhase.LOW, economy.tide)
+        assertTrue(economy.tideSecondsLeft in 1..600)
     }
 
     @Test

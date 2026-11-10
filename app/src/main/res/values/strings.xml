@@ -287,4 +287,10 @@
     <string name="madness_notice_collapse">☠ COLAPSO: pierdes tus potenciadores</string>
     <string name="madness_notice_possessed">☠ %1$s está poseído</string>
     <string name="madness_notice_echoes">☠ Tus Ecos se dispersan: -%1$s</string>
+    <string name="tide_bar">🌊 %1$s · %2$s</string>
+    <string name="tide_next">Luego: %1$s</string>
+    <string name="tide_title">Fases de la Marea</string>
+    <string name="tide_intro">La Marea cambia cada 10 minutos de juego, en este orden. Solo avanza mientras juegas.</string>
+    <string name="tide_madness_gain">La Locura sube %1$s</string>
+    <string name="tide_madness_decay">La Locura baja %1$s más rápido</string>
 </resources>

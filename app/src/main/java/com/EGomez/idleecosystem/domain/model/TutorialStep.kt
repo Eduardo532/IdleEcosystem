@@ -210,5 +210,12 @@ enum class TutorialStep(
         "El Medidor de Locura",
         "Tu mente ya no es la de antes. La barra de Locura sube cuando juegas fuerte (clics, runas, rituales) y baja sola con el tiempo. Cada punto da +1% de producción, pero desde la mitad llegan presagios y al 100% la mente colapsa: pierdes tus potenciadores y produces la mitad un minuto. Tócala para ver los detalles; la Letanía de Calma la baja de golpe.",
         "Al tener 5 Ascensiones"
+    ),
+
+    TIDES(
+        "tides",
+        "Fases de la Marea",
+        "El mar del fondo del mundo empezó a moverse. Cada 10 minutos de juego cambia la Marea: la Alta trae más runas y eventos (y más Locura), la Baja da más producción y calma, y la Muerta abarata los rituales. Toca el indicador para ver las tres y planea cuándo usar cada cosa.",
+        "Al tener 10 Ascensiones"
     )
 }

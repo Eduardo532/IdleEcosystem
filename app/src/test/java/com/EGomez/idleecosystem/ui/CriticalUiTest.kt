@@ -28,6 +28,10 @@ import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.ui.screens.main.components.TrialList
 import com.EGomez.idleecosystem.ui.screens.main.components.RuneAltar
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
+import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
+import com.EGomez.idleecosystem.ui.screens.main.components.TideInfoDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.TIDE_INDICATOR_TAG
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.ui.screens.main.components.MADNESS_METER_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
@@ -372,6 +376,20 @@ class CriticalUiTest {
         assertEquals(1, opened)
         collapse = 42
         compose.onNodeWithText("COLAPSO", substring = true).assertExists()
+    }
+
+    @Test
+    fun `the tide indicator shows the phase and opens the three phases`() {
+        var showInfo by mutableStateOf(false)
+        compose.setContent {
+            TideIndicator(TidePhase.HIGH, 272) { showInfo = true }
+            if (showInfo) TideInfoDialog(TidePhase.HIGH) { showInfo = false }
+        }
+
+        compose.onNodeWithText("🌊 Marea Alta · 4:32").assertExists()
+        compose.onNodeWithText("Luego: Marea Baja").assertExists()
+        compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
+        compose.onNodeWithText("Marea Muerta").assertExists()
     }
 
     @Test

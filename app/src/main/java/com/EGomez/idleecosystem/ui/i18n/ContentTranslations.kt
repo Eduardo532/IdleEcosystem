@@ -21,7 +21,53 @@ object ContentTranslations {
 
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
-            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: ladderName(text)
+            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?: ladderName(text)
+
+    /** El Panteón ([Pact]): nombres, epítetos y mitos. */
+    private val PACTS = mapOf(
+        "Cthulhu" to "Cthulhu",
+        "Hastur" to "Hastur",
+        "Tulzscha" to "Tulzscha",
+        "Ubbo-Sathla" to "Ubbo-Sathla",
+        "Abhoth" to "Abhoth",
+        "Nug" to "Nug",
+        "Yeb" to "Yeb",
+        "Daoloth" to "Daoloth",
+        "Ghroth" to "Ghroth",
+        "Shub-Niggurath" to "Shub-Niggurath",
+        "Yog-Sothoth" to "Yog-Sothoth",
+        "Nyarlathotep" to "Nyarlathotep",
+        "Azathoth" to "Azathoth",
+        "Sin Pacto" to "No Pact",
+        "La Mente Propia" to "The Unclaimed Mind",
+        "Ningún dios reclama tu alma en esta vida. Sin favores ni deudas, lo que comprendes es solo tuyo, y tu Cordura vuelve más entera de cada Ascensión." to "No god claims your soul in this life. With no favors and no debts, what you understand is yours alone, and your Sanity returns more whole from each Ascension.",
+        "El Durmiente de R'lyeh" to "The Sleeper of R'lyeh",
+        "Yace muerto pero soñando en la ciudad hundida de R'lyeh. Sus sueños se filtran en las mentes sensibles mientras duermen: con su pacto, el culto avanza cuando tú no miras. Pero su letargo pesa sobre el mundo despierto." to "He lies dead but dreaming in the sunken city of R'lyeh. His dreams seep into sensitive minds while they sleep: with his pact, the cult advances when you are not looking. But his slumber weighs on the waking world.",
+        "El Rey de Amarillo" to "The King in Yellow",
+        "El Innombrable reina en Carcosa, junto al lago de Hali. Quien lee la obra que lleva su nombre gana una lucidez terrible y febril, y paga con la razón: la mente que vuelve de Carcosa nunca vuelve entera." to "The Unspeakable One reigns in Carcosa, by the lake of Hali. Whoever reads the play that bears his name gains a terrible, feverish lucidity, and pays with reason: the mind that returns from Carcosa never returns whole.",
+        "La Llama Verde" to "The Green Flame",
+        "Danza en la corte de Azathoth y arde en los festivales secretos del solsticio. Su fuego verde prolonga cada rito, pero consume los ecos antes de que lleguen a oírse." to "It dances at the court of Azathoth and burns in the secret solstice festivals. Its green fire prolongs every rite, but consumes the echoes before they can be heard.",
+        "La Fuente Primigenia" to "The Primordial Source",
+        "La masa informe de la que brotó toda la vida de la Tierra, guardiana de las tablillas de los Dioses Arquetípicos. Bajo su pacto, lo antiguo y simple florece; lo complejo vuelve, poco a poco, a la fuente." to "The formless mass from which all life on Earth sprang, keeper of the tablets of the Elder Gods. Under its pact, the old and simple flourish; the complex slowly returns to the source.",
+        "El Padre de la Inmundicia" to "The Father of Uncleanliness",
+        "Una masa gris que engendra sin cesar criaturas deformes en las cavernas de N'kai, y devora a muchas de las que pare. Con su pacto todo se multiplica más barato, aunque parte de lo creado vuelve a sus fauces." to "A grey mass that endlessly spawns misshapen creatures in the caverns of N'kai, and devours many of those it births. With its pact everything multiplies more cheaply, though part of what is created returns to its maw.",
+        "El Primogénito" to "The Firstborn",
+        "Gemelo de Yeb, hijo de la Cabra Negra y, según los textos, padre de Cthulhu. Los cultos lo veneran en ritos multitudinarios: su favor fortalece a los fieles y a sus templos, no a la mano que investiga." to "Twin of Yeb, child of the Black Goat and, according to the texts, father of Cthulhu. Cults worship him in crowded rites: his favor strengthens the faithful and their temples, not the hand that researches.",
+        "El de las Nieblas Susurrantes" to "Of the Whispering Mists",
+        "El otro gemelo, envuelto en nieblas que susurran. Guía la mano del que busca y le acerca los ecos del Vacío, pero su niebla oculta y entorpece el trabajo del culto." to "The other twin, wrapped in whispering mists. He guides the seeker's hand and brings the echoes of the Void closer, but his mist hides and hinders the cult's work.",
+        "El que Rasga los Velos" to "The Render of the Veils",
+        "Una geometría imposible que ve todas las dimensiones a la vez; los astrólogos lo invocan para ver el pasado y el futuro. Bajo su mirada aparecen runas y presagios por todas partes, pero mirarlo de frente quiebra la mente del culto." to "An impossible geometry that sees every dimension at once; astrologers invoke it to see the past and the future. Under its gaze runes and omens appear everywhere, but looking at it directly breaks the cult's mind.",
+        "El Heraldo" to "The Harbinger",
+        "Un astro errante que recorre el cosmos cantando la Música de las Esferas, el canto que despierta a lo que duerme. Su paso trae prodigios más seguidos y más fuertes, pero su canción también despierta la locura." to "A wandering star that roams the cosmos singing the Music of the Spheres, the song that wakes what sleeps. Its passage brings wonders more often and stronger, but its song also wakes madness.",
+        "La Cabra Negra de los Mil Retoños" to "The Black Goat of a Thousand Young",
+        "La fertilidad monstruosa del cosmos, madre de mil crías. Todo lo que se construye bajo su pacto se multiplica y abunda; a cambio, sus cultos exigen sacrificios mayores y la mano del investigador queda olvidada entre la multitud." to "The monstrous fertility of the cosmos, mother of a thousand young. Everything built under her pact multiplies and abounds; in return, her cults demand greater sacrifices and the researcher's hand is forgotten in the crowd.",
+        "La Llave y la Puerta" to "The Key and the Gate",
+        "Coexiste con todo el tiempo y todo el espacio: es la puerta, la llave y el guardián del umbral. Bajo su pacto, el tiempo ausente rinde como nunca y los ritos se renuevan antes, pero las runas, atadas al instante, rara vez cruzan." to "It is coterminous with all time and all space: the gate, the key and the guardian of the threshold. Under its pact, time away yields as never before and rites renew sooner, but the runes, bound to the moment, rarely cross over.",
+        "El Caos Reptante" to "The Crawling Chaos",
+        "El alma y mensajero de los Dioses Exteriores, el único que camina entre los hombres con mil máscaras. Su pacto premia al que está presente: la mano, las runas y los presagios se multiplican, pero lo que no se ve no avanza." to "The soul and messenger of the Outer Gods, the only one who walks among men behind a thousand masks. His pact rewards those who are present: the hand, the runes and the omens multiply, but what is unseen does not advance.",
+        "El Sultán Demoníaco" to "The Daemon Sultan",
+        "El caos nuclear en el centro de todo, ciego e idiota, arrullado por flautas monótonas. Su pacto es una fuerza sin propósito: la producción salta al azar entre x1 y x20 cada medio minuto. Ningún rito lo conmueve, y todos cuestan el doble." to "The nuclear chaos at the center of everything, blind and idiot, lulled by monotonous flutes. His pact is a force without purpose: production jumps at random between x1 and x20 every half minute. No rite moves him, and all of them cost double."
+    )
 
     /** Sinergias entre edificios vecinos ([BuildingSynergies]). */
     private val SYNERGIES = mapOf(
@@ -165,6 +211,8 @@ object ContentTranslations {
         "Los Ecos se disuelven en saber: 2 minutos de producción al instante." to "Echoes dissolve into knowledge: 2 minutes of production at once.",
         "Grieta Temporal" to "Temporal Rift",
         "Un instante de eficiencia imposible. x20 a la producción." to "An instant of impossible efficiency. x20 production.",
+        "Convergencia" to "Convergence",
+        "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000)." to "For one minute boosts multiply each other instead of adding up (capped at x1,000).",
         "Vigilia Eterna" to "Eternal Vigil",
         "Dos minutos sin dormir, sin parpadear. x6 a la producción." to "Two minutes without sleep, without blinking. x6 production."
     )
@@ -203,7 +251,13 @@ object ContentTranslations {
         "Singularidad" to "Singularity",
         "Multiplicador masivo de Cordura." to "Massive Sanity multiplier.",
         "Ascensión Cósmica" to "Cosmic Ascension",
-        "El Multiplicador Supremo." to "The Supreme Multiplier."
+        "El Multiplicador Supremo." to "The Supreme Multiplier.",
+        "Senda de la Mano" to "Path of the Hand",
+        "Senda excluyente. +300% de clic por nivel." to "Exclusive path. +300% click per level.",
+        "Senda del Engranaje" to "Path of the Gear",
+        "Senda excluyente. +100% a todos los edificios por nivel." to "Exclusive path. +100% to all buildings per level.",
+        "Senda del Sueño" to "Path of the Dream",
+        "Senda excluyente. +300% de ganancia sin conexión por nivel." to "Exclusive path. +300% offline gains per level."
     )
 
     private val RUNES: Map<String, String> = mapOf(
@@ -252,6 +306,13 @@ object ContentTranslations {
     )
 
     private val TUTORIAL: Map<String, String> = mapOf(
+        "La Mirada" to "The Gaze",
+        "Tu primera Ascensión te dio un punto de Atención. Toca la barra ◎ Atención, sobre la lista de edificios, y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos." to "Your first Ascension gave you a point of Attention. Tap the ◎ Attention bar, above the building list, and place it on a building (+25% to its production), on the Dream (offline progress) or on the Vigil (more runes). Moving it is free, and with more Ascensions you will have more points.",
+        "Las Tres Sendas" to "The Three Paths",
+        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella." to "At the end of the click, building and dream branches of the Map of Madness wait three Paths. You can only walk one: once you buy it, the other two are sealed. If you want to change, you can abandon it when you Ascend and recover all the Sanity you put into it.",
+        "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez." to "You have enough Echoes for the Convergence. For one minute your boosts multiply instead of adding up, up to x1,000: invoke it when you have runes and rituals active at the same time.",
+        "Pactos con los Dioses" to "Pacts with the Gods",
+        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos." to "When you Ascend you can seal a pact for your next life. Each god grants advantages and demands a price according to its myth; 'No Pact' leaves you more Sanity. The Pantheon tab shows the gods you can already invoke and, with more Ascensions, more powerful ones will appear.",
         "Hitos de Ascensión" to "Ascension Milestones",
         "Cada Ascensión te acerca a un hito. Con 1 empiezas cada vida con 10 Sinapsis, y más adelante conservarás mejoras y desbloquearás autocompradores. La confirmación de Ascender muestra la lista completa." to "Every Ascension brings you closer to a milestone. With 1 you start every life with 10 Synapses, and later you will keep upgrades and unlock autobuyers. The Ascend confirmation shows the full list.",
         "Manos Ajenas" to "Other Hands",

@@ -17,6 +17,10 @@ class RitualManager @Inject constructor() {
     private val _rituals = MutableStateFlow<List<Ritual>>(emptyList())
     val rituals: StateFlow<List<Ritual>> = _rituals.asStateFlow()
 
+    companion object {
+        const val CONVERGENCE_ID = "rit_convergence"
+    }
+
     init {
         initializeRituals()
     }
@@ -64,6 +68,16 @@ class RitualManager @Inject constructor() {
                 effectValue = 20.0
             ),
             Ritual(
+                id = CONVERGENCE_ID,
+                name = "Convergencia",
+                description = "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000).",
+                baseCost = BigDecimal("75"),
+                durationSeconds = 60,
+                cooldownSeconds = 1800,
+                effectType = RitualEffectType.CONVERGENCE,
+                effectValue = BuffMath.CONVERGENCE_CAP
+            ),
+            Ritual(
                 id = "rit_eternal_vigil",
                 name = "Vigilia Eterna",
                 description = "Dos minutos sin dormir, sin parpadear. x6 a la producción.",
@@ -96,11 +110,14 @@ class RitualManager @Inject constructor() {
             }
             remaining -= current.timeRemaining
             current = when (current.state) {
-                RitualState.ACTIVE -> current.copy(
-                    state = RitualState.COOLDOWN,
-                    timeRemaining = current.cooldownSeconds,
-                    totalTimeForProgress = current.cooldownSeconds
-                )
+                RitualState.ACTIVE -> {
+                    val cooldown = scaled(current.cooldownSeconds, cooldownMultiplier)
+                    current.copy(
+                        state = RitualState.COOLDOWN,
+                        timeRemaining = cooldown,
+                        totalTimeForProgress = cooldown
+                    )
+                }
                 else -> current.copy(
                     state = RitualState.READY,
                     timeRemaining = 0,
@@ -111,17 +128,31 @@ class RitualManager @Inject constructor() {
         return current
     }
 
+    private var durationMultiplier = 1.0
+    private var cooldownMultiplier = 1.0
+
+    /** Aplica el pacto activo: costo, duración y recarga de los rituales. */
+    fun applyPact(cost: Double, duration: Double, cooldown: Double) {
+        durationMultiplier = duration
+        cooldownMultiplier = cooldown
+        _rituals.update { list -> list.map { it.copy(costMultiplier = cost) } }
+    }
+
+    private fun scaled(seconds: Long, multiplier: Double): Long =
+        (seconds * multiplier).toLong().coerceAtLeast(1)
+
     fun tryActivateRitual(ritualId: String, currentFunds: BigDecimal): Boolean {
         val ritual = _rituals.value.find { it.id == ritualId } ?: return false
 
-        if (ritual.state == RitualState.READY && currentFunds >= ritual.baseCost) {
+        if (ritual.state == RitualState.READY && currentFunds >= ritual.cost) {
             _rituals.update { currentList ->
                 currentList.map {
                     if (it.id == ritualId) {
+                        val duration = scaled(it.durationSeconds, durationMultiplier)
                         it.copy(
                             state = RitualState.ACTIVE,
-                            timeRemaining = it.durationSeconds,
-                            totalTimeForProgress = it.durationSeconds
+                            timeRemaining = duration,
+                            totalTimeForProgress = duration
                         )
                     } else it
                 }
@@ -134,6 +165,10 @@ class RitualManager @Inject constructor() {
     fun getActiveProductionMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.PRODUCTION_MULTIPLIER }
             .map { it.effectValue }
+
+    /** ¿Está activa la Convergencia? Entonces los potenciadores se multiplican. */
+    fun isConvergenceActive(): Boolean =
+        _rituals.value.any { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.CONVERGENCE }
 
     fun getActiveClickMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.CLICK_MULTIPLIER }

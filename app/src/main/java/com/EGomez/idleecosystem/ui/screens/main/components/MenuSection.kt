@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +36,10 @@ import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.ui.components.sigilColor
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.ui.components.AutoChip
 import com.EGomez.idleecosystem.domain.model.Building
@@ -85,6 +90,12 @@ fun MenuSection(
     onToggleAutoGrimoire: () -> Unit = {},
     onToggleAutoRitual: (String) -> Unit = {},
     onOpenAutomation: () -> Unit = {},
+    activePact: Pact = Pact.NONE,
+    chaosMultiplier: Int = 1,
+    onPactSelected: (Pact) -> Unit = {},
+    attention: Map<String, Int> = emptyMap(),
+    attentionPoints: Int = 0,
+    onOpenAttention: () -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -93,12 +104,16 @@ fun MenuSection(
     val tabs = listOf(
         stringResource(R.string.tab_research),
         if (revealed.grimoire) stringResource(R.string.tab_grimoire) else LOCKED_TITLE,
-        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE
+        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE,
+        // El Panteón se descubre junto con la Ascensión, donde se eligen los pactos
+        if (revealed.ascension) stringResource(R.string.tab_pantheon) else LOCKED_TITLE
     )
     val lockedTabText = when {
         selectedTabIndex == 1 && !revealed.grimoire ->
             stringResource(R.string.locked_grimoire, SystemReveal.GRIMOIRE_AT.toBeautifulString())
         selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
+        selectedTabIndex == 3 && !revealed.ascension ->
+            stringResource(R.string.locked_pantheon, BigDecimal("1000000").toBeautifulString())
         else -> null
     }
 
@@ -188,11 +203,21 @@ fun MenuSection(
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { onTabSelected(index) },
-                        text = { Text(title, fontWeight = FontWeight.Bold) },
+                        text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
                         selectedContentColor = ArcanePurple,
                         unselectedContentColor = Color.Gray
                     )
                 }
+            }
+
+            // Atención: barra fija sobre la lista de edificios (no se desplaza con ella)
+            if (selectedTabIndex == 0 && lockedTabText == null && attentionPoints > 0) {
+                AttentionBar(
+                    attention = attention,
+                    points = attentionPoints,
+                    buildings = buildings,
+                    onClick = onOpenAttention
+                )
             }
 
             LazyColumn(
@@ -212,6 +237,7 @@ fun MenuSection(
                                 buyMultiplier = buyMultiplier,
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
                                 milestones = buildingMilestones[building.id].orEmpty(),
+                                attentionPoints = attention[building.id] ?: 0,
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -337,6 +363,9 @@ fun MenuSection(
                         }
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
+                    3 -> {
+                        item { PantheonGallery(ascensions, activePact, onPactSelected) }
+                    }
                 }
             }
 
@@ -374,6 +403,16 @@ fun MenuSection(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // El pacto de esta vida (con Azathoth, el caos actual)
+                        if (activePact != Pact.NONE) {
+                            Text(
+                                if (activePact.effects.chaos) "${tr(activePact.godName)} · x$chaosMultiplier" else tr(activePact.godName),
+                                color = activePact.sigilColor(),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.testTag(ACTIVE_PACT_TAG)
+                            )
+                        }
                         // Cuándo conviene ascender: el punto en que la recompensa se duplica
                         if (canPrestige && doubleSanityAtFormatted != null) {
                             Text(
@@ -439,8 +478,82 @@ private const val LOCKED_TITLE = "???"
 const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
+const val ACTIVE_PACT_TAG = "active_pact"
+const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
+/** Barra fija de la Atención: puntos usados y a dónde apuntan; al tocarla abre el reparto. */
+@Composable
+private fun AttentionBar(
+    attention: Map<String, Int>,
+    points: Int,
+    buildings: List<Building>,
+    onClick: () -> Unit
+) {
+    val used = Attention.used(attention)
+    val dream = stringResource(R.string.attention_dream)
+    val vigil = stringResource(R.string.attention_vigil)
+    val names = buildings.associate { it.id to tr(it.name) }
+    val targets = attention.filterValues { it > 0 }.entries
+        .sortedByDescending { it.value }
+        .joinToString(" · ") { (id, n) ->
+            val name = when (id) {
+                Attention.DREAM -> dream
+                Attention.VIGIL -> vigil
+                else -> names[id] ?: id
+            }
+            "$name +${(n * Attention.BONUS_PER_POINT * 100).toInt()}%"
+        }
+    val free = points - used
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF221530),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (free > 0) AncientGold.copy(alpha = 0.7f) else ArcanePurple.copy(alpha = 0.35f)
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+            .testTag(ATTENTION_BAR_TAG)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("◎", color = AncientGold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.attention_bar_title, used, points),
+                    color = AncientGold,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    when {
+                        targets.isEmpty() -> stringResource(R.string.attention_bar_empty)
+                        free > 0 -> stringResource(R.string.attention_bar_free, targets, free)
+                        else -> targets
+                    },
+                    color = if (targets.isEmpty()) Color.LightGray else Color(0xFFBFA9D9),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
 @Composable
 private fun LockedSystem(requirement: String) {
     Row(

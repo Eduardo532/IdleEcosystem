@@ -9,6 +9,8 @@
 - [Eventos](Eventos)
 - [Logros](Logros)
 - [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura)
+- [Panteón](Panteon)
+- [Atención](Atencion)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

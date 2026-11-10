@@ -160,5 +160,34 @@ enum class TutorialStep(
         "Manos Ajenas",
         "Tus sectarios ya saben qué hacer. El botón 'AUTO' sobre las pestañas compra edificios solo, una unidad por segundo, sin gastar más de la mitad de tu Conocimiento. El engranaje de al lado abre el panel de automatización: qué edificios comprar y cuánto gastar.",
         "Al alcanzar el hito del autocomprador de edificios (5 Ascensiones)"
+    ),
+
+    // --- FASE 7: EL PANTEÓN (v0.16) ---
+    PACTS(
+        "pacts",
+        "Pactos con los Dioses",
+        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
+        "Al poder Ascender por primera vez"
+    ),
+
+    ATTENTION(
+        "attention",
+        "La Mirada",
+        "Tu primera Ascensión te dio un punto de Atención. Toca la barra ◎ Atención, sobre la lista de edificios, y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos.",
+        "Al tener el primer punto de Atención"
+    ),
+
+    PATHS(
+        "paths",
+        "Las Tres Sendas",
+        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
+        "Al poder comprar la primera Senda"
+    ),
+
+    CONVERGENCE(
+        "convergence",
+        "Convergencia",
+        "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez.",
+        "Al reunir 75 Ecos"
     )
 }

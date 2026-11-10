@@ -11,7 +11,9 @@ enum class RitualState {
 enum class RitualEffectType {
     PRODUCTION_MULTIPLIER,
     CLICK_MULTIPLIER,
-    INSTANT_KNOWLEDGE
+    INSTANT_KNOWLEDGE,
+    /** Mientras dura, los potenciadores temporales se multiplican en vez de sumarse. */
+    CONVERGENCE
 }
 
 data class Ritual(
@@ -28,19 +30,26 @@ data class Ritual(
     // Estado Dinámico
     val state: RitualState = RitualState.READY,
     val timeRemaining: Long = 0,
-    val totalTimeForProgress: Long = 1
+    val totalTimeForProgress: Long = 1,
+    /** Multiplicador de costo del pacto activo. */
+    val costMultiplier: Double = 1.0
 ) {
+    /** Lo que cuesta invocarlo ahora (con el pacto), redondeado hacia arriba. */
+    val cost: BigDecimal
+        get() = if (costMultiplier == 1.0) baseCost
+        else baseCost.multiply(BigDecimal.valueOf(costMultiplier)).setScale(0, java.math.RoundingMode.CEILING)
+
     /**
      * Producción que entrega, en segundos de producción base: un multiplicador xN
      * durante D segundos aporta (N - 1) x D (los potenciadores se suman); el
      * Conocimiento instantáneo aporta exactamente sus segundos. Los rituales de clic
-     * no se miden aquí.
+     * y la Convergencia (que no produce por sí sola) no se miden aquí.
      */
     val productionSeconds: Long
         get() = when (effectType) {
             RitualEffectType.PRODUCTION_MULTIPLIER -> ((effectValue - 1.0) * durationSeconds).toLong()
             RitualEffectType.INSTANT_KNOWLEDGE -> effectValue.toLong()
-            RitualEffectType.CLICK_MULTIPLIER -> 0L
+            RitualEffectType.CLICK_MULTIPLIER, RitualEffectType.CONVERGENCE -> 0L
         }
 
     fun getProgress(): Float {

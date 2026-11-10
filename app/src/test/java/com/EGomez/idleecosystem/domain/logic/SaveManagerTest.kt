@@ -77,13 +77,14 @@ class SaveManagerTest {
             prestigeUpgrades = listOf(PrestigeUpgradeSaveModel("pu_1", 2)),
             timestamp = 42L,
             statistics = StatisticsManager().getEntityForSave(),
-            completedTutorialSteps = listOf("welcome")
+            completedTutorialSteps = listOf("welcome"),
+            activePact = "hastur"
         )
 
         val json = Gson().toJson(data)
         listOf(
             "knowledge", "sanity", "echoes", "buildings", "upgrades", "achievements",
-            "prestigeUpgrades", "timestamp", "statistics", "completedTutorialSteps",
+            "prestigeUpgrades", "timestamp", "statistics", "completedTutorialSteps", "activePact",
             "amount", "isVisible", "level", "totalClicks", "runesInscribed"
         ).forEach { key -> assertTrue("Falta el campo $key", json.contains("\"$key\"")) }
 
@@ -92,5 +93,12 @@ class SaveManagerTest {
         assertEquals(4, parsed.buildings.single().amount)
         assertEquals(2, parsed.prestigeUpgrades.single().level)
         assertEquals(listOf("welcome"), parsed.completedTutorialSteps)
+        assertEquals("hastur", parsed.activePact)
+    }
+
+    @Test
+    fun `codes from before the pantheon import without a pact`() {
+        val parsed = saveManager.parseJson("""{"knowledge": 10, "buildings": []}""")!!
+        assertEquals("", parsed.activePact)
     }
 }

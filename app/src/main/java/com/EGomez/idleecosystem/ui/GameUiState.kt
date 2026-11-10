@@ -5,6 +5,7 @@ import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.domain.logic.NextGoal
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
+import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -64,6 +65,12 @@ data class GameUiState(
     /** Ascensiones totales (hitos) y automatizaciones elegidas. */
     val ascensions: Int = 0,
     val automation: AutomationSettings = AutomationSettings(),
+    /** El pacto de esta vida y el caos de Azathoth. */
+    val activePact: Pact = Pact.NONE,
+    val chaosMultiplier: Int = 1,
+    /** Reparto de la Atención y puntos disponibles. */
+    val attention: Map<String, Int> = emptyMap(),
+    val attentionPoints: Int = 0,
     /** Cordura ganada en la última Ascensión automática (aviso breve), o null. */
     val autoAscensionNotice: String? = null,
     val secretsFound: Int = 0,

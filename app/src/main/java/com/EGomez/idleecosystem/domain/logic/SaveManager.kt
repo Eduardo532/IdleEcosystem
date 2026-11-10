@@ -24,7 +24,9 @@ data class FullSaveData(
     val timestamp: Long,
     val statistics: GameStatisticsEntity,
     // Tutoriales vistos. Los códigos anteriores a la v0.11.0 no lo incluyen.
-    val completedTutorialSteps: List<String> = emptyList()
+    val completedTutorialSteps: List<String> = emptyList(),
+    // Pacto de la vida actual. Los códigos anteriores a la v0.16 no lo incluyen.
+    val activePact: String = ""
 )
 
 data class BuildingSaveModel(val id: String, val amount: Int, val isVisible: Boolean)
@@ -44,7 +46,8 @@ class SaveManager @Inject constructor() {
         achievements: List<Achievement>,
         prestigeUpgrades: List<PrestigeUpgrade>,
         statistics: GameStatisticsEntity,
-        completedTutorialSteps: List<String> = emptyList()
+        completedTutorialSteps: List<String> = emptyList(),
+        activePact: String = ""
     ): String {
         try {
             val buildingSaves = buildings.map { BuildingSaveModel(it.id, it.amountOwned, it.isVisible) }
@@ -62,7 +65,8 @@ class SaveManager @Inject constructor() {
                 prestigeUpgrades = prestigeSaves,
                 timestamp = System.currentTimeMillis(),
                 statistics = statistics,
-                completedTutorialSteps = completedTutorialSteps
+                completedTutorialSteps = completedTutorialSteps,
+                activePact = activePact
             )
 
             val jsonString = gson.toJson(saveData)
@@ -119,7 +123,8 @@ class SaveManager @Inject constructor() {
             },
             timestamp = raw.timestamp ?: System.currentTimeMillis(),
             statistics = raw.statistics.toEntity(),
-            completedTutorialSteps = raw.completedTutorialSteps.orEmpty().filterNotNull().distinct()
+            completedTutorialSteps = raw.completedTutorialSteps.orEmpty().filterNotNull().distinct(),
+            activePact = raw.activePact.orEmpty()
         )
     }
 
@@ -169,7 +174,8 @@ private data class RawSaveData(
     val prestigeUpgrades: List<RawPrestigeUpgrade?>?,
     val timestamp: Long?,
     val statistics: RawStatistics?,
-    val completedTutorialSteps: List<String?>?
+    val completedTutorialSteps: List<String?>?,
+    val activePact: String?
 )
 
 private data class RawBuilding(val id: String?, val amount: Int?, val isVisible: Boolean?)

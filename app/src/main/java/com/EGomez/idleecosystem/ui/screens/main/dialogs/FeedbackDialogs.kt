@@ -8,12 +8,25 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.core.math.toBeautifulString
+import com.EGomez.idleecosystem.ui.components.PactSigil
+import com.EGomez.idleecosystem.ui.components.sigilColor
+import com.EGomez.idleecosystem.ui.i18n.tr
+import com.EGomez.idleecosystem.ui.screens.main.components.PactEffectList
+import com.EGomez.idleecosystem.ui.screens.main.components.pactLines
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +70,16 @@ fun AscendDialog(
     onDismiss: () -> Unit,
     pacing: AscendPacing? = null,
     /** Ascensiones ya hechas (null = no mostrar los hitos). */
-    ascensions: Int? = null
+    ascensions: Int? = null,
+    /** Pactos que se pueden elegir para la próxima vida (vacío = no mostrar). */
+    pacts: List<Pact> = emptyList(),
+    selectedPact: Pact = Pact.NONE,
+    onPactSelected: (Pact) -> Unit = {},
+    buildingNames: Map<String, String> = emptyMap(),
+    /** La Senda del Mapa de Locura que se recorre (null = ninguna). */
+    activePath: PrestigeUpgrade? = null,
+    abandonPath: Boolean = false,
+    onAbandonPathChanged: (Boolean) -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -83,6 +105,8 @@ fun AscendDialog(
                         Text(stringResource(R.string.ascend_double, pacing.doubleGain, pacing.doubleAt), color = Color.Gray, fontSize = 12.sp)
                     }
                 }
+                if (pacts.isNotEmpty()) PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
+                if (activePath != null) AbandonPathOption(activePath, abandonPath, onAbandonPathChanged)
                 if (ascensions != null) AscensionMilestoneList(ascensions)
             }
         },
@@ -100,6 +124,36 @@ fun AscendDialog(
         }
     )
 }
+
+/** Cambiar de Senda solo se puede al Ascender: se abandona y se recupera su Cordura. */
+@Composable
+private fun AbandonPathOption(path: PrestigeUpgrade, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onChange(!checked) }
+            .testTag(ABANDON_PATH_TAG)
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onChange,
+            colors = CheckboxDefaults.colors(checkedColor = AncientGold, uncheckedColor = Color.Gray, checkmarkColor = Color.Black)
+        )
+        Column {
+            Text(
+                stringResource(R.string.ascend_abandon_path, tr(path.name), MadnessPaths.spent(path).toBeautifulString()),
+                color = if (checked) AncientGold else Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(stringResource(R.string.ascend_abandon_hint), color = Color.Gray, fontSize = 11.sp)
+        }
+    }
+}
+
+const val ABANDON_PATH_TAG = "abandon_path"
 
 @Composable
 fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss: () -> Unit) {
@@ -191,4 +245,42 @@ fun milestoneText(milestone: AscensionMilestone): Int = when (milestone) {
     AscensionMilestone.KEEP_SYNERGIES -> R.string.milestone_keep_synergies
     AscensionMilestone.AUTO_RITUAL -> R.string.milestone_auto_ritual
 }
+
+/** Elegir el pacto de la próxima vida, con lo que da y lo que quita el elegido. */
+@Composable
+private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Unit, buildingNames: Map<String, String>) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(stringResource(R.string.pact_choose_title), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 6.dp)
+    ) {
+        pacts.forEach { pact ->
+            val isSelected = pact == selected
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .width(64.dp)
+                    .border(
+                        width = if (isSelected) 2.dp else 1.dp,
+                        color = if (isSelected) pact.sigilColor() else Color(0xFF333333),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .clickable { onSelect(pact) }
+                    .padding(4.dp)
+                    .testTag("$PACT_CHOICE_TAG${pact.id}")
+            ) {
+                PactSigil(pact, Modifier.size(44.dp))
+                Text(tr(pact.godName), color = Color.White, fontSize = 9.sp, maxLines = 1)
+            }
+        }
+    }
+    Text("${tr(selected.godName)} — ${tr(selected.epithet)}", color = selected.sigilColor(), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+    PactEffectList(pactLines(selected.effects, buildingNames), fontSize = 11)
+}
+
+const val PACT_CHOICE_TAG = "pact_choice_"
 

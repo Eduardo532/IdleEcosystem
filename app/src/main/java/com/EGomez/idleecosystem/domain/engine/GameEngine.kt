@@ -11,8 +11,10 @@ import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.AchievementSets
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
@@ -44,6 +46,8 @@ import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.domain.model.RitualState
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.PactEffects
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
 import com.EGomez.idleecosystem.domain.model.TutorialStep
@@ -84,6 +88,12 @@ data class EconomyState(
     val revealed: SystemReveal = SystemReveal(),
     /** Ascensiones hechas en toda la partida: deciden los hitos de Ascensión. */
     val ascensions: Int = 0,
+    /** El pacto de esta vida y, con Azathoth, el multiplicador de caos actual. */
+    val activePact: Pact = Pact.NONE,
+    val chaosMultiplier: Int = 1,
+    /** Atención repartida (ya ajustada a los puntos disponibles) y puntos totales. */
+    val attention: Map<String, Int> = emptyMap(),
+    val attentionPoints: Int = 0,
     val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
 )
 
@@ -155,6 +165,11 @@ class GameEngine @Inject constructor(
     private var potentialPrestige = BigDecimal.ZERO
     private var prestigePacing = PrestigePacing()
     private var automation = AutomationSettings()
+    private var activePact = Pact.NONE
+    /** El reparto que eligió el jugador; se ajusta a los puntos al usarlo. */
+    private var wantedAttention: Map<String, Int> = emptyMap()
+    private var chaosMultiplier = 1
+    private val pact: PactEffects get() = activePact.effects
     private var costMultiplier = 1.0
 
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
@@ -240,7 +255,7 @@ class GameEngine @Inject constructor(
             val owned = buildingManager.availableBuildings.find { it.id == buildingId }?.amountOwned ?: return@post
             BuildingMilestones.amountToNext(buildingMilestones[buildingId].orEmpty(), owned)
         } else requested
-        val discount = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
+        val discount = BigDecimal.valueOf(buildingCostFactor())
         val cost = buildingManager.getCost(buildingId, amount, knowledge, discount)
         val bought = buildingManager.tryBuyBuilding(buildingId, knowledge, amount, discount)
         if (bought > 0) {
@@ -300,13 +315,20 @@ class GameEngine @Inject constructor(
         if (performRitual(ritualId)) soundManager.playSound(SoundType.BUY)
     }
 
+    /** Reparte la Atención. Lo que no alcance con los puntos actuales se ignora. */
+    fun setAttention(allocation: Map<String, Int>) = post {
+        wantedAttention = allocation
+        applyPactModifiers()
+        recalculate()
+    }
+
     /** Elige qué automatizaciones están encendidas (solo actúan con su hito alcanzado). */
     fun setAutomation(settings: AutomationSettings) = post { automation = settings }
 
     private fun performRitual(ritualId: String): Boolean {
         if (ritualManager.tryActivateRitual(ritualId, echoes)) {
             val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return false
-            echoes = echoes.subtract(ritual.baseCost)
+            echoes = echoes.subtract(ritual.cost)
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
                 // Producción base, igual que los saltos de tiempo de las runas: los
                 // potenciadores activos no se multiplican sobre este regalo
@@ -344,7 +366,7 @@ class GameEngine @Inject constructor(
         if (automation.autoAscend && AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions) &&
             AutomationSettings.shouldAutoAscend(potentialPrestige, prestigeManager.residualSanity)
         ) {
-            performAscension()?.let { _effects.trySend(EngineEffect.AutoAscended(it)) }
+            performAscension(activePact)?.let { _effects.trySend(EngineEffect.AutoAscended(it)) }
             return
         }
         if (changed) requestSave()
@@ -353,7 +375,7 @@ class GameEngine @Inject constructor(
     /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
     private fun autoBuyBuildings(): Boolean {
         var budget = knowledge.multiply(BigDecimal.valueOf(automation.budgetFraction))
-        val discount = BigDecimal.valueOf(runeManager.getCostReductionMultiplier())
+        val discount = BigDecimal.valueOf(buildingCostFactor())
         var bought = false
         val candidates = buildingManager.availableBuildings
             .filter { it.isVisible && it.id !in automation.excludedBuildings }
@@ -409,21 +431,31 @@ class GameEngine @Inject constructor(
         eventScheduler.close(System.currentTimeMillis())
     }
 
-    fun ascend() = post {
-        if (performAscension() != null) soundManager.playSound(SoundType.BUY)
+    /**
+     * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
+     * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
+     */
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(): BigDecimal? {
+    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
-            .multiply(prestigeShopManager.getPrestigeGainMultiplier())
+            .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
+        if (abandonPath) {
+            prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
+        }
 
         // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
         val ascensions = statsManager.totalPrestiges
+        // El pacto de la vida nueva (uno bloqueado no se puede elegir)
+        setPact(if (nextPact.isUnlocked(ascensions)) nextPact else Pact.NONE)
         buildingManager.resetForPrestige()
         upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, ascensions) })
         if (AscensionMilestone.STARTING_SYNAPSES.isReached(ascensions)) {
@@ -453,6 +485,7 @@ class GameEngine @Inject constructor(
         runeManager.hideRune()
         ritualManager.reset()
         eventScheduler.clearBuff()
+        setPact(Pact.NONE)
 
         recalculate()
         requestSave(replace = true)
@@ -478,6 +511,7 @@ class GameEngine @Inject constructor(
             upgrade.level = data.prestigeUpgrades.find { it.id == upgrade.id }?.level ?: 0
         }
         statsManager.loadFromEntity(data.statistics)
+        setPact(Pact.fromId(data.activePact))
 
         // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
         tutorialManager.markStepsAsCompleted(TutorialProgress.stepsSeenIn(data))
@@ -496,7 +530,8 @@ class GameEngine @Inject constructor(
             achievementManager.availableAchievements,
             prestigeShopManager.upgrades,
             statsManager.getEntityForSave(),
-            tutorialManager.getCompletedStepsList()
+            tutorialManager.getCompletedStepsList(),
+            activePact.id
         )
         ExportedSave(
             code = code,
@@ -631,6 +666,9 @@ class GameEngine @Inject constructor(
             ritualManager.restore(saved.rituals, elapsedSeconds)
         }
 
+        // El pacto de esta vida (las partidas anteriores a la v0.16 no tienen: Sin pacto)
+        setPact(Pact.fromId(entity?.activePact))
+
         isLoaded = true
         recalculate()
 
@@ -647,6 +685,8 @@ class GameEngine @Inject constructor(
         // Producción base: los potenciadores temporales no se extienden al tiempo fuera
         val gains = baseProductionPerSecond
             .multiply(prestigeShopManager.getOfflinePrestigeMultiplier())
+            .multiply(BigDecimal.valueOf(pact.offline))
+            .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal(diffSeconds))
 
         if (gains.signum() > 0) {
@@ -688,6 +728,7 @@ class GameEngine @Inject constructor(
         statsManager.trackPlayTime(1)
         statsManager.trackProductionPeak(productionPerSecond)
         ritualManager.tick(1)
+        rollChaos()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -801,6 +842,17 @@ class GameEngine @Inject constructor(
         val ascensions = statsManager.totalPrestiges
         if (ascensions >= 1) tutorialManager.triggerStep(TutorialStep.ASCENSION_MILESTONES)
         if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
+        // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
+        if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
+        if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
+        // Las Sendas, cuando alguna ya se puede comprar
+        val shop = prestigeShopManager.upgrades
+        val pathOpen = shop.any { node ->
+            MadnessPaths.isPath(node.id) && shop.any { it.id == node.parentId && it.level > 0 }
+        }
+        if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
+        val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
+        if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
@@ -813,7 +865,50 @@ class GameEngine @Inject constructor(
         sanity = prestigeManager.residualSanity
     )
 
-    private fun echoChance(): Double = BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()
+    private fun echoChance(): Double = (BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()) * pact.echoChance
+
+    // =====================================================================
+    // PACTOS
+    // =====================================================================
+
+    /** Cambia el pacto de la vida actual y aplica sus reglas a runas, eventos y rituales. */
+    private fun setPact(newPact: Pact) {
+        activePact = newPact
+        chaosMultiplier = 1
+        applyPactModifiers()
+    }
+
+    private fun effectiveAttention(): Map<String, Int> =
+        Attention.clamp(wantedAttention, Attention.available(statsManager.totalPrestiges))
+
+    private fun attentionMultiplier(target: String): Double =
+        Attention.multiplier(effectiveAttention()[target] ?: 0)
+
+    private fun applyPactModifiers() {
+        // Las runas: el pacto y la Atención puesta en la Vigilia
+        runeManager.spawnFrequency = pact.runeFrequency * attentionMultiplier(Attention.VIGIL)
+        eventScheduler.frequencyMultiplier = pact.eventFrequency
+        eventScheduler.buffPower = pact.eventBuffPower
+        ritualManager.applyPact(pact.ritualCost, pact.ritualDuration, pact.ritualCooldown)
+    }
+
+    /** Azathoth: la producción cambia al azar cada [PactEffects.CHAOS_PERIOD_SECONDS]. */
+    private fun rollChaos() {
+        if (!pact.chaos) return
+        chaosSeconds++
+        if (chaosSeconds % PactEffects.CHAOS_PERIOD_SECONDS != 0) return
+        chaosMultiplier = Random.nextInt(PactEffects.CHAOS_MIN, PactEffects.CHAOS_MAX + 1)
+        recalculate()
+    }
+
+    private var chaosSeconds = 0
+
+    /** El factor de costo de los edificios: Runa de Barrera y pacto. */
+    private fun buildingCostFactor(): Double = runeManager.getCostReductionMultiplier() * pact.buildingCost
+
+    /** Lo que multiplica la Cordura ganada al Ascender: Mapa de Locura y pacto de esta vida. */
+    private fun sanityGainMultiplier(): BigDecimal =
+        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(pact.sanityGain))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
 
@@ -845,41 +940,51 @@ class GameEngine @Inject constructor(
         val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
         val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
         val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
-        costMultiplier = runeManager.getCostReductionMultiplier()
+        costMultiplier = buildingCostFactor()
+        val pactProduction = BigDecimal.valueOf(pact.production * if (pact.chaos) chaosMultiplier else 1)
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
-        val temporaryMult = BuffMath.additive(
+        // Con el ritual Convergencia activo se MULTIPLICAN (con tope).
+        val convergence = ritualManager.isConvergenceActive()
+        val temporaryMult = BuffMath.combine(
             listOf(eventScheduler.buffMultiplier) +
                 ritualManager.getActiveProductionMultipliers() +
-                runeManager.getActiveProductionMultipliers()
+                runeManager.getActiveProductionMultipliers(),
+            convergence
         )
-        val temporaryClickMult = BuffMath.additive(
-            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers()
+        val temporaryClickMult = BuffMath.combine(
+            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers(),
+            convergence
         )
 
         globalMultiplier = upgradesGlobal
             .multiply(prestigeGlobal)
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
+            .multiply(pactProduction)
             .multiply(temporaryMult)
             .round(MathContext.DECIMAL64)
 
         val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
         val completedSets = AchievementSets.completed(achievementManager.availableAchievements)
+        val attention = effectiveAttention()
         val buildings = buildingManager.availableBuildings
         buildings.forEachIndexed { index, building ->
             val setMult = AchievementSets.multiplier(building.id, completedSets)
+                .multiply(BigDecimal.valueOf(Attention.multiplier(attention[building.id] ?: 0)))
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
                     .multiply(temporaryClickMult)
                     .multiply(setMult)
+                    .multiply(BigDecimal.valueOf(pact.click))
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id)
                     .multiply(upgradeManager.getSynergyMultiplier(building.id, buildings))
                     .multiply(prestigeShopManager.getBuildingTierMultiplier(index))
                     .multiply(setMult)
+                    .multiply(BigDecimal.valueOf(pact.buildingMultiplier(building.id)))
             }
             building.currentMultiplier = specificMult.multiply(globalMultiplier, MathContext.DECIMAL64)
         }
@@ -889,7 +994,7 @@ class GameEngine @Inject constructor(
             productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
         } else productionPerSecond
 
-        val gainMultiplier = prestigeShopManager.getPrestigeGainMultiplier()
+        val gainMultiplier = sanityGainMultiplier()
         potentialPrestige = prestigeManager.calculatePotentialPrestige(knowledgeThisRun()).multiply(gainMultiplier)
         // Una vez por segundo basta: solo cambia al cruzar un punto de Cordura
         prestigePacing = prestigeManager.pacing(knowledgeThisRun(), gainMultiplier)
@@ -941,6 +1046,10 @@ class GameEngine @Inject constructor(
             buildingCostMultiplier = costMultiplier,
             revealed = currentReveal(),
             ascensions = statsManager.totalPrestiges,
+            activePact = activePact,
+            chaosMultiplier = chaosMultiplier,
+            attention = effectiveAttention(),
+            attentionPoints = Attention.available(statsManager.totalPrestiges),
             echoChance = echoChance()
         )
     }
@@ -973,7 +1082,8 @@ class GameEngine @Inject constructor(
         upgrades = upgradeManager.availableUpgrades.map { UpgradeEntity(it.id, it.isBought) },
         unlockedAchievements = achievementManager.availableAchievements.filter { it.isUnlocked }.map { AchievementEntity(it.id, true) },
         prestigeUpgrades = prestigeShopManager.upgrades.map { PrestigeUpgradeEntity(it.id, it.level) },
-        statistics = statsManager.getEntityForSave()
+        statistics = statsManager.getEntityForSave(),
+        activePact = activePact.id
     )
 
     /** Lee un número guardado como texto; un valor corrupto ya no crashea la app al iniciar. */

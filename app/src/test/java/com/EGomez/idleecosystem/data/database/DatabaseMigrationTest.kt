@@ -60,6 +60,8 @@ class DatabaseMigrationTest {
                 assertEquals("3", state.echoes)
                 assertTrue(state.tutorialEnabled)
                 assertEquals("", state.completedTutorialSteps)
+                // v11: el pacto de la vida actual, vacío en partidas anteriores
+                assertEquals("", state.activePact)
 
                 assertEquals(12, dao.getAllBuildings().single { it.buildingId == "b_notes" }.amountOwned)
                 assertTrue(dao.getAllUpgrades().single { it.upgradeId == "u_click_1" }.isBought)

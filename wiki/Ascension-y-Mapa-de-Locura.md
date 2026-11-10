@@ -17,6 +17,8 @@ Ascender **reinicia la partida** a cambio de **Cordura Residual**, una moneda pe
 
 Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimiento**. La confirmación de Ascender *(v0.14)* muestra lo generado en esta vida, cuándo llega el siguiente punto y cuánto falta para duplicar. El panel de Cordura también indica cuándo se duplica.
 
+Al Ascender también eliges el **pacto** de tu próxima vida (ver [Panteón](Panteon)) y, si recorres una **Senda**, puedes abandonarla (ver [Sendas](#sendas-v0162)).
+
 ### Qué se pierde y qué se conserva
 
 | Se pierde | Se conserva |
@@ -59,7 +61,7 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 
 ## Mapa de Locura
 
-La tienda de Cordura: una constelación de **17 nodos**. Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
+La tienda de Cordura: una constelación de **20 nodos** (17 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
 
@@ -86,6 +88,18 @@ La tienda de Cordura: una constelación de **17 nodos**. Cada nodo se sube de ni
 | Ascensión Cósmica | Producción global | +100 % | 5000 | x5.0 | Omnisciencia |
 
 Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %). Entre nodos distintos, los bonos se multiplican.
+
+### Sendas *(v0.16.2)*
+
+Al final de las ramas de clic, edificios y sueño hay tres nodos con anillo dorado: las **Sendas**. Son **excluyentes**: en cuanto una tiene un nivel, las otras dos quedan **selladas** (con una cruz roja) y no se pueden comprar.
+
+| Senda | Efecto | Por nivel | Costo base | Crecimiento | Requiere |
+|---|---|---|---|---|---|
+| Senda de la Mano | Clic | +300 % | 2000 | x2.5 | La Mano de Dios |
+| Senda del Engranaje | Todos los edificios | +100 % | 2000 | x2.5 | Sincronía |
+| Senda del Sueño | Ganancia sin conexión | +300 % | 2000 | x2.5 | Eternidad en un Segundo |
+
+**Cambiar de Senda:** solo al Ascender. La confirmación muestra la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
 
 ## Progreso sin conexión
 

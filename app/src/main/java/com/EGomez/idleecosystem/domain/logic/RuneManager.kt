@@ -66,6 +66,9 @@ class RuneManager @Inject constructor(
     private val SPAWN_COOLDOWN_SECONDS = 40
     private val SPAWN_CHANCE_PER_TICK = 0.001f
 
+    /** Frecuencia de las runas según el pacto: escala la espera y la probabilidad. */
+    var spawnFrequency: Double = 1.0
+
     fun tick(deltaMillis: Long) {
         val currentTime = System.currentTimeMillis()
 
@@ -89,8 +92,8 @@ class RuneManager @Inject constructor(
             timeSinceLastRune += deltaMillis
             if (forceNextSpawn) {
                 spawnRune()
-            } else if (timeSinceLastRune >= SPAWN_COOLDOWN_SECONDS * 1000) {
-                if (Random.nextFloat() < SPAWN_CHANCE_PER_TICK) {
+            } else if (timeSinceLastRune >= SPAWN_COOLDOWN_SECONDS * 1000 / spawnFrequency.coerceAtLeast(0.1)) {
+                if (Random.nextFloat() < SPAWN_CHANCE_PER_TICK * spawnFrequency.toFloat()) {
                     spawnRune()
                 }
             }

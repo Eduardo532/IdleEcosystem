@@ -40,7 +40,12 @@ class PrestigeShopManager @Inject constructor() {
         PrestigeUpgrade("pu_void_3", "Singularidad", "Multiplicador masivo de Cordura.", BigDecimal("5000"), BigDecimal("4.0"), BigDecimal("0.50"), UpgradeType.BUILDING_MULTIPLIER, x = 0.75f, y = 0.1f, parentId = "pu_void_2"),
 
         // META
-        PrestigeUpgrade("pu_star_final", "Ascensión Cósmica", "El Multiplicador Supremo.", BigDecimal("5000"), BigDecimal("5.0"), BigDecimal("1.00"), UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.05f, parentId = "pu_mind_4")
+        PrestigeUpgrade("pu_star_final", "Ascensión Cósmica", "El Multiplicador Supremo.", BigDecimal("5000"), BigDecimal("5.0"), BigDecimal("1.00"), UpgradeType.GLOBAL_MULTIPLIER, x = 0.5f, y = 0.05f, parentId = "pu_mind_4"),
+
+        // SENDAS (excluyentes: solo una puede tener niveles, ver MadnessPaths)
+        PrestigeUpgrade(MadnessPaths.HAND, "Senda de la Mano", "Senda excluyente. +300% de clic por nivel.", BigDecimal("2000"), BigDecimal("2.5"), BigDecimal("3.0"), UpgradeType.CLICK_MULTIPLIER, x = 0.24f, y = 0.1f, parentId = "pu_click_4"),
+        PrestigeUpgrade(MadnessPaths.GEARS, "Senda del Engranaje", "Senda excluyente. +100% a todos los edificios por nivel.", BigDecimal("2000"), BigDecimal("2.5"), BigDecimal("1.0"), UpgradeType.BUILDING_MULTIPLIER, x = 0.95f, y = 0.68f, parentId = "pu_idle_2"),
+        PrestigeUpgrade(MadnessPaths.DREAM, "Senda del Sueño", "Senda excluyente. +300% de ganancia sin conexión por nivel.", BigDecimal("2000"), BigDecimal("2.5"), BigDecimal("3.0"), UpgradeType.BUILDING_MULTIPLIER, x = 0.88f, y = 0.07f, parentId = "pu_offline_2")
     )
 
     // --- CÁLCULO LEGACY ---
@@ -90,6 +95,7 @@ class PrestigeShopManager @Inject constructor() {
             val parent = upgrades.find { it.id == upgrade.parentId }
             if (parent == null || parent.level == 0) return false
         }
+        if (MadnessPaths.isSealed(upgrade, upgrades)) return false
         if (currentSanity >= upgrade.currentCost) {
             upgrade.level++
             return true
@@ -137,12 +143,13 @@ class PrestigeShopManager @Inject constructor() {
             }
         }
 
-        // B. Sincronía (Todos)
-        val sync = upgrades.find { it.id == "pu_idle_2" }
-        if (sync != null && sync.level > 0) {
-            val nodeBonus = sync.effectMultiplier.multiply(BigDecimal(sync.level))
-            val nodeMult = BigDecimal.ONE.add(nodeBonus)
-            multiplier = multiplier.multiply(nodeMult)
+        // B. Sincronía y Senda del Engranaje (Todos)
+        listOf("pu_idle_2", MadnessPaths.GEARS).forEach { id ->
+            val u = upgrades.find { it.id == id }
+            if (u != null && u.level > 0) {
+                val nodeBonus = u.effectMultiplier.multiply(BigDecimal(u.level))
+                multiplier = multiplier.multiply(BigDecimal.ONE.add(nodeBonus))
+            }
         }
 
         return multiplier
@@ -152,8 +159,12 @@ class PrestigeShopManager @Inject constructor() {
     fun getOfflinePrestigeMultiplier(): BigDecimal {
         val u1 = upgrades.find { it.id == "pu_offline_1" }
         val u2 = upgrades.find { it.id == "pu_offline_2" }
+        val path = upgrades.find { it.id == MadnessPaths.DREAM }
         var mult = BigDecimal.ONE
 
+        if (path != null && path.level > 0) {
+            mult = mult.multiply(BigDecimal.ONE.add(path.effectMultiplier.multiply(BigDecimal(path.level))))
+        }
         if (u1 != null && u1.level > 0) {
             mult = mult.multiply(BigDecimal.ONE.add(u1.effectMultiplier.multiply(BigDecimal(u1.level))))
         }
@@ -175,6 +186,17 @@ class PrestigeShopManager @Inject constructor() {
         if (u3 != null && u3.level > 0) mult = mult.multiply(BigDecimal.ONE.add(u3.effectMultiplier.multiply(BigDecimal(u3.level))))
 
         return mult
+    }
+
+    /**
+     * Abandona la Senda actual (al Ascender): vuelve a nivel 0 y devuelve la Cordura
+     * que se gastó en ella, para que el jugador pueda elegir otra.
+     */
+    fun abandonPath(): BigDecimal {
+        val path = MadnessPaths.active(upgrades) ?: return BigDecimal.ZERO
+        val refund = MadnessPaths.spent(path)
+        path.level = 0
+        return refund
     }
 
     fun getStartingKnowledgeBonus(): BigDecimal = BigDecimal.ZERO

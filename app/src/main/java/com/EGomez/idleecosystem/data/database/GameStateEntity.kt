@@ -18,5 +18,9 @@ data class GameStateEntity(
     val tutorialEnabled: Boolean = true,
 
     @ColumnInfo(defaultValue = "")
-    val completedTutorialSteps: String = ""
+    val completedTutorialSteps: String = "",
+
+    /** El pacto de la vida actual (v0.16). Vacío = sin pacto. */
+    @ColumnInfo(defaultValue = "")
+    val activePact: String = ""
 )

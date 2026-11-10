@@ -259,7 +259,7 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked(nextPact: Pact? = null) = engine.ascend(nextPact)
+    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false) = engine.ascend(nextPact, abandonPath)
 
     fun onHardResetClicked() = engine.hardReset()
 

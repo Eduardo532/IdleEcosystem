@@ -211,6 +211,8 @@ object ContentTranslations {
         "Los Ecos se disuelven en saber: 2 minutos de producción al instante." to "Echoes dissolve into knowledge: 2 minutes of production at once.",
         "Grieta Temporal" to "Temporal Rift",
         "Un instante de eficiencia imposible. x20 a la producción." to "An instant of impossible efficiency. x20 production.",
+        "Convergencia" to "Convergence",
+        "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000)." to "For one minute boosts multiply each other instead of adding up (capped at x1,000).",
         "Vigilia Eterna" to "Eternal Vigil",
         "Dos minutos sin dormir, sin parpadear. x6 a la producción." to "Two minutes without sleep, without blinking. x6 production."
     )
@@ -249,7 +251,13 @@ object ContentTranslations {
         "Singularidad" to "Singularity",
         "Multiplicador masivo de Cordura." to "Massive Sanity multiplier.",
         "Ascensión Cósmica" to "Cosmic Ascension",
-        "El Multiplicador Supremo." to "The Supreme Multiplier."
+        "El Multiplicador Supremo." to "The Supreme Multiplier.",
+        "Senda de la Mano" to "Path of the Hand",
+        "Senda excluyente. +300% de clic por nivel." to "Exclusive path. +300% click per level.",
+        "Senda del Engranaje" to "Path of the Gear",
+        "Senda excluyente. +100% a todos los edificios por nivel." to "Exclusive path. +100% to all buildings per level.",
+        "Senda del Sueño" to "Path of the Dream",
+        "Senda excluyente. +300% de ganancia sin conexión por nivel." to "Exclusive path. +300% offline gains per level."
     )
 
     private val RUNES: Map<String, String> = mapOf(
@@ -299,7 +307,10 @@ object ContentTranslations {
 
     private val TUTORIAL: Map<String, String> = mapOf(
         "La Mirada" to "The Gaze",
-        "Tu primera Ascensión te dio un punto de Atención. Toca el botón ◎ sobre las pestañas y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos." to "Your first Ascension gave you a point of Attention. Tap the ◎ button above the tabs and place it on a building (+25% to its production), on the Dream (offline progress) or on the Vigil (more runes). Moving it is free, and with more Ascensions you will have more points.",
+        "Tu primera Ascensión te dio un punto de Atención. Toca la barra ◎ Atención, sobre la lista de edificios, y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos." to "Your first Ascension gave you a point of Attention. Tap the ◎ Attention bar, above the building list, and place it on a building (+25% to its production), on the Dream (offline progress) or on the Vigil (more runes). Moving it is free, and with more Ascensions you will have more points.",
+        "Las Tres Sendas" to "The Three Paths",
+        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella." to "At the end of the click, building and dream branches of the Map of Madness wait three Paths. You can only walk one: once you buy it, the other two are sealed. If you want to change, you can abandon it when you Ascend and recover all the Sanity you put into it.",
+        "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez." to "You have enough Echoes for the Convergence. For one minute your boosts multiply instead of adding up, up to x1,000: invoke it when you have runes and rituals active at the same time.",
         "Pactos con los Dioses" to "Pacts with the Gods",
         "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos." to "When you Ascend you can seal a pact for your next life. Each god grants advantages and demands a price according to its myth; 'No Pact' leaves you more Sanity. The Pantheon tab shows the gods you can already invoke and, with more Ascensions, more powerful ones will appear.",
         "Hitos de Ascensión" to "Ascension Milestones",

@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Scaffold
@@ -107,6 +108,7 @@ fun MainScreen(
         // Ficha del Panteón abierta y pacto elegido para la próxima vida (por id)
         var pactDetailId by rememberSaveable { mutableStateOf<String?>(null) }
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
+        var abandonPath by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -299,12 +301,16 @@ fun MainScreen(
                     selectedPact = Pact.fromId(nextPactId ?: uiState.activePact.id),
                     onPactSelected = { nextPactId = it.id },
                     buildingNames = buildingNames,
+                    activePath = MadnessPaths.active(uiState.prestigeUpgrades),
+                    abandonPath = abandonPath,
+                    onAbandonPathChanged = { abandonPath = it },
                     onConfirm = {
-                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id))
+                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath)
                         nextPactId = null
+                        abandonPath = false
                         showAscendConfirmation = false
                     },
-                    onDismiss = { showAscendConfirmation = false }
+                    onDismiss = { showAscendConfirmation = false; abandonPath = false }
                 )
             }
 

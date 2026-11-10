@@ -88,4 +88,17 @@ class RitualManagerTest {
         assertTrue(manager.getActiveProductionMultipliers().isEmpty())
         assertEquals(120L, manager.ritual("rit_knowledge_offering").productionSeconds)
     }
+
+    @Test
+    fun `convergence is active only while it lasts and is not a production buff`() {
+        val manager = RitualManager()
+        assertFalse(manager.isConvergenceActive())
+        assertFalse(manager.tryActivateRitual(RitualManager.CONVERGENCE_ID, BigDecimal(74)))
+        assertTrue(manager.tryActivateRitual(RitualManager.CONVERGENCE_ID, BigDecimal(75)))
+        assertTrue(manager.isConvergenceActive())
+        assertTrue(manager.getActiveProductionMultipliers().isEmpty())
+        manager.tick(60)
+        assertFalse(manager.isConvergenceActive())
+        assertEquals(1800L, manager.ritual(RitualManager.CONVERGENCE_ID).timeRemaining)
+    }
 }

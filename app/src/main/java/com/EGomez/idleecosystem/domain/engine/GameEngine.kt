@@ -14,6 +14,7 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
@@ -430,19 +431,26 @@ class GameEngine @Inject constructor(
         eventScheduler.close(System.currentTimeMillis())
     }
 
-    /** Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro). */
-    fun ascend(nextPact: Pact? = null) = post {
-        if (performAscension(nextPact ?: activePact) != null) soundManager.playSound(SoundType.BUY)
+    /**
+     * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
+     * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
+     */
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(nextPact: Pact): BigDecimal? {
+    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
+        if (abandonPath) {
+            prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
+        }
 
         // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
         val ascensions = statsManager.totalPrestiges
@@ -837,6 +845,14 @@ class GameEngine @Inject constructor(
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
+        // Las Sendas, cuando alguna ya se puede comprar
+        val shop = prestigeShopManager.upgrades
+        val pathOpen = shop.any { node ->
+            MadnessPaths.isPath(node.id) && shop.any { it.id == node.parentId && it.level > 0 }
+        }
+        if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
+        val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
+        if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
@@ -929,13 +945,17 @@ class GameEngine @Inject constructor(
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
-        val temporaryMult = BuffMath.additive(
+        // Con el ritual Convergencia activo se MULTIPLICAN (con tope).
+        val convergence = ritualManager.isConvergenceActive()
+        val temporaryMult = BuffMath.combine(
             listOf(eventScheduler.buffMultiplier) +
                 ritualManager.getActiveProductionMultipliers() +
-                runeManager.getActiveProductionMultipliers()
+                runeManager.getActiveProductionMultipliers(),
+            convergence
         )
-        val temporaryClickMult = BuffMath.additive(
-            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers()
+        val temporaryClickMult = BuffMath.combine(
+            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers(),
+            convergence
         )
 
         globalMultiplier = upgradesGlobal

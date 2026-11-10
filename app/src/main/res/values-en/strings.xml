@@ -24,7 +24,9 @@
     <string name="ascension_count">This will be ascension #%1$d.</string>
     <string name="ascension_milestones_title">Ascension milestones</string>
     <string name="attention_bonus">+%1$d%%</string>
-    <string name="attention_chip">◎ %1$d/%2$d</string>
+    <string name="attention_bar_empty">Tap to assign your points</string>
+    <string name="attention_bar_free">%1$s · %2$d free</string>
+    <string name="attention_bar_title">Attention %1$d/%2$d</string>
     <string name="attention_clear">Free all</string>
     <string name="attention_click_effect">Click</string>
     <string name="attention_dream">Dream</string>
@@ -231,4 +233,9 @@
     <string name="upgrade_effect_synergy">Effect: +1%% per %1$s owned</string>
     <string name="view_stats">VIEW STATISTICS</string>
     <string name="your_file">YOUR CURRENT FILE</string>
+    <string name="ascend_abandon_path">Abandon the %1$s (recover %2$s Sanity)</string>
+    <string name="ascend_abandon_hint">You can only change Path when you Ascend.</string>
+    <string name="path_exclusive">Exclusive path: walking it seals the other two.</string>
+    <string name="path_sealed">Sealed: you already walk the %1$s. You can abandon it when you Ascend.</string>
+    <string name="path_sealed_button">Sealed</string>
 </resources>

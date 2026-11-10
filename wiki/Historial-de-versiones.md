@@ -8,6 +8,7 @@ Tercera etapa del plan de retención: que dos vidas seguidas se jueguen distinto
 
 - **v0.16.0:** pactos con 13 dioses del mito más "Sin Pacto", elegidos al Ascender; pestaña Panteón con galería de sigilos y ficha de cada dios.
 - **v0.16.1:** Atención: hasta 10 puntos que se reparten gratis entre edificios, Sueño (sin conexión) y Vigilia (runas).
+- **v0.16.2:** tres Sendas excluyentes en el Mapa de Locura (Mano, Engranaje, Sueño) que se cambian al Ascender recuperando la Cordura; ritual Convergencia; la Atención pasa a una barra fija sobre la lista de edificios.
 
 ## v0.15.1 · "Ascender sin Repetir" *(oficial, 9 nov 2026)*
 

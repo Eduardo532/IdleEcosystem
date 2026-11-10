@@ -4,6 +4,7 @@ import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.remember
 import com.EGomez.idleecosystem.domain.logic.SanitySpending
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import java.util.Locale
 import java.text.DecimalFormatSymbols
 import java.text.DecimalFormat
@@ -91,14 +92,31 @@ fun PrestigeShopDialog(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(tr(node.description), color = Color.LightGray, fontSize = 14.sp)
+                        val sealedBy = if (MadnessPaths.isSealed(node, upgrades)) MadnessPaths.active(upgrades) else null
+                        if (MadnessPaths.isPath(node.id)) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                if (sealedBy != null) stringResource(R.string.path_sealed, tr(sealedBy.name))
+                                else stringResource(R.string.path_exclusive),
+                                color = if (sealedBy != null) Color(0xFFE57373) else AncientGold,
+                                fontSize = 12.sp,
+                                modifier = Modifier.testTag(PATH_NOTE_TAG)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.current_effect), color = Color.Gray, fontSize = 12.sp)
                             Text(node.currentEffectDisplay, color = Color(0xFF81C784), fontWeight = FontWeight.Bold)
                         }
-                        if (parentUnlocked) SpendPreviewLines(node, currency)
+                        if (parentUnlocked && sealedBy == null) SpendPreviewLines(node, currency)
                         Spacer(modifier = Modifier.height(16.dp))
-                        if (parentUnlocked) {
+                        if (sealedBy != null) {
+                            Button(
+                                onClick = {}, enabled = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color(0xFF3A1A1A))
+                            ) { Text(stringResource(R.string.path_sealed_button), color = Color(0xFFE57373)) }
+                        } else if (parentUnlocked) {
                             // Antes el botón estaba siempre activo: sin Cordura suficiente
                             // el toque no hacía nada y no se veía por qué
                             val cost = node.currentCost
@@ -148,6 +166,7 @@ fun PrestigeShopDialog(
 }
 
 const val CONSTELLATION_MAP_TAG = "constellation_map"
+const val PATH_NOTE_TAG = "path_note"
 
 /**
  * Las dos caras de gastar Cordura: lo que sube el nodo y lo que baja el bono de la

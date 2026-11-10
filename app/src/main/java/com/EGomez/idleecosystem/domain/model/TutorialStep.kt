@@ -173,7 +173,21 @@ enum class TutorialStep(
     ATTENTION(
         "attention",
         "La Mirada",
-        "Tu primera Ascensión te dio un punto de Atención. Toca el botón ◎ sobre las pestañas y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos.",
+        "Tu primera Ascensión te dio un punto de Atención. Toca la barra ◎ Atención, sobre la lista de edificios, y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos.",
         "Al tener el primer punto de Atención"
+    ),
+
+    PATHS(
+        "paths",
+        "Las Tres Sendas",
+        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
+        "Al poder comprar la primera Senda"
+    ),
+
+    CONVERGENCE(
+        "convergence",
+        "Convergencia",
+        "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez.",
+        "Al reunir 75 Ecos"
     )
 }

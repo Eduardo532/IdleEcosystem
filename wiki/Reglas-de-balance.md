@@ -44,6 +44,8 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 *(Código: `Ritual.productionSeconds`.)*
 
+**Convergencia:** mientras está activa, los potenciadores temporales se multiplican: `min(∏ Mᵢ, 1.000)`, y nunca menos que la suma. *(Código: `BuffMath.converged`.)*
+
 ## Edificios
 
 - Costo de la unidad n: `costo base × 1,15ⁿ`.
@@ -71,6 +73,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
+
+## Sendas
+
+- Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*
+- Abandonar una Senda (solo al Ascender) devuelve `Σ costo base × crecimiento^i` para i < nivel.
 
 ## Atención
 

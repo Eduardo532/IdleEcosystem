@@ -419,7 +419,7 @@ class CriticalUiTest {
     @Test
     fun `the compact research button clicks like the big one`() {
         var clicks = 0
-        compose.setContent { CompactResearchButton("12") { _, _, _ -> clicks++ } }
+        compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }
 
         compose.onNodeWithText("+12").assertExists()
         compose.onNodeWithTag(COMPACT_RESEARCH_BUTTON_TAG).performClick()

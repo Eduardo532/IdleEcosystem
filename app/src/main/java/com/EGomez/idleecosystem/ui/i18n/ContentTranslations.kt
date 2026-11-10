@@ -21,7 +21,48 @@ object ContentTranslations {
 
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
-            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?: ladderName(text)
+            TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?:
+            MECHANIC_ACHIEVEMENTS_EN[text] ?: TRIALS[text] ?: ladderName(text)
+
+    /** Pruebas de Locura (v0.17.1): nombres y reglas. */
+    private val TRIALS = mapOf(
+        "Ceguera" to "Blindness",
+        "No aparece ninguna runa." to "No runes appear.",
+        "Manos Atadas" to "Bound Hands",
+        "El clic no produce Conocimiento. Empiezas con 10 Notas Desordenadas." to "Clicking produces no Knowledge. You start with 10 Messy Notes.",
+        "Legado del Culto" to "Legacy of the Cult",
+        "Cada vida empieza con 5 Notas Desordenadas por nivel." to "Every life starts with 5 Messy Notes per level.",
+        "Hambre" to "Hunger",
+        "Los edificios cuestan x10." to "Buildings cost x10.",
+        "Grimorio Quemado" to "Burned Grimoire",
+        "No se pueden comprar mejoras del Grimorio." to "Grimoire upgrades cannot be bought.",
+        "Silencio" to "Silence",
+        "No hay rituales ni Ecos." to "There are no rituals or Echoes.",
+        "Insomnio" to "Insomnia",
+        "No hay progreso sin conexión y la producción es la mitad." to "There is no offline progress and production is halved.",
+        "Monomanía" to "Monomania",
+        "Solo puedes tener 3 tipos de edificio, además de la Sinapsis." to "You can only own 3 kinds of building, besides the Synapse.",
+        "Amnesia" to "Amnesia",
+        "Los logros y sus conjuntos no dan bono." to "Achievements and their sets give no bonus.",
+        "Delirio" to "Delirium",
+        "La producción salta al azar entre x0,1 y x3 cada 30 segundos." to "Production jumps randomly between x0.1 and x3 every 30 seconds.",
+        "Mortalidad" to "Mortality",
+        "La Cordura Residual y el Mapa de Locura no dan bono." to "Residual Sanity and the Map of Madness give no bonus.",
+        "Pruebas de Locura" to "Trials of Madness",
+        "El Altar de Runas" to "The Rune Altar",
+        "El Medidor de Locura" to "The Madness Meter",
+        "Fases de la Marea" to "Tide Phases",
+        "El mar del fondo del mundo empezó a moverse. Cada 10 minutos de juego cambia la Marea: la Alta trae más runas y eventos (y más Locura), la Baja da más producción y calma, y la Muerta abarata los rituales. Toca el indicador para ver las tres y planea cuándo usar cada cosa." to "The sea at the bottom of the world has begun to move. Every 10 minutes of play the Tide changes: High brings more runes and events (and more Madness), Low gives more production and calm, and Dead makes rituals cheaper. Tap the indicator to see all three and plan when to use each thing.",
+        "Marea Alta" to "High Tide",
+        "El mar sube y trae cosas del fondo: más runas y más eventos, pero la Locura sube más rápido." to "The sea rises and brings things from the deep: more runes and more events, but Madness rises faster.",
+        "Marea Baja" to "Low Tide",
+        "Las aguas se retiran y el culto trabaja en calma: más producción y la Locura baja el doble de rápido." to "The waters recede and the cult works in calm: more production and Madness falls twice as fast.",
+        "Marea Muerta" to "Dead Tide",
+        "El mar se detiene y el velo se adelgaza: los rituales cuestan y recargan menos, y aparecen más Ecos." to "The sea stands still and the veil grows thin: rituals cost and recharge less, and more Echoes appear.",
+        "Tu mente ya no es la de antes. La barra de Locura sube cuando juegas fuerte (clics, runas, rituales) y baja sola con el tiempo. Cada punto da +1% de producción, pero desde la mitad llegan presagios y al 100% la mente colapsa: pierdes tus potenciadores y produces la mitad un minuto. Tócala para ver los detalles; la Letanía de Calma la baja de golpe." to "Your mind is not what it used to be. The Madness bar rises when you play hard (clicks, runes, rituals) and falls by itself over time. Each point gives +1% production, but from halfway omens arrive and at 100% the mind collapses: you lose your boosts and produce half for a minute. Tap it for details; the Litany of Calm lowers it at once.",
+        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto." to "Passing the Trial gave you a Rune Slot. In the Pantheon tab, Runes view, engrave a rune you have caught several times: its bonus stays active forever and changing it is free. Every rune gives a different bonus.",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas." to "You can now face Trials of Madness: lives with an altered rule and a Knowledge goal. Choose one when you Ascend, along with your pact. If you reach the goal, the Trial is passed and its reward is yours forever; some bring the Outer Gods early. The Pantheon tab shows every Trial."
+    )
 
     /** El Panteón ([Pact]): nombres, epítetos y mitos. */
     private val PACTS = mapOf(
@@ -213,6 +254,8 @@ object ContentTranslations {
         "Un instante de eficiencia imposible. x20 a la producción." to "An instant of impossible efficiency. x20 production.",
         "Convergencia" to "Convergence",
         "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000)." to "For one minute boosts multiply each other instead of adding up (capped at x1,000).",
+        "Letanía de Calma" to "Litany of Calm",
+        "Una plegaria lenta que aquieta la mente: baja 40 puntos el Medidor de Locura." to "A slow prayer that quiets the mind: lowers the Madness Meter by 40 points.",
         "Vigilia Eterna" to "Eternal Vigil",
         "Dos minutos sin dormir, sin parpadear. x6 a la producción." to "Two minutes without sleep, without blinking. x6 production."
     )

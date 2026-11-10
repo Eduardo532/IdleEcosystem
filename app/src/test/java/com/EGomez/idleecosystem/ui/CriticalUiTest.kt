@@ -22,6 +22,23 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.domain.model.Trial
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.foundation.verticalScroll
+import com.EGomez.idleecosystem.ui.screens.main.components.TrialList
+import com.EGomez.idleecosystem.ui.screens.main.components.RuneAltar
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
+import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
+import com.EGomez.idleecosystem.ui.screens.main.components.TideInfoDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.TIDE_INDICATOR_TAG
+import com.EGomez.idleecosystem.domain.model.TidePhase
+import com.EGomez.idleecosystem.ui.screens.main.components.MADNESS_METER_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
+import com.EGomez.idleecosystem.domain.model.Achievement
+import com.EGomez.idleecosystem.domain.model.AchievementType
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AttentionDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ATTENTION_ADD_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.ATTENTION_BAR_TAG
@@ -286,6 +303,114 @@ class CriticalUiTest {
         compose.onNodeWithText("Hito 25 · faltan 6").assertExists()
         compose.onNodeWithText("Comprar +6", substring = true).assertIsEnabled().performClick()
         assertEquals(1, bought)
+    }
+
+    @Test
+    fun `the ascend dialog lets you pick a trial and shows its rule`() {
+        var chosen by mutableStateOf<Trial?>(null)
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                trials = listOf(Trial.BLINDNESS, Trial.HUNGER), completedTrials = setOf(Trial.BLINDNESS),
+                selectedTrial = chosen, onTrialSelected = { chosen = it }
+            )
+        }
+
+        compose.onNodeWithTag(TRIAL_CHOICE_TAG + "hunger").performClick()
+        assertEquals(Trial.HUNGER, chosen)
+        compose.onNodeWithText("Los edificios cuestan x10.").assertExists()
+        compose.onNodeWithText("✓ Ceguera").assertExists()
+        compose.onNodeWithTag(TRIAL_CHOICE_TAG + "none").performClick()
+        assertEquals(null, chosen)
+    }
+
+    @Test
+    fun `the active trial shows its progress and can be abandoned`() {
+        var abandoned = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER)) { abandoned++ }
+            }
+        }
+
+        compose.onNodeWithText("En curso: 40%").assertExists()
+        compose.onNodeWithText("✓ Superada").assertExists()
+        // Mortalidad pide 20 Ascensiones: todavía no se ve su regla
+        compose.onNodeWithText("La Cordura Residual y el Mapa de Locura no dan bono.").assertDoesNotExist()
+        compose.onNodeWithTag(TRIAL_ABANDON_TAG).performScrollTo().performClick()
+        assertEquals(1, abandoned)
+    }
+
+    @Test
+    fun `a rune caught enough times can be engraved`() {
+        var engraved: String? = null
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                RuneAltar(
+                    slots = 1, engraved = emptyList(),
+                    catches = mapOf("t1_blood" to 10, "t1_ash" to 3),
+                    onEngrave = { engraved = it }, onRemove = {}
+                )
+            }
+        }
+
+        compose.onNodeWithText("Espacios de Runa: 0 de 1").assertExists()
+        compose.onNodeWithText("Atrapadas: 3 de 10").assertExists()
+        compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_ash").assertDoesNotExist()
+        compose.onNodeWithTag(RUNE_ENGRAVE_TAG + "t1_blood").performScrollTo().performClick()
+        assertEquals("t1_blood", engraved)
+    }
+
+    @Test
+    fun `the madness meter shows its bonus and the collapse`() {
+        var opened = 0
+        var collapse by mutableStateOf(0)
+        compose.setContent { MadnessMeterBar(63.0, collapse, null) { opened++ } }
+
+        compose.onNodeWithText("Locura 63%", substring = true).assertExists()
+        compose.onNodeWithTag(MADNESS_METER_TAG).performClick()
+        assertEquals(1, opened)
+        collapse = 42
+        compose.onNodeWithText("COLAPSO", substring = true).assertExists()
+    }
+
+    @Test
+    fun `the tide indicator shows the phase and opens the three phases`() {
+        var showInfo by mutableStateOf(false)
+        compose.setContent {
+            TideIndicator(TidePhase.HIGH, 272) { showInfo = true }
+            if (showInfo) TideInfoDialog(TidePhase.HIGH) { showInfo = false }
+        }
+
+        compose.onNodeWithText("🌊 Marea Alta · 4:32").assertExists()
+        compose.onNodeWithText("Luego: Marea Baja").assertExists()
+        compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
+        compose.onNodeWithText("Marea Muerta").assertExists()
+    }
+
+    @Test
+    fun `achievements can be filtered by category`() {
+        fun ach(id: String, name: String, group: String) = Achievement(
+            id, name, "d", AchievementType.STAT, null, BigDecimal.ONE, BigDecimal("1.01"),
+            isUnlocked = true, groupId = group, order = id.length, requirement = "r", stat = "ascensions"
+        )
+        compose.setContent {
+            AchievementsDialog(
+                achievements = listOf(ach("a1", "Primer Umbral", "6_asc"), ach("a22", "El Escéptico", "7_pact_none_1")),
+                achievementsProgress = "2 / 2", secretsProgress = null, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Primer Umbral").assertExists()
+        compose.onNodeWithTag(ACHIEVEMENT_CATEGORY_TAG + "PANTHEON").performClick()
+        compose.onNodeWithText("El Escéptico").assertExists()
+        compose.onNodeWithText("Primer Umbral").assertDoesNotExist()
+        compose.onNodeWithTag(ACHIEVEMENT_CATEGORY_TAG + "all").performClick()
+        compose.onNodeWithText("Primer Umbral").assertExists()
     }
 
     @Test

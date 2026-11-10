@@ -1,1 +1,1 @@
-Los valores de esta wiki corresponden a la versión **0.16.2**. Si algo no coincide con el juego, manda el juego.
+Los valores de esta wiki corresponden a la versión **0.17.4**. Si algo no coincide con el juego, manda el juego.

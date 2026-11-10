@@ -154,7 +154,8 @@ class SaveManager @Inject constructor() {
             totalEventsFound = (s?.totalEventsFound ?: 0).coerceAtLeast(0),
             runesSevered = (s?.runesSevered ?: 0).coerceAtLeast(0),
             runesStabilized = (s?.runesStabilized ?: 0).coerceAtLeast(0),
-            runesInscribed = (s?.runesInscribed ?: 0).coerceAtLeast(0)
+            runesInscribed = (s?.runesInscribed ?: 0).coerceAtLeast(0),
+            counters = StatisticsManager.encodeCounters(StatisticsManager.decodeCounters(s?.counters))
         )
     }
 
@@ -198,5 +199,6 @@ private data class RawStatistics(
     val totalEventsFound: Int?,
     val runesSevered: Int?,
     val runesStabilized: Int?,
-    val runesInscribed: Int?
+    val runesInscribed: Int?,
+    val counters: String?
 )

@@ -14,6 +14,10 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.MadnessMeter
+import com.EGomez.idleecosystem.domain.logic.RuneEngraving
+import com.EGomez.idleecosystem.domain.logic.AchievementContext
+import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
@@ -47,6 +51,10 @@ import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.domain.model.RitualState
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.TrialReward
+import com.EGomez.idleecosystem.domain.model.TrialRules
+import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.model.PactEffects
 import com.EGomez.idleecosystem.domain.model.RuneTier
 import com.EGomez.idleecosystem.domain.model.RuneVariant
@@ -94,7 +102,26 @@ data class EconomyState(
     /** Atención repartida (ya ajustada a los puntos disponibles) y puntos totales. */
     val attention: Map<String, Int> = emptyMap(),
     val attentionPoints: Int = 0,
-    val echoChance: Double = GameEngine.BASE_ECHO_CHANCE
+    val echoChance: Double = GameEngine.BASE_ECHO_CHANCE,
+    /** Pruebas de Locura: la de esta vida, su avance (0..1) y las superadas. */
+    val activeTrial: Trial? = null,
+    val trialProgress: Float = 0f,
+    val completedTrials: Set<Trial> = emptySet(),
+    /** Delirio: el multiplicador de producción actual. */
+    val deliriumMultiplier: Double = 1.0,
+    /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
+    val earlyPacts: Set<Pact> = emptySet(),
+    /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
+    val tide: TidePhase? = null,
+    val tideSecondsLeft: Int = 0,
+    /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
+    val madness: Double? = null,
+    val collapseSeconds: Int = 0,
+    val possessedBuilding: String? = null,
+    /** Espacios de Runa: cuántos hay, qué runas están grabadas y cuántas veces se atrapó cada una. */
+    val runeSlots: Int = 0,
+    val engravedRunes: List<String> = emptyList(),
+    val runeCatches: Map<String, Int> = emptyMap()
 )
 
 data class AchievementProgress(
@@ -114,6 +141,12 @@ sealed interface EngineEffect {
     data class AchievementUnlocked(val achievement: Achievement) : EngineEffect
     /** La automatización ascendió sola y ganó [sanity] de Cordura. */
     data class AutoAscended(val sanity: BigDecimal) : EngineEffect
+    /** Se superó una Prueba de Locura. */
+    data class TrialCompleted(val trial: Trial) : EngineEffect
+    /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
+    data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
+    /** La Locura llegó a 100: la mente colapsó. */
+    object MadnessCollapse : EngineEffect
 }
 
 data class ExportedSave(
@@ -169,7 +202,22 @@ class GameEngine @Inject constructor(
     /** El reparto que eligió el jugador; se ajusta a los puntos al usarlo. */
     private var wantedAttention: Map<String, Int> = emptyMap()
     private var chaosMultiplier = 1
-    private val pact: PactEffects get() = activePact.effects
+    /** Delirio (Prueba): multiplicador de producción que cambia cada 30 s. */
+    private var deliriumMultiplier = 1.0
+    private var deliriumSeconds = 0
+
+    // Medidor de Locura (v0.17.3)
+    private var madness = MadnessMeter()
+    private var collapseSeconds = 0
+    private var possessedBuildingId: String? = null
+    private var possessedSeconds = 0
+    private var madnessHighStreak = 0
+    private var lastRecalcMadness = 0.0
+    /** Runas atrapadas por nivel en el último segundo (para sumar Locura). */
+    private var lastRuneCounts: Triple<Int, Int, Int>? = null
+    /** Efectos del pacto de esta vida combinados con las runas grabadas (v0.17.2). */
+    private var pactWithRunes = PactEffects()
+    private val pact: PactEffects get() = pactWithRunes
     private var costMultiplier = 1.0
 
     // Evita que el autoguardado escriba un estado vacío antes de terminar la carga
@@ -255,6 +303,7 @@ class GameEngine @Inject constructor(
             val owned = buildingManager.availableBuildings.find { it.id == buildingId }?.amountOwned ?: return@post
             BuildingMilestones.amountToNext(buildingMilestones[buildingId].orEmpty(), owned)
         } else requested
+        if (!canOwnBuilding(buildingId)) return@post
         val discount = BigDecimal.valueOf(buildingCostFactor())
         val cost = buildingManager.getCost(buildingId, amount, knowledge, discount)
         val bought = buildingManager.tryBuyBuilding(buildingId, knowledge, amount, discount)
@@ -267,6 +316,7 @@ class GameEngine @Inject constructor(
     }
 
     fun buyUpgrade(upgradeId: String) = post {
+        if (trialRules().noGrimoire) return@post
         val upgrade = upgradeManager.availableUpgrades.find { it.id == upgradeId } ?: return@post
         // Una mejora que todavía no aparece en el Grimorio no se puede comprar
         if (!upgradeManager.isUnlocked(upgrade, buildingManager.availableBuildings)) return@post
@@ -283,6 +333,7 @@ class GameEngine @Inject constructor(
      * alcance el Conocimiento actual. Un solo recálculo y un solo guardado al final.
      */
     fun buyAllAffordableUpgrades() = post {
+        if (trialRules().noGrimoire) return@post
         val unlocked = upgradeManager.availableUpgrades
             .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
         var bought = 0
@@ -306,6 +357,7 @@ class GameEngine @Inject constructor(
             soundManager.playSound(SoundType.BUY)
             prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
             statsManager.trackSanitySpent(cost)
+            if (MadnessPaths.isPath(id)) statsManager.flag(AchievementStat.walked(id))
             recalculate()
             requestSave()
         }
@@ -326,9 +378,23 @@ class GameEngine @Inject constructor(
     fun setAutomation(settings: AutomationSettings) = post { automation = settings }
 
     private fun performRitual(ritualId: String): Boolean {
+        if (trialRules().noRituals) return false
         if (ritualManager.tryActivateRitual(ritualId, echoes)) {
             val ritual = ritualManager.rituals.value.find { it.id == ritualId } ?: return false
             echoes = echoes.subtract(ritual.cost)
+            statsManager.count(AchievementStat.RITUALS)
+            statsManager.count(AchievementStat.ritual(ritualId))
+            statsManager.count(StatisticsManager.RUN_RITUALS)
+            if (currentTide() == TidePhase.DEAD) statsManager.count(AchievementStat.TIDE_DEAD_RITUALS)
+            // Locura: los rituales la suben (la Convergencia mucho); la Letanía la calma
+            when (ritual.effectType) {
+                RitualEffectType.CALM -> { madness.calm(ritual.effectValue); syncMadness() }
+                RitualEffectType.CONVERGENCE -> {
+                    addMadness(MadnessMeter.PER_CONVERGENCE)
+                    if (currentTide() == TidePhase.HIGH) statsManager.count(AchievementStat.TIDE_HIGH_CONVERGENCE)
+                }
+                else -> addMadness(MadnessMeter.PER_RITUAL)
+            }
             if (ritual.effectType == RitualEffectType.INSTANT_KNOWLEDGE) {
                 // Producción base, igual que los saltos de tiempo de las runas: los
                 // potenciadores activos no se multiplican sobre este regalo
@@ -366,7 +432,10 @@ class GameEngine @Inject constructor(
         if (automation.autoAscend && AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions) &&
             AutomationSettings.shouldAutoAscend(potentialPrestige, prestigeManager.residualSanity)
         ) {
-            performAscension(activePact)?.let { _effects.trySend(EngineEffect.AutoAscended(it)) }
+            performAscension(activePact)?.let {
+                statsManager.count(AchievementStat.AUTO_ASCENSIONS)
+                _effects.trySend(EngineEffect.AutoAscended(it))
+            }
             return
         }
         if (changed) requestSave()
@@ -381,12 +450,14 @@ class GameEngine @Inject constructor(
             .filter { it.isVisible && it.id !in automation.excludedBuildings }
             .reversed()
         for (building in candidates) {
+            if (!canOwnBuilding(building.id)) continue
             val cost = buildingManager.getCost(building.id, 1, knowledge, discount)
             if (cost.signum() <= 0 || cost > budget) continue
             if (buildingManager.tryBuyBuilding(building.id, knowledge, 1, discount) > 0) {
                 knowledge = knowledge.subtract(cost)
                 budget = budget.subtract(cost)
                 bought = true
+                statsManager.count(AchievementStat.AUTO_UNITS)
             }
         }
         return bought
@@ -394,6 +465,7 @@ class GameEngine @Inject constructor(
 
     /** Las mejoras del Grimorio que entren en el presupuesto, de la más barata a la más cara. */
     private fun autoBuyUpgrades(): Boolean {
+        if (trialRules().noGrimoire) return false
         val budget = knowledge.multiply(BigDecimal.valueOf(automation.budgetFraction))
         val unlocked = upgradeManager.availableUpgrades
             .filter { upgradeManager.isUnlocked(it, buildingManager.availableBuildings) }
@@ -435,18 +507,28 @@ class GameEngine @Inject constructor(
      * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
      * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
      */
-    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false) = post {
-        if (performAscension(nextPact ?: activePact, abandonPath) != null) soundManager.playSound(SoundType.BUY)
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath, nextTrial) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false): BigDecimal? {
+    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false, nextTrial: Trial? = null): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
+        // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
+        recordFinishedLife(finalPotential, abandonPath)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
+        statsManager.resetRunCounters()
+        madness.reset()
+        syncMadness()
+        loadMadness()
+        deliriumMultiplier = 1.0
+        // La Prueba de la vida nueva (una bloqueada no se puede elegir)
+        if (nextTrial != null && nextTrial.isUnlocked(statsManager.totalPrestiges)) startTrial(nextTrial)
         // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
         if (abandonPath) {
             prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
@@ -455,13 +537,14 @@ class GameEngine @Inject constructor(
         // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
         val ascensions = statsManager.totalPrestiges
         // El pacto de la vida nueva (uno bloqueado no se puede elegir)
-        setPact(if (nextPact.isUnlocked(ascensions)) nextPact else Pact.NONE)
+        setPact(if (nextPact.isUnlocked(ascensions, earlyPacts())) nextPact else Pact.NONE)
         buildingManager.resetForPrestige()
         upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, ascensions) })
         if (AscensionMilestone.STARTING_SYNAPSES.isReached(ascensions)) {
             buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
                 ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
+        applyStartingBuildings()
         knowledge = prestigeShopManager.getStartingKnowledgeBonus()
         eventScheduler.clearBuff()
 
@@ -469,6 +552,101 @@ class GameEngine @Inject constructor(
         // Reemplazo completo: no quedan filas de edificios o mejoras de la vida anterior
         requestSave(replace = true)
         return finalPotential
+    }
+
+    /** Cuenta para los logros la vida que termina: con qué pacto y Senda, y sus hazañas. */
+    private fun recordFinishedLife(sanityGained: BigDecimal, abandonPath: Boolean) {
+        val path = MadnessPaths.active(prestigeShopManager.upgrades)
+        statsManager.count(AchievementStat.life(activePact.id))
+        if (path != null) {
+            statsManager.count(AchievementStat.lifeOnPath(path.id))
+            statsManager.count(AchievementStat.lifeWith(activePact.id, path.id))
+            if (abandonPath) {
+                statsManager.count(AchievementStat.PATHS_ABANDONED)
+                if (path.level >= LONG_PATH_LEVEL) statsManager.flag(AchievementStat.FEAT_LONG_PATH)
+            }
+        }
+        statsManager.record(AchievementStat.MAX_SANITY_GAIN, sanityGained)
+
+        val runSeconds = statsManager.runTimeSeconds
+        if (runSeconds < FAST_LIFE_SECONDS) statsManager.flag(AchievementStat.FEAT_FAST_15)
+        if (runSeconds < FASTEST_LIFE_SECONDS) statsManager.flag(AchievementStat.FEAT_FAST_5)
+        if (statsManager.counter(StatisticsManager.RUN_CLICKS).signum() == 0) statsManager.flag(AchievementStat.FEAT_SILENT_LIFE)
+        if (upgradeManager.availableUpgrades.none { it.isBought }) statsManager.flag(AchievementStat.FEAT_ASCETIC)
+        if (statsManager.counter(StatisticsManager.RUN_RUNES).signum() == 0 && knowledgeThisRun() >= BLIND_LIFE_KNOWLEDGE) {
+            statsManager.flag(AchievementStat.FEAT_BLIND)
+        }
+        val points = attentionPoints()
+        if (points >= BLANK_MIND_POINTS && Attention.used(effectiveAttention()) == 0) statsManager.flag(AchievementStat.FEAT_BLANK_MIND)
+    }
+
+    /** Las claves de los logros STAT: lo que se calcula al momento y los contadores guardados. */
+    private fun achievementContext(): AchievementContext {
+        val stats = HashMap<String, BigDecimal>(statsManager.counters)
+        fun put(key: String, value: Number) {
+            stats[key] = if (value is BigDecimal) value else BigDecimal(value.toString())
+        }
+
+        val ascensions = statsManager.totalPrestiges
+        put(AchievementStat.ASCENSIONS, ascensions)
+        put(AchievementStat.SANITY, prestigeManager.residualSanity)
+        put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
+        val upgrades = upgradeManager.availableUpgrades
+        put(AchievementStat.SYNERGIES, upgrades.count { it.type == UpgradeType.SYNERGY && it.isBought })
+        put(AchievementStat.GRIMOIRE, upgrades.count { it.isBought })
+        put(AchievementStat.SETS, AchievementSets.completed(achievementManager.availableAchievements).size)
+
+        val shop = prestigeShopManager.upgrades
+        val baseNodes = shop.filter { !MadnessPaths.isPath(it.id) }
+        put(AchievementStat.MAP_LEVELS, shop.sumOf { it.level })
+        put(AchievementStat.MAP_NODES, baseNodes.count { it.level > 0 })
+        put(AchievementStat.MAP_MAX_LEVEL, shop.maxOfOrNull { it.level } ?: 0)
+        put(AchievementStat.MAP_STAR, shop.firstOrNull { it.id == "pu_star_final" }?.level ?: 0)
+        val path = MadnessPaths.active(shop)
+        put(AchievementStat.PATH_LEVEL, path?.level ?: 0)
+        put(AchievementStat.PATHS_WALKED, MadnessPaths.IDS.count { statsManager.counter(AchievementStat.walked(it)).signum() > 0 })
+
+        val attention = effectiveAttention()
+        put(AchievementStat.ATTENTION_POINTS, attentionPoints())
+        put(AchievementStat.TRIALS_COMPLETED, completedTrials().size)
+        put(AchievementStat.MADNESS, BigDecimal.valueOf(madness.value))
+        put(AchievementStat.TIDE_PHASE, currentTide()?.ordinal ?: -1)
+        val engraved = engravedRunes()
+        put(AchievementStat.RUNE_SLOTS, runeSlots())
+        put(AchievementStat.ENGRAVED, engraved.size)
+        put(AchievementStat.ENGRAVED_T3, engraved.count { RuneEngraving.variant(it)?.tier == RuneTier.TIER_3_TRACE })
+        put(AchievementStat.RUNE_KINDS, RuneEngraving.ALL.count { statsManager.counter(AchievementStat.runeCatches(it.id)).signum() > 0 })
+        put(AchievementStat.ENGRAVED_KINDS, statsManager.counters.keys.count { it.startsWith(AchievementStat.ENGRAVED_EVER_PREFIX) })
+        put(AchievementStat.ATTENTION_USED, Attention.used(attention))
+        put(AchievementStat.ATTENTION_DREAM, attention[Attention.DREAM] ?: 0)
+        put(AchievementStat.ATTENTION_VIGIL, attention[Attention.VIGIL] ?: 0)
+        put(AchievementStat.ATTENTION_FOCUS, attention.values.maxOrNull() ?: 0)
+        put(AchievementStat.ATTENTION_TARGETS, attention.count { it.value > 0 })
+
+        put(AchievementStat.PACTS_UNLOCKED, Pact.available(ascensions).count { it != Pact.NONE })
+        put(AchievementStat.PACTS_LIVED, Pact.entries.count { statsManager.counter(AchievementStat.life(it.id)).signum() > 0 })
+
+        put(AchievementStat.CLICKS, statsManager.totalClicks)
+        put(AchievementStat.RUNES_T1, statsManager.runesSevered)
+        put(AchievementStat.RUNES_T2, statsManager.runesStabilized)
+        put(AchievementStat.RUNES_T3, statsManager.runesInscribed)
+        put(AchievementStat.RUNES, statsManager.runesSevered + statsManager.runesStabilized + statsManager.runesInscribed)
+        put(AchievementStat.EVENTS, statsManager.totalEventsFound)
+        put(AchievementStat.ECHOES_FOUND, statsManager.totalEchoes)
+        put(AchievementStat.ECHOES_HELD, echoes)
+        put(AchievementStat.PLAY_TIME, statsManager.totalPlayTimeSeconds)
+        put(AchievementStat.OFFLINE_TIME, statsManager.totalOfflineSeconds)
+        put(AchievementStat.KPS_MAX, statsManager.maxKnowledgePerSecond)
+        put(AchievementStat.RUN_KNOWLEDGE, knowledgeThisRun())
+        put(AchievementStat.CHAOS, if (pact.chaos) chaosMultiplier else 0)
+        put(AchievementStat.ACTIVE_RITUALS, ritualManager.rituals.value.count { it.state == RitualState.ACTIVE })
+
+        val buildings = buildingManager.availableBuildings
+        put(AchievementStat.BUILDINGS_TOTAL, buildings.sumOf { it.amountOwned })
+        put(AchievementStat.BUILDING_TYPES, buildings.count { it.amountOwned > 0 })
+        buildings.forEach { put(AchievementStat.owned(it.id), it.amountOwned) }
+
+        return AchievementContext(stats, activePact.id, path?.id)
     }
 
     fun hardReset() = post {
@@ -481,6 +659,7 @@ class GameEngine @Inject constructor(
         achievementManager.resetAchievements()
         prestigeShopManager.upgrades.forEach { it.level = 0 }
         statsManager.hardReset()
+        loadMadness()
         tutorialManager.resetTutorial()
         runeManager.hideRune()
         ritualManager.reset()
@@ -511,6 +690,7 @@ class GameEngine @Inject constructor(
             upgrade.level = data.prestigeUpgrades.find { it.id == upgrade.id }?.level ?: 0
         }
         statsManager.loadFromEntity(data.statistics)
+        loadMadness()
         setPact(Pact.fromId(data.activePact))
 
         // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
@@ -611,6 +791,7 @@ class GameEngine @Inject constructor(
         val entity = saved.state
 
         statsManager.loadFromEntity(saved.statistics)
+        loadMadness()
 
         val tutorialEnabled = entity?.tutorialEnabled ?: true
         val tutorialSteps = entity?.completedTutorialSteps?.split(",")?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
@@ -681,12 +862,18 @@ class GameEngine @Inject constructor(
 
     private fun grantOfflineGains(diffMillis: Long) {
         val diffSeconds = diffMillis / 1000
+        // La Locura también baja mientras no juegas
+        if (diffSeconds > 0) {
+            madness.decay(diffSeconds)
+            syncMadness()
+        }
         recalculate()
         // Producción base: los potenciadores temporales no se extienden al tiempo fuera
         val gains = baseProductionPerSecond
             .multiply(prestigeShopManager.getOfflinePrestigeMultiplier())
             .multiply(BigDecimal.valueOf(pact.offline))
             .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
+            .multiply(BigDecimal.valueOf(trialReward().offline * if (trialRules().noOffline) 0.0 else 1.0))
             .multiply(BigDecimal(diffSeconds))
 
         if (gains.signum() > 0) {
@@ -729,6 +916,9 @@ class GameEngine @Inject constructor(
         statsManager.trackProductionPeak(productionPerSecond)
         ritualManager.tick(1)
         rollChaos()
+        checkTrial()
+        madnessTick()
+        tideTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -744,7 +934,7 @@ class GameEngine @Inject constructor(
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
         buildingManager.checkUnlocks(knowledge)
-        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings)
+        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings, achievementContext())
         if (newUnlocks.isNotEmpty()) {
             soundManager.playSound(SoundType.ACHIEVEMENT)
             requestSave()
@@ -786,7 +976,7 @@ class GameEngine @Inject constructor(
                     }
                     is RuneReward.InstantEchoes -> {
                         val amount = BigDecimal(reward.amount)
-                        echoes = echoes.add(amount)
+                        if (!trialRules().noRituals) echoes = echoes.add(amount)
                         statsManager.trackEchoesFound(amount)
                         soundManager.playSound(SoundType.ECHO_FOUND)
                     }
@@ -814,9 +1004,14 @@ class GameEngine @Inject constructor(
     private fun applyClick(echoFound: Boolean) {
         if (!isAutoClicking()) soundManager.playSound(SoundType.CLICK, 250)
         statsManager.trackClick()
-        addKnowledge(currentClickPower(), isManual = true)
+        val rules = trialRules()
+        // Manos Atadas: el clic no produce
+        if (!rules.noClickKnowledge) addKnowledge(currentClickPower(), isManual = true)
+        addMadness(MadnessMeter.PER_CLICK)
+        clicksThisTide++
 
-        if (echoFound) {
+        // Silencio: no hay Ecos
+        if (echoFound && !rules.noRituals) {
             echoes = echoes.add(BigDecimal.ONE)
             statsManager.trackEchoesFound(BigDecimal.ONE)
             soundManager.playSound(SoundType.ECHO_FOUND)
@@ -851,6 +1046,11 @@ class GameEngine @Inject constructor(
             MadnessPaths.isPath(node.id) && shop.any { it.id == node.parentId && it.level > 0 }
         }
         if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
+        // Las Pruebas se eligen al Ascender: se presentan cuando la próxima ya puede tener una
+        if (ascensions + 1 >= Trial.REVEAL_AT) tutorialManager.triggerStep(TutorialStep.TRIALS)
+        if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
+        if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
+        if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -865,31 +1065,309 @@ class GameEngine @Inject constructor(
         sanity = prestigeManager.residualSanity
     )
 
-    private fun echoChance(): Double = (BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()) * pact.echoChance
+    private fun echoChance(): Double =
+        if (trialRules().noRituals) 0.0 else (BASE_ECHO_CHANCE + runeManager.getEchoChanceBonus()) * pact.echoChance
 
     // =====================================================================
     // PACTOS
     // =====================================================================
 
     /** Cambia el pacto de la vida actual y aplica sus reglas a runas, eventos y rituales. */
+    // =====================================================================
+    // PRUEBAS DE LOCURA (v0.17.1)
+    // La Prueba activa se guarda como contador de la vida ("run.trial.<id>"): se borra
+    // sola al Ascender. Las superadas, como "trial.<id>".
+    // =====================================================================
+
+    private fun activeTrial(): Trial? = statsManager.counters.keys
+        .firstOrNull { it.startsWith(AchievementStat.ACTIVE_TRIAL_PREFIX) }
+        ?.let { Trial.fromId(it.removePrefix(AchievementStat.ACTIVE_TRIAL_PREFIX)) }
+
+    private fun trialRules(): TrialRules = activeTrial()?.rules ?: NO_TRIAL_RULES
+
+    private fun completedTrials(): Set<Trial> =
+        Trial.entries.filter { statsManager.counter(AchievementStat.trial(it.id)).signum() > 0 }.toSet()
+
+    private fun trialReward(): TrialReward = Trial.combinedReward(completedTrials())
+
+    private fun earlyPacts(): Set<Pact> = Trial.earlyPacts(completedTrials())
+
+    /** Puntos de Atención: los de las Ascensiones y, desde la primera, los de las Pruebas. */
+    private fun attentionPoints(): Int {
+        val base = Attention.available(statsManager.totalPrestiges)
+        return if (base > 0) base + trialReward().attentionPoints else 0
+    }
+
+    private fun startTrial(trial: Trial) {
+        statsManager.flag(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
+        statsManager.count(AchievementStat.TRIALS_STARTED)
+        deliriumMultiplier = 1.0
+        deliriumSeconds = 0
+    }
+
+    /** Abandona la Prueba de esta vida: sus reglas se levantan, sin recompensa. */
+    fun abandonTrial() = post {
+        val trial = activeTrial() ?: return@post
+        statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
+        deliriumMultiplier = 1.0
+        applyPactModifiers()
+        recalculate()
+        requestSave()
+    }
+
+    /**
+     * Edificios con los que empieza la vida: el Legado del Culto (Mapa de Locura) y la
+     * Prueba activa (Manos Atadas). Sin ellos, una vida sin clic no podría arrancar.
+     */
+    private fun applyStartingBuildings() {
+        val start = HashMap<String, Int>()
+        val notes = prestigeShopManager.getStartingNotes()
+        if (notes > 0) start["b_notes"] = notes
+        trialRules().startingBuildings.forEach { (id, n) -> start[id] = maxOf(start[id] ?: 0, n) }
+        start.forEach { (id, n) ->
+            val building = buildingManager.availableBuildings.find { it.id == id } ?: return@forEach
+            building.amountOwned = maxOf(building.amountOwned, n)
+            building.isVisible = true
+        }
+        if (start.isNotEmpty()) buildingManager.checkUnlocks(knowledge)
+    }
+
+    /** Una vez por segundo: la Prueba se supera al llegar a su meta en esta vida. */
+    private fun checkTrial() {
+        val trial = activeTrial() ?: return
+        if (trial.rules.delirium) rollDelirium()
+        if (knowledgeThisRun() < trial.goal) return
+        statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
+        statsManager.flag(AchievementStat.trial(trial.id))
+        statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
+        if (statsManager.runTimeSeconds < FAST_TRIAL_SECONDS) statsManager.flag(AchievementStat.FEAT_TRIAL_FAST)
+        deliriumMultiplier = 1.0
+        refreshEngravings()
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.TrialCompleted(trial))
+        recalculate()
+        requestSave()
+    }
+
+    private fun rollDelirium() {
+        deliriumSeconds++
+        if (deliriumSeconds % Trial.DELIRIUM_PERIOD_SECONDS != 0) return
+        deliriumMultiplier = Trial.DELIRIUM_STEPS.random()
+        recalculate()
+    }
+
+    /** Monomanía: un edificio de un tipo nuevo solo si no se pasa del límite. */
+    private fun canOwnBuilding(buildingId: String): Boolean {
+        val limit = trialRules().maxBuildingTypes ?: return true
+        val buildings = buildingManager.availableBuildings
+        val target = buildings.find { it.id == buildingId } ?: return false
+        if (target.type == BuildingType.CLICK || target.amountOwned > 0) return true
+        return buildings.count { it.type != BuildingType.CLICK && it.amountOwned > 0 } < limit
+    }
+
+    // =====================================================================
+    // MEDIDOR DE LOCURA (v0.17.3)
+    // =====================================================================
+
+    private fun madnessRevealed(): Boolean = statsManager.totalPrestiges >= MadnessMeter.REVEAL_AT
+
+    /** Bono de la Locura y castigo del colapso, sobre la producción. */
+    private fun madnessFactor(): Double {
+        if (!madnessRevealed()) return 1.0
+        val collapse = if (collapseSeconds > 0) MadnessMeter.COLLAPSE_PRODUCTION else 1.0
+        return madness.productionBonus() * collapse
+    }
+
+    private fun syncMadness() {
+        statsManager.counters.remove(AchievementStat.MADNESS)
+        if (madness.value > 0.0) statsManager.counters[AchievementStat.MADNESS] =
+            BigDecimal.valueOf(madness.value).setScale(2, java.math.RoundingMode.HALF_UP)
+        statsManager.record(AchievementStat.MAX_MADNESS, BigDecimal.valueOf(madness.value))
+        if (madness.value >= EDGE_MADNESS && madness.value < MadnessMeter.MAX) statsManager.flag(AchievementStat.FEAT_EDGE)
+    }
+
+    private fun loadMadness() {
+        madness = MadnessMeter(statsManager.counter(AchievementStat.MADNESS).toDouble())
+        collapseSeconds = 0
+        possessedBuildingId = null
+        possessedSeconds = 0
+        madnessHighStreak = 0
+        lastRuneCounts = null
+    }
+
+    /** Suma Locura por jugar fuerte; si llega a 100, la mente colapsa. */
+    private fun addMadness(amount: Double) {
+        if (!madnessRevealed()) return
+        // Marea Alta: la Locura sube más rápido
+        if (madness.add(amount * (currentTide()?.madnessGain ?: 1.0))) collapse() else syncMadness()
+    }
+
+    /** El colapso (leve): se pierden los potenciadores y la producción baja a la mitad 1 minuto. */
+    private fun collapse() {
+        syncMadness()
+        runeManager.clearBuffs()
+        ritualManager.endActive()
+        eventScheduler.clearBuff()
+        madness.reset()
+        syncMadness()
+        collapseSeconds = MadnessMeter.COLLAPSE_SECONDS
+        statsManager.count(AchievementStat.MADNESS_COLLAPSES)
+        if (currentTide() == TidePhase.HIGH) statsManager.flag(AchievementStat.FEAT_TSUNAMI)
+        statsManager.count(AchievementStat.RUN_COLLAPSES)
+        soundManager.playSound(SoundType.EVENT_APPEAR)
+        _effects.trySend(EngineEffect.MadnessCollapse)
+        recalculate()
+    }
+
+    /** Una vez por segundo: runas atrapadas, la Locura baja, presagios y castigos. */
+    private fun madnessTick() {
+        if (!madnessRevealed()) return
+        val counts = Triple(statsManager.runesSevered, statsManager.runesStabilized, statsManager.runesInscribed)
+        lastRuneCounts?.let { last ->
+            val gained = (counts.first - last.first).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_1_SWIPE) +
+                (counts.second - last.second).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_2_HOLD) +
+                (counts.third - last.third).coerceAtLeast(0) * MadnessMeter.perRune(RuneTier.TIER_3_TRACE)
+            if (gained > 0) addMadness(gained)
+            val caught = (counts.first - last.first) + (counts.second - last.second) + (counts.third - last.third)
+            if (caught > 0 && currentTide() == TidePhase.HIGH) statsManager.count(AchievementStat.TIDE_HIGH_RUNES, BigDecimal(caught))
+        }
+        lastRuneCounts = counts
+
+        var changed = false
+        if (collapseSeconds > 0 && --collapseSeconds == 0) changed = true
+        if (possessedSeconds > 0 && --possessedSeconds == 0) {
+            possessedBuildingId = null
+            changed = true
+        }
+        madness.decay(1, currentTide()?.madnessDecay ?: 1.0)
+        if (madness.rollOmen()) {
+            omen()
+            changed = true
+        }
+        madnessHighStreak = if (madness.value >= HIGH_MADNESS) madnessHighStreak + 1 else 0
+        statsManager.record(AchievementStat.MAX_MADNESS_STREAK, BigDecimal(madnessHighStreak))
+        syncMadness()
+        if (changed || kotlin.math.abs(madness.value - lastRecalcMadness) >= MADNESS_RECALC_STEP) {
+            lastRecalcMadness = madness.value
+            recalculate()
+        }
+    }
+
+    /** Un presagio malo: un edificio poseído deja de producir, o se dispersan Ecos. */
+    private fun omen() {
+        statsManager.count(AchievementStat.MADNESS_OMENS)
+        val owned = buildingManager.availableBuildings.filter { it.type != BuildingType.CLICK && it.amountOwned > 0 }
+        if (owned.isNotEmpty() && (echoes < BigDecimal.ONE || kotlin.random.Random.nextBoolean())) {
+            val building = owned.random()
+            possessedBuildingId = building.id
+            possessedSeconds = MadnessMeter.POSSESSION_SECONDS
+            _effects.trySend(EngineEffect.MadnessOmen(building.name, null))
+        } else if (echoes >= BigDecimal.ONE) {
+            val lost = echoes.multiply(BigDecimal.valueOf(MadnessMeter.SCATTERED_ECHOES)).setScale(0, java.math.RoundingMode.CEILING)
+            echoes = echoes.subtract(lost).max(BigDecimal.ZERO)
+            _effects.trySend(EngineEffect.MadnessOmen(null, lost))
+        }
+    }
+
     private fun setPact(newPact: Pact) {
         activePact = newPact
         chaosMultiplier = 1
+        refreshEngravings()
+    }
+
+    // =====================================================================
+    // ESPACIOS DE RUNA (v0.17.2)
+    // =====================================================================
+
+    private fun runeSlots(): Int = trialReward().runeSlots
+
+    /** Las runas grabadas, en el orden en que se grabaron y ajustadas a los espacios. */
+    private fun engravedRunes(): List<String> = statsManager.counters.entries
+        .filter { it.key.startsWith(AchievementStat.ENGRAVE_PREFIX) }
+        .sortedBy { it.value }
+        .map { it.key.removePrefix(AchievementStat.ENGRAVE_PREFIX) }
+        .filter { RuneEngraving.variant(it) != null }
+        .take(runeSlots())
+
+    private fun runeCatches(): Map<String, Int> = RuneEngraving.ALL.associate {
+        it.id to statsManager.counter(AchievementStat.runeCatches(it.id)).toInt()
+    }
+
+    /** Recalcula el pacto con las runas grabadas y lo aplica a runas, eventos y rituales. */
+    private fun refreshEngravings() {
+        val tideEffects = currentTide()?.effects ?: PactEffects()
+        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes())).combinedWith(tideEffects)
         applyPactModifiers()
     }
 
+    // =====================================================================
+    // FASES DE LA MAREA (v0.17.4)
+    // Se calcula del tiempo jugado: no hace falta guardarla.
+    // =====================================================================
+
+    private fun tidesRevealed(): Boolean = statsManager.totalPrestiges >= TidePhase.REVEAL_AT
+
+    private fun currentTide(): TidePhase? =
+        if (tidesRevealed()) TidePhase.at(statsManager.totalPlayTimeSeconds) else null
+
+    private var lastTide: TidePhase? = null
+    private var clicksThisTide = 0
+
+    /** Una vez por segundo: al cambiar de fase se aplican sus efectos y cuenta para los logros. */
+    private fun tideTick() {
+        val tide = currentTide()
+        if (tide == lastTide) return
+        val previous = lastTide
+        lastTide = tide
+        if (previous != null && tide != null) {
+            statsManager.count(AchievementStat.TIDES_PASSED)
+            statsManager.count(AchievementStat.RUN_TIDES)
+            // Una Marea Baja entera sin un solo clic
+            if (previous == TidePhase.LOW && clicksThisTide == 0) statsManager.flag(AchievementStat.FEAT_STILL_LOW_TIDE)
+        }
+        clicksThisTide = 0
+        refreshEngravings()
+        recalculate()
+    }
+
+    /** Graba una runa en un espacio libre (si se atrapó las veces necesarias). */
+    fun engraveRune(runeId: String) = post {
+        val current = engravedRunes()
+        if (runeId in current || current.size >= runeSlots()) return@post
+        if (!RuneEngraving.canEngrave(runeId, statsManager.counter(AchievementStat.runeCatches(runeId)).toInt())) return@post
+        // Las grabadas que sobraban (sin espacio) se descartan al grabar una nueva
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.ENGRAVE_PREFIX) && it.removePrefix(AchievementStat.ENGRAVE_PREFIX) !in current }
+        val order = (statsManager.counters.filterKeys { it.startsWith(AchievementStat.ENGRAVE_PREFIX) }.values.maxOrNull() ?: BigDecimal.ZERO).add(BigDecimal.ONE)
+        statsManager.counters[AchievementStat.engraved(runeId)] = order
+        statsManager.flag(AchievementStat.ENGRAVED_EVER_PREFIX + runeId)
+        soundManager.playSound(SoundType.BUY)
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
+    /** Quita una runa de su espacio. Es gratis: se puede volver a grabar cuando quieras. */
+    fun removeEngraving(runeId: String) = post {
+        if (statsManager.counters.remove(AchievementStat.engraved(runeId)) == null) return@post
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
     private fun effectiveAttention(): Map<String, Int> =
-        Attention.clamp(wantedAttention, Attention.available(statsManager.totalPrestiges))
+        Attention.clamp(wantedAttention, attentionPoints())
 
     private fun attentionMultiplier(target: String): Double =
         Attention.multiplier(effectiveAttention()[target] ?: 0)
 
     private fun applyPactModifiers() {
         // Las runas: el pacto y la Atención puesta en la Vigilia
-        runeManager.spawnFrequency = pact.runeFrequency * attentionMultiplier(Attention.VIGIL)
+        val reward = trialReward()
+        runeManager.spawnFrequency = if (trialRules().noRunes) 0.0
+        else pact.runeFrequency * attentionMultiplier(Attention.VIGIL) * reward.runeFrequency
         eventScheduler.frequencyMultiplier = pact.eventFrequency
         eventScheduler.buffPower = pact.eventBuffPower
-        ritualManager.applyPact(pact.ritualCost, pact.ritualDuration, pact.ritualCooldown)
+        ritualManager.applyPact(pact.ritualCost, pact.ritualDuration, pact.ritualCooldown * reward.ritualCooldown)
     }
 
     /** Azathoth: la producción cambia al azar cada [PactEffects.CHAOS_PERIOD_SECONDS]. */
@@ -898,17 +1376,20 @@ class GameEngine @Inject constructor(
         chaosSeconds++
         if (chaosSeconds % PactEffects.CHAOS_PERIOD_SECONDS != 0) return
         chaosMultiplier = Random.nextInt(PactEffects.CHAOS_MIN, PactEffects.CHAOS_MAX + 1)
+        if (chaosMultiplier == PactEffects.CHAOS_MAX) statsManager.count(AchievementStat.FEAT_CHAOS_20)
+        if (chaosMultiplier == PactEffects.CHAOS_MIN) statsManager.count(AchievementStat.FEAT_CHAOS_1)
         recalculate()
     }
 
     private var chaosSeconds = 0
 
     /** El factor de costo de los edificios: Runa de Barrera y pacto. */
-    private fun buildingCostFactor(): Double = runeManager.getCostReductionMultiplier() * pact.buildingCost
+    private fun buildingCostFactor(): Double =
+        runeManager.getCostReductionMultiplier() * pact.buildingCost * trialRules().buildingCost * trialReward().buildingCost
 
     /** Lo que multiplica la Cordura ganada al Ascender: Mapa de Locura y pacto de esta vida. */
     private fun sanityGainMultiplier(): BigDecimal =
-        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(pact.sanityGain))
+        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(pact.sanityGain * trialReward().sanityGain))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
 
@@ -937,22 +1418,31 @@ class GameEngine @Inject constructor(
 
     private fun recalculate() {
         val upgradesGlobal = upgradeManager.getGlobalMultiplier()
-        val prestigeGlobal = prestigeManager.getPrestigeMultiplier()
-        val achievementGlobal = achievementManager.getGlobalAchievementMultiplier()
-        val shopGlobal = prestigeShopManager.getPermanentGlobalMultiplier()
+        // Pruebas: Mortalidad apaga la Cordura y el Mapa; Amnesia, los logros
+        val rules = trialRules()
+        val reward = trialReward()
+        val prestigeGlobal = if (rules.noSanityBonus) BigDecimal.ONE else prestigeManager.getPrestigeMultiplier()
+        val achievementGlobal = if (rules.noAchievementBonus) BigDecimal.ONE else achievementManager.getGlobalAchievementMultiplier()
+        val shopGlobal = if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getPermanentGlobalMultiplier()
         costMultiplier = buildingCostFactor()
         val pactProduction = BigDecimal.valueOf(pact.production * if (pact.chaos) chaosMultiplier else 1)
+        val trialProduction = BigDecimal.valueOf(rules.production * reward.production * deliriumMultiplier)
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
         // Con el ritual Convergencia activo se MULTIPLICAN (con tope).
         val convergence = ritualManager.isConvergenceActive()
-        val temporaryMult = BuffMath.combine(
-            listOf(eventScheduler.buffMultiplier) +
-                ritualManager.getActiveProductionMultipliers() +
-                runeManager.getActiveProductionMultipliers(),
-            convergence
-        )
+        val temporaryBuffs = listOf(eventScheduler.buffMultiplier) +
+            ritualManager.getActiveProductionMultipliers() +
+            runeManager.getActiveProductionMultipliers()
+        val boostMult = BuffMath.combine(temporaryBuffs, convergence)
+        // La Locura (bono y colapso) cuenta como temporal: no se extiende al tiempo sin conexión
+        val temporaryMult = boostMult.multiply(BigDecimal.valueOf(madnessFactor()))
+        if (convergence) {
+            // Logros de la Convergencia: el mejor combo logrado
+            statsManager.record(AchievementStat.MAX_CONVERGENCE, boostMult)
+            statsManager.record(AchievementStat.MAX_CONVERGENCE_BUFFS, BigDecimal(temporaryBuffs.count { it > 1.0 }))
+        }
         val temporaryClickMult = BuffMath.combine(
             ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers(),
             convergence
@@ -963,11 +1453,12 @@ class GameEngine @Inject constructor(
             .multiply(achievementGlobal)
             .multiply(shopGlobal)
             .multiply(pactProduction)
+            .multiply(trialProduction)
             .multiply(temporaryMult)
             .round(MathContext.DECIMAL64)
 
-        val shopClickBonus = prestigeShopManager.getClickPrestigeMultiplier()
-        val completedSets = AchievementSets.completed(achievementManager.availableAchievements)
+        val shopClickBonus = if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getClickPrestigeMultiplier()
+        val completedSets = if (rules.noAchievementBonus) emptySet() else AchievementSets.completed(achievementManager.availableAchievements)
         val attention = effectiveAttention()
         val buildings = buildingManager.availableBuildings
         buildings.forEachIndexed { index, building ->
@@ -978,13 +1469,15 @@ class GameEngine @Inject constructor(
                     .multiply(shopClickBonus)
                     .multiply(temporaryClickMult)
                     .multiply(setMult)
-                    .multiply(BigDecimal.valueOf(pact.click))
+                    .multiply(BigDecimal.valueOf(pact.click * reward.click))
             } else {
                 upgradeManager.getSpecificBuildingMultiplier(building.id)
                     .multiply(upgradeManager.getSynergyMultiplier(building.id, buildings))
-                    .multiply(prestigeShopManager.getBuildingTierMultiplier(index))
+                    .multiply(if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getBuildingTierMultiplier(index))
                     .multiply(setMult)
                     .multiply(BigDecimal.valueOf(pact.buildingMultiplier(building.id)))
+                    // Presagio de la Locura: el edificio poseído no produce
+                    .multiply(if (building.id == possessedBuildingId) BigDecimal.ZERO else BigDecimal.ONE)
             }
             building.currentMultiplier = specificMult.multiply(globalMultiplier, MathContext.DECIMAL64)
         }
@@ -1026,7 +1519,7 @@ class GameEngine @Inject constructor(
             setsCompleted = AchievementSets.completed(all).size,
             setsTotal = AchievementSets.byBuilding(all).size
         )
-        _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings)
+        _nextGoal.value = NextGoalFinder.find(all, knowledge, buildingManager.availableBuildings, achievementContext())
         _prestigeUpgrades.value = prestigeShopManager.upgrades.map { it.copy() }
         _statistics.value = statsManager.snapshot()
     }
@@ -1049,7 +1542,22 @@ class GameEngine @Inject constructor(
             activePact = activePact,
             chaosMultiplier = chaosMultiplier,
             attention = effectiveAttention(),
-            attentionPoints = Attention.available(statsManager.totalPrestiges),
+            attentionPoints = attentionPoints(),
+            activeTrial = activeTrial(),
+            trialProgress = activeTrial()?.let { t ->
+                knowledgeThisRun().divide(t.goal, MathContext.DECIMAL64).toFloat().coerceIn(0f, 1f)
+            } ?: 0f,
+            completedTrials = completedTrials(),
+            deliriumMultiplier = deliriumMultiplier,
+            earlyPacts = earlyPacts(),
+            madness = if (madnessRevealed()) madness.value else null,
+            tide = currentTide(),
+            tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
+            collapseSeconds = collapseSeconds,
+            possessedBuilding = possessedBuildingId,
+            runeSlots = runeSlots(),
+            engravedRunes = engravedRunes(),
+            runeCatches = runeCatches(),
             echoChance = echoChance()
         )
     }
@@ -1118,5 +1626,17 @@ class GameEngine @Inject constructor(
         private const val OFFLINE_THRESHOLD_MS = 10_000L
         private const val RUNE_SUCCESS_DISPLAY_MS = 2_000L
         private const val EVENT_RESULT_DISPLAY_MS = 2_500L
+
+        // Hazañas de los logros (v0.17)
+        private const val LONG_PATH_LEVEL = 5
+        private const val FAST_LIFE_SECONDS = 15 * 60L
+        private const val FASTEST_LIFE_SECONDS = 5 * 60L
+        private val BLIND_LIFE_KNOWLEDGE = BigDecimal("1000000000")
+        private const val BLANK_MIND_POINTS = 4
+        private const val FAST_TRIAL_SECONDS = 20 * 60L
+        private val NO_TRIAL_RULES = TrialRules()
+        private const val HIGH_MADNESS = 90.0
+        private const val EDGE_MADNESS = 99.0
+        private const val MADNESS_RECALC_STEP = 0.5
     }
 }

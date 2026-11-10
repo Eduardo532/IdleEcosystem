@@ -189,5 +189,33 @@ enum class TutorialStep(
         "Convergencia",
         "Ya tienes Ecos para la Convergencia. Durante un minuto tus potenciadores se multiplican en vez de sumarse, hasta x1.000: invócala cuando tengas runas y rituales activos a la vez.",
         "Al reunir 75 Ecos"
+    ),
+
+    TRIALS(
+        "trials",
+        "Pruebas de Locura",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas.",
+        "Al poder elegir la primera Prueba"
+    ),
+
+    RUNE_SLOTS(
+        "rune_slots",
+        "El Altar de Runas",
+        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
+        "Al ganar el primer espacio de runa"
+    ),
+
+    MADNESS(
+        "madness",
+        "El Medidor de Locura",
+        "Tu mente ya no es la de antes. La barra de Locura sube cuando juegas fuerte (clics, runas, rituales) y baja sola con el tiempo. Cada punto da +1% de producción, pero desde la mitad llegan presagios y al 100% la mente colapsa: pierdes tus potenciadores y produces la mitad un minuto. Tócala para ver los detalles; la Letanía de Calma la baja de golpe.",
+        "Al tener 5 Ascensiones"
+    ),
+
+    TIDES(
+        "tides",
+        "Fases de la Marea",
+        "El mar del fondo del mundo empezó a moverse. Cada 10 minutos de juego cambia la Marea: la Alta trae más runas y eventos (y más Locura), la Baja da más producción y calma, y la Muerta abarata los rituales. Toca el indicador para ver las tres y planea cuándo usar cada cosa.",
+        "Al tener 10 Ascensiones"
     )
 }

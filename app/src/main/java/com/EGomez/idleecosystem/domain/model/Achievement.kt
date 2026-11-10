@@ -4,7 +4,8 @@ import java.math.BigDecimal
 
 enum class AchievementType {
     RESOURCE_REACHED, // Alcanzar X dinero
-    BUILDING_OWNED    // Tener X edificios de tipo Y
+    BUILDING_OWNED,   // Tener X edificios de tipo Y
+    STAT              // Una estadística o contador (ver AchievementStat) llega a X (v0.17)
 }
 
 data class Achievement(
@@ -23,5 +24,13 @@ data class Achievement(
     val requirement: String = "", // Texto descriptivo del requisito (ej: "1000 Oro")
 
     // NUEVO CAMPO: LOGRO OCULTO
-    val isSecret: Boolean = false
+    val isSecret: Boolean = false,
+
+    // v0.17: logros de tipo STAT
+    /** La clave que se mide (AchievementStat). */
+    val stat: String? = null,
+    /** Solo cuenta con este pacto activo (id del pacto). */
+    val pact: String? = null,
+    /** Solo cuenta recorriendo esta Senda (id del nodo). */
+    val path: String? = null
 )

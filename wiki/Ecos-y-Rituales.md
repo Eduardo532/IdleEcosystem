@@ -18,6 +18,7 @@ Un ritual se paga con Ecos y da un efecto temporal. Después de usarlo hay que e
 | Cántico del Vacío | 15 Ecos | x3 a la producción | 30 s | 2 min |
 | Ofrenda de Conocimiento | 25 Ecos | 2 minutos de producción al instante | inmediato | 10 min |
 | Grieta Temporal | 50 Ecos | x20 a la producción | 15 s | 5 min |
+| Letanía de Calma *(v0.17.3)* | 10 Ecos | baja 40 puntos el [Medidor de Locura](Medidor-de-Locura) | al instante | 5 min |
 | Convergencia *(v0.16.2)* | 75 Ecos | los potenciadores se multiplican (tope x1.000) | 1 min | 30 min |
 | Vigilia Eterna | 100 Ecos | x6 a la producción | 2 min | 20 min |
 

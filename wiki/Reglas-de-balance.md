@@ -61,6 +61,8 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - El bono global de logros es el **producto** de los bonos de los logros desbloqueados (redondeado a 16 cifras).
 - **Conjuntos:** todos los logros de cantidad no secretos de un edificio → x2 a ese edificio. *(Código: `AchievementSets`.)*
 - **Próxima meta:** el logro no secreto con mayor progreso (a igual progreso, el primero de la lista). *(Código: `NextGoalFinder`.)*
+- **Logros de las mecánicas** *(v0.17)*: +1 % cada uno, +2 % el último escalón de una serie y los combinados, +5 % los secretos; en promedio, cada logro nuevo no da más de x1,02. Cada mecánica tiene al menos 3 y cada dios al menos 2 propios. *(Código: `MechanicAchievements`; test: `MechanicAchievementsTest`.)*
+- **Contadores:** lo que miden los logros nuevos se guarda en la estadística `counters`; los de la vida actual (`run.*`) se borran al Ascender. *(Código: `AchievementStat`, `StatisticsManager.counters`.)*
 
 ## Ascensión
 
@@ -73,6 +75,28 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
+
+## Pruebas de Locura
+
+- Se superan al generar su meta de Conocimiento en la vida en que se eligieron; la regla se levanta al superarla.
+- Las recompensas se multiplican entre sí y son permanentes. Cuatro adelantan a un Dios Exterior. *(Código: `Trial`; test: `TrialTest`.)*
+
+## Espacios de Runa
+
+- Grabar una runa pide atraparla 10 veces (nivel 1), 5 (nivel 2) o 3 (nivel 3). Hay hasta 4 espacios, uno por cada Prueba que los da.
+- Cada runa grabada da un bono pasivo propio que se multiplica con el pacto. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
+
+## Medidor de Locura
+
+- Sube: clic +0,02, runa +2/+4/+8, ritual +5, Convergencia +20. Baja 0,2 por segundo (también sin conexión); la Letanía de Calma, 40.
+- Mantener pulsado (8 clics/s = +0,16/s) nunca supera lo que baja sola. *(Test: `MadnessMeterTest`.)*
+- Bono: `1 + 0,01 × Locura`, como potenciador temporal. Presagios desde el 50 %: probabilidad por segundo `(Locura − 50) / 500`.
+- Colapso al 100 %: se pierden los potenciadores y la producción queda x0,5 durante 60 s. Nunca se pierden recursos. *(Código: `MadnessMeter`.)*
+
+## Fases de la Marea
+
+- Cada fase dura 600 s de juego, en orden Alta, Baja, Muerta. Se calcula del tiempo jugado. *(Código: `TidePhase`; test: `TidePhaseTest`.)*
+- Alta: runas y eventos x1,5, Locura sube x1,5. Baja: producción x1,25, Locura baja x2. Muerta: rituales x0,7 de costo y recarga, Ecos x1,5.
 
 ## Sendas
 

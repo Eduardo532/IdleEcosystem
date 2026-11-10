@@ -20,6 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
+import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
+import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
+import com.EGomez.idleecosystem.ui.screens.main.components.TideInfoDialog
+import androidx.compose.ui.platform.testTag
+import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.domain.logic.BuildingCatalog
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import androidx.compose.material3.Surface
@@ -109,6 +116,9 @@ fun MainScreen(
         var pactDetailId by rememberSaveable { mutableStateOf<String?>(null) }
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
         var abandonPath by rememberSaveable { mutableStateOf(false) }
+        var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
+        var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
+        var showTideInfo by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -173,6 +183,17 @@ fun MainScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
+                        // Medidor de Locura (desde la quinta Ascensión)
+                        uiState.madness?.let { value ->
+                            MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                        // Fases de la Marea (desde la décima Ascensión)
+                        uiState.tide?.let { tide ->
+                            TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+
                         InfoSection(
                             knowledgeFormatted = uiState.knowledgeFormatted,
                             knowledgePerSecond = uiState.knowledgePerSecond,
@@ -229,6 +250,17 @@ fun MainScreen(
                             attention = uiState.attention,
                             attentionPoints = uiState.attentionPoints,
                             onOpenAttention = { showAttentionDialog = true },
+                            activeTrial = uiState.activeTrial,
+                            trialProgress = uiState.trialProgress,
+                            completedTrials = uiState.completedTrials,
+                            deliriumMultiplier = uiState.deliriumMultiplier,
+                            earlyPacts = uiState.earlyPacts,
+                            onAbandonTrial = { viewModel.onAbandonTrial() },
+                            runeSlots = uiState.runeSlots,
+                            engravedRunes = uiState.engravedRunes,
+                            runeCatches = uiState.runeCatches,
+                            onEngraveRune = { viewModel.onEngraveRune(it) },
+                            onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -297,16 +329,21 @@ fun MainScreen(
                         doubleAt = uiState.doubleSanityAtFormatted
                     ),
                     ascensions = uiState.ascensions,
-                    pacts = Pact.available(uiState.ascensions + 1),
+                    pacts = Pact.available(uiState.ascensions + 1, uiState.earlyPacts),
                     selectedPact = Pact.fromId(nextPactId ?: uiState.activePact.id),
                     onPactSelected = { nextPactId = it.id },
                     buildingNames = buildingNames,
                     activePath = MadnessPaths.active(uiState.prestigeUpgrades),
                     abandonPath = abandonPath,
                     onAbandonPathChanged = { abandonPath = it },
+                    trials = Trial.entries.filter { it.isUnlocked(uiState.ascensions + 1) },
+                    completedTrials = uiState.completedTrials,
+                    selectedTrial = Trial.fromId(nextTrialId),
+                    onTrialSelected = { nextTrialId = it?.id },
                     onConfirm = {
-                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath)
+                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId))
                         nextPactId = null
+                        nextTrialId = null
                         abandonPath = false
                         showAscendConfirmation = false
                     },
@@ -383,6 +420,63 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            if (showTideInfo) {
+                uiState.tide?.let { TideInfoDialog(it) { showTideInfo = false } } ?: run { showTideInfo = false }
+            }
+
+            if (showMadnessInfo) {
+                MadnessInfoDialog(uiState.madness ?: 0.0) { showMadnessInfo = false }
+            }
+
+            // Presagios y colapso de la Locura
+            uiState.madnessNotice?.let { notice ->
+                val text = when {
+                    notice.collapse -> stringResource(R.string.madness_notice_collapse)
+                    notice.possessedBuilding != null -> stringResource(R.string.madness_notice_possessed, tr(notice.possessedBuilding))
+                    else -> stringResource(R.string.madness_notice_echoes, notice.echoesLost ?: "0")
+                }
+                Surface(
+                    color = Color(0xFF2A0A0A),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFD50000)),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 190.dp)
+                        .zIndex(5f)
+                        .testTag(MADNESS_NOTICE_TAG)
+                ) {
+                    Text(
+                        text,
+                        color = Color(0xFFFF5252),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
+            // Prueba de Locura superada
+            uiState.trialNotice?.let { trial ->
+                Surface(
+                    color = Color(0xFF2A1218),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCF6679)),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(5f)
+                        .testTag(TRIAL_NOTICE_TAG)
+                ) {
+                    Text(
+                        stringResource(R.string.trial_completed_notice, tr(trial.title)),
+                        color = Color(0xFFCF6679),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
             uiState.autoAscensionNotice?.let { gain ->
                 Surface(
                     color = Color(0xFF2A1A2E),
@@ -488,3 +582,6 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
 
 /** Cada cuánto se refresca la cuenta regresiva de las runas. */
 private const val BUFF_TICK_MS = 250L
+
+const val TRIAL_NOTICE_TAG = "trial_notice"
+const val MADNESS_NOTICE_TAG = "madness_notice"

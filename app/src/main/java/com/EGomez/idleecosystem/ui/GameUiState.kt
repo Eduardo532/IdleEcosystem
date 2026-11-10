@@ -6,6 +6,8 @@ import com.EGomez.idleecosystem.domain.logic.NextGoal
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -73,6 +75,25 @@ data class GameUiState(
     val attentionPoints: Int = 0,
     /** Cordura ganada en la última Ascensión automática (aviso breve), o null. */
     val autoAscensionNotice: String? = null,
+    /** Pruebas de Locura: la de esta vida, su avance, las superadas y el aviso al superar una. */
+    val activeTrial: Trial? = null,
+    val trialProgress: Float = 0f,
+    val completedTrials: Set<Trial> = emptySet(),
+    val deliriumMultiplier: Double = 1.0,
+    val earlyPacts: Set<Pact> = emptySet(),
+    val trialNotice: Trial? = null,
+    /** Fase de la Marea (null = oculta) y segundos que le quedan. */
+    val tide: TidePhase? = null,
+    val tideSecondsLeft: Int = 0,
+    /** Medidor de Locura (null = oculto), colapso, edificio poseído y el último presagio. */
+    val madness: Double? = null,
+    val collapseSeconds: Int = 0,
+    val possessedBuilding: String? = null,
+    val madnessNotice: MadnessNotice? = null,
+    /** Espacios de Runa: cuántos hay, las grabadas y cuántas veces se atrapó cada runa. */
+    val runeSlots: Int = 0,
+    val engravedRunes: List<String> = emptyList(),
+    val runeCatches: Map<String, Int> = emptyMap(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,
@@ -108,4 +129,11 @@ data class SavePreview(
     val date: String,
     val money: String,
     val achievements: String
+)
+
+/** Aviso breve de la Locura: un edificio poseído, Ecos dispersos o el colapso. */
+data class MadnessNotice(
+    val possessedBuilding: String? = null,
+    val echoesLost: String? = null,
+    val collapse: Boolean = false
 )

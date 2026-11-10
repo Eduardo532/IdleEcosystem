@@ -155,6 +155,8 @@ class RuneManager @Inject constructor(
             RuneTier.TIER_2_HOLD -> statisticsManager.trackRuneStabilized()
             RuneTier.TIER_3_TRACE -> statisticsManager.trackRuneInscribed()
         }
+        // Espacios de Runa: cada runa cuenta por separado para poder grabarla
+        statisticsManager.count(AchievementStat.runeCatches(rune.id))
 
         // El ciclo se reinicia ANTES de aplicar el efecto: antes se reiniciaba después
         // y anulaba a la Runa de Entropía.
@@ -196,6 +198,11 @@ class RuneManager @Inject constructor(
             }
             _activeBuffs.update { it + buffs }
         }
+    }
+
+    /** Colapso de la mente: se pierden los potenciadores de las runas. */
+    fun clearBuffs() {
+        _activeBuffs.value = emptyList()
     }
 
     fun hideRune() {

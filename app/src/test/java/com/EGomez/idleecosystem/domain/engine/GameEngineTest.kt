@@ -17,6 +17,7 @@ import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
 import com.EGomez.idleecosystem.domain.logic.RuneManager
@@ -26,6 +27,9 @@ import com.EGomez.idleecosystem.domain.logic.StatisticsManager
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.TidePhase
+import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -359,6 +363,142 @@ class GameEngineTest {
         assertEquals(0, BigDecimal("7003.75").compareTo(economy.sanity))
         val hand = await(engine.prestigeUpgrades) { list -> list.any { it.id == MadnessPaths.HAND && it.level == 0 } }
         assertEquals(0, hand.first { it.id == MadnessPaths.HAND }.level)
+    }
+
+    @Test
+    fun `ascending counts the finished life for the achievements and saves it`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(Pact.HASTUR)
+
+        // La vida que terminó fue Sin Pacto: cuenta para "El Escéptico" y para el primer umbral
+        val achievements = await(engine.achievements) { list -> list.any { it.id == "a_asc_1" && it.isUnlocked } }
+        assertTrue(achievements.first { it.id == "a_asc_1" }.isUnlocked)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.life("none"))))
+        engine.save()
+        val saved = eventually { repository.gameStatistics.first()?.takeIf { it.counters.contains("life.none=1") } }
+        assertTrue(saved.counters.contains("life.none=1"))
+    }
+
+    @Test
+    fun `a trial starts on ascension, changes the rules and its reward stays`() = runBlocking {
+        stats.totalPrestiges = 2 // la Ascensión que viene es la tercera: se abren las Pruebas
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(nextTrial = Trial.HUNGER)
+
+        // Hambre: los edificios cuestan x10
+        val started = await(engine.economy) { it.activeTrial == Trial.HUNGER }
+        assertEquals(10.0, started.buildingCostMultiplier, 1e-9)
+
+        // Al llegar a la meta (1B en esta vida) se supera y la regla se levanta
+        engine.grantKnowledge(BigDecimal("2000000000"))
+        val passed = await(engine.economy) { Trial.HUNGER in it.completedTrials }
+        assertEquals(null, passed.activeTrial)
+        assertEquals(0.9, passed.buildingCostMultiplier, 1e-9)
+        assertTrue(Pact.SHUB_NIGGURATH in passed.earlyPacts)
+    }
+
+    @Test
+    fun `a caught rune can be engraved in a slot won by a trial`() = runBlocking {
+        // Partida importada: Ceguera superada (1 espacio) y la Runa de Hueso atrapada 10 veces
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 3
+            flag(AchievementStat.trial("blindness"))
+            count(AchievementStat.runeCatches("t1_bone"), BigDecimal(10))
+            count(AchievementStat.runeCatches("t2_gravity"), BigDecimal(2))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.runeSlots == 1 }
+
+        engine.engraveRune("t2_gravity") // solo 2 de 5: no se puede
+        engine.engraveRune("t1_bone")
+
+        // La Runa de Hueso grabada: los edificios cuestan un 5 % menos
+        val after = await(engine.economy) { it.engravedRunes == listOf("t1_bone") }
+        assertEquals(0.95, after.buildingCostMultiplier, 1e-9)
+
+        engine.removeEngraving("t1_bone")
+        val removed = await(engine.economy) { it.engravedRunes.isEmpty() }
+        assertEquals(1.0, removed.buildingCostMultiplier, 1e-9)
+    }
+
+    @Test
+    fun `madness rises with clicks and collapses at 100`() = runBlocking {
+        // Oculto hasta la quinta Ascensión
+        assertEquals(null, engine.economy.value.madness)
+        stats.totalPrestiges = 5
+        engine.click(false)
+        val rising = await(engine.economy) { (it.madness ?: 0.0) > 0.0 }
+        assertTrue(rising.globalMultiplier.signum() >= 0)
+
+        // 5.100 clics (x0,02) llenan el medidor aunque baje 0,2 por segundo
+        repeat(5_100) { engine.click(false) }
+        val collapsed = await(engine.economy) { it.collapseSeconds > 0 }
+        assertTrue((collapsed.madness ?: 100.0) < 10.0)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.MADNESS_COLLAPSES)))
+    }
+
+    @Test
+    fun `bound hands starts with notes so the life can move without clicks`() = runBlocking {
+        stats.totalPrestiges = 2
+        // Legado del Culto a nivel 1: +5 Notas en cada vida (la Prueba da 10, se queda el mayor)
+        shop.upgrades.first { it.id == "pu_core" }.level = 1
+        shop.upgrades.first { it.id == PrestigeShopManager.STARTING_NOTES_ID }.level = 1
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(nextTrial = Trial.BOUND_HANDS)
+
+        val buildings = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        assertTrue(buildings.first { it.id == "b_scrolls" }.isVisible)
+        val economy = await(engine.economy) { it.activeTrial == Trial.BOUND_HANDS && it.productionPerSecond.signum() > 0 }
+        assertTrue(economy.productionPerSecond.signum() > 0)
+    }
+
+    @Test
+    fun `the legacy of the cult gives notes at the start of every life`() = runBlocking {
+        shop.upgrades.first { it.id == "pu_core" }.level = 1
+        shop.upgrades.first { it.id == PrestigeShopManager.STARTING_NOTES_ID }.level = 2
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend()
+
+        val buildings = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.amountOwned == 10 } }
+        assertEquals(10, buildings.first { it.id == "b_notes" }.amountOwned)
+    }
+
+    @Test
+    fun `the tide appears with the tenth ascension and follows play time`() = runBlocking {
+        assertEquals(null, engine.economy.value.tide)
+        stats.totalPrestiges = 10
+        stats.totalPlayTimeSeconds = 650 // ya en la Marea Baja
+        val economy = await(engine.economy) { it.tide != null }
+        assertEquals(TidePhase.LOW, economy.tide)
+        assertTrue(economy.tideSecondsLeft in 1..600)
+    }
+
+    @Test
+    fun `abandoning a trial lifts its rules without a reward`() = runBlocking {
+        stats.totalPrestiges = 2
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(nextTrial = Trial.BLINDNESS)
+        await(engine.economy) { it.activeTrial == Trial.BLINDNESS }
+
+        engine.abandonTrial()
+
+        val economy = await(engine.economy) { it.activeTrial == null }
+        assertTrue(economy.completedTrials.isEmpty())
     }
 
     @Test

@@ -22,6 +22,7 @@ import com.EGomez.idleecosystem.domain.logic.SoundType
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -184,7 +185,20 @@ class MainViewModel @Inject constructor(
         activePact = economy.activePact,
         chaosMultiplier = economy.chaosMultiplier,
         attention = economy.attention,
-        attentionPoints = economy.attentionPoints
+        attentionPoints = economy.attentionPoints,
+        activeTrial = economy.activeTrial,
+        trialProgress = economy.trialProgress,
+        completedTrials = economy.completedTrials,
+        deliriumMultiplier = economy.deliriumMultiplier,
+        earlyPacts = economy.earlyPacts,
+        madness = economy.madness,
+        tide = economy.tide,
+        tideSecondsLeft = economy.tideSecondsLeft,
+        collapseSeconds = economy.collapseSeconds,
+        possessedBuilding = economy.possessedBuilding?.let { id -> engine.buildings.value.firstOrNull { it.id == id }?.name ?: id },
+        runeSlots = economy.runeSlots,
+        engravedRunes = economy.engravedRunes,
+        runeCatches = economy.runeCatches
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -215,6 +229,18 @@ class MainViewModel @Inject constructor(
                     _uiState.update { if (it.autoAscensionNotice == gain) it.copy(autoAscensionNotice = null) else it }
                 }
             }
+            is EngineEffect.MadnessOmen -> showMadnessNotice(
+                MadnessNotice(possessedBuilding = effect.possessedBuilding, echoesLost = effect.echoesLost?.toBeautifulString())
+            )
+            EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
+            is EngineEffect.TrialCompleted -> {
+                val trial = effect.trial
+                _uiState.update { it.copy(trialNotice = trial) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.trialNotice == trial) it.copy(trialNotice = null) else it }
+                }
+            }
             is EngineEffect.AchievementUnlocked -> {
                 val achievement = effect.achievement
                 _uiState.update { it.copy(lastUnlockedAchievement = achievement) }
@@ -225,6 +251,14 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun showMadnessNotice(notice: MadnessNotice) {
+        _uiState.update { it.copy(madnessNotice = notice) }
+        viewModelScope.launch {
+            delay(MADNESS_NOTICE_MS)
+            _uiState.update { if (it.madnessNotice == notice) it.copy(madnessNotice = null) else it }
         }
     }
 
@@ -259,7 +293,14 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false) = engine.ascend(nextPact, abandonPath)
+    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) =
+        engine.ascend(nextPact, abandonPath, nextTrial)
+
+    fun onAbandonTrial() = engine.abandonTrial()
+
+    fun onEngraveRune(runeId: String) = engine.engraveRune(runeId)
+
+    fun onRemoveEngraving(runeId: String) = engine.removeEngraving(runeId)
 
     fun onHardResetClicked() = engine.hardReset()
 
@@ -468,5 +509,7 @@ class MainViewModel @Inject constructor(
         const val ACHIEVEMENT_POPUP_MS = 4_000L
 
         const val AUTO_ASCENSION_NOTICE_MS = 4_000L
+        const val TRIAL_NOTICE_MS = 5_000L
+        const val MADNESS_NOTICE_MS = 4_000L
     }
 }

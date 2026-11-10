@@ -20,6 +20,7 @@ import com.EGomez.idleecosystem.domain.logic.SoundManager
 import com.EGomez.idleecosystem.domain.logic.SoundType
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
+import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -177,7 +178,9 @@ class MainViewModel @Inject constructor(
         echoes = economy.echoes,
         echoesFormatted = economy.echoes.toBeautifulString(),
         revealed = economy.revealed,
-        ascensions = economy.ascensions
+        ascensions = economy.ascensions,
+        activePact = economy.activePact,
+        chaosMultiplier = economy.chaosMultiplier
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -252,7 +255,7 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked() = engine.ascend()
+    fun onAscendClicked(nextPact: Pact? = null) = engine.ascend(nextPact)
 
     fun onHardResetClicked() = engine.hardReset()
 

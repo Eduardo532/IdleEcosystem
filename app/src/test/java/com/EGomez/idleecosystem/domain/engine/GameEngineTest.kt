@@ -24,6 +24,7 @@ import com.EGomez.idleecosystem.domain.logic.SoundManager
 import com.EGomez.idleecosystem.domain.logic.StatisticsManager
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
+import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -141,14 +142,14 @@ class GameEngineTest {
         engine.ascend()
 
         val economy = await(engine.economy) { it.sanity.signum() > 0 }
-        // 1e7 generados / 1e6 = 10 -> raíz entera 3
-        assertEquals(0, BigDecimal(3).compareTo(economy.sanity))
+        // 1e7 generados / 1e6 = 10 -> raíz entera 3, x1,25 por terminar la vida sin pacto
+        assertEquals(0, BigDecimal("3.75").compareTo(economy.sanity))
         assertEquals(0, engine.buildings.value.first { it.id == NOTES }.amountOwned)
 
         val state = eventually {
-            repository.gameState.first()?.takeIf { BigDecimal(it.prestigeCurrency).compareTo(BigDecimal(3)) == 0 }
+            repository.gameState.first()?.takeIf { BigDecimal(it.prestigeCurrency).compareTo(BigDecimal("3.75")) == 0 }
         }
-        assertEquals(0, BigDecimal(3).compareTo(BigDecimal(state.prestigeCurrency)))
+        assertEquals(0, BigDecimal("3.75").compareTo(BigDecimal(state.prestigeCurrency)))
         val notes = eventually { repository.loadBuildings().find { it.buildingId == NOTES }?.takeIf { it.amountOwned == 0 } }
         assertEquals(0, notes.amountOwned)
     }
@@ -316,12 +317,37 @@ class GameEngineTest {
     fun `automatic ascension happens when the gain doubles the sanity`() = runBlocking {
         stats.totalPrestiges = 10
         engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, autoAscend = true))
-        // 9M generados -> 3 puntos de Cordura, más que los 0 que hay
+        // 9M generados -> 3 puntos de Cordura (x1,25 sin pacto), más que los 0 que hay
         engine.grantKnowledge(BigDecimal("9000000"))
 
         val economy = await(engine.economy) { it.sanity.signum() > 0 }
-        assertEquals(0, BigDecimal(3).compareTo(economy.sanity))
+        assertEquals(0, BigDecimal("3.75").compareTo(economy.sanity))
         assertTrue(economy.knowledge < BigDecimal("9000000"))
+    }
+
+    @Test
+    fun `ascending seals the chosen pact and saves it`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(Pact.HASTUR)
+
+        val economy = await(engine.economy) { it.activePact == Pact.HASTUR }
+        assertEquals(Pact.HASTUR, economy.activePact)
+        val state = eventually { repository.gameState.first()?.takeIf { it.activePact == "hastur" } }
+        assertEquals("hastur", state.activePact)
+    }
+
+    @Test
+    fun `a locked god cannot be chosen`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        // Azathoth pide 50 Ascensiones: la primera vida nueva queda sin pacto
+        engine.ascend(Pact.AZATHOTH)
+
+        val economy = await(engine.economy) { it.sanity.signum() > 0 }
+        assertEquals(Pact.NONE, economy.activePact)
     }
 
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =

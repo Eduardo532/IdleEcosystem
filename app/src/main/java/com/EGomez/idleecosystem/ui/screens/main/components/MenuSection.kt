@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +35,8 @@ import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.ui.components.sigilColor
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.ui.components.AutoChip
@@ -85,6 +88,9 @@ fun MenuSection(
     onToggleAutoGrimoire: () -> Unit = {},
     onToggleAutoRitual: (String) -> Unit = {},
     onOpenAutomation: () -> Unit = {},
+    activePact: Pact = Pact.NONE,
+    chaosMultiplier: Int = 1,
+    onPactSelected: (Pact) -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -93,12 +99,16 @@ fun MenuSection(
     val tabs = listOf(
         stringResource(R.string.tab_research),
         if (revealed.grimoire) stringResource(R.string.tab_grimoire) else LOCKED_TITLE,
-        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE
+        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE,
+        // El Panteón se descubre junto con la Ascensión, donde se eligen los pactos
+        if (revealed.ascension) stringResource(R.string.tab_pantheon) else LOCKED_TITLE
     )
     val lockedTabText = when {
         selectedTabIndex == 1 && !revealed.grimoire ->
             stringResource(R.string.locked_grimoire, SystemReveal.GRIMOIRE_AT.toBeautifulString())
         selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
+        selectedTabIndex == 3 && !revealed.ascension ->
+            stringResource(R.string.locked_pantheon, BigDecimal("1000000").toBeautifulString())
         else -> null
     }
 
@@ -188,7 +198,7 @@ fun MenuSection(
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { onTabSelected(index) },
-                        text = { Text(title, fontWeight = FontWeight.Bold) },
+                        text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
                         selectedContentColor = ArcanePurple,
                         unselectedContentColor = Color.Gray
                     )
@@ -337,6 +347,9 @@ fun MenuSection(
                         }
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
+                    3 -> {
+                        item { PantheonGallery(ascensions, activePact, onPactSelected) }
+                    }
                 }
             }
 
@@ -374,6 +387,16 @@ fun MenuSection(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // El pacto de esta vida (con Azathoth, el caos actual)
+                        if (activePact != Pact.NONE) {
+                            Text(
+                                if (activePact.effects.chaos) "${tr(activePact.godName)} · x$chaosMultiplier" else tr(activePact.godName),
+                                color = activePact.sigilColor(),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.testTag(ACTIVE_PACT_TAG)
+                            )
+                        }
                         // Cuándo conviene ascender: el punto en que la recompensa se duplica
                         if (canPrestige && doubleSanityAtFormatted != null) {
                             Text(
@@ -439,6 +462,7 @@ private const val LOCKED_TITLE = "???"
 const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
+const val ACTIVE_PACT_TAG = "active_pact"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
 @Composable

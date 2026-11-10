@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PrestigeUpgradeEntity::class,
         GameStatisticsEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -85,6 +85,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v0.16: el pacto de la vida actual. La tabla sigue siendo game_save. */
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `game_save` ADD COLUMN `activePact` TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         val ALL_MIGRATIONS = arrayOf(
             MIGRATION_3_4,
             MIGRATION_4_5,
@@ -92,7 +99,8 @@ abstract class AppDatabase : RoomDatabase() {
             MIGRATION_6_7,
             MIGRATION_7_8,
             MIGRATION_8_9,
-            MIGRATION_9_10
+            MIGRATION_9_10,
+            MIGRATION_10_11
         )
     }
 }

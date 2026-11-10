@@ -2,7 +2,7 @@
 
 **Ecosistema Arcano** (IdleEcosystem) es un juego idle para Android con estética de horror cósmico. Investigas lo prohibido para reunir **Conocimiento**, construyes un culto que trabaja por ti y, cuando la mente ya no da más, **Asciendes**: reinicias la partida a cambio de **Cordura Residual**, que hace más fuerte cada vida siguiente.
 
-> Versión oficial actual: **v0.15.1 "Ascender sin Repetir"**.
+> Versión oficial actual: **v0.15.1 "Ascender sin Repetir"**. En desarrollo: **v0.16.x**.
 
 ## Para jugadores
 
@@ -16,6 +16,7 @@
 | [Eventos](Eventos) | Eventos aleatorios, cadenas y memorias de Ascensión |
 | [Logros](Logros) | Logros, conjuntos y la próxima meta |
 | [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura) | Reiniciar a cambio de Cordura y gastarla |
+| [Panteón](Panteon) | Los 14 pactos con los dioses, uno por vida |
 | [Ajustes](Ajustes) | Idioma, notación, sonido y partidas |
 
 ## Para el desarrollo

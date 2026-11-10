@@ -2,7 +2,7 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
-## v0.16.x · "El Panteón" *(en pruebas)*
+## v0.16.2 · "El Panteón" *(oficial, 10 nov 2026)*
 
 Tercera etapa del plan de retención: que dos vidas seguidas se jueguen distinto.
 

@@ -119,6 +119,7 @@ fun MainScreen(
         var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
         var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
         var showTideInfo by rememberSaveable { mutableStateOf(false) }
+        var showTranscend by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -261,6 +262,9 @@ fun MainScreen(
                             runeCatches = uiState.runeCatches,
                             onEngraveRune = { viewModel.onEngraveRune(it) },
                             onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
+                            transcendRevealed = uiState.transcendRevealed,
+                            ether = uiState.ether,
+                            onOpenTranscend = { showTranscend = true },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -420,6 +424,42 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            if (showTranscend) {
+                TranscendDialog(
+                    cycleAscensions = uiState.cycleAscensions,
+                    etherGain = uiState.etherGain,
+                    ether = uiState.ether,
+                    eternalLevels = uiState.eternalLevels,
+                    onBuyEternal = { viewModel.onBuyEternal(it) },
+                    onTranscend = {
+                        viewModel.onTranscend()
+                        showTranscend = false
+                    },
+                    onDismiss = { showTranscend = false }
+                )
+            }
+
+            // Aviso al Trascender
+            uiState.transcendNotice?.let { gain ->
+                Surface(
+                    color = Color(0xFF12161C),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, EtherColor),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(5f)
+                ) {
+                    Text(
+                        stringResource(R.string.transcend_notice, gain),
+                        color = EtherColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
             if (showTideInfo) {
                 uiState.tide?.let { TideInfoDialog(it) { showTideInfo = false } } ?: run { showTideInfo = false }
             }

@@ -98,6 +98,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Cada fase dura 600 s de juego, en orden Alta, Baja, Muerta. Se calcula del tiempo jugado. *(Código: `TidePhase`; test: `TidePhaseTest`.)*
 - Alta: runas y eventos x1,5, Locura sube x1,5. Baja: producción x1,25, Locura baja x2. Muerta: rituales x0,7 de costo y recarga, Ecos x1,5.
 
+## Trascender
+
+- Pide 50 Ascensiones en el ciclo. Éter = `⌊√(Ascensiones del ciclo × log10(1 + Cordura del ciclo)) × 1,25^Eco⌋`. *(Código: `Transcendence`; test: `TranscendenceTest`.)*
+- Mejoras eternas: costo `base × crecimiento^nivel`, redondeado hacia arriba. Fuego Eterno x2, Cordura Primordial x1,5 por nivel.
+- Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

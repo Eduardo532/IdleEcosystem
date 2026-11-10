@@ -488,6 +488,39 @@ class GameEngineTest {
     }
 
     @Test
+    fun `transcending resets almost everything for ether and eternal upgrades`() = runBlocking {
+        // Ciclo importado: 50 Ascensiones, 10.000 de Cordura ganada y Ceguera superada
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            flag(AchievementStat.trial("blindness"))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal(500), echoes = BigDecimal(30),
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendRevealed }
+        assertEquals(14, before.etherGain)
+
+        engine.transcend()
+
+        val after = await(engine.economy) { it.transcendences == 1 }
+        assertEquals(14, after.ether)
+        assertEquals(0, after.ascensions)
+        assertEquals(0, BigDecimal.ZERO.compareTo(after.sanity))
+        assertTrue(after.completedTrials.isEmpty())
+        // Los logros de Ascensiones no retroceden
+        assertEquals(0, BigDecimal(50).compareTo(stats.counter(AchievementStat.ASCENSIONS_PAST)))
+
+        engine.buyEternal("memory")
+        val bought = await(engine.economy) { it.eternalLevels["memory"] == 1 }
+        assertEquals(13, bought.ether)
+    }
+
+    @Test
     fun `abandoning a trial lifts its rules without a reward`() = runBlocking {
         stats.totalPrestiges = 2
         engine.grantKnowledge(BigDecimal("10000000"))

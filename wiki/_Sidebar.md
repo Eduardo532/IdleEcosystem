@@ -14,6 +14,7 @@
 - [Pruebas de Locura](Pruebas-de-Locura)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
+- [Trascender](Trascender)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.EtherColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -112,6 +113,9 @@ fun MenuSection(
     runeCatches: Map<String, Int> = emptyMap(),
     onEngraveRune: (String) -> Unit = {},
     onRemoveEngraving: (String) -> Unit = {},
+    transcendRevealed: Boolean = false,
+    ether: Int = 0,
+    onOpenTranscend: () -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -461,6 +465,19 @@ fun MenuSection(
                                 modifier = Modifier.testTag(ACTIVE_PACT_TAG)
                             )
                         }
+                        // Trascender (v0.18.0): el Éter y el acceso a la segunda capa
+                        if (transcendRevealed) {
+                            Text(
+                                stringResource(R.string.transcend_link, ether),
+                                color = EtherColor,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable(onClick = onOpenTranscend)
+                                    .padding(vertical = 2.dp)
+                                    .testTag(TRANSCEND_LINK_TAG)
+                            )
+                        }
                         // Cuándo conviene ascender: el punto en que la recompensa se duplica
                         if (canPrestige && doubleSanityAtFormatted != null) {
                             Text(
@@ -527,6 +544,7 @@ const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
+const val TRANSCEND_LINK_TAG = "transcend_link"
 const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */

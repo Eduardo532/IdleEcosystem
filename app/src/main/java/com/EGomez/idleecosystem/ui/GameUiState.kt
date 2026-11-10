@@ -82,6 +82,14 @@ data class GameUiState(
     val deliriumMultiplier: Double = 1.0,
     val earlyPacts: Set<Pact> = emptySet(),
     val trialNotice: Trial? = null,
+    /** Trascender (v0.18.0): si se ve, el ciclo, el Éter y las mejoras eternas. */
+    val transcendRevealed: Boolean = false,
+    val cycleAscensions: Int = 0,
+    val etherGain: Int = 0,
+    val ether: Int = 0,
+    val transcendences: Int = 0,
+    val eternalLevels: Map<String, Int> = emptyMap(),
+    val transcendNotice: Int? = null,
     /** Fase de la Marea (null = oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,

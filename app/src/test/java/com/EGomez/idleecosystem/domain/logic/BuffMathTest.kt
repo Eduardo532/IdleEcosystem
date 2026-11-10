@@ -32,4 +32,21 @@ class BuffMathTest {
     fun `values below x1 are ignored`() {
         assertBd("10", BuffMath.additive(listOf(0.5, 10.0)))
     }
+
+    @Test
+    fun `convergence multiplies the boosts instead of adding them`() {
+        // x20 + x6 + x3 sumados dan x27; multiplicados, x360
+        assertEquals(0, BigDecimal(27).compareTo(BuffMath.combine(listOf(20.0, 6.0, 3.0), convergence = false)))
+        assertEquals(0, BigDecimal(360).compareTo(BuffMath.combine(listOf(20.0, 6.0, 3.0), convergence = true)))
+    }
+
+    @Test
+    fun `convergence is capped and never worse than adding`() {
+        assertEquals(0, BigDecimal(1_000).compareTo(BuffMath.converged(listOf(777.0, 500.0))))
+        // Un solo potenciador (o ninguno) vale lo mismo que sumado
+        assertEquals(0, BigDecimal(10).compareTo(BuffMath.converged(listOf(10.0, 1.0))))
+        assertEquals(0, BigDecimal.ONE.compareTo(BuffMath.converged(emptyList())))
+        // Por encima del tope, la suma manda: x1.500 + x200 no baja a x1.000
+        assertEquals(0, BigDecimal(1_700).compareTo(BuffMath.converged(listOf(1_500.0, 201.0))))
+    }
 }

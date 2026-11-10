@@ -21,4 +21,21 @@ object BuffMath {
         }
         return total
     }
+
+    /** Tope del ritual Convergencia. */
+    const val CONVERGENCE_CAP = 1_000.0
+
+    /**
+     * Durante la Convergencia los potenciadores se MULTIPLICAN, con un tope de
+     * [CONVERGENCE_CAP]. Nunca rinde menos que la suma: con un solo potenciador da lo mismo.
+     */
+    fun converged(multipliers: List<Double>): BigDecimal {
+        var product = BigDecimal.ONE
+        multipliers.forEach { m -> if (m > 1.0) product = product.multiply(BigDecimal.valueOf(m)) }
+        return product.min(BigDecimal.valueOf(CONVERGENCE_CAP)).max(additive(multipliers))
+    }
+
+    /** Suma o, con la Convergencia activa, multiplica. */
+    fun combine(multipliers: List<Double>, convergence: Boolean): BigDecimal =
+        if (convergence) converged(multipliers) else additive(multipliers)
 }

@@ -14,6 +14,7 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
@@ -844,6 +845,14 @@ class GameEngine @Inject constructor(
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
+        // Las Sendas, cuando alguna ya se puede comprar
+        val shop = prestigeShopManager.upgrades
+        val pathOpen = shop.any { node ->
+            MadnessPaths.isPath(node.id) && shop.any { it.id == node.parentId && it.level > 0 }
+        }
+        if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
+        val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
+        if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
 
     private fun currentReveal(): SystemReveal = SystemReveal.compute(
@@ -936,13 +945,17 @@ class GameEngine @Inject constructor(
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
-        val temporaryMult = BuffMath.additive(
+        // Con el ritual Convergencia activo se MULTIPLICAN (con tope).
+        val convergence = ritualManager.isConvergenceActive()
+        val temporaryMult = BuffMath.combine(
             listOf(eventScheduler.buffMultiplier) +
                 ritualManager.getActiveProductionMultipliers() +
-                runeManager.getActiveProductionMultipliers()
+                runeManager.getActiveProductionMultipliers(),
+            convergence
         )
-        val temporaryClickMult = BuffMath.additive(
-            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers()
+        val temporaryClickMult = BuffMath.combine(
+            ritualManager.getActiveClickMultipliers() + runeManager.getActiveClickMultipliers(),
+            convergence
         )
 
         globalMultiplier = upgradesGlobal

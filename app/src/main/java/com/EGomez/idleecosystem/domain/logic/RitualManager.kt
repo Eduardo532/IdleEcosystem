@@ -17,6 +17,10 @@ class RitualManager @Inject constructor() {
     private val _rituals = MutableStateFlow<List<Ritual>>(emptyList())
     val rituals: StateFlow<List<Ritual>> = _rituals.asStateFlow()
 
+    companion object {
+        const val CONVERGENCE_ID = "rit_convergence"
+    }
+
     init {
         initializeRituals()
     }
@@ -62,6 +66,16 @@ class RitualManager @Inject constructor() {
                 cooldownSeconds = 300,
                 effectType = RitualEffectType.PRODUCTION_MULTIPLIER,
                 effectValue = 20.0
+            ),
+            Ritual(
+                id = CONVERGENCE_ID,
+                name = "Convergencia",
+                description = "Durante un minuto los potenciadores se multiplican entre sí en vez de sumarse (tope x1.000).",
+                baseCost = BigDecimal("75"),
+                durationSeconds = 60,
+                cooldownSeconds = 1800,
+                effectType = RitualEffectType.CONVERGENCE,
+                effectValue = BuffMath.CONVERGENCE_CAP
             ),
             Ritual(
                 id = "rit_eternal_vigil",
@@ -151,6 +165,10 @@ class RitualManager @Inject constructor() {
     fun getActiveProductionMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.PRODUCTION_MULTIPLIER }
             .map { it.effectValue }
+
+    /** ¿Está activa la Convergencia? Entonces los potenciadores se multiplican. */
+    fun isConvergenceActive(): Boolean =
+        _rituals.value.any { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.CONVERGENCE }
 
     fun getActiveClickMultipliers(): List<Double> =
         _rituals.value.filter { it.state == RitualState.ACTIVE && it.effectType == RitualEffectType.CLICK_MULTIPLIER }

@@ -16,6 +16,10 @@ import com.EGomez.idleecosystem.domain.model.RitualEffectType
 import com.EGomez.idleecosystem.ui.components.BuildingItem
 import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.PATH_NOTE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
+import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AttentionDialog
@@ -196,6 +200,45 @@ class CriticalUiTest {
         compose.onNodeWithText("MEJORAR", substring = true).assertIsNotEnabled().performClick()
         compose.onNodeWithText("Faltan 3 Cordura", substring = true).assertExists()
         assertEquals(0, bought)
+    }
+
+    @Test
+    fun `a sealed path cannot be bought and says why`() {
+        val hand = PrestigeUpgrade(
+            id = MadnessPaths.HAND, name = "Senda de la Mano", description = "Prueba",
+            baseCost = BigDecimal(5), costMultiplier = BigDecimal(2), effectMultiplier = BigDecimal.ONE,
+            type = UpgradeType.CLICK_MULTIPLIER, x = 0.2f, y = 0.2f, level = 1
+        )
+        val gears = hand.copy(id = MadnessPaths.GEARS, name = "Senda del Engranaje", x = 0.5f, y = 0.5f, level = 0)
+        var bought = 0
+        compose.setContent {
+            PrestigeShopDialog(listOf(hand, gears), "100", BigDecimal(100), { bought++ }, {})
+        }
+
+        compose.onNodeWithTag(CONSTELLATION_MAP_TAG).performTouchInput { click(center) }
+        compose.onNodeWithTag(PATH_NOTE_TAG).assertTextContains("Senda de la Mano", substring = true)
+        compose.onNodeWithText("Sellada").assertIsNotEnabled()
+        assertEquals(0, bought)
+    }
+
+    @Test
+    fun `the ascend dialog offers to abandon the current path`() {
+        val hand = PrestigeUpgrade(
+            id = MadnessPaths.HAND, name = "Senda de la Mano", description = "Prueba",
+            baseCost = BigDecimal(2_000), costMultiplier = BigDecimal("2.5"), effectMultiplier = BigDecimal(3),
+            type = UpgradeType.CLICK_MULTIPLIER, level = 2
+        )
+        var abandon by mutableStateOf(false)
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                activePath = hand, abandonPath = abandon, onAbandonPathChanged = { abandon = it }
+            )
+        }
+
+        compose.onNodeWithText("recuperas", substring = true).assertExists()
+        compose.onNodeWithTag(ABANDON_PATH_TAG).performClick()
+        assertTrue(abandon)
     }
 
     @Test

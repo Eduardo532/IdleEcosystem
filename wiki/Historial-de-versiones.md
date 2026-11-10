@@ -2,7 +2,7 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
-## v0.15.x · "Ascender sin Repetir" *(en pruebas)*
+## v0.15.1 · "Ascender sin Repetir" *(oficial, 9 nov 2026)*
 
 Segunda etapa del plan de retención: que Ascender no obligue a repetir el inicio a mano.
 

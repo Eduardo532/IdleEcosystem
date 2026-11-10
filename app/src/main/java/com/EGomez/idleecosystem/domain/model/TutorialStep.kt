@@ -231,5 +231,12 @@ enum class TutorialStep(
         "Consagrar Edificios",
         "Tu primera Trascendencia abre un rito nuevo: consagrar edificios con Éter. Cada nivel (hasta V) multiplica por 3 la producción de ese edificio para siempre, aunque Asciendas o Trasciendas. Para consagrarlo necesitas 100 unidades por nivel en la vida actual; cuando las tengas, toca la línea ✦ bajo el edificio.",
         "Tras la primera Trascendencia"
+    ),
+
+    RUNE_MASTERY(
+        "rune_mastery",
+        "Maestría de Runas",
+        "Desde tu primera Trascendencia, cada runa que atrapas suma a su maestría, que nunca se pierde. Cada nivel (hasta 5 estrellas) alarga su potenciador un 10% y, si está grabada, su bono es un 20% más fuerte. Mira las estrellas en la vista Runas del Panteón.",
+        "Al atrapar una runa tras la primera Trascendencia"
     )
 }

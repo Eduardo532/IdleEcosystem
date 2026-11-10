@@ -68,7 +68,8 @@ object AchievementStat {
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
-        CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX
+        CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
+        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED
     )
 
     // --- Contadores guardados ---
@@ -117,6 +118,15 @@ object AchievementStat {
     const val ENGRAVED_EVER_PREFIX = "engraved_ever."
 
     fun runeCatches(runeId: String) = RUNE_CATCH_PREFIX + runeId
+
+    // --- Maestría de runas (v0.18.3) ---
+    /** "mastery.t1_blood": capturas de esa runa desde siempre (nunca se reinician). */
+    const val MASTERY_PREFIX = "mastery."
+    const val MASTERY_LEVELS = "mastery_levels"
+    const val MASTERY_KINDS = "mastery_kinds"
+    const val MASTERY_MAXED = "mastery_maxed"
+
+    fun mastery(runeId: String) = MASTERY_PREFIX + runeId
 
     // --- Medidor de Locura (v0.17.3) ---
     const val MAX_MADNESS = "max.madness"
@@ -188,7 +198,7 @@ object AchievementStat {
 
     private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX,
         RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX,
-        CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX)
+        CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX)
 
     /** ¿La clave la entiende el motor? (un logro con una clave desconocida nunca se desbloquearía) */
     fun isKnown(key: String): Boolean =

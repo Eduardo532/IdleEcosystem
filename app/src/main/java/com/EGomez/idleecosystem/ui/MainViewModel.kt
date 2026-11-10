@@ -206,7 +206,8 @@ class MainViewModel @Inject constructor(
         possessedBuilding = economy.possessedBuilding?.let { id -> engine.buildings.value.firstOrNull { it.id == id }?.name ?: id },
         runeSlots = economy.runeSlots,
         engravedRunes = economy.engravedRunes,
-        runeCatches = economy.runeCatches
+        runeCatches = economy.runeCatches,
+        runeMastery = economy.runeMastery
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(

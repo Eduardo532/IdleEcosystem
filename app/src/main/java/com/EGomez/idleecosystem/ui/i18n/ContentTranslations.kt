@@ -57,6 +57,8 @@ object ContentTranslations {
         "Memoria Ancestral" to "Ancestral Memory",
         "Cada ciclo empieza con 5 Ascensiones por nivel (cuentan para los hitos, la Atención, los pactos y las Pruebas)." to "Every cycle starts with 5 Ascensions per level (they count for milestones, Attention, pacts and Trials).",
         "Consagrar Edificios" to "Consecrate Buildings",
+        "Maestría de Runas" to "Rune Mastery",
+        "Desde tu primera Trascendencia, cada runa que atrapas suma a su maestría, que nunca se pierde. Cada nivel (hasta 5 estrellas) alarga su potenciador un 10% y, si está grabada, su bono es un 20% más fuerte. Mira las estrellas en la vista Runas del Panteón." to "Since your first Transcendence, every rune you catch adds to its mastery, which is never lost. Each level (up to 5 stars) makes its boost last 10% longer and, if engraved, its bonus 20% stronger. See the stars in the Runes view of the Pantheon.",
         "Tu primera Trascendencia abre un rito nuevo: consagrar edificios con Éter. Cada nivel (hasta V) multiplica por 3 la producción de ese edificio para siempre, aunque Asciendas o Trasciendas. Para consagrarlo necesitas 100 unidades por nivel en la vida actual; cuando las tengas, toca la línea ✦ bajo el edificio." to "Your first Transcendence opens a new rite: consecrating buildings with Ether. Each level (up to V) multiplies that building's production by 3 forever, even when you Ascend or Transcend. To consecrate it you need 100 units per level in your current life; once you have them, tap the ✦ line under the building.",
         "Fuego Eterno" to "Eternal Fire",
         "Producción x2 por nivel." to "Production x2 per level.",

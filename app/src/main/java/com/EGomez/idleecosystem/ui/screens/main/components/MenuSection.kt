@@ -113,6 +113,7 @@ fun MenuSection(
     runeCatches: Map<String, Int> = emptyMap(),
     onEngraveRune: (String) -> Unit = {},
     onRemoveEngraving: (String) -> Unit = {},
+    runeMastery: Map<String, Int> = emptyMap(),
     transcendRevealed: Boolean = false,
     ether: Int = 0,
     onOpenTranscend: () -> Unit = {},
@@ -421,7 +422,7 @@ fun MenuSection(
                         val view = if (trialsRevealed) pantheonView else PantheonView.GODS
                         when (view) {
                             PantheonView.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
-                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving) }
+                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                             PantheonView.GODS -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
                         }
                     }

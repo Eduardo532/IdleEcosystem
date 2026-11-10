@@ -307,4 +307,7 @@
     <string name="eternal_cost">%1$d Ether</string>
     <string name="consecrate_ready">✦ Consecrate %1$s · %2$d Ether</string>
     <string name="consecrate_hint">✦ Consecration %1$s: at %2$d (%3$d Ether)</string>
+    <string name="rune_mastery_intro">Mastery: each rune levels up the more times you catch it, ever. Each star makes its boost last 10% longer and its engraved bonus 20% stronger.</string>
+    <string name="rune_mastery_line">Mastery %1$s · %2$d of %3$d</string>
+    <string name="rune_mastery_max">Mastery %1$s · maxed</string>
 </resources>

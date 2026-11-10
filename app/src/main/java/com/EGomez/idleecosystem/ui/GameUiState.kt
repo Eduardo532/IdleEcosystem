@@ -105,6 +105,7 @@ data class GameUiState(
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
     val runeCatches: Map<String, Int> = emptyMap(),
+    val runeMastery: Map<String, Int> = emptyMap(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

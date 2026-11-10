@@ -430,19 +430,26 @@ class GameEngine @Inject constructor(
         eventScheduler.close(System.currentTimeMillis())
     }
 
-    /** Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro). */
-    fun ascend(nextPact: Pact? = null) = post {
-        if (performAscension(nextPact ?: activePact) != null) soundManager.playSound(SoundType.BUY)
+    /**
+     * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
+     * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
+     */
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(nextPact: Pact): BigDecimal? {
+    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
+        if (abandonPath) {
+            prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
+        }
 
         // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
         val ascensions = statsManager.totalPrestiges

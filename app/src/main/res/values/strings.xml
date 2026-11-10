@@ -234,4 +234,9 @@
     <string name="upgrade_effect_synergy">Efecto: +1%% por unidad de %1$s</string>
     <string name="view_stats">VER ESTADÍSTICAS</string>
     <string name="your_file">TU ARCHIVO ACTUAL</string>
+    <string name="ascend_abandon_path">Abandonar la %1$s (recuperas %2$s de Cordura)</string>
+    <string name="ascend_abandon_hint">Solo puedes cambiar de Senda al Ascender.</string>
+    <string name="path_exclusive">Senda excluyente: al recorrerla se sellan las otras dos.</string>
+    <string name="path_sealed">Sellada: ya recorres la %1$s. Puedes abandonarla al Ascender.</string>
+    <string name="path_sealed_button">Sellada</string>
 </resources>

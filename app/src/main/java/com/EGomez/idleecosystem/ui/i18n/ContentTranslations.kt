@@ -249,7 +249,13 @@ object ContentTranslations {
         "Singularidad" to "Singularity",
         "Multiplicador masivo de Cordura." to "Massive Sanity multiplier.",
         "Ascensión Cósmica" to "Cosmic Ascension",
-        "El Multiplicador Supremo." to "The Supreme Multiplier."
+        "El Multiplicador Supremo." to "The Supreme Multiplier.",
+        "Senda de la Mano" to "Path of the Hand",
+        "Senda excluyente. +300% de clic por nivel." to "Exclusive path. +300% click per level.",
+        "Senda del Engranaje" to "Path of the Gear",
+        "Senda excluyente. +100% a todos los edificios por nivel." to "Exclusive path. +100% to all buildings per level.",
+        "Senda del Sueño" to "Path of the Dream",
+        "Senda excluyente. +300% de ganancia sin conexión por nivel." to "Exclusive path. +300% offline gains per level."
     )
 
     private val RUNES: Map<String, String> = mapOf(

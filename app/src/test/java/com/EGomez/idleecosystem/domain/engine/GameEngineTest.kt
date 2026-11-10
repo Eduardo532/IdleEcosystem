@@ -16,6 +16,7 @@ import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.BuildingSynergies
 import com.EGomez.idleecosystem.domain.logic.PrestigeManager
 import com.EGomez.idleecosystem.domain.logic.PrestigeShopManager
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.logic.RitualManager
 import com.EGomez.idleecosystem.domain.logic.RuneManager
@@ -63,6 +64,7 @@ class GameEngineTest {
     private lateinit var scope: CoroutineScope
     private lateinit var engine: GameEngine
     private lateinit var stats: StatisticsManager
+    private lateinit var shop: PrestigeShopManager
 
     @Before
     fun setUp() {
@@ -80,7 +82,7 @@ class GameEngineTest {
             upgradeManager = UpgradeManager(),
             prestigeManager = PrestigeManager(),
             achievementManager = AchievementManager(),
-            prestigeShopManager = PrestigeShopManager(),
+            prestigeShopManager = PrestigeShopManager().also { shop = it },
             saveManager = SaveManager(),
             soundManager = sound,
             statsManager = stats,
@@ -336,6 +338,27 @@ class GameEngineTest {
         assertEquals(Pact.HASTUR, economy.activePact)
         val state = eventually { repository.gameState.first()?.takeIf { it.activePact == "hastur" } }
         assertEquals("hastur", state.activePact)
+    }
+
+    @Test
+    fun `abandoning the path on ascension refunds its sanity`() = runBlocking {
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        // Senda de la Mano a nivel 2 (7.000 de Cordura gastados); el motor la lee al Ascender
+        var id: String? = MadnessPaths.HAND
+        while (id != null) {
+            val node = shop.upgrades.first { it.id == id }
+            node.level = if (id == MadnessPaths.HAND) 2 else maxOf(node.level, 1)
+            id = node.parentId
+        }
+
+        engine.ascend(abandonPath = true)
+
+        val economy = await(engine.economy) { it.sanity.signum() > 0 }
+        // 3,75 de esta vida + 2.000 + 5.000 devueltos
+        assertEquals(0, BigDecimal("7003.75").compareTo(economy.sanity))
+        val hand = await(engine.prestigeUpgrades) { list -> list.any { it.id == MadnessPaths.HAND && it.level == 0 } }
+        assertEquals(0, hand.first { it.id == MadnessPaths.HAND }.level)
     }
 
     @Test

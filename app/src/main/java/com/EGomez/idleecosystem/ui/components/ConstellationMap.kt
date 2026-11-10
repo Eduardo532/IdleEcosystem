@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -110,13 +112,28 @@ fun ConstellationMap(
                     if (parent != null && parent.level > 0) isAvailable = true
                 }
 
+                val isPath = MadnessPaths.isPath(node.id)
+                val isSealed = MadnessPaths.isSealed(node, upgrades)
+                if (isSealed) isAvailable = false
+
                 val color = when {
+                    isBought && isPath -> AncientGold
                     isBought -> nodeColorBought
                     isAvailable -> nodeColorAvailable
                     else -> nodeColorLocked
                 }
 
                 val radius = if (isBought) 20f else 14f
+
+                // Las Sendas llevan un anillo dorado; una sellada, una cruz encima
+                if (isPath) {
+                    drawCircle(
+                        color = if (isSealed) Color.Gray.copy(alpha = 0.5f) else AncientGold,
+                        center = center,
+                        radius = radius * 1.6f,
+                        style = Stroke(width = 3f)
+                    )
+                }
 
                 // Efecto de brillo (Halo)
                 if (isBought || isAvailable) {
@@ -133,6 +150,12 @@ fun ConstellationMap(
                     center = center,
                     radius = radius
                 )
+
+                if (isSealed) {
+                    val d = radius * 0.9f
+                    drawLine(MadnessRed, Offset(center.x - d, center.y - d), Offset(center.x + d, center.y + d), strokeWidth = 4f)
+                    drawLine(MadnessRed, Offset(center.x - d, center.y + d), Offset(center.x + d, center.y - d), strokeWidth = 4f)
+                }
 
                 // Nivel de la mejora (Texto pequeño sobre la estrella)
                 if (node.level > 0) {

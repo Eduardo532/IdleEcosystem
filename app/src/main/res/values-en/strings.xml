@@ -233,4 +233,9 @@
     <string name="upgrade_effect_synergy">Effect: +1%% per %1$s owned</string>
     <string name="view_stats">VIEW STATISTICS</string>
     <string name="your_file">YOUR CURRENT FILE</string>
+    <string name="ascend_abandon_path">Abandon the %1$s (recover %2$s Sanity)</string>
+    <string name="ascend_abandon_hint">You can only change Path when you Ascend.</string>
+    <string name="path_exclusive">Exclusive path: walking it seals the other two.</string>
+    <string name="path_sealed">Sealed: you already walk the %1$s. You can abandon it when you Ascend.</string>
+    <string name="path_sealed_button">Sealed</string>
 </resources>

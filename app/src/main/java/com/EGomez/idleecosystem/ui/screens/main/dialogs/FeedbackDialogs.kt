@@ -9,6 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
+import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.ui.components.PactSigil
 import com.EGomez.idleecosystem.ui.components.sigilColor
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -72,7 +75,11 @@ fun AscendDialog(
     pacts: List<Pact> = emptyList(),
     selectedPact: Pact = Pact.NONE,
     onPactSelected: (Pact) -> Unit = {},
-    buildingNames: Map<String, String> = emptyMap()
+    buildingNames: Map<String, String> = emptyMap(),
+    /** La Senda del Mapa de Locura que se recorre (null = ninguna). */
+    activePath: PrestigeUpgrade? = null,
+    abandonPath: Boolean = false,
+    onAbandonPathChanged: (Boolean) -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -99,6 +106,7 @@ fun AscendDialog(
                     }
                 }
                 if (pacts.isNotEmpty()) PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
+                if (activePath != null) AbandonPathOption(activePath, abandonPath, onAbandonPathChanged)
                 if (ascensions != null) AscensionMilestoneList(ascensions)
             }
         },
@@ -116,6 +124,36 @@ fun AscendDialog(
         }
     )
 }
+
+/** Cambiar de Senda solo se puede al Ascender: se abandona y se recupera su Cordura. */
+@Composable
+private fun AbandonPathOption(path: PrestigeUpgrade, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onChange(!checked) }
+            .testTag(ABANDON_PATH_TAG)
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onChange,
+            colors = CheckboxDefaults.colors(checkedColor = AncientGold, uncheckedColor = Color.Gray, checkmarkColor = Color.Black)
+        )
+        Column {
+            Text(
+                stringResource(R.string.ascend_abandon_path, tr(path.name), MadnessPaths.spent(path).toBeautifulString()),
+                color = if (checked) AncientGold else Color.White,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(stringResource(R.string.ascend_abandon_hint), color = Color.Gray, fontSize = 11.sp)
+        }
+    }
+}
+
+const val ABANDON_PATH_TAG = "abandon_path"
 
 @Composable
 fun OfflineGainsDialog(timeFormatted: String, gainsFormatted: String, onDismiss: () -> Unit) {

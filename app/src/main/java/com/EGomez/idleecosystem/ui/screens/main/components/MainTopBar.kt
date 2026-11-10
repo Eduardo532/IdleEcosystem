@@ -2,6 +2,7 @@ package com.EGomez.idleecosystem.ui.screens.main.components
 
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -34,14 +35,23 @@ fun MainTopBar(
     achievements: List<Achievement>,
     achievementsProgress: String,
     nextGoalProgress: Float? = null,
+    /** Con el menú abierto (v0.18.2): el Conocimiento y su producción, en lugar del título. */
+    knowledgeFormatted: String? = null,
+    knowledgePerSecond: String? = null,
     onSettingsClick: () -> Unit,
     onStatsClick: () -> Unit,
     onAchievementsClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
-            // Solo mostramos el título si el menú no ocupa casi toda la pantalla
-            if (!isMenuExpanded || menuWeight < 0.8f) {
+            if (isMenuExpanded && knowledgeFormatted != null) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.testTag(COMPACT_KNOWLEDGE_TAG)) {
+                    Text(knowledgeFormatted, color = ArcanePurple, fontWeight = FontWeight.Bold, fontSize = 20.sp, maxLines = 1)
+                    if (knowledgePerSecond != null) {
+                        Text(stringResource(R.string.per_second, knowledgePerSecond), color = Color(0xFF4CAF50), fontSize = 11.sp, maxLines = 1)
+                    }
+                }
+            } else if (!isMenuExpanded || menuWeight < 0.8f) {
                 Text(
                     stringResource(R.string.app_title),
                     color = ArcanePurple,
@@ -108,3 +118,5 @@ fun MainTopBar(
         }
     )
 }
+
+const val COMPACT_KNOWLEDGE_TAG = "compact_knowledge"

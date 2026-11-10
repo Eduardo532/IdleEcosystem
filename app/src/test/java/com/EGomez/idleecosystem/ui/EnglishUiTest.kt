@@ -63,6 +63,9 @@ class EnglishUiTest {
         }
 
         compose.onNodeWithText("Messy Notes").assertExists()
+        // La descripción se despliega al tocar el nombre (tarjeta compacta, v0.18.2)
+        compose.onNodeWithText("Frantic scribbles.").assertDoesNotExist()
+        compose.onNodeWithText("Messy Notes").performClick()
         compose.onNodeWithText("Frantic scribbles.").assertExists()
     }
 

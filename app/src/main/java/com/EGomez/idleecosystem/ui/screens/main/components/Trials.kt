@@ -152,15 +152,19 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
         border = BorderStroke(1.dp, TrialRed.copy(alpha = 0.7f)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+            .padding(start = 12.dp, end = 12.dp, top = 4.dp)
             .testTag(TRIAL_BAR_TAG)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
             val text = stringResource(R.string.trial_bar, tr(trial.title), (progress * 100).toInt()) +
                 if (trial.rules.delirium) " · x${multiplier(delirium)}" else ""
-            Text(text, color = TrialRed, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(tr(trial.rule), color = Color.LightGray, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(modifier = Modifier.height(4.dp))
+            // Una sola línea: la Prueba, su avance y la regla
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text, color = TrialRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(tr(trial.rule), color = Color.LightGray, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Spacer(modifier = Modifier.height(3.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 color = TrialRed,

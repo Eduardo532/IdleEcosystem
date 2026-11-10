@@ -68,6 +68,9 @@ data class GameUiState(
     /** El pacto de esta vida y el caos de Azathoth. */
     val activePact: Pact = Pact.NONE,
     val chaosMultiplier: Int = 1,
+    /** Reparto de la Atención y puntos disponibles. */
+    val attention: Map<String, Int> = emptyMap(),
+    val attentionPoints: Int = 0,
     /** Cordura ganada en la última Ascensión automática (aviso breve), o null. */
     val autoAscensionNotice: String? = null,
     val secretsFound: Int = 0,

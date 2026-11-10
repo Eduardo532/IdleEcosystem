@@ -9,6 +9,7 @@ import com.EGomez.idleecosystem.core.math.NumberNotation
 import com.EGomez.idleecosystem.core.math.formatSecondsToTime
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.data.preferences.GamePreferences
+import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.engine.AchievementProgress
 import com.EGomez.idleecosystem.domain.engine.EconomyState
@@ -98,6 +99,7 @@ class MainViewModel @Inject constructor(
     init {
         NumberFormatting.notation = preferences.numberNotation
         engine.setAutomation(preferences.automation)
+        engine.setAttention(preferences.attention)
         observeEngine()
         engine.start(viewModelScope)
         if (GameEngine.DEBUG_RUNES) startDebugRuneCycle()
@@ -180,7 +182,9 @@ class MainViewModel @Inject constructor(
         revealed = economy.revealed,
         ascensions = economy.ascensions,
         activePact = economy.activePact,
-        chaosMultiplier = economy.chaosMultiplier
+        chaosMultiplier = economy.chaosMultiplier,
+        attention = economy.attention,
+        attentionPoints = economy.attentionPoints
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -315,6 +319,29 @@ class MainViewModel @Inject constructor(
         updateAutomation { it.copy(ritualId = if (it.ritualId == ritualId) null else ritualId) }
 
     fun selectAutoRitual(ritualId: String?) = updateAutomation { it.copy(ritualId = ritualId) }
+
+    /** Pone un punto de Atención en [target] si queda alguno libre. */
+    fun addAttention(target: String) {
+        val state = _uiState.value
+        if (Attention.used(state.attention) >= state.attentionPoints) return
+        updateAttention(state.attention + (target to (state.attention[target] ?: 0) + 1))
+    }
+
+    /** Quita un punto de Atención de [target]. */
+    fun removeAttention(target: String) {
+        val current = _uiState.value.attention[target] ?: return
+        updateAttention(_uiState.value.attention + (target to current - 1))
+    }
+
+    fun clearAttention() = updateAttention(emptyMap())
+
+    private fun updateAttention(allocation: Map<String, Int>) {
+        val clean = allocation.filterValues { it > 0 }
+        preferences.attention = clean
+        engine.setAttention(clean)
+        // Se ve al instante; el motor confirma el reparto en su próxima publicación
+        _uiState.update { it.copy(attention = clean) }
+    }
 
     fun setAutomationBudget(percent: Int) = updateAutomation { it.copy(budgetPercent = percent) }
 

@@ -298,6 +298,8 @@ object ContentTranslations {
     )
 
     private val TUTORIAL: Map<String, String> = mapOf(
+        "La Mirada" to "The Gaze",
+        "Tu primera Ascensión te dio un punto de Atención. Toca el botón ◎ sobre las pestañas y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos." to "Your first Ascension gave you a point of Attention. Tap the ◎ button above the tabs and place it on a building (+25% to its production), on the Dream (offline progress) or on the Vigil (more runes). Moving it is free, and with more Ascensions you will have more points.",
         "Pactos con los Dioses" to "Pacts with the Gods",
         "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos." to "When you Ascend you can seal a pact for your next life. Each god grants advantages and demands a price according to its myth; 'No Pact' leaves you more Sanity. The Pantheon tab shows the gods you can already invoke and, with more Ascensions, more powerful ones will appear.",
         "Hitos de Ascensión" to "Ascension Milestones",

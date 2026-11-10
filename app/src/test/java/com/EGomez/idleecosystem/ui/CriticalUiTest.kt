@@ -18,6 +18,9 @@ import com.EGomez.idleecosystem.ui.screens.main.components.RitualItem
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.AttentionDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ATTENTION_ADD_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.ATTENTION_CHIP_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.PactDetailDialog
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.PACT_CHOICE_TAG
 import com.EGomez.idleecosystem.domain.model.Pact
@@ -496,6 +499,44 @@ class CriticalUiTest {
         compose.onNodeWithText("+ Cordura ganada al Ascender x1.25").assertExists()
         compose.onNodeWithTag("${PACT_CHOICE_TAG}cthulhu").performClick()
         assertEquals(Pact.CTHULHU, chosen)
+    }
+
+    @Test
+    fun `attention can be moved freely within the available points`() {
+        val added = mutableListOf<String>()
+        compose.setContent {
+            AttentionDialog(
+                allocation = mapOf("b_notes" to 1), points = 2, ascensions = 3, buildings = listOf(notes),
+                onAdd = { added += it }, onRemove = {}, onClear = {}, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Puntos usados: 1 de 2").assertExists()
+        compose.onNodeWithText("Producción · +25%").assertExists()
+        compose.onNodeWithTag("${ATTENTION_ADD_TAG}vigil").performClick()
+        assertEquals(listOf("vigil"), added)
+    }
+
+    @Test
+    fun `the attention chip appears after the first ascension`() {
+        var points by mutableStateOf(0)
+        compose.setContent {
+            MenuSection(
+                isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+                selectedTabIndex = 0, onTabSelected = {},
+                buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+                buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+                currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+                buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+                onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+                prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+                attentionPoints = points, onAscendClicked = {}, onShowPrestigeShop = {}
+            )
+        }
+
+        compose.onNodeWithTag(ATTENTION_CHIP_TAG).assertDoesNotExist()
+        points = 1
+        compose.onNodeWithTag(ATTENTION_CHIP_TAG).assertExists()
     }
 }
 

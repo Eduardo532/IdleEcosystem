@@ -36,6 +36,8 @@ fun BuildingItem(
     buyMultiplier: Int,
     costMultiplier: Double = 1.0, // NUEVO PARÁMETRO
     milestones: List<Int> = emptyList(),
+    /** Puntos de Atención puestos en este edificio. */
+    attentionPoints: Int = 0,
     onBuyClick: () -> Unit
 ) {
     // 1. Calcular Costo Base (Sin descuento)
@@ -121,6 +123,19 @@ fun BuildingItem(
                             Text(
                                 text = "x${specificMult.toBeautifulString()}",
                                 color = Color(0xFFA5D6A7),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    // La Atención puesta en este edificio
+                    if (attentionPoints > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(color = Color(0xFF2A1A3A), shape = RoundedCornerShape(4.dp)) {
+                            Text(
+                                text = "◎ $attentionPoints",
+                                color = Color(0xFFD4AF37),
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)

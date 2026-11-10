@@ -350,6 +350,25 @@ class GameEngineTest {
         assertEquals(Pact.NONE, economy.activePact)
     }
 
+    @Test
+    fun `attention boosts the building it watches`() = runBlocking {
+        stats.totalPrestiges = 3 // 2 puntos de Atención
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        engine.grantKnowledge(BigDecimal(10_000))
+        await(engine.economy) { it.knowledge >= BigDecimal(10_000) }
+        engine.buyBuilding(NOTES, 1)
+        engine.buyBuilding(SCROLLS, 1)
+        fun ratio(list: List<com.EGomez.idleecosystem.domain.model.Building>) =
+            list.first { it.id == NOTES }.currentMultiplier.divide(list.first { it.id == SCROLLS }.currentMultiplier, java.math.MathContext.DECIMAL64)
+        val before = ratio(await(engine.buildings) { list -> list.any { it.id == SCROLLS && it.amountOwned == 1 } })
+
+        // Se piden 5 puntos, pero solo hay 2: las Notas reciben +50 %
+        engine.setAttention(mapOf(NOTES to 5))
+        val expected = before.multiply(BigDecimal("1.5"))
+        await(engine.buildings) { list -> ratio(list).subtract(expected).abs() < BigDecimal("0.0001") }
+        assertEquals(mapOf(NOTES to 2), engine.economy.value.attention)
+    }
+
     private suspend fun <T> await(flow: Flow<T>, predicate: (T) -> Boolean): T =
         withTimeout(TIMEOUT_MS) { flow.first(predicate) }
 

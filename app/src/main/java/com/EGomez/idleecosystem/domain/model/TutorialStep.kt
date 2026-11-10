@@ -168,5 +168,12 @@ enum class TutorialStep(
         "Pactos con los Dioses",
         "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
         "Al poder Ascender por primera vez"
+    ),
+
+    ATTENTION(
+        "attention",
+        "La Mirada",
+        "Tu primera Ascensión te dio un punto de Atención. Toca el botón ◎ sobre las pestañas y ponlo en un edificio (+25% a su producción), en el Sueño (progreso sin conexión) o en la Vigilia (más runas). Moverlo es gratis y con más Ascensiones tendrás más puntos.",
+        "Al tener el primer punto de Atención"
     )
 }

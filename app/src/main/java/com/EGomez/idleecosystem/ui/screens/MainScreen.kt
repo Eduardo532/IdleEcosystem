@@ -103,6 +103,7 @@ fun MainScreen(
         var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
         var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
         var showAutomationDialog by rememberSaveable { mutableStateOf(false) }
+        var showAttentionDialog by rememberSaveable { mutableStateOf(false) }
         // Ficha del Panteón abierta y pacto elegido para la próxima vida (por id)
         var pactDetailId by rememberSaveable { mutableStateOf<String?>(null) }
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -223,6 +224,9 @@ fun MainScreen(
                             activePact = uiState.activePact,
                             chaosMultiplier = uiState.chaosMultiplier,
                             onPactSelected = { pactDetailId = it.id },
+                            attention = uiState.attention,
+                            attentionPoints = uiState.attentionPoints,
+                            onOpenAttention = { showAttentionDialog = true },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -340,6 +344,19 @@ fun MainScreen(
                     active = pact == uiState.activePact,
                     buildingNames = buildingNames,
                     onDismiss = { pactDetailId = null }
+                )
+            }
+
+            if (showAttentionDialog) {
+                AttentionDialog(
+                    allocation = uiState.attention,
+                    points = uiState.attentionPoints,
+                    ascensions = uiState.ascensions,
+                    buildings = buildings,
+                    onAdd = { viewModel.addAttention(it) },
+                    onRemove = { viewModel.removeAttention(it) },
+                    onClear = { viewModel.clearAttention() },
+                    onDismiss = { showAttentionDialog = false }
                 )
             }
 

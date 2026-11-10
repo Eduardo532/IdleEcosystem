@@ -96,3 +96,21 @@ Una runa que ya atrapaste varias veces se puede **grabar** en un espacio del **A
 | Sigilo de Azathoth | Probabilidad de Eco x2 |
 
 Con los Espacios de Runa llegan **16 logros** (categoría Arcanos): espacios ganados, runas grabadas, atrapar las 21 runas distintas, grabar sigilos y retos con un dios (por ejemplo, tener grabado el Sigilo de Cthulhu durante una vida con Cthulhu).
+
+## Maestría de runas *(v0.18.3)*
+
+Tras la **primera Trascendencia**, cada runa gana **maestría** según cuántas veces la atrapaste **desde siempre** (las capturas de maestría nunca se reinician, ni al Trascender). Se ve como estrellas en la vista **Runas** del Panteón.
+
+| Nivel | Nivel 1 (capturas) | Nivel 2 (capturas) | Nivel 3 (capturas) |
+|---|---|---|---|
+| ★ | 25 | 10 | 5 |
+| ★★ | 100 | 40 | 15 |
+| ★★★ | 250 | 100 | 40 |
+| ★★★★ | 500 | 200 | 80 |
+| ★★★★★ | 1.000 | 400 | 150 |
+
+Cada estrella:
+- **alarga un 10 %** el potenciador de la runa al atraparla (x1,5 con 5 estrellas);
+- hace **un 20 % más fuerte** su bono si está grabada (con 5 estrellas, el doble de fuerte: la Runa de Sangre pasa de x1,15 a x1,30).
+
+La maestría trae **9 logros** (Arcanos): niveles de maestría en total, una estrella en las 21 runas, una runa a 5 estrellas, retos con Nyarlathotep, Cthulhu y Daoloth, y uno secreto.

@@ -1,6 +1,6 @@
 # Logros
 
-Hay **363 logros**: 113 originales y **250 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **372 logros**: 113 originales y **259 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -285,8 +285,16 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Las Aguas de R'lyeh | Vive 3 cambios de Marea en una vida con Cthulhu | +1 % |
 | El Tiempo Fluye | Vive 6 cambios de Marea en una vida con Yog-Sothoth | +1 % |
 | Mareas del Sueño | Vive 3 cambios de Marea recorriendo la Senda del Sueño | +1 % |
+| Aprendiz de Glifos | Suma 5 niveles de maestría de runas | +1 % |
+| Erudito Rúnico | Suma 25 niveles de maestría de runas | +1 % |
+| Gran Maestro de Runas | Lleva las 21 runas a maestría 5 | +2 % |
+| Ninguna Ajena | Consigue maestría 1 en las 21 runas | +1 % |
+| Cinco Estrellas | Lleva una runa a maestría 5 | +1 % |
+| El Mensajero Reconoce su Rostro | Ten maestría 3 de El Caos Reptante durante una vida con Nyarlathotep | +1 % |
+| Sello del Durmiente | Ten maestría 3 del Sigilo de Cthulhu durante una vida con Cthulhu | +1 % |
+| Entropía Domada | Ten maestría 3 de la Runa de Entropía durante una vida con Daoloth | +1 % |
 
-Además hay **22 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **23 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

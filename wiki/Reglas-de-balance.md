@@ -109,6 +109,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*
 - Producción del edificio x3 por nivel (x243 en el V). Eterno: no se pierde al Ascender ni al Trascender.
 
+## Maestría de runas
+
+- Niveles por capturas de siempre: nivel 1 de runa 25/100/250/500/1.000; nivel 2 10/40/100/200/400; nivel 3 5/15/40/80/150.
+- Cada nivel: duración del potenciador `x(1 + 0,1·n)` y bono grabado escalado `1 + (b − 1)·(1 + 0,2·n)`. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

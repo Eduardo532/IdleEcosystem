@@ -86,6 +86,13 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Grabar una runa pide atraparla 10 veces (nivel 1), 5 (nivel 2) o 3 (nivel 3). Hay hasta 4 espacios, uno por cada Prueba que los da.
 - Cada runa grabada da un bono pasivo propio que se multiplica con el pacto. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
 
+## Medidor de Locura
+
+- Sube: clic +0,02, runa +2/+4/+8, ritual +5, Convergencia +20. Baja 0,2 por segundo (también sin conexión); la Letanía de Calma, 40.
+- Mantener pulsado (8 clics/s = +0,16/s) nunca supera lo que baja sola. *(Test: `MadnessMeterTest`.)*
+- Bono: `1 + 0,01 × Locura`, como potenciador temporal. Presagios desde el 50 %: probabilidad por segundo `(Locura − 50) / 500`.
+- Colapso al 100 %: se pierden los potenciadores y la producción queda x0,5 durante 60 s. Nunca se pierden recursos. *(Código: `MadnessMeter`.)*
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

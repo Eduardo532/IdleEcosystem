@@ -1,6 +1,6 @@
 # Logros
 
-Hay **313 logros**: 113 originales y **200 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **329 logros**: 113 originales y **216 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -17,7 +17,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 | Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
 | Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
-| Arcanos | Rituales, Convergencia, runas, Espacios de Runa, eventos y Ecos |
+| Arcanos | Rituales, Convergencia, runas, Espacios de Runa, Medidor de Locura, eventos y Ecos |
 | Secretos | No se dicen. Solo cuentan los que ya encontraste |
 
 ## La regla: cada mecánica trae sus logros
@@ -240,8 +240,22 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Máscara Propia | Ten grabado El Caos Reptante durante una vida con Nyarlathotep | +1 % |
 | Eco del Sultán | Ten grabado el Sigilo de Azathoth durante una vida con Azathoth | +1 % |
 | Reloj de la Mano | Ten grabada la Runa del Tiempo recorriendo la Senda de la Mano | +1 % |
+| Mente Inquieta | Llega al 50% de Locura | +1 % |
+| Al Borde | Llega al 75% de Locura | +1 % |
+| Umbral Rojo | Llega al 90% de Locura | +2 % |
+| Primer Colapso | Colapsa 1 vez | +1 % |
+| Fractura Recurrente | Colapsa 5 veces | +1 % |
+| Mente de Vidrio | Colapsa 25 veces | +2 % |
+| Presagios | Sufre 10 presagios de la Locura | +1 % |
+| Habitante del Abismo | Sufre 50 presagios de la Locura | +1 % |
+| Bailar en el Abismo | Mantén la Locura sobre 90% durante 60 segundos | +2 % |
+| Voz Serena | Invoca la Letanía de Calma 10 veces | +1 % |
+| Caos Absoluto | Colapsa en una vida con Azathoth | +1 % |
+| La Máscara Pálida | Colapsa en una vida con Hastur | +1 % |
+| Fiebre Verde | Llega al 80% de Locura en una vida con Tulzscha | +1 % |
+| Mano Temblorosa | Colapsa 3 veces en una vida recorriendo la Senda de la Mano | +1 % |
 
-Además hay **17 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **19 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

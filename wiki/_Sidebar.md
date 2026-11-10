@@ -12,6 +12,7 @@
 - [Panteón](Panteon)
 - [Atención](Atencion)
 - [Pruebas de Locura](Pruebas-de-Locura)
+- [Medidor de Locura](Medidor-de-Locura)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

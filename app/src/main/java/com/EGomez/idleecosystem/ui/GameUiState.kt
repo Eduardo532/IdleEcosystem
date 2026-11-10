@@ -90,6 +90,9 @@ data class GameUiState(
     val transcendences: Int = 0,
     val eternalLevels: Map<String, Int> = emptyMap(),
     val transcendNotice: Int? = null,
+    /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */
+    val consecrationRevealed: Boolean = false,
+    val consecrations: Map<String, Int> = emptyMap(),
     /** Fase de la Marea (null = oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,

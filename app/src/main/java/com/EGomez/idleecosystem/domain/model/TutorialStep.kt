@@ -224,5 +224,12 @@ enum class TutorialStep(
         "Trascender",
         "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Toca \"Éter · Trascender\" en el panel de Cordura para ver qué ganarías.",
         "Al tener 50 Ascensiones en el ciclo"
+    ),
+
+    CONSECRATION(
+        "consecration",
+        "Consagrar Edificios",
+        "Tu primera Trascendencia abre un rito nuevo: consagrar edificios con Éter. Cada nivel (hasta V) multiplica por 3 la producción de ese edificio para siempre, aunque Asciendas o Trasciendas. Para consagrarlo necesitas 100 unidades por nivel en la vida actual; cuando las tengas, toca la línea ✦ bajo el edificio.",
+        "Tras la primera Trascendencia"
     )
 }

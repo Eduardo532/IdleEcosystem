@@ -198,6 +198,8 @@ class MainViewModel @Inject constructor(
         ether = economy.ether,
         transcendences = economy.transcendences,
         eternalLevels = economy.eternalLevels,
+        consecrationRevealed = economy.consecrationRevealed,
+        consecrations = economy.consecrations,
         tide = economy.tide,
         tideSecondsLeft = economy.tideSecondsLeft,
         collapseSeconds = economy.collapseSeconds,
@@ -315,6 +317,8 @@ class MainViewModel @Inject constructor(
     fun onTranscend() = engine.transcend()
 
     fun onBuyEternal(id: String) = engine.buyEternal(id)
+
+    fun onConsecrate(buildingId: String) = engine.consecrate(buildingId)
 
     fun onEngraveRune(runeId: String) = engine.engraveRune(runeId)
 

@@ -30,6 +30,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
+import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -518,6 +519,32 @@ class GameEngineTest {
         engine.buyEternal("memory")
         val bought = await(engine.economy) { it.eternalLevels["memory"] == 1 }
         assertEquals(13, bought.ether)
+    }
+
+    @Test
+    fun `a building with enough units can be consecrated with ether`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.ETHER, BigDecimal(3))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = listOf(BuildingSaveModel("b_notes", 100, true), BuildingSaveModel("b_scrolls", 50, true)),
+                upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.consecrationRevealed }
+
+        engine.consecrate("b_scrolls") // solo 50 de 100: no se puede
+        engine.consecrate("b_notes")
+
+        val after = await(engine.economy) { it.consecrations["b_notes"] == 1 }
+        assertEquals(2, after.ether)
+        assertEquals(null, after.consecrations["b_scrolls"])
+        val notes = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.currentMultiplier.signum() > 0 } }
+        assertTrue(notes.first { it.id == "b_notes" }.currentMultiplier.signum() > 0)
     }
 
     @Test

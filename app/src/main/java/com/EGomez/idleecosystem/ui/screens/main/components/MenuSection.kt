@@ -116,6 +116,9 @@ fun MenuSection(
     transcendRevealed: Boolean = false,
     ether: Int = 0,
     onOpenTranscend: () -> Unit = {},
+    consecrationRevealed: Boolean = false,
+    consecrations: Map<String, Int> = emptyMap(),
+    onConsecrate: (String) -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -276,6 +279,10 @@ fun MenuSection(
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
                                 milestones = buildingMilestones[building.id].orEmpty(),
                                 attentionPoints = attention[building.id] ?: 0,
+                                consecration = consecrations[building.id] ?: 0,
+                                consecrationRevealed = consecrationRevealed,
+                                ether = ether,
+                                onConsecrate = { onConsecrate(building.id) },
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }

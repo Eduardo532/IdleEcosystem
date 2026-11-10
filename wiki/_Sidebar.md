@@ -11,6 +11,7 @@
 - [Ascensión y Mapa de Locura](Ascension-y-Mapa-de-Locura)
 - [Panteón](Panteon)
 - [Atención](Atencion)
+- [Pruebas de Locura](Pruebas-de-Locura)
 - [Ajustes](Ajustes)
 
 **Desarrollo**

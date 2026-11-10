@@ -169,6 +169,7 @@ private fun categoryName(category: AchievementCategory): String = stringResource
         AchievementCategory.BUILDINGS -> R.string.achievements_cat_buildings
         AchievementCategory.ASCENSION -> R.string.achievements_cat_ascension
         AchievementCategory.PANTHEON -> R.string.achievements_cat_pantheon
+        AchievementCategory.TRIALS -> R.string.achievements_cat_trials
         AchievementCategory.ARCANE -> R.string.achievements_cat_arcane
         AchievementCategory.SECRET -> R.string.achievements_cat_secret
     }

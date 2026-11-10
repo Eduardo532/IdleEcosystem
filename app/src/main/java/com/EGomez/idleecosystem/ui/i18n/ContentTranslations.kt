@@ -22,7 +22,33 @@ object ContentTranslations {
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
             TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?:
-            MECHANIC_ACHIEVEMENTS_EN[text] ?: ladderName(text)
+            MECHANIC_ACHIEVEMENTS_EN[text] ?: TRIALS[text] ?: ladderName(text)
+
+    /** Pruebas de Locura (v0.17.1): nombres y reglas. */
+    private val TRIALS = mapOf(
+        "Ceguera" to "Blindness",
+        "No aparece ninguna runa." to "No runes appear.",
+        "Manos Atadas" to "Bound Hands",
+        "El clic no produce Conocimiento." to "Clicking produces no Knowledge.",
+        "Hambre" to "Hunger",
+        "Los edificios cuestan x10." to "Buildings cost x10.",
+        "Grimorio Quemado" to "Burned Grimoire",
+        "No se pueden comprar mejoras del Grimorio." to "Grimoire upgrades cannot be bought.",
+        "Silencio" to "Silence",
+        "No hay rituales ni Ecos." to "There are no rituals or Echoes.",
+        "Insomnio" to "Insomnia",
+        "No hay progreso sin conexión y la producción es la mitad." to "There is no offline progress and production is halved.",
+        "Monomanía" to "Monomania",
+        "Solo puedes tener 3 tipos de edificio, además de la Sinapsis." to "You can only own 3 kinds of building, besides the Synapse.",
+        "Amnesia" to "Amnesia",
+        "Los logros y sus conjuntos no dan bono." to "Achievements and their sets give no bonus.",
+        "Delirio" to "Delirium",
+        "La producción salta al azar entre x0,1 y x3 cada 30 segundos." to "Production jumps randomly between x0.1 and x3 every 30 seconds.",
+        "Mortalidad" to "Mortality",
+        "La Cordura Residual y el Mapa de Locura no dan bono." to "Residual Sanity and the Map of Madness give no bonus.",
+        "Pruebas de Locura" to "Trials of Madness",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas." to "You can now face Trials of Madness: lives with an altered rule and a Knowledge goal. Choose one when you Ascend, along with your pact. If you reach the goal, the Trial is passed and its reward is yours forever; some bring the Outer Gods early. The Pantheon tab shows every Trial."
+    )
 
     /** El Panteón ([Pact]): nombres, epítetos y mitos. */
     private val PACTS = mapOf(

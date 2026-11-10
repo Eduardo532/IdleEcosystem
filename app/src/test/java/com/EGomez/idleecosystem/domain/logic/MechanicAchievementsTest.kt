@@ -3,6 +3,7 @@ package com.EGomez.idleecosystem.domain.logic
 import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.AchievementType
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -35,7 +36,8 @@ class MechanicAchievementsTest {
         "Ecos" to { it.stat?.startsWith("echoes_") == true },
         "Sinergias" to { it.stat == AchievementStat.SYNERGIES },
         "Conjuntos" to { it.stat == AchievementStat.SETS },
-        "Grimorio" to { it.stat == AchievementStat.GRIMOIRE }
+        "Grimorio" to { it.stat == AchievementStat.GRIMOIRE },
+        "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 
     @Test
@@ -75,8 +77,18 @@ class MechanicAchievementsTest {
             val allowed = if (a.isSecret) listOf("1.05") else listOf("1.01", "1.02")
             assertTrue("${a.id} da ${a.bonusMultiplier}", allowed.any { BigDecimal(it).compareTo(a.bonusMultiplier) == 0 })
         }
+        // Crece con cada mecánica (la regla pide logros nuevos siempre): se limita el promedio
         val total = mechanic.fold(BigDecimal.ONE) { acc, a -> acc.multiply(a.bonusMultiplier, MathContext.DECIMAL64) }
-        assertTrue("todos los logros nuevos juntos dan x$total", total <= BigDecimal(13))
+        val average = Math.pow(total.toDouble(), 1.0 / mechanic.size)
+        assertTrue("en promedio cada logro nuevo da x$average", average <= 1.02)
+    }
+
+    @Test
+    fun `every trial has its own achievement`() {
+        Trial.entries.forEach { trial ->
+            assertTrue("${trial.title} sin logro", mechanic.any { it.stat == AchievementStat.trial(trial.id) })
+        }
+        assertEquals(0, BigDecimal(Trial.entries.size).compareTo(mechanic.filter { it.stat == AchievementStat.TRIALS_COMPLETED }.maxOf { it.targetValue }))
     }
 
     @Test

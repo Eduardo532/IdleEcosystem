@@ -27,6 +27,7 @@ import com.EGomez.idleecosystem.domain.logic.StatisticsManager
 import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -376,6 +377,40 @@ class GameEngineTest {
         engine.save()
         val saved = eventually { repository.gameStatistics.first()?.takeIf { it.counters.contains("life.none=1") } }
         assertTrue(saved.counters.contains("life.none=1"))
+    }
+
+    @Test
+    fun `a trial starts on ascension, changes the rules and its reward stays`() = runBlocking {
+        stats.totalPrestiges = 2 // la Ascensión que viene es la tercera: se abren las Pruebas
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+
+        engine.ascend(nextTrial = Trial.HUNGER)
+
+        // Hambre: los edificios cuestan x10
+        val started = await(engine.economy) { it.activeTrial == Trial.HUNGER }
+        assertEquals(10.0, started.buildingCostMultiplier, 1e-9)
+
+        // Al llegar a la meta (1B en esta vida) se supera y la regla se levanta
+        engine.grantKnowledge(BigDecimal("2000000000"))
+        val passed = await(engine.economy) { Trial.HUNGER in it.completedTrials }
+        assertEquals(null, passed.activeTrial)
+        assertEquals(0.9, passed.buildingCostMultiplier, 1e-9)
+        assertTrue(Pact.SHUB_NIGGURATH in passed.earlyPacts)
+    }
+
+    @Test
+    fun `abandoning a trial lifts its rules without a reward`() = runBlocking {
+        stats.totalPrestiges = 2
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(nextTrial = Trial.BLINDNESS)
+        await(engine.economy) { it.activeTrial == Trial.BLINDNESS }
+
+        engine.abandonTrial()
+
+        val economy = await(engine.economy) { it.activeTrial == null }
+        assertTrue(economy.completedTrials.isEmpty())
     }
 
     @Test

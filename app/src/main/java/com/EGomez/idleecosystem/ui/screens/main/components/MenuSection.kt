@@ -21,6 +21,11 @@ import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -96,6 +101,12 @@ fun MenuSection(
     attention: Map<String, Int> = emptyMap(),
     attentionPoints: Int = 0,
     onOpenAttention: () -> Unit = {},
+    activeTrial: Trial? = null,
+    trialProgress: Float = 0f,
+    completedTrials: Set<Trial> = emptySet(),
+    deliriumMultiplier: Double = 1.0,
+    earlyPacts: Set<Pact> = emptySet(),
+    onAbandonTrial: () -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -114,8 +125,14 @@ fun MenuSection(
         selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
         selectedTabIndex == 3 && !revealed.ascension ->
             stringResource(R.string.locked_pantheon, BigDecimal("1000000").toBeautifulString())
+        // Pruebas: Grimorio Quemado y Silencio cierran su pestaña durante la vida
+        selectedTabIndex == 1 && activeTrial?.rules?.noGrimoire == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
+        selectedTabIndex == 2 && activeTrial?.rules?.noRituals == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
         else -> null
     }
+    // Pestaña Panteón: los dioses o las Pruebas de Locura
+    var showTrials by rememberSaveable { mutableStateOf(false) }
+    val trialsRevealed = ascensions + 1 >= Trial.REVEAL_AT
 
     Column(
         modifier = modifier
@@ -218,6 +235,14 @@ fun MenuSection(
                     buildings = buildings,
                     onClick = onOpenAttention
                 )
+            }
+
+            // Prueba de Locura en curso: barra fija con su avance; abre la lista de Pruebas
+            if (selectedTabIndex == 0 && activeTrial != null) {
+                TrialBar(activeTrial, trialProgress, deliriumMultiplier) {
+                    showTrials = true
+                    onTabSelected(3)
+                }
             }
 
             LazyColumn(
@@ -364,7 +389,19 @@ fun MenuSection(
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
                     3 -> {
-                        item { PantheonGallery(ascensions, activePact, onPactSelected) }
+                        if (trialsRevealed) {
+                            item {
+                                PantheonViewChips(
+                                    showTrials,
+                                    stringResource(R.string.pantheon_view_trials, completedTrials.size, Trial.entries.size)
+                                ) { showTrials = it }
+                            }
+                        }
+                        if (trialsRevealed && showTrials) {
+                            item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
+                        } else {
+                            item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
+                        }
                     }
                 }
             }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.Pact
+import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.components.TrialPicker
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.core.math.toBeautifulString
@@ -79,7 +81,12 @@ fun AscendDialog(
     /** La Senda del Mapa de Locura que se recorre (null = ninguna). */
     activePath: PrestigeUpgrade? = null,
     abandonPath: Boolean = false,
-    onAbandonPathChanged: (Boolean) -> Unit = {}
+    onAbandonPathChanged: (Boolean) -> Unit = {},
+    /** Pruebas de Locura que se pueden elegir para la próxima vida (vacío = no mostrar). */
+    trials: List<Trial> = emptyList(),
+    completedTrials: Set<Trial> = emptySet(),
+    selectedTrial: Trial? = null,
+    onTrialSelected: (Trial?) -> Unit = {}
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -106,6 +113,7 @@ fun AscendDialog(
                     }
                 }
                 if (pacts.isNotEmpty()) PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
+                if (trials.isNotEmpty()) TrialPicker(trials, completedTrials, selectedTrial, onTrialSelected)
                 if (activePath != null) AbandonPathOption(activePath, abandonPath, onAbandonPathChanged)
                 if (ascensions != null) AscensionMilestoneList(ascensions)
             }

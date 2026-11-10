@@ -61,7 +61,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - El bono global de logros es el **producto** de los bonos de los logros desbloqueados (redondeado a 16 cifras).
 - **Conjuntos:** todos los logros de cantidad no secretos de un edificio → x2 a ese edificio. *(Código: `AchievementSets`.)*
 - **Próxima meta:** el logro no secreto con mayor progreso (a igual progreso, el primero de la lista). *(Código: `NextGoalFinder`.)*
-- **Logros de las mecánicas** *(v0.17)*: +1 % cada uno, +2 % el último escalón de una serie y los combinados, +5 % los secretos; todos juntos no pasan de x13. Cada mecánica tiene al menos 3 y cada dios al menos 2 propios. *(Código: `MechanicAchievements`; test: `MechanicAchievementsTest`.)*
+- **Logros de las mecánicas** *(v0.17)*: +1 % cada uno, +2 % el último escalón de una serie y los combinados, +5 % los secretos; en promedio, cada logro nuevo no da más de x1,02. Cada mecánica tiene al menos 3 y cada dios al menos 2 propios. *(Código: `MechanicAchievements`; test: `MechanicAchievementsTest`.)*
 - **Contadores:** lo que miden los logros nuevos se guarda en la estadística `counters`; los de la vida actual (`run.*`) se borran al Ascender. *(Código: `AchievementStat`, `StatisticsManager.counters`.)*
 
 ## Ascensión
@@ -75,6 +75,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
+
+## Pruebas de Locura
+
+- Se superan al generar su meta de Conocimiento en la vida en que se eligieron; la regla se levanta al superarla.
+- Las recompensas se multiplican entre sí y son permanentes. Cuatro adelantan a un Dios Exterior. *(Código: `Trial`; test: `TrialTest`.)*
 
 ## Sendas
 

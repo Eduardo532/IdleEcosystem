@@ -48,6 +48,7 @@ object AchievementStat {
     const val RUN_KNOWLEDGE = "run_knowledge"
     const val CHAOS = "chaos"
     const val ACTIVE_RITUALS = "active_rituals"
+    const val TRIALS_COMPLETED = "trials_completed"
     /** "owned.b_temple": unidades de un edificio. */
     const val OWNED_PREFIX = "owned."
 
@@ -56,7 +57,8 @@ object AchievementStat {
         MAP_MAX_LEVEL, MAP_STAR, ATTENTION_POINTS, ATTENTION_USED, ATTENTION_DREAM, ATTENTION_VIGIL,
         ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED,
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
-        OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS
+        OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
+        TRIALS_COMPLETED
     )
 
     // --- Contadores guardados ---
@@ -85,16 +87,29 @@ object AchievementStat {
     const val FEAT_LONG_PATH = "feat.long_path"
     const val FEAT_CHAOS_20 = "feat.chaos_20"
     const val FEAT_CHAOS_1 = "feat.chaos_1"
+    const val FEAT_TRIAL_FAST = "feat.trial_fast"
+
+    // --- Pruebas de Locura (v0.17.1) ---
+    /** "trial.blindness": la Prueba se superó. */
+    const val TRIAL_PREFIX = "trial."
+    /** "trialwith.hunger.abhoth": se superó con ese pacto. */
+    const val TRIAL_WITH_PREFIX = "trialwith."
+    /** "run.trial.blindness": la Prueba de la vida actual (se borra al Ascender). */
+    const val ACTIVE_TRIAL_PREFIX = "run.trial."
+    const val TRIALS_STARTED = "trials_started"
+
+    fun trial(trialId: String) = TRIAL_PREFIX + trialId
+    fun trialWith(trialId: String, pactId: String) = "$TRIAL_WITH_PREFIX$trialId.$pactId"
 
     val COUNTERS = setOf(
         RITUALS, MAX_SANITY_GAIN, MAX_CONVERGENCE, MAX_CONVERGENCE_BUFFS, AUTO_ASCENSIONS, AUTO_UNITS,
         PATHS_ABANDONED, FEAT_SILENT_LIFE, FEAT_FAST_15, FEAT_FAST_5, FEAT_ASCETIC, FEAT_BLIND,
-        FEAT_BLANK_MIND, FEAT_LONG_PATH, FEAT_CHAOS_20, FEAT_CHAOS_1,
+        FEAT_BLANK_MIND, FEAT_LONG_PATH, FEAT_CHAOS_20, FEAT_CHAOS_1, FEAT_TRIAL_FAST, TRIALS_STARTED,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
 
-    private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX)
+    private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX)
 
     /** ¿La clave la entiende el motor? (un logro con una clave desconocida nunca se desbloquearía) */
     fun isKnown(key: String): Boolean =

@@ -1,22 +1,206 @@
 # Logros
 
-Hay **113 logros**. Se abren con el botón de la copa, arriba a la derecha.
+Hay **275 logros**: 113 originales y **162 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
-- **Cada logro da un bono permanente** a toda la producción, normalmente entre x1,01 y x1,10. Los bonos se multiplican entre sí.
+- **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
 - Los de cada cadena se revelan en orden: ves el siguiente cuando completas el anterior.
 
-## Tipos
+## Categorías *(v0.17)*
 
-| Grupo | Cuántos | Qué piden |
+La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas de su categoría.
+
+| Categoría | Qué reúne |
+|---|---|
+| Progreso | Conocimiento, clics, tiempo de juego, producción por segundo, edificios en total, Grimorio, sinergias y conjuntos |
+| Edificios | Los 5 logros de cantidad de cada edificio (forman los conjuntos) |
+| Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
+| Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
+| Arcanos | Rituales, Convergencia, runas, eventos y Ecos |
+| Secretos | No se dicen. Solo cuentan los que ya encontraste |
+
+## La regla: cada mecánica trae sus logros
+
+Desde la v0.17, **toda mecánica nueva llega con una serie de varios logros** (al menos 3, variados: cantidades, retos con un pacto o una Senda, hazañas y secretos). Un test (`MechanicAchievementsTest`) falla si una mecánica no tiene los suyos.
+
+## Bonos
+
+- Logros originales: normalmente entre x1,01 y x1,10; los secretos, más.
+- Logros de las mecánicas *(v0.17)*: **+1 %** cada uno, **+2 %** el último escalón de cada serie y los retos combinados, **+5 %** los secretos. Todos juntos dan unas **x12**.
+
+## Logros de las mecánicas *(v0.17)*
+
+Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los combinados, además, con esa Senda). Los de "vidas" se cuentan al Ascender: cuenta el pacto de la vida que termina.
+
+### Progreso
+
+| Logro | Requisito | Bono |
 |---|---|---|
-| Conocimiento | 14 | Tener cierta cantidad de Conocimiento |
-| Clic | 3 | Tener Sinapsis |
-| Ascensión | 3 | Primeros pasos hacia la Ascensión |
-| Edificios | 80 | 5 por edificio: tener 5, 10, 50... unidades |
-| **Secretos** | 13 | No se dicen. Sus bonos son mayores |
+| Mil Golpes | Haz 1.000 clics en total | +1 % |
+| Tendinitis Arcana | Haz 10.000 clics en total | +1 % |
+| El Pulso del Abismo | Haz 100.000 clics en total | +1 % |
+| Mano de Hierro | Haz 1.000.000 de clics en total | +2 % |
+| Una Hora Perdida | Juega 1 hora en total | +1 % |
+| Noche en Vela | Juega 10 horas en total | +1 % |
+| Fervor | Juega 100 horas en total | +2 % |
+| Sueño Profundo | Pasa 24 horas sin conexión en total | +1 % |
+| Letargo | Pasa 7 días sin conexión en total | +1 % |
+| Torrente | Produce 1M de Conocimiento por segundo | +1 % |
+| Catarata de Saber | Produce 1B de Conocimiento por segundo | +1 % |
+| Marea Cognitiva | Produce 1T de Conocimiento por segundo | +1 % |
+| Singularidad Mental | Produce 1Qa de Conocimiento por segundo | +2 % |
+| Pequeña Congregación | Ten 100 edificios en total | +1 % |
+| Ciudad Oculta | Ten 500 edificios en total | +1 % |
+| Metrópolis Sombría | Ten 1.000 edificios en total | +1 % |
+| Imperio del Vacío | Ten 2.500 edificios en total | +2 % |
+| Coleccionista Arcano | Ten al menos 1 de los 16 edificios | +2 % |
+| Lector Voraz | Ten 25 mejoras del Grimorio a la vez | +1 % |
+| Bibliotecario Prohibido | Ten 50 mejoras del Grimorio a la vez | +1 % |
+| El Grimorio Vivo | Ten 80 mejoras del Grimorio a la vez | +2 % |
+| Primer Lazo | Compra 1 sinergia | +1 % |
+| Red de Susurros | Ten 5 sinergias a la vez | +1 % |
+| Tejido Prohibido | Ten 10 sinergias a la vez | +1 % |
+| Simbiosis Total | Ten las 15 sinergias a la vez | +2 % |
+| Colección Completa | Completa 1 conjunto de logros | +1 % |
+| Coleccionista Metódico | Completa 4 conjuntos de logros | +1 % |
+| Archivo Perfecto | Completa 8 conjuntos de logros | +1 % |
+| Catálogo del Todo | Completa los 16 conjuntos de logros | +2 % |
 
-Los secretos no aparecen en la lista hasta que los encuentras. El contador de secretos aparece cuando encuentras el primero.
+### Ascensión
+
+| Logro | Requisito | Bono |
+|---|---|---|
+| Primer Umbral | Asciende 1 vez | +1 % |
+| Ciclo Naciente | Asciende 3 veces | +1 % |
+| Hábito del Abismo | Asciende 5 veces | +1 % |
+| Diez Vidas | Asciende 10 veces | +1 % |
+| Rueda del Samsara | Asciende 25 veces | +1 % |
+| Medio Centenar | Asciende 50 veces | +1 % |
+| Eterno Retornante | Asciende 100 veces | +1 % |
+| Más Allá del Ciclo | Asciende 250 veces | +2 % |
+| Mente Templada | Ten 10 de Cordura Residual | +1 % |
+| Cordura de Hierro | Ten 100 de Cordura Residual | +1 % |
+| Fortaleza Interior | Ten 1.000 de Cordura Residual | +1 % |
+| Lucidez Absoluta | Ten 10.000 de Cordura Residual | +2 % |
+| Gran Cosecha | Gana 100 de Cordura en una Ascensión | +1 % |
+| Cosecha de Eones | Gana 1.000 de Cordura en una Ascensión | +2 % |
+| Cartógrafo de la Locura | Suma 10 niveles en el Mapa de Locura | +1 % |
+| Constelación Propia | Suma 50 niveles en el Mapa de Locura | +1 % |
+| Firmamento Dominado | Suma 150 niveles en el Mapa de Locura | +2 % |
+| El Mapa Completo | Ten al menos 1 nivel en los 17 nodos del Mapa | +2 % |
+| Obsesión Estelar | Sube un nodo del Mapa a nivel 10 | +1 % |
+| La Estrella Final | Compra Ascensión Cósmica | +1 % |
+| Piloto Automático | Asciende 1 vez de forma automática | +1 % |
+| Ciclo Perpetuo | Asciende 10 veces de forma automática | +1 % |
+| Máquina de Eternidad | Asciende 100 veces de forma automática | +2 % |
+| Siervos Diligentes | El autocomprador compra 100 edificios | +1 % |
+| Burocracia Oscura | El autocomprador compra 1.000 edificios | +1 % |
+| Fábrica de Culto | El autocomprador compra 10.000 edificios | +2 % |
+| Primera Mirada | Ten 1 punto de Atención | +1 % |
+| Mirada Afilada | Ten 4 puntos de Atención | +1 % |
+| Mirada Múltiple | Ten 7 puntos de Atención | +1 % |
+| El Ojo que Todo lo Ve | Ten 10 puntos de Atención | +2 % |
+| Mirada Fija | Pon 4 puntos de Atención en un mismo destino | +1 % |
+| Soñador Consciente | Pon 3 puntos de Atención en el Sueño | +1 % |
+| Centinela de Runas | Pon 3 puntos de Atención en la Vigilia | +1 % |
+| Mirada Dispersa | Reparte la Atención en 5 destinos distintos | +1 % |
+| Primer Paso de la Mano | Recorre la Senda de la Mano | +1 % |
+| Mano Consagrada | Sube la Senda de la Mano a nivel 3 | +1 % |
+| La Mano Absoluta | Sube la Senda de la Mano a nivel 5 | +2 % |
+| Primer Diente del Engranaje | Recorre la Senda del Engranaje | +1 % |
+| Engranaje Consagrado | Sube la Senda del Engranaje a nivel 3 | +1 % |
+| La Máquina Absoluta | Sube la Senda del Engranaje a nivel 5 | +2 % |
+| Primer Sueño de la Senda | Recorre la Senda del Sueño | +1 % |
+| Durmiente Consagrado | Sube la Senda del Sueño a nivel 3 | +1 % |
+| El Sueño Absoluto | Sube la Senda del Sueño a nivel 5 | +2 % |
+| Vidas de la Mano | Termina 3 vidas recorriendo la Senda de la Mano | +1 % |
+| Vidas del Engranaje | Termina 3 vidas recorriendo la Senda del Engranaje | +1 % |
+| Vidas del Sueño | Termina 3 vidas recorriendo la Senda del Sueño | +1 % |
+| Las Tres Sendas | Recorre las tres Sendas (en distintas vidas) | +2 % |
+| Peregrino | Abandona una Senda al Ascender | +1 % |
+| Errante Eterno | Abandona Sendas 5 veces | +1 % |
+
+### Panteón
+
+| Logro | Requisito | Bono |
+|---|---|---|
+| Primeros Fieles | Ten 3 dioses disponibles | +1 % |
+| Panteón Menor | Ten 9 dioses disponibles | +1 % |
+| Panteón Completo | Ten los 13 dioses disponibles | +2 % |
+| Devoto Inconstante | Termina vidas con 3 pactos distintos | +1 % |
+| Sirviente de Muchos | Termina vidas con 7 pactos distintos | +1 % |
+| Hereje Universal | Termina una vida con cada pacto, incluido Sin Pacto | +2 % |
+| El Escéptico | Termina 5 vidas Sin Pacto | +1 % |
+| Fe en Nada | Genera 1T de Conocimiento en una vida Sin Pacto | +1 % |
+| Que Sueñe | Pasa 8 horas sin conexión en una vida con Cthulhu | +1 % |
+| Ph'nglui mglw'nafh | Ten 100 Templos de R'lyeh con Cthulhu | +1 % |
+| El Signo Amarillo | Termina 3 vidas con Hastur | +1 % |
+| Carcosa | Genera 1Qa de Conocimiento en una vida con Hastur | +1 % |
+| La Llama Verde | Invoca 15 rituales en una vida con Tulzscha | +1 % |
+| Festival del Solsticio | Ten 3 rituales activos a la vez con Tulzscha | +1 % |
+| La Fuente Primigenia | Ten 200 Notas Desordenadas con Ubbo-Sathla | +1 % |
+| Lodo Original | Ten 150 Sectarios Novatos con Ubbo-Sathla | +1 % |
+| Padre de la Inmundicia | Ten 750 edificios con Abhoth | +1 % |
+| Progenie Interminable | Ten los 16 edificios con Abhoth | +1 % |
+| El Primogénito | Ten 100 Sacerdotes Dementes con Nug | +1 % |
+| Altar de los Gemelos | Ten 100 Altares de Hueso con Nug | +1 % |
+| Nieblas Susurrantes | Haz 5.000 clics en una vida con Yeb | +1 % |
+| Eco de Yeb | Encuentra 100 Ecos en una vida con Yeb | +1 % |
+| El que Desgarra los Velos | Atrapa 50 runas en una vida con Daoloth | +1 % |
+| Visión Total | Atrapa 150 runas en una vida con Daoloth | +1 % |
+| La Esfera Errante | Encuentra 20 eventos en una vida con Ghroth | +1 % |
+| Música de las Esferas | Encuentra 50 eventos en una vida con Ghroth | +1 % |
+| La Cabra Negra | Genera 1Qi de Conocimiento en una vida con Shub-Niggurath | +1 % |
+| Las Mil Crías | Ten 1.500 edificios con Shub-Niggurath | +1 % |
+| La Llave y la Puerta | Pasa 24 horas sin conexión en una vida con Yog-Sothoth | +1 % |
+| Todo en Uno | Invoca 30 rituales en una vida con Yog-Sothoth | +1 % |
+| El Caos Reptante | Haz 50.000 clics en una vida con Nyarlathotep | +1 % |
+| Las Mil Máscaras | Atrapa 100 runas en una vida con Nyarlathotep | +1 % |
+| El Sultán Demoníaco | Consigue el caos x20 con Azathoth | +1 % |
+| Flautas Monótonas | Termina 3 vidas con Azathoth | +1 % |
+| La Mano del Mensajero | Haz 100.000 clics en una vida con Nyarlathotep y la Senda de la Mano | +2 % |
+| El Sueño de R'lyeh | Pasa 12 horas sin conexión en una vida con Cthulhu y la Senda del Sueño | +2 % |
+| Engranajes de Carne | Ten 1.500 edificios con Abhoth y la Senda del Engranaje | +2 % |
+| Más Allá de la Puerta | Pasa 24 horas sin conexión en una vida con Yog-Sothoth y la Senda del Sueño | +2 % |
+| La Obra en Escena | Genera 1Qa de Conocimiento con Hastur y la Senda del Engranaje | +2 % |
+
+### Arcanos
+
+| Logro | Requisito | Bono |
+|---|---|---|
+| Aprendiz de Ritos | Invoca 10 rituales | +1 % |
+| Oficiante | Invoca 100 rituales | +1 % |
+| Sumo Sacerdote | Invoca 500 rituales | +1 % |
+| Liturgia Eterna | Invoca 2.000 rituales | +2 % |
+| Sed de Sangre | Invoca Frenesí de Sangre 50 veces | +1 % |
+| Coro del Vacío | Invoca Cántico del Vacío 50 veces | +1 % |
+| Ofrenda Perpetua | Invoca Ofrenda de Conocimiento 50 veces | +1 % |
+| Grietas en el Reloj | Invoca Grieta Temporal 50 veces | +1 % |
+| Insomne Eterno | Invoca Vigilia Eterna 50 veces | +1 % |
+| Primera Convergencia | Invoca la Convergencia | +1 % |
+| Alineación Forzada | Invoca la Convergencia 10 veces | +1 % |
+| Maestro de la Convergencia | Invoca la Convergencia 50 veces | +2 % |
+| Combo Oscuro | Logra x50 de potenciadores durante la Convergencia | +1 % |
+| Cascada de Poder | Logra x250 de potenciadores durante la Convergencia | +1 % |
+| El Tope del Cosmos | Llega al tope x1.000 de la Convergencia | +2 % |
+| Cazador de Runas | Atrapa 10 runas | +1 % |
+| Coleccionista de Glifos | Atrapa 100 runas | +1 % |
+| Escriba del Caos | Atrapa 500 runas | +1 % |
+| Lengua de las Runas | Atrapa 2.000 runas | +2 % |
+| Filo Veloz | Corta 500 runas de nivel 1 | +1 % |
+| Pulso Firme | Estabiliza 100 runas de nivel 2 | +1 % |
+| Trazo Perfecto | Inscribe 50 runas de nivel 3 | +2 % |
+| Testigo | Encuentra 10 eventos | +1 % |
+| Coleccionista de Presagios | Encuentra 50 eventos | +1 % |
+| Profeta Involuntario | Encuentra 200 eventos | +1 % |
+| Ojo de la Tormenta | Encuentra 500 eventos | +2 % |
+| Oído Fino | Encuentra 100 Ecos en total | +1 % |
+| Cámara de Ecos | Encuentra 1.000 Ecos en total | +1 % |
+| Resonancia Infinita | Encuentra 10.000 Ecos en total | +2 % |
+| Avaro de Ecos | Ten 250 Ecos a la vez | +1 % |
+| Bóveda Resonante | Ten 1.000 Ecos a la vez | +2 % |
+
+Además hay **14 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 
@@ -25,15 +209,13 @@ El juego elige el **logro pendiente más avanzado** y lo muestra como tu próxim
 - en el **botón de logros**, como una línea dorada que se llena;
 - al **abrir los logros**, arriba de la lista, con el requisito y el porcentaje.
 
-Los logros secretos nunca se muestran como meta.
+Los logros secretos nunca se muestran como meta. Un logro de un pacto o una Senda solo suma avance mientras estás en esa vida.
 
 ## Conjuntos de logros *(v0.14)*
 
 Los logros de "tener N unidades" de un mismo edificio forman su **conjunto**. Si completas el conjunto entero, **la producción de ese edificio se duplica** (en la Sinapsis, el clic).
 
 - Hay **16 conjuntos**, uno por edificio.
-- Los logros secretos no forman parte de ningún conjunto.
+- Los logros secretos y los de las mecánicas no forman parte de ningún conjunto.
 - Como los logros no se pierden, **el x2 es permanente**.
 - La lista de logros muestra cuántos conjuntos llevas.
-
-El último logro de un conjunto vale mucho más que los anteriores: es una meta concreta a la que apuntar.

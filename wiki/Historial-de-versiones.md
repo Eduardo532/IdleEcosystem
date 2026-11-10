@@ -2,6 +2,12 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.17.x · "Desafíos y Riesgo" *(en pruebas)*
+
+Cuarta etapa del plan de retención: retos voluntarios y decisiones con riesgo.
+
+- **v0.17.0:** 162 logros nuevos de todas las mecánicas (Ascensión, Mapa de Locura, Sendas, Atención, automatización, Panteón, rituales, Convergencia, runas, eventos y Ecos), incluidos retos propios de cada dios y de cada combinación de dios y Senda; filtros por categoría en la lista de logros.
+
 ## v0.16.2 · "El Panteón" *(oficial, 10 nov 2026)*
 
 Tercera etapa del plan de retención: que dos vidas seguidas se jueguen distinto.

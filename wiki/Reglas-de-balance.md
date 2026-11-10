@@ -61,6 +61,8 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - El bono global de logros es el **producto** de los bonos de los logros desbloqueados (redondeado a 16 cifras).
 - **Conjuntos:** todos los logros de cantidad no secretos de un edificio → x2 a ese edificio. *(Código: `AchievementSets`.)*
 - **Próxima meta:** el logro no secreto con mayor progreso (a igual progreso, el primero de la lista). *(Código: `NextGoalFinder`.)*
+- **Logros de las mecánicas** *(v0.17)*: +1 % cada uno, +2 % el último escalón de una serie y los combinados, +5 % los secretos; todos juntos no pasan de x13. Cada mecánica tiene al menos 3 y cada dios al menos 2 propios. *(Código: `MechanicAchievements`; test: `MechanicAchievementsTest`.)*
+- **Contadores:** lo que miden los logros nuevos se guarda en la estadística `counters`; los de la vida actual (`run.*`) se borran al Ascender. *(Código: `AchievementStat`, `StatisticsManager.counters`.)*
 
 ## Ascensión
 

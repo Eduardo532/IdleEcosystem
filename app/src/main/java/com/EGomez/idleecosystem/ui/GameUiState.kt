@@ -81,6 +81,10 @@ data class GameUiState(
     val deliriumMultiplier: Double = 1.0,
     val earlyPacts: Set<Pact> = emptySet(),
     val trialNotice: Trial? = null,
+    /** Espacios de Runa: cuántos hay, las grabadas y cuántas veces se atrapó cada runa. */
+    val runeSlots: Int = 0,
+    val engravedRunes: List<String> = emptyList(),
+    val runeCatches: Map<String, Int> = emptyMap(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

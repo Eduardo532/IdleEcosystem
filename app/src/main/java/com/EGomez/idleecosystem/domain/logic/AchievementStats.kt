@@ -49,6 +49,11 @@ object AchievementStat {
     const val CHAOS = "chaos"
     const val ACTIVE_RITUALS = "active_rituals"
     const val TRIALS_COMPLETED = "trials_completed"
+    const val RUNE_SLOTS = "rune_slots"
+    const val ENGRAVED = "engraved"
+    const val ENGRAVED_T3 = "engraved_t3"
+    const val RUNE_KINDS = "rune_kinds"
+    const val ENGRAVED_KINDS = "engraved_kinds"
     /** "owned.b_temple": unidades de un edificio. */
     const val OWNED_PREFIX = "owned."
 
@@ -58,7 +63,7 @@ object AchievementStat {
         ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED,
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
-        TRIALS_COMPLETED
+        TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS
     )
 
     // --- Contadores guardados ---
@@ -98,6 +103,17 @@ object AchievementStat {
     const val ACTIVE_TRIAL_PREFIX = "run.trial."
     const val TRIALS_STARTED = "trials_started"
 
+    // --- Espacios de Runa (v0.17.2) ---
+    /** "rune.t1_blood": veces que se atrapó esa runa. */
+    const val RUNE_CATCH_PREFIX = "rune."
+    /** "engrave.t1_blood": la runa está grabada (el valor ordena los espacios). */
+    const val ENGRAVE_PREFIX = "engrave."
+    /** "engraved_ever.t1_blood": la runa se grabó alguna vez. */
+    const val ENGRAVED_EVER_PREFIX = "engraved_ever."
+
+    fun runeCatches(runeId: String) = RUNE_CATCH_PREFIX + runeId
+    fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
+
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
     fun trialWith(trialId: String, pactId: String) = "$TRIAL_WITH_PREFIX$trialId.$pactId"
 
@@ -109,7 +125,8 @@ object AchievementStat {
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
 
-    private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX)
+    private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX,
+        RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX)
 
     /** ¿La clave la entiende el motor? (un logro con una clave desconocida nunca se desbloquearía) */
     fun isKnown(key: String): Boolean =

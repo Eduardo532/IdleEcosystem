@@ -45,6 +45,7 @@ fun trialRewardLines(reward: TrialReward): List<String> {
     add(reward.ritualCooldown, R.string.pact_effect_ritual_cooldown)
     add(reward.sanityGain, R.string.pact_effect_sanity)
     if (reward.attentionPoints > 0) lines += resources.getString(R.string.trial_reward_attention, reward.attentionPoints)
+    if (reward.runeSlots > 0) lines += resources.getString(R.string.trial_reward_rune_slot, reward.runeSlots)
     reward.pact?.let { lines += resources.getString(R.string.trial_reward_pact, tr(it.godName)) }
     return lines
 }
@@ -220,15 +221,21 @@ private fun TrialChip(label: String, selected: Boolean, tag: String, onClick: ()
     )
 }
 
-/** Vista de la pestaña Panteón: los dioses o las Pruebas. */
+/** Vistas de la pestaña Panteón: los dioses, las Pruebas y el Altar de Runas. */
+enum class PantheonView { GODS, TRIALS, RUNES }
+
 @Composable
-fun PantheonViewChips(showTrials: Boolean, trialsLabel: String, onShowTrials: (Boolean) -> Unit) {
+fun PantheonViewChips(view: PantheonView, trialsLabel: String, runesLabel: String, onSelect: (PantheonView) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
-        TrialChip(stringResource(R.string.pantheon_view_gods), !showTrials, PANTHEON_VIEW_TAG + "gods") { onShowTrials(false) }
-        TrialChip(trialsLabel, showTrials, PANTHEON_VIEW_TAG + "trials") { onShowTrials(true) }
+        TrialChip(stringResource(R.string.pantheon_view_gods), view == PantheonView.GODS, PANTHEON_VIEW_TAG + "gods") { onSelect(PantheonView.GODS) }
+        TrialChip(trialsLabel, view == PantheonView.TRIALS, PANTHEON_VIEW_TAG + "trials") { onSelect(PantheonView.TRIALS) }
+        TrialChip(runesLabel, view == PantheonView.RUNES, PANTHEON_VIEW_TAG + "runes") { onSelect(PantheonView.RUNES) }
     }
 }
 

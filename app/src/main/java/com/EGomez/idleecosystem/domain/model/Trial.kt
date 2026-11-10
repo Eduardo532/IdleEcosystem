@@ -44,6 +44,8 @@ data class TrialReward(
     val ritualCooldown: Double = 1.0,
     val sanityGain: Double = 1.0,
     val attentionPoints: Int = 0,
+    /** Espacios para grabar runas (v0.17.2). */
+    val runeSlots: Int = 0,
     /** Un dios que se adelanta: se puede elegir sin las Ascensiones que pide. */
     val pact: Pact? = null
 )
@@ -68,7 +70,7 @@ enum class Trial(
         "No aparece ninguna runa.",
         3, BigDecimal("1e9"),
         TrialRules(noRunes = true),
-        TrialReward(runeFrequency = 1.25)
+        TrialReward(runeFrequency = 1.25, runeSlots = 1)
     ),
     BOUND_HANDS(
         "bound_hands", "Manos Atadas",
@@ -96,7 +98,7 @@ enum class Trial(
         "No hay rituales ni Ecos.",
         5, BigDecimal("1e9"),
         TrialRules(noRituals = true),
-        TrialReward(ritualCooldown = 0.75)
+        TrialReward(ritualCooldown = 0.75, runeSlots = 1)
     ),
     INSOMNIA(
         "insomnia", "Insomnio",
@@ -117,7 +119,7 @@ enum class Trial(
         "Los logros y sus conjuntos no dan bono.",
         10, BigDecimal("1e12"),
         TrialRules(noAchievementBonus = true),
-        TrialReward(sanityGain = 1.1)
+        TrialReward(sanityGain = 1.1, runeSlots = 1)
     ),
     DELIRIUM(
         "delirium", "Delirio",
@@ -131,7 +133,7 @@ enum class Trial(
         "La Cordura Residual y el Mapa de Locura no dan bono.",
         20, BigDecimal("1e12"),
         TrialRules(noSanityBonus = true),
-        TrialReward(production = 1.25)
+        TrialReward(production = 1.25, runeSlots = 1)
     );
 
     fun isUnlocked(ascensions: Int): Boolean = ascensions >= unlockAscensions
@@ -156,7 +158,8 @@ enum class Trial(
                 buildingCost = acc.buildingCost * r.buildingCost,
                 ritualCooldown = acc.ritualCooldown * r.ritualCooldown,
                 sanityGain = acc.sanityGain * r.sanityGain,
-                attentionPoints = acc.attentionPoints + r.attentionPoints
+                attentionPoints = acc.attentionPoints + r.attentionPoints,
+                runeSlots = acc.runeSlots + r.runeSlots
             )
         }
 

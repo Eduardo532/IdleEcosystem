@@ -42,6 +42,27 @@ data class PactEffects(
     /** Un potenciador de evento xM con este pacto. */
     fun eventBuff(multiplier: Double): Double = 1.0 + (multiplier - 1.0) * eventBuffPower
 
+    /**
+     * Estos efectos sumados a otros (runas grabadas, v0.17.2): los multiplicadores se
+     * multiplican; los bonos por edificio y el caos se toman de ambos.
+     */
+    fun combinedWith(other: PactEffects): PactEffects = PactEffects(
+        production = production * other.production,
+        click = click * other.click,
+        offline = offline * other.offline,
+        runeFrequency = runeFrequency * other.runeFrequency,
+        ritualCost = ritualCost * other.ritualCost,
+        ritualDuration = ritualDuration * other.ritualDuration,
+        ritualCooldown = ritualCooldown * other.ritualCooldown,
+        echoChance = echoChance * other.echoChance,
+        sanityGain = sanityGain * other.sanityGain,
+        eventFrequency = eventFrequency * other.eventFrequency,
+        eventBuffPower = eventBuffPower * other.eventBuffPower,
+        buildingCost = buildingCost * other.buildingCost,
+        buildings = (buildings.keys + other.buildings.keys).associateWith { buildingMultiplier(it) * other.buildingMultiplier(it) },
+        chaos = chaos || other.chaos
+    )
+
     companion object {
         const val CHAOS_MIN = 1
         const val CHAOS_MAX = 20

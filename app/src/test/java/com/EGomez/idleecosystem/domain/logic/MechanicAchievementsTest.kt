@@ -37,6 +37,7 @@ class MechanicAchievementsTest {
         "Sinergias" to { it.stat == AchievementStat.SYNERGIES },
         "Conjuntos" to { it.stat == AchievementStat.SETS },
         "Grimorio" to { it.stat == AchievementStat.GRIMOIRE },
+        "Espacios de Runa" to { it.stat?.startsWith("engrave") == true || it.stat == AchievementStat.RUNE_SLOTS || it.stat == AchievementStat.RUNE_KINDS || it.stat?.startsWith(AchievementStat.RUNE_CATCH_PREFIX) == true || it.stat == AchievementStat.ENGRAVED_T3 },
         "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 

@@ -25,7 +25,7 @@ Los puntos en un mismo destino se suman: 4 puntos en las Notas dan +100 % (x2).
 
 ## Cómo se usa
 
-- El botón **◎ usados/total** sobre las pestañas abre el panel de Atención, con − y + para cada destino, "Liberar todo" y cuándo llega el próximo punto.
+- La barra fija **◎ Atención usados/total**, sobre la lista de edificios de la pestaña Investigación, muestra a dónde apuntan tus puntos y abre el panel de Atención, con − y + para cada destino, "Liberar todo" y cuándo llega el próximo punto.
 - Las tarjetas de los edificios muestran sus puntos ("◎ 2").
 - El reparto se guarda en el teléfono (no viaja en el código de exportación) y siempre se ajusta a los puntos que tienes: tras un reinicio total no usa puntos de más.
 

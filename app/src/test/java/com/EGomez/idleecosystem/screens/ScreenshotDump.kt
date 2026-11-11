@@ -44,8 +44,9 @@ class ScreenshotDump {
     val compose = createComposeRule()
 
     private fun shot(name: String, content: @Composable () -> Unit) {
+        compose.mainClock.autoAdvance = false
         compose.setContent { IdleEcosystemTheme { Box(Modifier.fillMaxSize().background(VoidBlack)) { content() } } }
-        compose.waitForIdle()
+        compose.mainClock.advanceTimeBy(600)
         val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
         val dir = File("build/screens").apply { mkdirs() }
         File(dir, "$name.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
@@ -99,30 +100,29 @@ class ScreenshotDump {
         }
     }
 
-    @Test
-    fun dump() {
-        shot("01_new_player") { Screen(MenuTab.RESEARCH, MenuUnlocks(), owned = listOf(3, 1)) }
-        shot("02_new_player_closed") { Screen(MenuTab.RESEARCH, MenuUnlocks(), owned = listOf(3, 1), expanded = false) }
-        val life = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS))
-        shot("03_life_grimoire_new") { Screen(MenuTab.RESEARCH, life, newTabs = setOf(MenuTab.RITUALS), owned = listOf(12, 8, 3, 1)) }
-        val asc = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS, MenuTab.SANITY, MenuTab.PANTHEON, MenuTab.TRIALS))
-        val buffs = listOf(
-            RuneBuff(id = "t1_blood", multiplier = 10.0, expirationTime = 12_000, description = "", durationMs = 15_000),
-            RuneBuff(id = "t1_shadow", multiplier = 5.0, expirationTime = 25_000, description = "", durationMs = 30_000),
-            RuneBuff(id = "t2_barrier", costReduction = 0.15, expirationTime = 9_000, description = "", durationMs = 30_000)
-        )
-        shot("04_ascension_research") { Screen(MenuTab.RESEARCH, asc, newTabs = setOf(MenuTab.TRIALS), owned = listOf(40, 30, 20, 10, 5), ascensions = 5, buffs = buffs) }
-        shot("05_sanity_tab") { Screen(MenuTab.SANITY, asc, owned = listOf(40, 30, 20, 10, 5), ascensions = 5) }
-        shot("06_ether_tab") { Screen(MenuTab.ETHER, MenuUnlocks.ALL, owned = listOf(40, 30, 20, 10, 5), ascensions = 60) }
-        shot("07_mutations_tab") { Screen(MenuTab.MUTATIONS, MenuUnlocks.ALL, owned = listOf(40, 30, 20, 10, 5), ascensions = 60) }
-        shot("08_runes") {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                RunePlate(RuneCatalog.T1_SHADOW, 0)
-                RunePlate(RuneCatalog.T2_BARRIER, 2)
-                RunePlate(RuneCatalog.T3_CTHULHU, 5)
-                RuneCaughtNotice(RuneCatalog.T1_BONE, 0)
-                ActiveBuffsDisplay(buffs, clock = { 0L })
-            }
+    private val life = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS))
+    private val asc = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS, MenuTab.SANITY, MenuTab.PANTHEON, MenuTab.TRIALS))
+    private val buffs = listOf(
+        RuneBuff(id = "t1_blood", multiplier = 10.0, expirationTime = 12_000, description = "", durationMs = 15_000),
+        RuneBuff(id = "t1_shadow", multiplier = 5.0, expirationTime = 25_000, description = "", durationMs = 30_000),
+        RuneBuff(id = "t2_barrier", costReduction = 0.15, expirationTime = 9_000, description = "", durationMs = 30_000)
+    )
+
+    @Test fun s01() = shot("01_new_player") { Screen(MenuTab.RESEARCH, MenuUnlocks(), owned = listOf(3, 1)) }
+    @Test fun s02() = shot("02_new_player_closed") { Screen(MenuTab.RESEARCH, MenuUnlocks(), owned = listOf(3, 1), expanded = false) }
+    @Test fun s03() = shot("03_life_new_tab") { Screen(MenuTab.RESEARCH, life, newTabs = setOf(MenuTab.RITUALS), owned = listOf(12, 8, 3, 1)) }
+    @Test fun s04() = shot("04_ascension_research") { Screen(MenuTab.RESEARCH, asc, newTabs = setOf(MenuTab.TRIALS), owned = listOf(40, 30, 20, 10, 5), ascensions = 5, buffs = buffs) }
+    @Test fun s05() = shot("05_sanity_tab") { Screen(MenuTab.SANITY, asc, owned = listOf(40, 30, 20, 10, 5), ascensions = 5) }
+    @Test fun s06() = shot("06_ether_tab") { Screen(MenuTab.ETHER, MenuUnlocks.ALL, owned = listOf(40, 30, 20, 10, 5), ascensions = 60) }
+    @Test fun s07() = shot("07_mutations_tab") { Screen(MenuTab.MUTATIONS, MenuUnlocks.ALL, owned = listOf(40, 30, 20, 10, 5), ascensions = 60) }
+    @Test fun s08() = shot("08_runes") {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Spacer(Modifier.height(60.dp))
+            RunePlate(RuneCatalog.T1_SHADOW, 0)
+            RunePlate(RuneCatalog.T2_BARRIER, 2)
+            RunePlate(RuneCatalog.T3_CTHULHU, 5)
+            RuneCaughtNotice(RuneCatalog.T1_BONE, 0)
+            ActiveBuffsDisplay(buffs, clock = { 0L })
         }
     }
 }

@@ -3,6 +3,13 @@ package com.EGomez.idleecosystem.ui.components
 import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.clickable
+import com.EGomez.idleecosystem.domain.logic.Consecration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +45,11 @@ fun BuildingItem(
     milestones: List<Int> = emptyList(),
     /** Puntos de Atención puestos en este edificio. */
     attentionPoints: Int = 0,
+    /** Consagración (v0.18.1): nivel actual, si ya se ve el sistema y el Éter disponible. */
+    consecration: Int = 0,
+    consecrationRevealed: Boolean = false,
+    ether: Int = 0,
+    onConsecrate: () -> Unit = {},
     onBuyClick: () -> Unit
 ) {
     // 1. Calcular Costo Base (Sin descuento)
@@ -96,25 +108,33 @@ fun BuildingItem(
     val borderStroke = BorderStroke(1.dp, tierColor.copy(alpha = 0.6f))
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceGrey),
         shape = RoundedCornerShape(8.dp),
         border = borderStroke
     ) {
+        // Tarjeta compacta (v0.18.2): la descripción se despliega al tocar el nombre
+        var showDescription by rememberSaveable(building.id) { mutableStateOf(false) }
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable { showDescription = !showDescription }
+                        .testTag(BUILDING_NAME_TAG + building.id)
+                ) {
                     Text(
                         text = tr(building.name),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
 
                     if (hasSpecificMultiplier) {
@@ -126,6 +146,19 @@ fun BuildingItem(
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    // Consagración
+                    if (consecration > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(color = Color(0xFF12202A), shape = RoundedCornerShape(4.dp)) {
+                            Text(
+                                text = "✦ ${Consecration.roman(consecration)}",
+                                color = Color(0xFFB3E5FC),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp).testTag(CONSECRATION_BADGE_TAG + building.id)
                             )
                         }
                     }
@@ -150,26 +183,47 @@ fun BuildingItem(
                     Text(
                         text = stringResource(R.string.owned_line, building.amountOwned, prodLabel, productionToShow.toBeautifulString(), prodSuffix),
                         color = if (hasSpecificMultiplier) Color(0xFF81C784) else Color.Gray,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Text(
-                    text = tr(building.description),
-                    color = Color.DarkGray,
-                    fontSize = 10.sp,
-                    lineHeight = 12.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (showDescription) {
+                    Text(
+                        text = tr(building.description),
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
+                        modifier = Modifier.testTag(BUILDING_DESCRIPTION_TAG + building.id)
+                    )
+                }
+
+                // Consagración: el próximo nivel, cuántas unidades pide y su costo en Éter
+                if (consecrationRevealed && consecration < Consecration.MAX_LEVEL) {
+                    val needed = Consecration.requiredOwned(consecration)
+                    val cost = Consecration.etherCost(consecration)
+                    val ready = Consecration.canConsecrate(consecration, owned, ether)
+                    Text(
+                        text = if (owned >= needed) stringResource(R.string.consecrate_ready, Consecration.roman(consecration + 1), cost)
+                        else stringResource(R.string.consecrate_hint, Consecration.roman(consecration + 1), needed, cost),
+                        color = if (ready) Color(0xFFB3E5FC) else Color.Gray,
+                        fontSize = 10.sp,
+                        fontWeight = if (ready) FontWeight.Bold else FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .padding(top = 2.dp)
+                            .clickable(enabled = ready, onClick = onConsecrate)
+                            .testTag(CONSECRATE_TAG + building.id)
+                    )
+                }
 
                 // Cuánto falta para el siguiente hito (escalón del Grimorio o logro)
                 if (milestones.isNotEmpty()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     ) {
                         LinearProgressIndicator(
                             progress = { milestoneProgress },
@@ -194,10 +248,12 @@ fun BuildingItem(
             Button(
                 onClick = onBuyClick,
                 enabled = canAfford,
-                colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black, disabledContainerColor = Color(0xFF333333), disabledContentColor = Color.White.copy(alpha = 0.6f))
+                colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black, disabledContainerColor = Color(0xFF333333), disabledContentColor = Color.White.copy(alpha = 0.6f)),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier.heightIn(min = 40.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(R.string.buy_amount, amountToBuyLabel), maxLines = 1)
+                    Text(text = stringResource(R.string.buy_amount, amountToBuyLabel), maxLines = 1, fontSize = 13.sp)
 
                     if (hasDiscount) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -223,3 +279,8 @@ fun BuildingItem(
         }
     }
 }
+
+const val CONSECRATE_TAG = "consecrate_"
+const val CONSECRATION_BADGE_TAG = "consecration_badge_"
+const val BUILDING_NAME_TAG = "building_name_"
+const val BUILDING_DESCRIPTION_TAG = "building_description_"

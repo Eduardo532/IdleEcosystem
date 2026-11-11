@@ -199,6 +199,46 @@ fun InfoSection(
 }
 
 const val RESEARCH_BUTTON_TAG = "research_button"
+const val COMPACT_RESEARCH_BUTTON_TAG = "research_button_compact"
+
+/**
+ * INVESTIGAR en pequeño (v0.18.2), para la cabecera compacta con el menú abierto:
+ * una píldora que hace clic al tocarla y sigue mientras se mantiene pulsada.
+ */
+@Composable
+fun CompactResearchButton(
+    clickMultiplier: String,
+    onManualClick: (clickOffset: Offset, buttonCenter: Offset, buttonRadius: Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var position by remember { mutableStateOf(Offset.Zero) }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val currentOnManualClick by rememberUpdatedState(onManualClick)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(22.dp))
+            .background(ArcanePurple.copy(alpha = 0.25f))
+            .onGloballyPositioned {
+                position = it.positionInRoot()
+                size = it.size
+            }
+            .clickAndHold { tap ->
+                currentOnManualClick(
+                    Offset(position.x + tap.x, position.y + tap.y),
+                    Offset(position.x + size.width / 2f, position.y + size.height / 2f),
+                    size.height / 2f
+                )
+            }
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .testTag(COMPACT_RESEARCH_BUTTON_TAG)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.research_button), color = ArcanePurple, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text("+$clickMultiplier", color = Color.White.copy(alpha = 0.9f), fontWeight = FontWeight.Bold, fontSize = 10.sp, maxLines = 1)
+        }
+    }
+}
 
 /** Clics por segundo al mantener el dedo: algo menos que el autoclic de las runas (10/s). */
 const val HOLD_CLICKS_PER_SECOND = 8

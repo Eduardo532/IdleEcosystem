@@ -14,6 +14,9 @@ import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.logic.BuffMath
+import com.EGomez.idleecosystem.domain.logic.Consecration
+import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
+import com.EGomez.idleecosystem.domain.logic.Transcendence
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -54,6 +57,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.domain.model.TrialRules
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.model.PactEffects
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -111,9 +115,24 @@ data class EconomyState(
     val deliriumMultiplier: Double = 1.0,
     /** Dioses que las Pruebas superadas permiten elegir antes de tiempo. */
     val earlyPacts: Set<Pact> = emptySet(),
+    /** Trascender: si ya se ve, Ascensiones del ciclo, Éter que daría y Éter disponible. */
+    val transcendRevealed: Boolean = false,
+    val cycleAscensions: Int = 0,
+    val etherGain: Int = 0,
+    val ether: Int = 0,
+    val transcendences: Int = 0,
+    val eternalLevels: Map<String, Int> = emptyMap(),
+    /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
+    val consecrationRevealed: Boolean = false,
+    val consecrations: Map<String, Int> = emptyMap(),
     /** Fase de la Marea (null = todavía oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,
+    /** Mutaciones (v0.18.4): la de esta vida, las que ofrece la próxima Ascensión y las descubiertas. */
+    val mutationsRevealed: Boolean = false,
+    val activeMutation: Mutation? = null,
+    val mutationOffer: List<Mutation> = emptyList(),
+    val mutationsSeen: Int = 0,
     /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
     val madness: Double? = null,
     val collapseSeconds: Int = 0,
@@ -121,7 +140,9 @@ data class EconomyState(
     /** Espacios de Runa: cuántos hay, qué runas están grabadas y cuántas veces se atrapó cada una. */
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
-    val runeCatches: Map<String, Int> = emptyMap()
+    val runeCatches: Map<String, Int> = emptyMap(),
+    /** Maestría de runas (v0.18.3): capturas de cada runa desde siempre (vacío = oculta). */
+    val runeMastery: Map<String, Int> = emptyMap()
 )
 
 data class AchievementProgress(
@@ -145,6 +166,8 @@ sealed interface EngineEffect {
     data class TrialCompleted(val trial: Trial) : EngineEffect
     /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
     data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
+    /** Se Trascendió y se ganó [ether] de Éter. */
+    data class Transcended(val ether: Int) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -507,18 +530,26 @@ class GameEngine @Inject constructor(
      * Asciende y empieza la vida nueva con [nextPact] (el actual si no se elige otro).
      * Con [abandonPath] se deja la Senda del Mapa de Locura y se recupera su Cordura.
      */
-    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) = post {
-        if (performAscension(nextPact ?: activePact, abandonPath, nextTrial) != null) soundManager.playSound(SoundType.BUY)
+    fun ascend(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null, nextMutation: Mutation? = null) = post {
+        if (performAscension(nextPact ?: activePact, abandonPath, nextTrial, nextMutation) != null) soundManager.playSound(SoundType.BUY)
     }
 
     /** Asciende y devuelve la Cordura ganada, o null si todavía no se puede. */
-    private fun performAscension(nextPact: Pact, abandonPath: Boolean = false, nextTrial: Trial? = null): BigDecimal? {
+    private fun performAscension(
+        nextPact: Pact,
+        abandonPath: Boolean = false,
+        nextTrial: Trial? = null,
+        nextMutation: Mutation? = null
+    ): BigDecimal? {
         val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
             .multiply(sanityGainMultiplier())
         if (finalPotential.signum() <= 0) return null
 
         // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
         recordFinishedLife(finalPotential, abandonPath)
+        // La mutación elegida tiene que estar entre las ofrecidas por esta Ascensión
+        val offeredMutations = mutationOffer()
+        statsManager.count(AchievementStat.CYCLE_SANITY, finalPotential)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
         if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
@@ -529,6 +560,10 @@ class GameEngine @Inject constructor(
         deliriumMultiplier = 1.0
         // La Prueba de la vida nueva (una bloqueada no se puede elegir)
         if (nextTrial != null && nextTrial.isUnlocked(statsManager.totalPrestiges)) startTrial(nextTrial)
+        if (nextMutation != null && nextMutation in offeredMutations) {
+            statsManager.flag(AchievementStat.ACTIVE_MUTATION_PREFIX + nextMutation.id)
+            statsManager.flag(AchievementStat.MUTATION_SEEN_PREFIX + nextMutation.id)
+        }
         // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
         if (abandonPath) {
             prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
@@ -557,6 +592,11 @@ class GameEngine @Inject constructor(
     /** Cuenta para los logros la vida que termina: con qué pacto y Senda, y sus hazañas. */
     private fun recordFinishedLife(sanityGained: BigDecimal, abandonPath: Boolean) {
         val path = MadnessPaths.active(prestigeShopManager.upgrades)
+        activeMutation()?.let { mutation ->
+            statsManager.count(AchievementStat.MUTATION_LIVES)
+            statsManager.flag(AchievementStat.mutationWith(activePact.id, mutation.id))
+            if (path != null) statsManager.flag(AchievementStat.mutationPath(path.id, mutation.id))
+        }
         statsManager.count(AchievementStat.life(activePact.id))
         if (path != null) {
             statsManager.count(AchievementStat.lifeOnPath(path.id))
@@ -588,7 +628,18 @@ class GameEngine @Inject constructor(
         }
 
         val ascensions = statsManager.totalPrestiges
-        put(AchievementStat.ASCENSIONS, ascensions)
+        // Ascensiones de todos los ciclos: los logros de Ascensiones no retroceden al Trascender
+        put(AchievementStat.ASCENSIONS, totalAscensionsEver())
+        put(AchievementStat.ETERNAL_LEVELS, EternalUpgrade.entries.sumOf { eternalLevel(it) })
+        val consecrations = buildingManager.availableBuildings.map { consecrationLevel(it.id) }
+        put(AchievementStat.CONSECRATION_LEVELS, consecrations.sum())
+        put(AchievementStat.CONSECRATED_BUILDINGS, consecrations.count { it > 0 })
+        put(AchievementStat.CONSECRATED_MAX, consecrations.count { it >= Consecration.MAX_LEVEL })
+        val mastery = RuneEngraving.ALL.map { RuneEngraving.masteryLevel(it.tier, statsManager.counter(AchievementStat.mastery(it.id)).toInt()) }
+        put(AchievementStat.MASTERY_LEVELS, mastery.sum())
+        put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
+        put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
+        put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
         val upgrades = upgradeManager.availableUpgrades
@@ -919,6 +970,7 @@ class GameEngine @Inject constructor(
         checkTrial()
         madnessTick()
         tideTick()
+        masteryTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1051,6 +1103,12 @@ class GameEngine @Inject constructor(
         if (runeSlots() > 0) tutorialManager.triggerStep(TutorialStep.RUNE_SLOTS)
         if (madnessRevealed()) tutorialManager.triggerStep(TutorialStep.MADNESS)
         if (tidesRevealed()) tutorialManager.triggerStep(TutorialStep.TIDES)
+        if (transcendRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCEND)
+        if (consecrationRevealed()) tutorialManager.triggerStep(TutorialStep.CONSECRATION)
+        if (mutationsRevealed()) tutorialManager.triggerStep(TutorialStep.MUTATIONS)
+        if (consecrationRevealed() && statsManager.counters.keys.any { it.startsWith(AchievementStat.MASTERY_PREFIX) }) {
+            tutorialManager.triggerStep(TutorialStep.RUNE_MASTERY)
+        }
         val convergence = ritualManager.rituals.value.firstOrNull { it.id == RitualManager.CONVERGENCE_ID }
         if (convergence != null && echoes >= convergence.cost) tutorialManager.triggerStep(TutorialStep.CONVERGENCE)
     }
@@ -1140,6 +1198,7 @@ class GameEngine @Inject constructor(
         statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
         statsManager.flag(AchievementStat.trial(trial.id))
         statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
+        activeMutation()?.let { statsManager.flag(AchievementStat.mutationTrial(trial.id, it.id)) }
         if (statsManager.runTimeSeconds < FAST_TRIAL_SECONDS) statsManager.flag(AchievementStat.FEAT_TRIAL_FAST)
         deliriumMultiplier = 1.0
         refreshEngravings()
@@ -1269,6 +1328,140 @@ class GameEngine @Inject constructor(
         }
     }
 
+    // =====================================================================
+    // TRASCENDER (v0.18.0)
+    // Todo vive en los contadores: Éter, mejoras eternas y datos del ciclo.
+    // =====================================================================
+
+    private fun eternalLevel(upgrade: EternalUpgrade): Int = statsManager.counter(AchievementStat.eternal(upgrade.id)).toInt()
+
+    private fun cycleStart(): Int = statsManager.counter(AchievementStat.CYCLE_START).toInt()
+
+    private fun cycleAscensions(): Int = (statsManager.totalPrestiges - cycleStart()).coerceAtLeast(0)
+
+    private fun totalAscensionsEver(): Int = statsManager.counter(AchievementStat.ASCENSIONS_PAST).toInt() + cycleAscensions()
+
+    /** Cordura ganada en el ciclo; en el primero, toda la histórica (se registraba desde antes). */
+    private fun cycleSanity(): BigDecimal {
+        val counted = statsManager.counter(AchievementStat.CYCLE_SANITY)
+        return if (statsManager.counter(AchievementStat.TRANSCENDENCES).signum() == 0) counted.max(statsManager.lifetimeSanity) else counted
+    }
+
+    private fun etherGainNow(): Int = Transcendence.etherGain(
+        cycleAscensions(),
+        cycleSanity(),
+        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO))
+    )
+
+    private fun transcendRevealed(): Boolean =
+        cycleAscensions() >= Transcendence.REQUIRED_ASCENSIONS || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+
+    // =====================================================================
+    // CONSAGRAR EDIFICIOS (v0.18.1)
+    // =====================================================================
+
+    private fun consecrationRevealed(): Boolean = statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+
+    private fun consecrationLevel(buildingId: String): Int =
+        statsManager.counter(AchievementStat.consecrated(buildingId)).toInt()
+
+    /** Consagra un edificio un nivel más: pide unidades en esta vida y Éter. */
+    fun consecrate(buildingId: String) = post {
+        if (!consecrationRevealed()) return@post
+        val building = buildingManager.availableBuildings.find { it.id == buildingId } ?: return@post
+        val level = consecrationLevel(buildingId)
+        val ether = statsManager.counter(AchievementStat.ETHER).toInt()
+        if (!Consecration.canConsecrate(level, building.amountOwned, ether)) return@post
+        val left = ether - Consecration.etherCost(level)
+        statsManager.counters.remove(AchievementStat.ETHER)
+        if (left > 0) statsManager.counters[AchievementStat.ETHER] = BigDecimal(left)
+        statsManager.counters[AchievementStat.consecrated(buildingId)] = BigDecimal(level + 1)
+        statsManager.flag(AchievementStat.consecratedWith(activePact.id, buildingId))
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /** Compra un nivel de una mejora eterna con Éter. */
+    fun buyEternal(id: String) = post {
+        val upgrade = EternalUpgrade.fromId(id) ?: return@post
+        val level = eternalLevel(upgrade)
+        if (upgrade.isMaxed(level)) return@post
+        val cost = BigDecimal(upgrade.cost(level))
+        val ether = statsManager.counter(AchievementStat.ETHER)
+        if (ether < cost) return@post
+        statsManager.counters[AchievementStat.ETHER] = ether.subtract(cost)
+        if (statsManager.counters[AchievementStat.ETHER]!!.signum() == 0) statsManager.counters.remove(AchievementStat.ETHER)
+        statsManager.counters[AchievementStat.eternal(upgrade.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /**
+     * Trascender: con 50 Ascensiones en el ciclo se reinicia casi todo a cambio de Éter.
+     * Se conservan los logros, las estadísticas, el Éter y las mejoras eternas; las
+     * Pruebas y las runas grabadas solo si se compró la mejora que las recuerda.
+     */
+    fun transcend() = post {
+        val gain = etherGainNow()
+        if (gain <= 0) return@post
+        val cycle = cycleAscensions()
+
+        // Logros: con qué pacto y Senda se Trascendió
+        statsManager.flag(AchievementStat.transcendWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.transcendPath(it.id)) }
+        if (cycle == Transcendence.REQUIRED_ASCENSIONS) statsManager.flag(AchievementStat.FEAT_EXACT_THRESHOLD)
+        statsManager.count(AchievementStat.TRANSCENDENCES)
+        statsManager.count(AchievementStat.ETHER, BigDecimal(gain))
+        statsManager.count(AchievementStat.ETHER_EARNED, BigDecimal(gain))
+        statsManager.record(AchievementStat.MAX_ETHER_GAIN, BigDecimal(gain))
+        statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
+
+        // El ciclo nuevo
+        val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY
+        statsManager.trackPrestige(BigDecimal.ZERO)
+        statsManager.totalPrestiges = start
+        statsManager.resetRunCounters()
+        statsManager.counters.remove(AchievementStat.CYCLE_SANITY)
+        statsManager.counters.remove(AchievementStat.CYCLE_START)
+        if (start > 0) statsManager.counters[AchievementStat.CYCLE_START] = BigDecimal(start)
+        if (eternalLevel(EternalUpgrade.REMEMBERED_TRIALS) == 0) {
+            statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.TRIAL_PREFIX) }
+        }
+        if (eternalLevel(EternalUpgrade.ETERNAL_RUNES) == 0) {
+            statsManager.counters.keys.removeAll {
+                it.startsWith(AchievementStat.RUNE_CATCH_PREFIX) || it.startsWith(AchievementStat.ENGRAVE_PREFIX)
+            }
+        }
+
+        knowledge = BigDecimal.ZERO
+        echoes = BigDecimal.ZERO
+        prestigeManager.residualSanity = BigDecimal.ZERO
+        prestigeShopManager.upgrades.forEach { it.level = 0 }
+        buildingManager.resetForPrestige()
+        upgradeManager.resetForPrestige()
+        runeManager.hideRune()
+        runeManager.clearBuffs()
+        ritualManager.reset()
+        eventScheduler.clearBuff()
+        madness.reset()
+        syncMadness()
+        loadMadness()
+        deliriumMultiplier = 1.0
+        setPact(Pact.NONE)
+        if (AscensionMilestone.STARTING_SYNAPSES.isReached(start)) {
+            buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
+                ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
+        }
+        applyStartingBuildings()
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Transcended(gain))
+        recalculate()
+        requestSave(replace = true)
+    }
+
     private fun setPact(newPact: Pact) {
         activePact = newPact
         chaosMultiplier = 1
@@ -1289,6 +1482,43 @@ class GameEngine @Inject constructor(
         .filter { RuneEngraving.variant(it) != null }
         .take(runeSlots())
 
+    // =====================================================================
+    // MUTACIONES (v0.18.4)
+    // La de la vida actual es un contador de la vida ("run.mutation.<id>").
+    // =====================================================================
+
+    private fun mutationsRevealed(): Boolean = consecrationRevealed()
+
+    private fun activeMutation(): Mutation? = statsManager.counters.keys
+        .firstOrNull { it.startsWith(AchievementStat.ACTIVE_MUTATION_PREFIX) }
+        ?.let { Mutation.fromId(it.removePrefix(AchievementStat.ACTIVE_MUTATION_PREFIX)) }
+
+    /** Las tres mutaciones que ofrece la próxima Ascensión (dependen de las Ascensiones de siempre). */
+    private fun mutationOffer(): List<Mutation> =
+        if (mutationsRevealed()) Mutation.offer(totalAscensionsEver().toLong() * 7919L + 17L) else emptyList()
+
+    private var lastMasterySum = -1
+
+    /** Si sube la maestría de una runa grabada, su bono se recalcula. */
+    private fun masteryTick() {
+        if (!consecrationRevealed()) return
+        val sum = engravedRunes().sumOf { masteryLevel(it) }
+        if (sum == lastMasterySum) return
+        val first = lastMasterySum < 0
+        lastMasterySum = sum
+        if (!first) {
+            refreshEngravings()
+            recalculate()
+        }
+    }
+
+    /** Nivel de maestría de una runa (0 hasta la primera Trascendencia). */
+    private fun masteryLevel(runeId: String): Int {
+        if (!consecrationRevealed()) return 0
+        val rune = RuneEngraving.variant(runeId) ?: return 0
+        return RuneEngraving.masteryLevel(rune.tier, statsManager.counter(AchievementStat.mastery(runeId)).toInt())
+    }
+
     private fun runeCatches(): Map<String, Int> = RuneEngraving.ALL.associate {
         it.id to statsManager.counter(AchievementStat.runeCatches(it.id)).toInt()
     }
@@ -1296,7 +1526,10 @@ class GameEngine @Inject constructor(
     /** Recalcula el pacto con las runas grabadas y lo aplica a runas, eventos y rituales. */
     private fun refreshEngravings() {
         val tideEffects = currentTide()?.effects ?: PactEffects()
-        pactWithRunes = activePact.effects.combinedWith(RuneEngraving.combined(engravedRunes())).combinedWith(tideEffects)
+        pactWithRunes = activePact.effects
+            .combinedWith(RuneEngraving.combined(engravedRunes()) { masteryLevel(it) })
+            .combinedWith(tideEffects)
+            .combinedWith(activeMutation()?.effects ?: PactEffects())
         applyPactModifiers()
     }
 
@@ -1363,6 +1596,7 @@ class GameEngine @Inject constructor(
     private fun applyPactModifiers() {
         // Las runas: el pacto y la Atención puesta en la Vigilia
         val reward = trialReward()
+        runeManager.masteryEnabled = consecrationRevealed()
         runeManager.spawnFrequency = if (trialRules().noRunes) 0.0
         else pact.runeFrequency * attentionMultiplier(Attention.VIGIL) * reward.runeFrequency
         eventScheduler.frequencyMultiplier = pact.eventFrequency
@@ -1389,7 +1623,9 @@ class GameEngine @Inject constructor(
 
     /** Lo que multiplica la Cordura ganada al Ascender: Mapa de Locura y pacto de esta vida. */
     private fun sanityGainMultiplier(): BigDecimal =
-        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(pact.sanityGain * trialReward().sanityGain))
+        prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(
+            pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY))
+        ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
 
@@ -1426,7 +1662,10 @@ class GameEngine @Inject constructor(
         val shopGlobal = if (rules.noSanityBonus) BigDecimal.ONE else prestigeShopManager.getPermanentGlobalMultiplier()
         costMultiplier = buildingCostFactor()
         val pactProduction = BigDecimal.valueOf(pact.production * if (pact.chaos) chaosMultiplier else 1)
-        val trialProduction = BigDecimal.valueOf(rules.production * reward.production * deliriumMultiplier)
+        val trialProduction = BigDecimal.valueOf(
+            rules.production * reward.production * deliriumMultiplier *
+                Transcendence.productionMultiplier(eternalLevel(EternalUpgrade.ETERNAL_FIRE))
+        )
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -1464,6 +1703,8 @@ class GameEngine @Inject constructor(
         buildings.forEachIndexed { index, building ->
             val setMult = AchievementSets.multiplier(building.id, completedSets)
                 .multiply(BigDecimal.valueOf(Attention.multiplier(attention[building.id] ?: 0)))
+                // Consagración (eterna): x3 por nivel, también para la Sinapsis
+                .multiply(BigDecimal.valueOf(Consecration.multiplier(consecrationLevel(building.id))))
             val specificMult = if (building.type == BuildingType.CLICK) {
                 upgradeManager.getRawClickMultiplier()
                     .multiply(shopClickBonus)
@@ -1551,13 +1792,28 @@ class GameEngine @Inject constructor(
             deliriumMultiplier = deliriumMultiplier,
             earlyPacts = earlyPacts(),
             madness = if (madnessRevealed()) madness.value else null,
+            transcendRevealed = transcendRevealed(),
+            cycleAscensions = cycleAscensions(),
+            etherGain = etherGainNow(),
+            ether = statsManager.counter(AchievementStat.ETHER).toInt(),
+            transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
+            eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
+            consecrationRevealed = consecrationRevealed(),
+            consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },
             tide = currentTide(),
             tideSecondsLeft = TidePhase.secondsLeft(statsManager.totalPlayTimeSeconds),
             collapseSeconds = collapseSeconds,
             possessedBuilding = possessedBuildingId,
+            mutationsRevealed = mutationsRevealed(),
+            activeMutation = activeMutation(),
+            mutationOffer = mutationOffer(),
+            mutationsSeen = Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 },
             runeSlots = runeSlots(),
             engravedRunes = engravedRunes(),
             runeCatches = runeCatches(),
+            runeMastery = if (consecrationRevealed()) RuneEngraving.ALL.associate {
+                it.id to statsManager.counter(AchievementStat.mastery(it.id)).toInt()
+            } else emptyMap(),
             echoChance = echoChance()
         )
     }

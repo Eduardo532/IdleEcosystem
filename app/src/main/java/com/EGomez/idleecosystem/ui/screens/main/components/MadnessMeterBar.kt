@@ -32,11 +32,18 @@ private val Danger = Color(0xFFD50000)
  * Al tocarlo se explica cómo funciona.
  */
 @Composable
-fun MadnessMeterBar(madness: Double, collapseSeconds: Int, possessedBuilding: String?, onClick: () -> Unit) {
+fun MadnessMeterBar(
+    madness: Double,
+    collapseSeconds: Int,
+    possessedBuilding: String?,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
+    onClick: () -> Unit
+) {
     val fraction = (madness / MadnessMeter.MAX).toFloat().coerceIn(0f, 1f)
     val color = if (collapseSeconds > 0) Danger else lerp(Calm, Danger, fraction)
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
@@ -44,13 +51,15 @@ fun MadnessMeterBar(madness: Double, collapseSeconds: Int, possessedBuilding: St
             .testTag(MADNESS_METER_TAG)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            val text = if (collapseSeconds > 0) {
+            val text = if (compact) {
+                if (collapseSeconds > 0) "☠ ${collapseSeconds}s" else "☠ ${madness.toInt()}%"
+            } else if (collapseSeconds > 0) {
                 stringResource(R.string.madness_collapse_bar, collapseSeconds)
             } else {
                 stringResource(R.string.madness_bar, madness.toInt(), multiplier(1.0 + madness * MadnessMeter.BONUS_PER_POINT))
             }
             Text(text, color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            possessedBuilding?.let {
+            if (!compact) possessedBuilding?.let {
                 Text(
                     stringResource(R.string.madness_possessed_short, tr(it)),
                     color = Danger,

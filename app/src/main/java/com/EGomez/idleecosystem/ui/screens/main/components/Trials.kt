@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.ui.i18n.tr
 import com.EGomez.idleecosystem.ui.theme.AncientGold
@@ -152,15 +153,19 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
         border = BorderStroke(1.dp, TrialRed.copy(alpha = 0.7f)),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, end = 12.dp, top = 8.dp)
+            .padding(start = 12.dp, end = 12.dp, top = 4.dp)
             .testTag(TRIAL_BAR_TAG)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
             val text = stringResource(R.string.trial_bar, tr(trial.title), (progress * 100).toInt()) +
                 if (trial.rules.delirium) " · x${multiplier(delirium)}" else ""
-            Text(text, color = TrialRed, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(tr(trial.rule), color = Color.LightGray, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(modifier = Modifier.height(4.dp))
+            // Una sola línea: la Prueba, su avance y la regla
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text, color = TrialRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(tr(trial.rule), color = Color.LightGray, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Spacer(modifier = Modifier.height(3.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 color = TrialRed,
@@ -220,6 +225,29 @@ private fun TrialChip(label: String, selected: Boolean, tag: String, onClick: ()
         modifier = Modifier.testTag(tag)
     )
 }
+
+/** Elegir la mutación de la próxima vida (v0.18.4): tres al azar o ninguna. */
+@Composable
+fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutation?) -> Unit) {
+    Spacer(modifier = Modifier.height(12.dp))
+    Text(stringResource(R.string.mutation_choose_title), color = MutationGreen, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 6.dp)
+    ) {
+        TrialChip(stringResource(R.string.mutation_none), selected == null, MUTATION_CHOICE_TAG + "none") { onSelect(null) }
+        offer.forEach { mutation ->
+            TrialChip("🧬 " + tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
+        }
+    }
+    selected?.let { Text(tr(it.description), color = MutationGreen, fontSize = 12.sp) }
+}
+
+val MutationGreen = Color(0xFF9CCC65)
+const val MUTATION_CHOICE_TAG = "mutation_choice_"
 
 /** Vistas de la pestaña Panteón: los dioses, las Pruebas y el Altar de Runas. */
 enum class PantheonView { GODS, TRIALS, RUNES }

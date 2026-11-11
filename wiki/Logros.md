@@ -1,6 +1,6 @@
 # Logros
 
-Hay **339 logros**: 113 originales y **226 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **385 logros**: 113 originales y **272 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -14,7 +14,7 @@ La lista se filtra con los botones de arriba; cada uno muestra cuántos llevas d
 |---|---|
 | Progreso | Conocimiento, clics, tiempo de juego, producción por segundo, edificios en total, Grimorio, sinergias y conjuntos |
 | Edificios | Los 5 logros de cantidad de cada edificio (forman los conjuntos) |
-| Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención y automatización |
+| Ascensión | Ascensiones, Cordura, Mapa de Locura, Sendas, Atención, automatización, Trascender y Consagración |
 | Panteón | Dioses disponibles, vidas con cada pacto y retos propios de cada dios y de cada combinación de dios y Senda |
 | Pruebas | Las Pruebas de Locura: superarlas, retos con un dios y hazañas *(v0.17.1)* |
 | Arcanos | Rituales, Convergencia, runas, Espacios de Runa, Medidor de Locura, Marea, eventos y Ecos |
@@ -120,6 +120,28 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Las Tres Sendas | Recorre las tres Sendas (en distintas vidas) | +2 % |
 | Peregrino | Abandona una Senda al Ascender | +1 % |
 | Errante Eterno | Abandona Sendas 5 veces | +1 % |
+| Más Allá del Velo | Trasciende 1 vez | +1 % |
+| Ciclo de Ciclos | Trasciende 3 veces | +1 % |
+| El Eterno | Trasciende 10 veces | +2 % |
+| Gotas de Éter | Gana 10 de Éter en total | +1 % |
+| Río de Éter | Gana 100 de Éter en total | +1 % |
+| Océano de Éter | Gana 1.000 de Éter en total | +2 % |
+| Primera Eternidad | Compra 1 nivel de una mejora eterna | +1 % |
+| Pilar Eterno | Ten 20 niveles de mejoras eternas | +2 % |
+| Gran Trascendencia | Gana 25 de Éter en una sola Trascendencia | +1 % |
+| El Sultán Despierta | Trasciende durante una vida con Azathoth | +1 % |
+| La Puerta Final | Trasciende durante una vida con Yog-Sothoth | +1 % |
+| Sin Dioses | Trasciende durante una vida Sin Pacto | +1 % |
+| Despertar del Sueño | Trasciende recorriendo la Senda del Sueño | +1 % |
+| Primera Consagración | Consagra un edificio | +1 % |
+| Templos Sagrados | Suma 10 niveles de consagración | +1 % |
+| Arquitecto Divino | Suma 40 niveles de consagración | +1 % |
+| Todo es Sagrado | Consagra los 16 edificios hasta el nivel V | +2 % |
+| Bendición Completa | Consagra los 16 edificios al menos una vez | +2 % |
+| Consagración Absoluta | Consagra un edificio hasta el nivel V | +1 % |
+| Altar del Durmiente | Consagra el Templo de R'lyeh durante una vida con Cthulhu | +1 % |
+| Sacerdocio del Primogénito | Consagra los Sacerdotes Dementes durante una vida con Nug | +1 % |
+| Garabatos Sagrados | Consagra las Notas Desordenadas durante una vida con Ubbo-Sathla | +1 % |
 
 ### Panteón
 
@@ -189,6 +211,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Velo Cerrado | Supera Ceguera con Daoloth | +1 % |
 | Prueba Relámpago | Supera una Prueba en menos de 20 minutos | +1 % |
 | Penitente | Empieza 25 Pruebas de Locura | +1 % |
+| Escritura Febril | Supera Manos Atadas con la mutación Notas Febriles | +1 % |
 
 ### Arcanos
 
@@ -263,8 +286,27 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Las Aguas de R'lyeh | Vive 3 cambios de Marea en una vida con Cthulhu | +1 % |
 | El Tiempo Fluye | Vive 6 cambios de Marea en una vida con Yog-Sothoth | +1 % |
 | Mareas del Sueño | Vive 3 cambios de Marea recorriendo la Senda del Sueño | +1 % |
+| Aprendiz de Glifos | Suma 5 niveles de maestría de runas | +1 % |
+| Erudito Rúnico | Suma 25 niveles de maestría de runas | +1 % |
+| Gran Maestro de Runas | Lleva las 21 runas a maestría 5 | +2 % |
+| Ninguna Ajena | Consigue maestría 1 en las 21 runas | +1 % |
+| Cinco Estrellas | Lleva una runa a maestría 5 | +1 % |
+| El Mensajero Reconoce su Rostro | Ten maestría 3 de El Caos Reptante durante una vida con Nyarlathotep | +1 % |
+| Sello del Durmiente | Ten maestría 3 del Sigilo de Cthulhu durante una vida con Cthulhu | +1 % |
+| Entropía Domada | Ten maestría 3 de la Runa de Entropía durante una vida con Daoloth | +1 % |
+| Primera Mutación | Elige una mutación al Ascender | +1 % |
+| Carne Maleable | Descubre 10 mutaciones distintas | +1 % |
+| Bestiario de lo Imposible | Descubre las 20 mutaciones | +2 % |
+| Linaje Mutante | Termina 10 vidas con una mutación | +1 % |
+| Evolución Abominable | Termina 50 vidas con una mutación | +2 % |
+| La Ciudad Emerge | Termina una vida con Cthulhu y la mutación R'lyeh Emerge | +1 % |
+| El Sultán Tiene Hambre | Termina una vida con Azathoth y la mutación Vacío Hambriento | +1 % |
+| Mil Crías | Termina una vida con Shub-Niggurath y la mutación Eclosión Shoggoth | +1 % |
+| Genio sin Dios | Termina una vida Sin Pacto con la mutación Genio Loco | +1 % |
+| Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
+| Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **20 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **24 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

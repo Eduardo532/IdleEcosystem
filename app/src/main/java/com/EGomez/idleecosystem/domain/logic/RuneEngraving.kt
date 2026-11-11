@@ -56,9 +56,31 @@ object RuneEngraving {
 
     fun passive(id: String): PactEffects = PASSIVES[id] ?: PactEffects()
 
-    /** El bono de todas las runas grabadas juntas. */
-    fun combined(ids: Collection<String>): PactEffects =
-        ids.fold(PactEffects()) { acc, id -> acc.combinedWith(passive(id)) }
+    /** El bono de todas las runas grabadas juntas (con su maestría, si la hay). */
+    fun combined(ids: Collection<String>, mastery: (String) -> Int = { 0 }): PactEffects =
+        ids.fold(PactEffects()) { acc, id -> acc.combinedWith(passive(id).scaled(passiveScale(mastery(id)))) }
+
+    // --- Maestría de runas (v0.18.3) ---
+
+    const val MAX_MASTERY = 5
+
+    /** Capturas totales para cada nivel de maestría (las raras piden menos). */
+    fun masteryThresholds(tier: RuneTier): List<Int> = when (tier) {
+        RuneTier.TIER_1_SWIPE -> listOf(25, 100, 250, 500, 1_000)
+        RuneTier.TIER_2_HOLD -> listOf(10, 40, 100, 200, 400)
+        RuneTier.TIER_3_TRACE -> listOf(5, 15, 40, 80, 150)
+    }
+
+    fun masteryLevel(tier: RuneTier, catches: Int): Int = masteryThresholds(tier).count { catches >= it }
+
+    /** Capturas para el próximo nivel, o null si ya está al máximo. */
+    fun nextMasteryAt(tier: RuneTier, catches: Int): Int? = masteryThresholds(tier).firstOrNull { catches < it }
+
+    /** Cada nivel: el potenciador de la runa dura un 10 % más. */
+    fun durationBonus(level: Int): Double = 1.0 + 0.1 * level
+
+    /** Cada nivel: el bono de la runa grabada es un 20 % más fuerte. */
+    fun passiveScale(level: Int): Double = 1.0 + 0.2 * level
 
     fun canEngrave(id: String, catches: Int): Boolean {
         val rune = variant(id) ?: return false

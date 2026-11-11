@@ -98,6 +98,28 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Cada fase dura 600 s de juego, en orden Alta, Baja, Muerta. Se calcula del tiempo jugado. *(Código: `TidePhase`; test: `TidePhaseTest`.)*
 - Alta: runas y eventos x1,5, Locura sube x1,5. Baja: producción x1,25, Locura baja x2. Muerta: rituales x0,7 de costo y recarga, Ecos x1,5.
 
+## Trascender
+
+- Pide 50 Ascensiones en el ciclo. Éter = `⌊√(Ascensiones del ciclo × log10(1 + Cordura del ciclo)) × 1,25^Eco⌋`. *(Código: `Transcendence`; test: `TranscendenceTest`.)*
+- Mejoras eternas: costo `base × crecimiento^nivel`, redondeado hacia arriba. Fuego Eterno x2, Cordura Primordial x1,5 por nivel.
+- Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
+
+## Consagrar edificios
+
+- Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*
+- Producción del edificio x3 por nivel (x243 en el V). Eterno: no se pierde al Ascender ni al Trascender.
+
+## Maestría de runas
+
+- Niveles por capturas de siempre: nivel 1 de runa 25/100/250/500/1.000; nivel 2 10/40/100/200/400; nivel 3 5/15/40/80/150.
+- Cada nivel: duración del potenciador `x(1 + 0,1·n)` y bono grabado escalado `1 + (b − 1)·(1 + 0,2·n)`. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
+
+## Mutaciones
+
+- Tras la primera Trascendencia. Oferta: 3 de 20 sin repetir, barajadas con la semilla `Ascensiones totales × 7919 + 17` (determinista: no se puede volver a tirar). *(Código: `Mutation.offer`; test: `MutationTest`.)*
+- Las de edificio: ese edificio x10 y otro x0,5 (o un precio global de x0,5–x1,5). Las globales: entre x1,5 y x5 de beneficio con un precio de x0,75–x0,9.
+- Dura una vida (contador `run.mutation.<id>`); se combina con el pacto, las runas grabadas y la Marea mediante `PactEffects.combinedWith`.
+
 ## Sendas
 
 - Tres nodos excluyentes: solo uno puede tener niveles. *(Código: `MadnessPaths`.)*

@@ -292,4 +292,24 @@
     <string name="tide_intro">The Tide changes every 10 minutes of play, in this order. It only moves while you play.</string>
     <string name="tide_madness_gain">Madness rises %1$s</string>
     <string name="tide_madness_decay">Madness falls %1$s faster</string>
+    <string name="transcend_title">Transcend</string>
+    <string name="transcend_ether">Ether: %1$d</string>
+    <string name="transcend_cycle">Ascensions this cycle: %1$d of %2$d</string>
+    <string name="transcend_loses">You lose: Sanity, the Map of Madness and Paths, Ascensions (milestones, Attention and pacts), passed Trials, engraved runes, Echoes and your whole current life.</string>
+    <string name="transcend_keeps">You keep: achievements, statistics, Ether and eternal upgrades.</string>
+    <string name="transcend_eternal_title">Eternal upgrades</string>
+    <string name="transcend_confirm">Transcend (+%1$d Ether)</string>
+    <string name="transcend_confirm_again">Tap again to Transcend</string>
+    <string name="transcend_link">✦ Ether %1$d · Transcend</string>
+    <string name="transcend_notice">✦ You transcended: +%1$d Ether</string>
+    <string name="eternal_level">Level %1$d</string>
+    <string name="eternal_maxed">MAX</string>
+    <string name="eternal_cost">%1$d Ether</string>
+    <string name="consecrate_ready">✦ Consecrate %1$s · %2$d Ether</string>
+    <string name="consecrate_hint">✦ Consecration %1$s: at %2$d (%3$d Ether)</string>
+    <string name="rune_mastery_intro">Mastery: each rune levels up the more times you catch it, ever. Each star makes its boost last 10% longer and its engraved bonus 20% stronger.</string>
+    <string name="rune_mastery_line">Mastery %1$s · %2$d of %3$d</string>
+    <string name="rune_mastery_max">Mastery %1$s · maxed</string>
+    <string name="mutation_choose_title">Mutation for the next life</string>
+    <string name="mutation_none">No mutation</string>
 </resources>

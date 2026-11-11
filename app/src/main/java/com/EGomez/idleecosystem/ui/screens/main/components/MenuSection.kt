@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.EtherColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -112,6 +113,14 @@ fun MenuSection(
     runeCatches: Map<String, Int> = emptyMap(),
     onEngraveRune: (String) -> Unit = {},
     onRemoveEngraving: (String) -> Unit = {},
+    runeMastery: Map<String, Int> = emptyMap(),
+    activeMutation: com.EGomez.idleecosystem.domain.model.Mutation? = null,
+    transcendRevealed: Boolean = false,
+    ether: Int = 0,
+    onOpenTranscend: () -> Unit = {},
+    consecrationRevealed: Boolean = false,
+    consecrations: Map<String, Int> = emptyMap(),
+    onConsecrate: (String) -> Unit = {},
     onAscendClicked: () -> Unit,
     onShowPrestigeShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -215,7 +224,7 @@ fun MenuSection(
             if (selectedTabIndex == 0 && lockedTabText == null && (attentionPoints > 0 || autobuyer)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 4.dp)
                 ) {
                     if (attentionPoints > 0) {
                         AttentionBar(
@@ -272,6 +281,10 @@ fun MenuSection(
                                 costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
                                 milestones = buildingMilestones[building.id].orEmpty(),
                                 attentionPoints = attention[building.id] ?: 0,
+                                consecration = consecrations[building.id] ?: 0,
+                                consecrationRevealed = consecrationRevealed,
+                                ether = ether,
+                                onConsecrate = { onConsecrate(building.id) },
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
@@ -410,7 +423,7 @@ fun MenuSection(
                         val view = if (trialsRevealed) pantheonView else PantheonView.GODS
                         when (view) {
                             PantheonView.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
-                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving) }
+                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                             PantheonView.GODS -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
                         }
                     }
@@ -430,80 +443,102 @@ fun MenuSection(
                 }
             } else if (isMenuExpanded) {
                 HorizontalDivider(color = Color(0xFF333333))
+                // Panel de Cordura en una sola fila: deja sitio a la lista de edificios
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF0D0D0D))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            stringResource(R.string.residual_sanity_title),
-                            color = Color(0xFFCF6679),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            prestigeCurrencyFormatted,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        // El pacto de esta vida (con Azathoth, el caos actual)
-                        if (activePact != Pact.NONE) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.Bottom) {
                             Text(
-                                if (activePact.effects.chaos) "${tr(activePact.godName)} · x$chaosMultiplier" else tr(activePact.godName),
-                                color = activePact.sigilColor(),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.testTag(ACTIVE_PACT_TAG)
+                                stringResource(R.string.residual_sanity_title),
+                                color = Color(0xFFCF6679),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(prestigeCurrencyFormatted, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // El pacto de esta vida (con Azathoth, el caos actual)
+                            if (activePact != Pact.NONE) {
+                                Text(
+                                    if (activePact.effects.chaos) "${tr(activePact.godName)} · x$chaosMultiplier" else tr(activePact.godName),
+                                    color = activePact.sigilColor(),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    modifier = Modifier.testTag(ACTIVE_PACT_TAG)
+                                )
+                                if (transcendRevealed) Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            // La mutación de esta vida (v0.18.4)
+                            activeMutation?.let {
+                                Text(
+                                    "🧬 " + tr(it.title),
+                                    color = MutationGreen,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    modifier = Modifier.padding(end = 8.dp).testTag(ACTIVE_MUTATION_TAG)
+                                )
+                            }
+                            // Trascender (v0.18.0): el Éter y el acceso a la segunda capa
+                            if (transcendRevealed) {
+                                Text(
+                                    stringResource(R.string.transcend_link, ether),
+                                    color = EtherColor,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .clickable(onClick = onOpenTranscend)
+                                        .padding(vertical = 2.dp)
+                                        .testTag(TRANSCEND_LINK_TAG)
+                                )
+                            }
                         }
                         // Cuándo conviene ascender: el punto en que la recompensa se duplica
                         if (canPrestige && doubleSanityAtFormatted != null) {
                             Text(
                                 stringResource(R.string.sanity_double_short, doubleSanityAtFormatted),
                                 color = Color.Gray,
-                                fontSize = 9.sp
+                                fontSize = 9.sp,
+                                maxLines = 1
                             )
                         }
                     }
-                    Row {
-                        Button(
-                            onClick = onShowPrestigeShop,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF4A148C),
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.padding(end = 8.dp)
-                        ) {
-                            Text(stringResource(R.string.shop_button), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                        }
-                        Button(
-                            onClick = onAscendClicked,
-                            enabled = canPrestige,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFCF6679),
-                                disabledContainerColor = Color(0xFF333333),
-                                contentColor = Color.Black,
-                                disabledContentColor = Color.Gray
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(stringResource(R.string.ascend), fontWeight = FontWeight.Black)
-                                if (canPrestige) {
-                                    Text(
-                                        "+$potentialPrestigeFormatted",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                } else {
-                                    Text(stringResource(R.string.ascend_requirement, BigDecimal("1000000").toBeautifulString()), fontSize = 9.sp)
-                                }
+                    Button(
+                        onClick = onShowPrestigeShop,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A148C), contentColor = Color.White),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(end = 6.dp).height(40.dp)
+                    ) {
+                        Text(stringResource(R.string.shop_button), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Button(
+                        onClick = onAscendClicked,
+                        enabled = canPrestige,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFCF6679),
+                            disabledContainerColor = Color(0xFF333333),
+                            contentColor = Color.Black,
+                            disabledContentColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
+                        modifier = Modifier.height(44.dp)
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(stringResource(R.string.ascend), fontWeight = FontWeight.Black, fontSize = 12.sp)
+                            if (canPrestige) {
+                                Text("+$potentialPrestigeFormatted", fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                            } else {
+                                Text(stringResource(R.string.ascend_requirement, BigDecimal("1000000").toBeautifulString()), fontSize = 8.sp, maxLines = 1)
                             }
                         }
                     }
@@ -527,6 +562,8 @@ const val LOCKED_ASCENSION_TAG = "locked_ascension"
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
+const val TRANSCEND_LINK_TAG = "transcend_link"
+const val ACTIVE_MUTATION_TAG = "active_mutation"
 const val ATTENTION_BAR_TAG = "attention_bar"
 
 /** Un sistema sin descubrir: un candado y lo que falta para verlo. */
@@ -537,7 +574,7 @@ private fun BuyMultiplierChip(label: String, selected: Boolean, onClick: () -> U
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
         color = if (selected) ArcanePurple else Color(0xFF333333),
-        modifier = modifier.height(32.dp)
+        modifier = modifier.height(28.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -591,35 +628,37 @@ private fun AttentionBar(
         modifier = modifier.testTag(ATTENTION_BAR_TAG)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("◎", color = AncientGold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    stringResource(R.string.attention_bar_title, used, points),
-                    color = AncientGold,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    when {
-                        targets.isEmpty() -> stringResource(R.string.attention_bar_empty)
-                        free > 0 -> stringResource(R.string.attention_bar_free, targets, free)
-                        else -> targets
-                    },
-                    color = if (targets.isEmpty()) Color.LightGray else Color(0xFFBFA9D9),
-                    fontSize = 11.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text("◎", color = AncientGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(6.dp))
+            // Una sola línea: los puntos y a dónde apuntan
+            Text(
+                stringResource(R.string.attention_bar_title, used, points),
+                color = AncientGold,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                when {
+                    targets.isEmpty() -> stringResource(R.string.attention_bar_empty)
+                    free > 0 -> stringResource(R.string.attention_bar_free, targets, free)
+                    else -> targets
+                },
+                color = if (targets.isEmpty()) Color.LightGray else Color(0xFFBFA9D9),
+                fontSize = 11.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
     }

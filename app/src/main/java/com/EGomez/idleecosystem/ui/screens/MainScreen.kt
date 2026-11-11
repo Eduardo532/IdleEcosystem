@@ -21,6 +21,9 @@ import androidx.compose.material3.Text
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
+import androidx.compose.ui.geometry.Offset
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessMeterBar
 import com.EGomez.idleecosystem.ui.screens.main.components.TideIndicator
@@ -117,8 +120,10 @@ fun MainScreen(
         var nextPactId by rememberSaveable { mutableStateOf<String?>(null) }
         var abandonPath by rememberSaveable { mutableStateOf(false) }
         var nextTrialId by rememberSaveable { mutableStateOf<String?>(null) }
+        var nextMutationId by rememberSaveable { mutableStateOf<String?>(null) }
         var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
         var showTideInfo by rememberSaveable { mutableStateOf(false) }
+        var showTranscend by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -162,6 +167,8 @@ fun MainScreen(
                         achievements = achievements,
                         achievementsProgress = uiState.achievementsProgress,
                         nextGoalProgress = uiState.nextGoal?.progress,
+                        knowledgeFormatted = uiState.knowledgeFormatted,
+                        knowledgePerSecond = uiState.knowledgePerSecond,
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -178,30 +185,8 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 
-                        if (uiState.activeRuneBuffs.isNotEmpty()) {
-                            ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        // Medidor de Locura (desde la quinta Ascensión)
-                        uiState.madness?.let { value ->
-                            MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        // Fases de la Marea (desde la décima Ascensión)
-                        uiState.tide?.let { tide ->
-                            TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-
-                        InfoSection(
-                            knowledgeFormatted = uiState.knowledgeFormatted,
-                            knowledgePerSecond = uiState.knowledgePerSecond,
-                            globalMultiplier = uiState.globalMultiplier,
-                            activeBuffMultiplier = uiState.activeBuffMultiplier,
-                            buffTimeRemaining = uiState.buffTimeRemaining,
-                            clickMultiplier = uiState.clickMultiplier,
-                            onManualClick = { clickOffset, buttonCenter, buttonRadius ->
+                        // El clic manual (INVESTIGAR grande o compacto)
+                        val onManualClick: (Offset, Offset, Float) -> Unit = { clickOffset, buttonCenter, buttonRadius ->
                                 val result = viewModel.onManualClick()
                                 if (result.knowledgeGained > BigDecimal.ZERO && uiState.isFloatingTextEnabled) {
                                     spawnFloatingText("+${result.knowledgeGained.toBeautifulString()}", Color.White, clickOffset.x, clickOffset.y - 80f)
@@ -213,9 +198,58 @@ fun MainScreen(
                                     if (result.knowledgeGained > BigDecimal.ZERO) particleSystem.spawnExplosion(clickOffset.x, clickOffset.y, ParticleType.KNOWLEDGE, baseRadius = buttonRadius)
                                     if (result.echoFound) particleSystem.spawnExplosion(buttonCenter.x, buttonCenter.y, ParticleType.ECHO, count = 30, baseRadius = buttonRadius)
                                 }
-                            },
-                            modifier = Modifier.weight(1f - menuWeight)
-                        )
+                            }
+
+                        if (isMenuExpanded) {
+                            // Cabecera compacta (v0.18.2): potenciadores, Locura, Marea e INVESTIGAR
+                            // en dos filas finas; el Conocimiento va en la barra superior
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (uiState.activeRuneBuffs.isNotEmpty()) ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                CompactResearchButton(uiState.clickMultiplier, onManualClick)
+                            }
+                            if (uiState.madness != null || uiState.tide != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                                    uiState.madness?.let { value ->
+                                        MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding, Modifier.weight(1f), compact = true) { showMadnessInfo = true }
+                                    }
+                                    if (uiState.madness != null && uiState.tide != null) Spacer(modifier = Modifier.width(8.dp))
+                                    uiState.tide?.let { tide ->
+                                        TideIndicator(tide, uiState.tideSecondsLeft, Modifier.weight(1f), compact = true) { showTideInfo = true }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                        } else {
+                            if (uiState.activeRuneBuffs.isNotEmpty()) {
+                                ActiveBuffsDisplay(buffs = uiState.activeRuneBuffs)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            // Medidor de Locura (desde la quinta Ascensión)
+                            uiState.madness?.let { value ->
+                                MadnessMeterBar(value, uiState.collapseSeconds, uiState.possessedBuilding) { showMadnessInfo = true }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+                            // Fases de la Marea (desde la décima Ascensión)
+                            uiState.tide?.let { tide ->
+                                TideIndicator(tide, uiState.tideSecondsLeft) { showTideInfo = true }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+
+                            InfoSection(
+                                knowledgeFormatted = uiState.knowledgeFormatted,
+                                knowledgePerSecond = uiState.knowledgePerSecond,
+                                globalMultiplier = uiState.globalMultiplier,
+                                activeBuffMultiplier = uiState.activeBuffMultiplier,
+                                buffTimeRemaining = uiState.buffTimeRemaining,
+                                clickMultiplier = uiState.clickMultiplier,
+                                onManualClick = onManualClick,
+                                modifier = Modifier.weight(1f - menuWeight)
+                            )
+                        }
 
                         MenuSection(
                             isMenuExpanded = isMenuExpanded, onToggleMenu = { isMenuExpanded = !isMenuExpanded },
@@ -261,6 +295,14 @@ fun MainScreen(
                             runeCatches = uiState.runeCatches,
                             onEngraveRune = { viewModel.onEngraveRune(it) },
                             onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
+                            runeMastery = uiState.runeMastery,
+                            activeMutation = uiState.activeMutation,
+                            transcendRevealed = uiState.transcendRevealed,
+                            ether = uiState.ether,
+                            onOpenTranscend = { showTranscend = true },
+                            consecrationRevealed = uiState.consecrationRevealed,
+                            consecrations = uiState.consecrations,
+                            onConsecrate = { viewModel.onConsecrate(it) },
                             onAscendClicked = {
                                 // Primero se confirma; el tutorial "El Ciclo" se muestra sobre la confirmación
                                 showAscendConfirmation = true
@@ -270,7 +312,8 @@ fun MainScreen(
                                 showPrestigeShopDialog = true
                                 viewModel.onPrestigeShopOpened()
                             },
-                            modifier = Modifier.weight(menuWeight)
+                            // Con el menú abierto, la lista ocupa todo lo que deja la cabecera compacta
+                            modifier = if (isMenuExpanded) Modifier.weight(1f) else Modifier.weight(menuWeight)
                         )
                     }
 
@@ -340,10 +383,17 @@ fun MainScreen(
                     completedTrials = uiState.completedTrials,
                     selectedTrial = Trial.fromId(nextTrialId),
                     onTrialSelected = { nextTrialId = it?.id },
+                    mutationOffer = uiState.mutationOffer,
+                    selectedMutation = Mutation.fromId(nextMutationId)?.takeIf { it in uiState.mutationOffer },
+                    onMutationSelected = { nextMutationId = it?.id },
                     onConfirm = {
-                        viewModel.onAscendClicked(Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId))
+                        viewModel.onAscendClicked(
+                            Pact.fromId(nextPactId ?: uiState.activePact.id), abandonPath, Trial.fromId(nextTrialId),
+                            Mutation.fromId(nextMutationId)?.takeIf { it in uiState.mutationOffer }
+                        )
                         nextPactId = null
                         nextTrialId = null
+                        nextMutationId = null
                         abandonPath = false
                         showAscendConfirmation = false
                     },
@@ -420,6 +470,42 @@ fun MainScreen(
             }
 
             // Aviso breve de la Ascensión automática
+            if (showTranscend) {
+                TranscendDialog(
+                    cycleAscensions = uiState.cycleAscensions,
+                    etherGain = uiState.etherGain,
+                    ether = uiState.ether,
+                    eternalLevels = uiState.eternalLevels,
+                    onBuyEternal = { viewModel.onBuyEternal(it) },
+                    onTranscend = {
+                        viewModel.onTranscend()
+                        showTranscend = false
+                    },
+                    onDismiss = { showTranscend = false }
+                )
+            }
+
+            // Aviso al Trascender
+            uiState.transcendNotice?.let { gain ->
+                Surface(
+                    color = Color(0xFF12161C),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, EtherColor),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(5f)
+                ) {
+                    Text(
+                        stringResource(R.string.transcend_notice, gain),
+                        color = EtherColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
             if (showTideInfo) {
                 uiState.tide?.let { TideInfoDialog(it) { showTideInfo = false } } ?: run { showTideInfo = false }
             }

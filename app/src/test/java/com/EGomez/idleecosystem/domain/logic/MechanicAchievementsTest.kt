@@ -40,6 +40,10 @@ class MechanicAchievementsTest {
         "Espacios de Runa" to { it.stat?.startsWith("engrave") == true || it.stat == AchievementStat.RUNE_SLOTS || it.stat == AchievementStat.RUNE_KINDS || it.stat?.startsWith(AchievementStat.RUNE_CATCH_PREFIX) == true || it.stat == AchievementStat.ENGRAVED_T3 },
         "Medidor de Locura" to { it.stat == AchievementStat.MADNESS || it.stat?.contains("madness") == true || it.stat == AchievementStat.RUN_COLLAPSES || it.stat == AchievementStat.ritual(RitualManager.CALM_ID) },
         "Fases de la Marea" to { it.stat?.contains("tide") == true || it.stat == AchievementStat.FEAT_TSUNAMI },
+        "Trascender" to { it.stat == AchievementStat.TRANSCENDENCES || it.stat?.contains("ether") == true || it.stat?.startsWith("transcend") == true || it.stat == AchievementStat.ETERNAL_LEVELS },
+        "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
+        "Maestría de runas" to { it.stat?.startsWith("mastery") == true },
+        "Mutaciones" to { it.stat?.contains("mutation") == true },
         "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 

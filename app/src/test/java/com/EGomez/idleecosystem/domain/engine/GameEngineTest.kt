@@ -28,8 +28,10 @@ import com.EGomez.idleecosystem.domain.logic.TutorialManager
 import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
+import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -485,6 +487,92 @@ class GameEngineTest {
         val economy = await(engine.economy) { it.tide != null }
         assertEquals(TidePhase.LOW, economy.tide)
         assertTrue(economy.tideSecondsLeft in 1..600)
+    }
+
+    @Test
+    fun `transcending resets almost everything for ether and eternal upgrades`() = runBlocking {
+        // Ciclo importado: 50 Ascensiones, 10.000 de Cordura ganada y Ceguera superada
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            flag(AchievementStat.trial("blindness"))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal(500), echoes = BigDecimal(30),
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendRevealed }
+        assertEquals(14, before.etherGain)
+
+        engine.transcend()
+
+        val after = await(engine.economy) { it.transcendences == 1 }
+        assertEquals(14, after.ether)
+        assertEquals(0, after.ascensions)
+        assertEquals(0, BigDecimal.ZERO.compareTo(after.sanity))
+        assertTrue(after.completedTrials.isEmpty())
+        // Los logros de Ascensiones no retroceden
+        assertEquals(0, BigDecimal(50).compareTo(stats.counter(AchievementStat.ASCENSIONS_PAST)))
+
+        engine.buyEternal("memory")
+        val bought = await(engine.economy) { it.eternalLevels["memory"] == 1 }
+        assertEquals(13, bought.ether)
+    }
+
+    @Test
+    fun `a building with enough units can be consecrated with ether`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.ETHER, BigDecimal(3))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = listOf(BuildingSaveModel("b_notes", 100, true), BuildingSaveModel("b_scrolls", 50, true)),
+                upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.consecrationRevealed }
+
+        engine.consecrate("b_scrolls") // solo 50 de 100: no se puede
+        engine.consecrate("b_notes")
+
+        val after = await(engine.economy) { it.consecrations["b_notes"] == 1 }
+        assertEquals(2, after.ether)
+        assertEquals(null, after.consecrations["b_scrolls"])
+        val notes = await(engine.buildings) { list -> list.any { it.id == "b_notes" && it.currentMultiplier.signum() > 0 } }
+        assertTrue(notes.first { it.id == "b_notes" }.currentMultiplier.signum() > 0)
+    }
+
+    @Test
+    fun `an offered mutation shapes the next life and only offered ones count`() = runBlocking {
+        val saved = StatisticsManager().apply { count(AchievementStat.TRANSCENDENCES) }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("10000000"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canPrestige && it.mutationOffer.size == Mutation.OFFER_SIZE }
+        assertEquals(null, before.activeMutation)
+        val chosen = before.mutationOffer.first()
+
+        engine.ascend(nextMutation = chosen)
+
+        val after = await(engine.economy) { it.activeMutation == chosen }
+        assertEquals(1, after.mutationsSeen)
+        // La oferta cambia con cada Ascensión, y una mutación no ofrecida se ignora
+        val notOffered = Mutation.entries.first { it !in after.mutationOffer }
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(nextMutation = notOffered)
+        val third = await(engine.economy) { it.activeMutation == null && it.mutationsSeen == 1 }
+        assertTrue(third.mutationsRevealed)
     }
 
     @Test

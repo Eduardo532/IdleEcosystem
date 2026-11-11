@@ -293,4 +293,24 @@
     <string name="tide_intro">La Marea cambia cada 10 minutos de juego, en este orden. Solo avanza mientras juegas.</string>
     <string name="tide_madness_gain">La Locura sube %1$s</string>
     <string name="tide_madness_decay">La Locura baja %1$s más rápido</string>
+    <string name="transcend_title">Trascender</string>
+    <string name="transcend_ether">Éter: %1$d</string>
+    <string name="transcend_cycle">Ascensiones de este ciclo: %1$d de %2$d</string>
+    <string name="transcend_loses">Se pierde: Cordura, Mapa de Locura y Sendas, Ascensiones (hitos, Atención y pactos), Pruebas superadas, runas grabadas, Ecos y toda la vida actual.</string>
+    <string name="transcend_keeps">Se conserva: logros, estadísticas, Éter y mejoras eternas.</string>
+    <string name="transcend_eternal_title">Mejoras eternas</string>
+    <string name="transcend_confirm">Trascender (+%1$d Éter)</string>
+    <string name="transcend_confirm_again">Toca otra vez para Trascender</string>
+    <string name="transcend_link">✦ Éter %1$d · Trascender</string>
+    <string name="transcend_notice">✦ Trascendiste: +%1$d Éter</string>
+    <string name="eternal_level">Nivel %1$d</string>
+    <string name="eternal_maxed">MÁXIMO</string>
+    <string name="eternal_cost">%1$d Éter</string>
+    <string name="consecrate_ready">✦ Consagrar %1$s · %2$d Éter</string>
+    <string name="consecrate_hint">✦ Consagración %1$s: con %2$d (%3$d Éter)</string>
+    <string name="rune_mastery_intro">Maestría: cada runa sube de nivel cuantas más veces la atrapas, desde siempre. Cada estrella alarga su potenciador un 10% y hace su bono grabado un 20% más fuerte.</string>
+    <string name="rune_mastery_line">Maestría %1$s · %2$d de %3$d</string>
+    <string name="rune_mastery_max">Maestría %1$s · máxima</string>
+    <string name="mutation_choose_title">Mutación de la próxima vida</string>
+    <string name="mutation_none">Sin mutación</string>
 </resources>

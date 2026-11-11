@@ -217,5 +217,33 @@ enum class TutorialStep(
         "Fases de la Marea",
         "El mar del fondo del mundo empezó a moverse. Cada 10 minutos de juego cambia la Marea: la Alta trae más runas y eventos (y más Locura), la Baja da más producción y calma, y la Muerta abarata los rituales. Toca el indicador para ver las tres y planea cuándo usar cada cosa.",
         "Al tener 10 Ascensiones"
+    ),
+
+    TRANSCEND(
+        "transcend",
+        "Trascender",
+        "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Toca \"Éter · Trascender\" en el panel de Cordura para ver qué ganarías.",
+        "Al tener 50 Ascensiones en el ciclo"
+    ),
+
+    CONSECRATION(
+        "consecration",
+        "Consagrar Edificios",
+        "Tu primera Trascendencia abre un rito nuevo: consagrar edificios con Éter. Cada nivel (hasta V) multiplica por 3 la producción de ese edificio para siempre, aunque Asciendas o Trasciendas. Para consagrarlo necesitas 100 unidades por nivel en la vida actual; cuando las tengas, toca la línea ✦ bajo el edificio.",
+        "Tras la primera Trascendencia"
+    ),
+
+    RUNE_MASTERY(
+        "rune_mastery",
+        "Maestría de Runas",
+        "Desde tu primera Trascendencia, cada runa que atrapas suma a su maestría, que nunca se pierde. Cada nivel (hasta 5 estrellas) alarga su potenciador un 10% y, si está grabada, su bono es un 20% más fuerte. Mira las estrellas en la vista Runas del Panteón.",
+        "Al atrapar una runa tras la primera Trascendencia"
+    ),
+
+    MUTATIONS(
+        "mutations",
+        "Mutaciones",
+        "Tras Trascender, la realidad se vuelve maleable. Cada Ascensión te ofrece tres mutaciones al azar para la vida siguiente: cada una multiplica mucho un edificio (o algo más) y cobra un precio en otra cosa. Elige una en la confirmación de Ascender, o ninguna. Descubrirlas todas tiene su recompensa.",
+        "Tras la primera Trascendencia"
     )
 }

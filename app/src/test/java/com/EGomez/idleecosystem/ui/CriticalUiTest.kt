@@ -22,6 +22,8 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.TranscendDialog
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ETERNAL_BUY_TAG
 import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +37,8 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.ui.screens.main.components.MADNESS_METER_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.RUNE_ENGRAVE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_CHOICE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MUTATION_CHOICE_TAG
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.ui.screens.main.components.TRIAL_ABANDON_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ACHIEVEMENT_CATEGORY_TAG
 import com.EGomez.idleecosystem.domain.model.Achievement
@@ -58,6 +62,8 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.ui.screens.ActiveBuffsDisplay
 import com.EGomez.idleecosystem.ui.screens.main.components.RESEARCH_BUTTON_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.COMPACT_RESEARCH_BUTTON_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
 import androidx.compose.runtime.Composable
 import org.junit.Assert.assertTrue
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.NEXT_GOAL_TAG
@@ -325,6 +331,25 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the ascend dialog offers mutations and explains the chosen one`() {
+        var chosen by mutableStateOf<Mutation?>(null)
+        val offer = listOf(Mutation.FEVERISH_NOTES, Mutation.BURNING_SYNAPSE, Mutation.HUNGRY_VOID)
+        compose.setContent {
+            AscendDialog(
+                sanityGainFormatted = "3", onConfirm = {}, onDismiss = {},
+                mutationOffer = offer, selectedMutation = chosen, onMutationSelected = { chosen = it }
+            )
+        }
+
+        compose.onNodeWithText("Mutación de la próxima vida").assertExists()
+        compose.onNodeWithTag(MUTATION_CHOICE_TAG + "burning_synapse").performClick()
+        assertEquals(Mutation.BURNING_SYNAPSE, chosen)
+        compose.onNodeWithText("El clic x5, pero toda la producción x0,75.").assertExists()
+        compose.onNodeWithTag(MUTATION_CHOICE_TAG + "none").performClick()
+        assertEquals(null, chosen)
+    }
+
+    @Test
     fun `the active trial shows its progress and can be abandoned`() {
         var abandoned = 0
         compose.setContent {
@@ -390,6 +415,48 @@ class CriticalUiTest {
         compose.onNodeWithText("Luego: Marea Baja").assertExists()
         compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
         compose.onNodeWithText("Marea Muerta").assertExists()
+    }
+
+    @Test
+    fun `transcending asks for a second tap`() {
+        var transcended = 0
+        var bought: String? = null
+        compose.setContent {
+            TranscendDialog(
+                cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
+                onBuyEternal = { bought = it }, onTranscend = { transcended++ }, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithText("Trascender (+14 Éter)").performClick()
+        assertEquals(0, transcended)
+        compose.onNodeWithText("Toca otra vez para Trascender").performClick()
+        assertEquals(1, transcended)
+        compose.onNodeWithTag(ETERNAL_BUY_TAG + "fire").performScrollTo().performClick()
+        assertEquals("fire", bought)
+        compose.onNodeWithTag(ETERNAL_BUY_TAG + "trials").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the compact research button clicks like the big one`() {
+        var clicks = 0
+        compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }
+
+        compose.onNodeWithText("+12").assertExists()
+        compose.onNodeWithTag(COMPACT_RESEARCH_BUTTON_TAG).performClick()
+        assertEquals(1, clicks)
+    }
+
+    @Test
+    fun `the rune altar shows mastery stars`() {
+        compose.setContent {
+            RuneAltar(
+                slots = 0, engraved = emptyList(), catches = emptyMap(),
+                onEngrave = {}, onRemove = {}, mastery = mapOf("t1_blood" to 120)
+            )
+        }
+
+        compose.onNodeWithText("Maestría ★★☆☆☆ · 120 de 250").assertExists()
     }
 
     @Test

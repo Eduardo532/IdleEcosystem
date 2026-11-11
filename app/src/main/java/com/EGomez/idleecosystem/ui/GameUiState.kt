@@ -7,6 +7,7 @@ import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
@@ -82,6 +83,21 @@ data class GameUiState(
     val deliriumMultiplier: Double = 1.0,
     val earlyPacts: Set<Pact> = emptySet(),
     val trialNotice: Trial? = null,
+    /** Trascender (v0.18.0): si se ve, el ciclo, el Éter y las mejoras eternas. */
+    val transcendRevealed: Boolean = false,
+    val cycleAscensions: Int = 0,
+    val etherGain: Int = 0,
+    val ether: Int = 0,
+    val transcendences: Int = 0,
+    val eternalLevels: Map<String, Int> = emptyMap(),
+    val transcendNotice: Int? = null,
+    /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */
+    val consecrationRevealed: Boolean = false,
+    val consecrations: Map<String, Int> = emptyMap(),
+    /** Mutaciones (v0.18.4): la de esta vida, la oferta de la próxima Ascensión y las descubiertas. */
+    val activeMutation: Mutation? = null,
+    val mutationOffer: List<Mutation> = emptyList(),
+    val mutationsSeen: Int = 0,
     /** Fase de la Marea (null = oculta) y segundos que le quedan. */
     val tide: TidePhase? = null,
     val tideSecondsLeft: Int = 0,
@@ -94,6 +110,7 @@ data class GameUiState(
     val runeSlots: Int = 0,
     val engravedRunes: List<String> = emptyList(),
     val runeCatches: Map<String, Int> = emptyMap(),
+    val runeMastery: Map<String, Int> = emptyMap(),
     val secretsFound: Int = 0,
     val secretsTotal: Int = 0,
     val setsCompleted: Int = 0,

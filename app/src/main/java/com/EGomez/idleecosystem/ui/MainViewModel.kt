@@ -23,6 +23,7 @@ import com.EGomez.idleecosystem.domain.model.Achievement
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -192,13 +193,25 @@ class MainViewModel @Inject constructor(
         deliriumMultiplier = economy.deliriumMultiplier,
         earlyPacts = economy.earlyPacts,
         madness = economy.madness,
+        activeMutation = economy.activeMutation,
+        mutationOffer = economy.mutationOffer,
+        mutationsSeen = economy.mutationsSeen,
+        transcendRevealed = economy.transcendRevealed,
+        cycleAscensions = economy.cycleAscensions,
+        etherGain = economy.etherGain,
+        ether = economy.ether,
+        transcendences = economy.transcendences,
+        eternalLevels = economy.eternalLevels,
+        consecrationRevealed = economy.consecrationRevealed,
+        consecrations = economy.consecrations,
         tide = economy.tide,
         tideSecondsLeft = economy.tideSecondsLeft,
         collapseSeconds = economy.collapseSeconds,
         possessedBuilding = economy.possessedBuilding?.let { id -> engine.buildings.value.firstOrNull { it.id == id }?.name ?: id },
         runeSlots = economy.runeSlots,
         engravedRunes = economy.engravedRunes,
-        runeCatches = economy.runeCatches
+        runeCatches = economy.runeCatches,
+        runeMastery = economy.runeMastery
     )
 
     private fun GameUiState.withAchievements(progress: AchievementProgress) = copy(
@@ -233,6 +246,14 @@ class MainViewModel @Inject constructor(
                 MadnessNotice(possessedBuilding = effect.possessedBuilding, echoesLost = effect.echoesLost?.toBeautifulString())
             )
             EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
+            is EngineEffect.Transcended -> {
+                val gain = effect.ether
+                _uiState.update { it.copy(transcendNotice = gain) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null) else it }
+                }
+            }
             is EngineEffect.TrialCompleted -> {
                 val trial = effect.trial
                 _uiState.update { it.copy(trialNotice = trial) }
@@ -293,10 +314,16 @@ class MainViewModel @Inject constructor(
 
     fun onEventOptionSelected(optionIndex: Int) = engine.chooseEventOption(optionIndex)
 
-    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null) =
-        engine.ascend(nextPact, abandonPath, nextTrial)
+    fun onAscendClicked(nextPact: Pact? = null, abandonPath: Boolean = false, nextTrial: Trial? = null, nextMutation: Mutation? = null) =
+        engine.ascend(nextPact, abandonPath, nextTrial, nextMutation)
 
     fun onAbandonTrial() = engine.abandonTrial()
+
+    fun onTranscend() = engine.transcend()
+
+    fun onBuyEternal(id: String) = engine.buyEternal(id)
+
+    fun onConsecrate(buildingId: String) = engine.consecrate(buildingId)
 
     fun onEngraveRune(runeId: String) = engine.engraveRune(runeId)
 

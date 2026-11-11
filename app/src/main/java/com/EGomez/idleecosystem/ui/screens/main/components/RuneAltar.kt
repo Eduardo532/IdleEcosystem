@@ -32,10 +32,15 @@ fun RuneAltar(
     engraved: List<String>,
     catches: Map<String, Int>,
     onEngrave: (String) -> Unit,
-    onRemove: (String) -> Unit
+    onRemove: (String) -> Unit,
+    /** Maestría (v0.18.3): capturas de cada runa desde siempre; vacío = todavía oculta. */
+    mastery: Map<String, Int> = emptyMap()
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
         Text(stringResource(R.string.rune_altar_intro), color = Color.Gray, fontSize = 12.sp)
+        if (mastery.isNotEmpty()) {
+            Text(stringResource(R.string.rune_mastery_intro), color = Color(0xFFB3E5FC), fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
+        }
         Text(
             stringResource(R.string.rune_altar_slots, engraved.size, slots),
             color = AncientGold,
@@ -65,6 +70,7 @@ fun RuneAltar(
                 RuneRow(
                     rune = rune,
                     caught = catches[rune.id] ?: 0,
+                    masteryCatches = mastery[rune.id],
                     isEngraved = rune.id in engraved,
                     freeSlot = engraved.size < slots,
                     onEngrave = { onEngrave(rune.id) },
@@ -79,13 +85,15 @@ fun RuneAltar(
 private fun RuneRow(
     rune: RuneVariant,
     caught: Int,
+    masteryCatches: Int?,
     isEngraved: Boolean,
     freeSlot: Boolean,
     onEngrave: () -> Unit,
     onRemove: () -> Unit
 ) {
     val required = RuneEngraving.required(rune.tier)
-    val known = caught > 0
+    val known = caught > 0 || (masteryCatches ?: 0) > 0
+    val masteryLevel = masteryCatches?.let { RuneEngraving.masteryLevel(rune.tier, it) } ?: 0
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = if (isEngraved) Color(0xFF221A08) else Color(0xFF151515),
@@ -107,7 +115,22 @@ private fun RuneRow(
                     fontSize = 13.sp
                 )
                 if (known) {
-                    PactEffectList(pactLines(RuneEngraving.passive(rune.id), emptyMap()), fontSize = 11)
+                    PactEffectList(
+                        pactLines(RuneEngraving.passive(rune.id).scaled(RuneEngraving.passiveScale(masteryLevel)), emptyMap()),
+                        fontSize = 11
+                    )
+                }
+                // Maestría: estrellas, el bono que da y cuánto falta para el siguiente nivel
+                if (masteryCatches != null && known) {
+                    val next = RuneEngraving.nextMasteryAt(rune.tier, masteryCatches)
+                    val stars = "★".repeat(masteryLevel) + "☆".repeat(RuneEngraving.MAX_MASTERY - masteryLevel)
+                    Text(
+                        if (next != null) stringResource(R.string.rune_mastery_line, stars, masteryCatches, next)
+                        else stringResource(R.string.rune_mastery_max, stars),
+                        color = Color(0xFFB3E5FC),
+                        fontSize = 10.sp,
+                        modifier = Modifier.testTag(RUNE_MASTERY_TAG + rune.id)
+                    )
                 }
                 Text(
                     stringResource(R.string.rune_caught, caught.coerceAtMost(required), required),
@@ -134,6 +157,7 @@ private fun RuneRow(
 }
 
 const val RUNE_SLOTS_TAG = "rune_slots"
+const val RUNE_MASTERY_TAG = "rune_mastery_"
 const val RUNE_ROW_TAG = "rune_row_"
 const val RUNE_ENGRAVE_TAG = "rune_engrave_"
 const val RUNE_REMOVE_TAG = "rune_remove_"

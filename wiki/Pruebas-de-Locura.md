@@ -8,7 +8,7 @@ Las **Pruebas de Locura** son vidas voluntarias con **una regla alterada** y una
 - La Prueba se **elige al Ascender**, en la misma confirmación donde eliges el pacto. Se pueden combinar: cualquier pacto con cualquier Prueba.
 - Durante la vida, una **barra roja** en Investigación muestra la regla y el avance. Al tocarla se abre la lista de Pruebas.
 - Al llegar a la meta (Conocimiento generado **en esa vida**), la Prueba se supera: **su regla se levanta al instante** y la recompensa queda para siempre.
-- Puedes **abandonarla** cuando quieras desde la lista (pestaña Panteón → Pruebas). Se levanta la regla, sin recompensa.
+- Puedes **abandonarla** cuando quieras desde la lista (capa Ascensión → pestaña Pruebas). Se levanta la regla, sin recompensa.
 - Una Prueba ya superada **se puede repetir** (por ejemplo, para los logros con un pacto), pero no vuelve a dar recompensa.
 - Grimorio Quemado y Silencio **cierran su pestaña** mientras dura la Prueba.
 

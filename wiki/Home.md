@@ -9,6 +9,7 @@
 | Página | De qué trata |
 |---|---|
 | [Primeros pasos](Primeros-pasos) | Cómo empezar y qué hacer en los primeros minutos |
+| [La interfaz por capas](Interfaz) | Cómo aparecen las capas, las pestañas y los sistemas a medida que avanzas |
 | [Edificios](Edificios) | Los 16 edificios, hitos y el botón HITO |
 | [Grimorio](Grimorio) | Mejoras, escalera del Grimorio y sinergias |
 | [Ecos y Rituales](Ecos-y-Rituales) | La segunda moneda y los 5 rituales |

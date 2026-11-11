@@ -135,7 +135,7 @@ fun ConstellationMap(
             val progress = stars.count { it.level > 0 }.toFloat() / stars.size
             val pathNode = upgrades.firstOrNull { it.constellation == c && MadnessPaths.isPath(it.id) }
             val nodeAt = figure.nodes.zip(stars).toMap()
-            fun world(name: String) = figure.center + figure.points.getValue(name)
+            fun world(name: String) = figure.world(name)
             // Un extremo "encendido": estrella comprada, Senda recorrida o adorno de una
             // constelación completa
             fun lit(name: String): Boolean? = when {
@@ -211,18 +211,20 @@ fun ConstellationMap(
             val maxed = node.isMaxed
             val affordable = reachable && !maxed && currency >= node.currentCost
             val base = node.constellation.color()
-            val radius = if (isPath) r * 1.5f else if (node == core) r * 1.4f else r
+            val radius = if (isPath) r * 1.35f else if (node == core) r * 1.4f else r
             val fill = when {
-                sealed -> MadnessRed.copy(alpha = 0.6f)
+                sealed -> null
                 maxed || (isPath && node.level > 0) -> AncientGold
                 node.level > 0 -> base
                 else -> null
             }
             // Halo: más fuerte si se puede comprar ya
             if (fill != null || affordable) {
-                drawCircle((fill ?: base).copy(alpha = if (affordable) 0.45f else 0.25f), radius * 2.1f, center)
+                drawCircle((fill ?: base).copy(alpha = if (affordable) 0.4f else 0.22f), radius * 1.7f, center)
             }
             when {
+                // Sellada: apagada, con un anillo rojo fino y una cruz pequeña
+                sealed -> drawCircle(Color(0xFF1A1418), radius, center)
                 fill != null -> drawCircle(fill, radius, center)
                 reachable -> {
                     drawCircle(Color(0xFF15121C), radius, center)
@@ -233,14 +235,14 @@ fun ConstellationMap(
             // La Senda: doble anillo (gris si su constelación todavía no está completa)
             if (isPath) {
                 drawCircle(
-                    if (sealed) MadnessRed else if (reachable) base else Color(0xFF3A3A44),
-                    radius * 1.45f, center, style = Stroke(width = 2.5f)
+                    if (sealed) MadnessRed.copy(alpha = 0.6f) else if (reachable) base else Color(0xFF3A3A44),
+                    radius * 1.4f, center, style = Stroke(width = if (sealed) 1.5f else 2.5f)
                 )
             }
             if (sealed) {
-                val d = radius * 0.8f
-                drawLine(MadnessRed, Offset(center.x - d, center.y - d), Offset(center.x + d, center.y + d), strokeWidth = 4f)
-                drawLine(MadnessRed, Offset(center.x - d, center.y + d), Offset(center.x + d, center.y - d), strokeWidth = 4f)
+                val d = radius * 0.45f
+                drawLine(MadnessRed.copy(alpha = 0.8f), Offset(center.x - d, center.y - d), Offset(center.x + d, center.y + d), strokeWidth = 2.5f)
+                drawLine(MadnessRed.copy(alpha = 0.8f), Offset(center.x - d, center.y + d), Offset(center.x + d, center.y - d), strokeWidth = 2.5f)
             }
             // Selección
             if (node.id == selectedId) {
@@ -278,21 +280,26 @@ class SkyFigure(
     val edges: List<Pair<String, String>>,
     val nodes: List<String>,
     val path: String
-)
+) {
+    /** Posición en el cielo de una estrella de la figura. */
+    fun world(name: String): Offset = center + points.getValue(name) * SkyLayout.FIGURE_SCALE
+}
 
 /** Dónde va cada estrella: siete constelaciones reales alrededor de El Despertar. */
 object SkyLayout {
-    const val WIDTH = 1000f
-    const val HEIGHT = 1500f
-    const val LABEL_OFFSET = 190f
-    val CORE = Offset(500f, 735f)
+    const val WIDTH = 1200f
+    const val HEIGHT = 1800f
+    const val LABEL_OFFSET = 235f
+    /** Las figuras se dibujan un 30 % más grandes que sus coordenadas, para que respiren. */
+    const val FIGURE_SCALE = 1.3f
+    val CORE = Offset(600f, 880f)
 
     private fun o(x: Int, y: Int) = Offset(x.toFloat(), y.toFloat())
 
     val figures: Map<Constellation, SkyFigure> = linkedMapOf(
         // La Mano: Orión, el cazador. Su Senda es Alnilam, en medio del cinturón.
         Constellation.HAND to SkyFigure(
-            "Orión", o(190, 450),
+            "Orión", o(220, 540),
             mapOf(
                 "Rigel" to o(70, 100), "Saiph" to o(-55, 110), "Alnitak" to o(-34, 12), "Alnilam" to o(0, 0),
                 "Mintaka" to o(34, -10), "Bellatrix" to o(62, -95), "Betelgeuse" to o(-72, -108), "Meissa" to o(-4, -150)
@@ -305,14 +312,14 @@ object SkyLayout {
         ),
         // La Mente: Casiopea, la reina en su trono (la W).
         Constellation.MIND to SkyFigure(
-            "Casiopea", o(500, 200),
+            "Casiopea", o(600, 230),
             mapOf("Caph" to o(-125, -45), "Schedar" to o(-62, 20), "Navi" to o(-5, -28), "Ruchbah" to o(48, 32), "Segin" to o(118, 72), "★" to o(-6, 52)),
             listOf("Caph" to "Schedar", "Schedar" to "Navi", "Navi" to "Ruchbah", "Ruchbah" to "Segin"),
             listOf("Segin", "Ruchbah", "Navi", "Schedar", "Caph"), "★"
         ),
         // El Engranaje: la Osa Mayor, el Carro. La Senda va en el centro del cazo.
         Constellation.GEARS to SkyFigure(
-            "Osa Mayor", o(810, 450),
+            "Osa Mayor", o(980, 540),
             mapOf(
                 "Alkaid" to o(-150, 48), "Mizar" to o(-100, 12), "Alioth" to o(-52, -6), "Megrez" to o(0, -12),
                 "Dubhe" to o(92, -50), "Merak" to o(108, 32), "Phecda" to o(22, 42), "★" to o(56, 2)
@@ -325,7 +332,7 @@ object SkyLayout {
         ),
         // El Sueño: las Pléyades, las siete hermanas.
         Constellation.DREAM to SkyFigure(
-            "Las Pléyades", o(820, 900),
+            "Las Pléyades", o(990, 1080),
             mapOf(
                 "Atlas" to o(-105, 18), "Pleione" to o(-118, -22), "Alcyone" to o(0, 0), "Merope" to o(48, 52),
                 "Electra" to o(92, -30), "Maia" to o(68, -92), "Taygeta" to o(14, -118), "★" to o(20, -50)
@@ -338,7 +345,7 @@ object SkyLayout {
         ),
         // El Vacío: el Pez Austral y Fomalhaut, la estrella solitaria.
         Constellation.VOID to SkyFigure(
-            "Pez Austral", o(650, 1270),
+            "Pez Austral", o(780, 1530),
             mapOf(
                 "Epsilon" to o(-72, -34), "Fomalhaut" to o(-125, 8), "Delta" to o(-72, 42), "Gamma" to o(-8, 50),
                 "Beta" to o(55, 34), "Theta" to o(118, 6), "Iota" to o(88, -28), "Mu" to o(12, -44), "★" to o(4, 4)
@@ -351,7 +358,7 @@ object SkyLayout {
         ),
         // El Culto: Tauro, el toro del sacrificio. La Senda va dentro de la V de las Híades.
         Constellation.CULT to SkyFigure(
-            "Tauro", o(170, 900),
+            "Tauro", o(200, 1080),
             mapOf(
                 "Elnath" to o(128, -118), "Ain" to o(58, -32), "Delta" to o(36, 10), "Gamma" to o(8, 48), "Theta" to o(-24, 16),
                 "Aldebaran" to o(-48, -22), "Zeta" to o(-70, -132), "Lambda" to o(-12, 108), "Omicron" to o(-112, 122), "★" to o(4, -12)
@@ -364,7 +371,7 @@ object SkyLayout {
         ),
         // Lo Arcano: Perseo, con la cabeza de Medusa (Algol). Su Senda es Delta Persei.
         Constellation.ARCANE to SkyFigure(
-            "Perseo", o(330, 1270),
+            "Perseo", o(400, 1530),
             mapOf(
                 "Eta" to o(-12, -112), "Gamma" to o(-6, -62), "Mirfak" to o(0, 0), "Delta" to o(26, 46), "Epsilon" to o(42, 98),
                 "Zeta" to o(18, 148), "Kappa" to o(-42, 30), "Algol" to o(-80, 62), "Rho" to o(-98, 108)
@@ -386,11 +393,11 @@ object SkyLayout {
             val figure = c?.let { figures[it] }
             when {
                 figure == null -> result[node.id] = CORE
-                MadnessPaths.isPath(node.id) -> result[node.id] = figure.center + figure.points.getValue(figure.path)
+                MadnessPaths.isPath(node.id) -> result[node.id] = figure.world(figure.path)
                 else -> {
                     val stars = upgrades.filter { it.constellation == c && !MadnessPaths.isPath(it.id) }
                     val name = figure.nodes.getOrNull(stars.indexOf(node))
-                    result[node.id] = figure.center + (name?.let { figure.points[it] } ?: Offset.Zero)
+                    result[node.id] = name?.let { figure.world(it) } ?: figure.center
                 }
             }
         }
@@ -413,7 +420,7 @@ object SkyLayout {
     }
 }
 
-private const val NODE_RADIUS = 16f
+private const val NODE_RADIUS = 12f
 private const val TOUCH_RADIUS_PX = 60f
 private const val MIN_ZOOM = 0.8f
 private const val MAX_ZOOM = 4f

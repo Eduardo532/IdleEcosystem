@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -165,10 +164,33 @@ fun MenuSection(
         if (menuWeight > 0.2f) {
             // Capas: Vida, Ascensión y Trascendencia (solo si hay más de una)
             val layers = unlocks.layers
-            if (layers.size > 1) {
-                LayerBar(layers, tab.layer, newTabs) { layer ->
+            // El autocomprador (hito de Ascensión) va al final de la fila de capas
+            val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)
+            val autoControls: (@Composable RowScope.() -> Unit)? = if (tab == MenuTab.RESEARCH && autobuyer) {
+                {
+                    AutoChip(
+                        selected = automation.buildings,
+                        onClick = onToggleAutoBuildings,
+                        modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
+                    )
+                    IconButton(
+                        onClick = onOpenAutomation,
+                        modifier = Modifier.size(32.dp).testTag(AUTOMATION_SETTINGS_TAG)
+                    ) {
+                        Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
+                    }
+                }
+            } else null
+            if (layers.size > 1 || autoControls != null) {
+                LayerBar(layers.takeIf { it.size > 1 }.orEmpty(), tab.layer, newTabs, autoControls) { layer ->
                     onTabSelected(unlocks.tabsOf(layer).first())
                 }
+            }
+
+            // Pestañas de la capa actual (una sola pestaña no necesita fila)
+            val layerTabs = unlocks.tabsOf(tab.layer)
+            if (layerTabs.size > 1) {
+                SubTabRow(layerTabs, tab, tab.layer.color(), newTabs, onTabSelected)
             }
 
             if (tab == MenuTab.RESEARCH && showBuyMultipliers) {
@@ -191,59 +213,6 @@ fun MenuSection(
                             onClick = { onBuyMultiplierChanged(mult) },
                             modifier = Modifier.weight(1f).testTag(BUY_MULTIPLIER_TAG + mult)
                         )
-                    }
-                }
-            }
-
-            // Pestañas de la capa actual (una sola pestaña no necesita fila)
-            val layerTabs = unlocks.tabsOf(tab.layer)
-            if (layerTabs.size > 1) {
-                val selectedIndex = layerTabs.indexOf(tab).coerceAtLeast(0)
-                val accent = tab.layer.color()
-                TabRow(
-                    selectedTabIndex = selectedIndex,
-                    containerColor = Color.Transparent,
-                    contentColor = accent,
-                    indicator = { tabPositions ->
-                        if (selectedIndex < tabPositions.size) {
-                            TabRowDefaults.SecondaryIndicator(
-                                Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-                                color = accent
-                            )
-                        }
-                    }
-                ) {
-                    layerTabs.forEach { item ->
-                        Tab(
-                            selected = item == tab,
-                            onClick = { onTabSelected(item) },
-                            text = { TabTitle(item.title(), item in newTabs) },
-                            selectedContentColor = accent,
-                            unselectedContentColor = Color.Gray,
-                            modifier = Modifier.testTag(MENU_TAB_TAG + item.id)
-                        )
-                    }
-                }
-            }
-
-            // Barra fija sobre la lista de edificios: el autocomprador y su panel
-            val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)
-            if (tab == MenuTab.RESEARCH && autobuyer) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 4.dp)
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    AutoChip(
-                        selected = automation.buildings,
-                        onClick = onToggleAutoBuildings,
-                        modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
-                    )
-                    IconButton(
-                        onClick = onOpenAutomation,
-                        modifier = Modifier.size(36.dp).testTag(AUTOMATION_SETTINGS_TAG)
-                    ) {
-                        Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
                     }
                 }
             }
@@ -517,11 +486,19 @@ fun MenuSection(
 
 /** Fila de capas: cada una con el color de su moneda y una marca si trae algo nuevo. */
 @Composable
-private fun LayerBar(layers: List<MenuLayer>, selected: MenuLayer, newTabs: Set<MenuTab>, onSelect: (MenuLayer) -> Unit) {
+private fun LayerBar(
+    layers: List<MenuLayer>,
+    selected: MenuLayer,
+    newTabs: Set<MenuTab>,
+    trailing: (@Composable RowScope.() -> Unit)?,
+    onSelect: (MenuLayer) -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp)
     ) {
+        if (layers.isEmpty()) Spacer(modifier = Modifier.weight(1f))
         layers.forEach { layer ->
             val isSelected = layer == selected
             val color = layer.color()
@@ -542,6 +519,47 @@ private fun LayerBar(layers: List<MenuLayer>, selected: MenuLayer, newTabs: Set<
                 }
             }
         }
+        trailing?.invoke(this)
+    }
+}
+
+/**
+ * Pestañas de una capa: reparten el ancho por igual, sin el relleno de las pestañas de
+ * Material (que cortaba "Investigación" con tres pestañas), con una línea del color de la
+ * capa bajo la elegida.
+ */
+@Composable
+private fun SubTabRow(
+    tabs: List<MenuTab>,
+    selected: MenuTab,
+    accent: Color,
+    newTabs: Set<MenuTab>,
+    onSelect: (MenuTab) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 2.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            tabs.forEach { item ->
+                val isSelected = item == selected
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onSelect(item) }
+                        .testTag(MENU_TAB_TAG + item.id)
+                ) {
+                    Box(modifier = Modifier.height(36.dp).padding(horizontal = 2.dp), contentAlignment = Alignment.Center) {
+                        TabTitle(item.title(), item in newTabs, color = if (isSelected) accent else Color.Gray, fontSize = 13)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .height(2.dp)
+                            .background(if (isSelected) accent else Color.Transparent, RoundedCornerShape(1.dp))
+                    )
+                }
+            }
+        }
+        HorizontalDivider(color = Color(0xFF2A2A2A))
     }
 }
 

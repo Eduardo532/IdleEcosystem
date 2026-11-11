@@ -144,10 +144,12 @@ fun ConstellationMap(
                 val parent = node.parentId?.let { byId[it] } ?: return@forEach
                 val q = positions[parent.id] ?: return@forEach
                 val lit = parent.level > 0 && node.level > 0
+                // El hilo desde El Despertar cruza el cielo: siempre fino y tenue
+                val fromCore = parent.constellation == null
                 drawLine(
-                    if (lit) color.copy(alpha = 0.8f) else color.copy(alpha = if (parent.level > 0) 0.35f else 0.15f),
+                    if (lit) color.copy(alpha = if (fromCore) 0.35f else 0.8f) else color.copy(alpha = if (parent.level > 0) 0.3f else 0.12f),
                     at(q), at(p),
-                    strokeWidth = if (lit) 3f else 1.5f,
+                    strokeWidth = if (lit && !fromCore) 3f else 1.5f,
                     pathEffect = if (parent.level > 0) null else PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
                 )
             }
@@ -239,7 +241,7 @@ fun ConstellationMap(
 object SkyLayout {
     const val WIDTH = 1000f
     const val HEIGHT = 1500f
-    const val LABEL_OFFSET = 175f
+    const val LABEL_OFFSET = 205f
     private val CORE = Offset(500f, 735f)
 
     private val centers = mapOf(

@@ -16,7 +16,7 @@ enum class TutorialStep(
     MENU_INTRO(
         "menu_intro",
         "Gestión Arcana",
-        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción. Las pestañas marcadas con ??? se descubren más adelante: el candado indica qué te falta.",
+        "Necesitas expandirte. Despliega el Menú Inferior tocando la flecha para ver tus opciones de construcción. Al principio solo hay una pestaña: cada sistema nuevo aparece cuando llegas a él, y la línea con candado al final de la lista te dice qué viene después.",
         "Al tener > 10 de conocimiento"
     ),
     FIRST_BUILDING(
@@ -28,7 +28,7 @@ enum class TutorialStep(
     BUY_MULTIPLIERS(
         "buy_multipliers",
         "Producción en Masa",
-        "Usa los botones sobre las pestañas para comprar varios edificios a la vez: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta.",
+        "Ya puedes comprar varios edificios a la vez con los botones sobre la lista: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta.",
         "Tras comprar 5 edificios totales"
     ),
 
@@ -36,7 +36,7 @@ enum class TutorialStep(
     UPGRADES_TAB(
         "upgrades_tab",
         "Potenciación",
-        "Has desbloqueado la segunda pestaña (Grimorio). Aquí puedes adquirir tecnologías que multiplican la eficiencia de tus edificios y tus clicks.",
+        "Has descubierto el Grimorio, una pestaña nueva junto a Investigación. Aquí puedes adquirir tecnologías que multiplican la eficiencia de tus edificios y tus clicks.",
         "Al entrar a la pestaña 1 (Mejoras) por primera vez"
     ),
     TOP_BAR_INFO(
@@ -56,7 +56,7 @@ enum class TutorialStep(
     RITUALS_TAB(
         "rituals_tab",
         "Rituales",
-        "En la tercera pestaña (Rituales), puedes gastar tus Ecos para activar bonificaciones temporales masivas. Úsalos para romper límites de producción.",
+        "En la pestaña Rituales puedes gastar tus Ecos para activar bonificaciones temporales masivas. Úsalos para romper límites de producción.",
         "Al entrar a la pestaña 2 (Rituales) con Ecos > 0"
     ),
 
@@ -166,7 +166,7 @@ enum class TutorialStep(
     PACTS(
         "pacts",
         "Pactos con los Dioses",
-        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
+        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la capa Ascensión, pestaña Panteón, verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
         "Al poder Ascender por primera vez"
     ),
 
@@ -194,14 +194,14 @@ enum class TutorialStep(
     TRIALS(
         "trials",
         "Pruebas de Locura",
-        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas.",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la capa Ascensión, pestaña Pruebas, verás todas.",
         "Al poder elegir la primera Prueba"
     ),
 
     RUNE_SLOTS(
         "rune_slots",
         "El Altar de Runas",
-        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
+        "Superar la Prueba te dio un Espacio de Runa. En la capa Ascensión, pestaña Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
         "Al ganar el primer espacio de runa"
     ),
 
@@ -222,7 +222,7 @@ enum class TutorialStep(
     TRANSCEND(
         "transcend",
         "Trascender",
-        "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Toca \"Éter · Trascender\" en el panel de Cordura para ver qué ganarías.",
+        "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Abre la capa nueva, Trascendencia, para ver qué ganarías.",
         "Al tener 50 Ascensiones en el ciclo"
     ),
 

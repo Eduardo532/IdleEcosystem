@@ -10,6 +10,8 @@ import com.EGomez.idleecosystem.data.repository.SaveCoordinator
 import com.EGomez.idleecosystem.data.repository.SaveRequest
 import com.EGomez.idleecosystem.domain.logic.AchievementManager
 import com.EGomez.idleecosystem.domain.logic.AchievementSets
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.Attention
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
@@ -133,6 +135,11 @@ data class EconomyState(
     val activeMutation: Mutation? = null,
     val mutationOffer: List<Mutation> = emptyList(),
     val mutationsSeen: Int = 0,
+    /** Mutaciones descubiertas, por id (para su catálogo). */
+    val seenMutations: Set<String> = emptySet(),
+    /** Interfaz por capas (v0.19.0): pestañas visibles y las que aún no se abrieron. */
+    val menuUnlocks: MenuUnlocks = MenuUnlocks(),
+    val newTabs: Set<MenuTab> = emptySet(),
     /** Medidor de Locura (null = todavía oculto), segundos de colapso y edificio poseído. */
     val madness: Double? = null,
     val collapseSeconds: Int = 0,
@@ -746,6 +753,7 @@ class GameEngine @Inject constructor(
 
         // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
         tutorialManager.markStepsAsCompleted(TutorialProgress.stepsSeenIn(data))
+        markVisibleTabsSeenOnce()
 
         recalculate()
         requestSave(replace = true)
@@ -822,11 +830,45 @@ class GameEngine @Inject constructor(
         requestSave()
     }
 
-    fun onMenuTabSelected(index: Int) = post {
-        // Una pestaña sin descubrir muestra su requisito, no su tutorial
-        val revealed = currentReveal()
-        if (index == 1 && revealed.grimoire) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
-        if (index == 2 && revealed.rituals && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
+    fun onMenuTabSelected(tab: MenuTab) = post {
+        // Una pestaña solo se puede abrir si ya se ve
+        if (!menuUnlocks().has(tab)) return@post
+        if (tab == MenuTab.GRIMOIRE) tutorialManager.triggerStep(TutorialStep.UPGRADES_TAB)
+        if (tab == MenuTab.RITUALS && echoes.signum() > 0) tutorialManager.triggerStep(TutorialStep.RITUALS_TAB)
+        val key = AchievementStat.SEEN_TAB_PREFIX + tab.id
+        if (statsManager.counter(key).signum() == 0) {
+            statsManager.flag(key)
+            publishEconomy()
+            requestSave()
+        }
+    }
+
+    // =====================================================================
+    // INTERFAZ POR CAPAS (v0.19.0)
+    // =====================================================================
+
+    private fun menuUnlocks(): MenuUnlocks = MenuUnlocks.compute(
+        reveal = currentReveal(),
+        ascensions = statsManager.totalPrestiges,
+        runeSlots = runeSlots(),
+        masteryRevealed = consecrationRevealed(),
+        transcendRevealed = transcendRevealed(),
+        mutationsRevealed = mutationsRevealed()
+    )
+
+    /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
+    private fun newTabs(): Set<MenuTab> = menuUnlocks().tabs
+        .filter { it !in MenuUnlocks.NEVER_NEW && statsManager.counter(AchievementStat.SEEN_TAB_PREFIX + it.id).signum() == 0 }
+        .toSet()
+
+    /**
+     * Al pasar a la interfaz por capas, lo que el jugador ya tenía no se anuncia como nuevo:
+     * se marca una sola vez como visto todo lo visible en ese momento.
+     */
+    private fun markVisibleTabsSeenOnce() {
+        if (statsManager.counter(AchievementStat.SEEN_TABS_INIT).signum() > 0) return
+        menuUnlocks().tabs.forEach { statsManager.flag(AchievementStat.SEEN_TAB_PREFIX + it.id) }
+        statsManager.flag(AchievementStat.SEEN_TABS_INIT)
     }
 
     fun onPrestigeShopOpened() = post { tutorialManager.triggerStep(TutorialStep.PRESTIGE_SHOP) }
@@ -900,6 +942,7 @@ class GameEngine @Inject constructor(
 
         // El pacto de esta vida (las partidas anteriores a la v0.16 no tienen: Sin pacto)
         setPact(Pact.fromId(entity?.activePact))
+        markVisibleTabsSeenOnce()
 
         isLoaded = true
         recalculate()
@@ -1808,6 +1851,9 @@ class GameEngine @Inject constructor(
             activeMutation = activeMutation(),
             mutationOffer = mutationOffer(),
             mutationsSeen = Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 },
+            seenMutations = Mutation.entries.filter { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 }.map { it.id }.toSet(),
+            menuUnlocks = menuUnlocks(),
+            newTabs = newTabs(),
             runeSlots = runeSlots(),
             engravedRunes = engravedRunes(),
             runeCatches = runeCatches(),

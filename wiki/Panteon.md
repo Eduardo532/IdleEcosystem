@@ -2,7 +2,7 @@
 
 Al **Ascender** eliges un **pacto** para tu próxima vida. El pacto dura hasta la siguiente Ascensión y no se puede cambiar antes. Cada dios da ventajas y cobra un precio según su mito.
 
-La pestaña **Panteón** (se descubre junto con la Ascensión) muestra a todos los dioses con su sigilo. Los que aún no puedes elegir aparecen como silueta, con las Ascensiones que faltan. Al tocar uno se abre su ficha, con su mito y su pacto.
+La pestaña **Panteón** (capa Ascensión; aparece tras la primera Ascensión) muestra a todos los dioses con su sigilo. Los que aún no puedes elegir aparecen como silueta, con las Ascensiones que faltan. Al tocar uno se abre su ficha, con su mito y su pacto.
 
 ## Sin dioses
 

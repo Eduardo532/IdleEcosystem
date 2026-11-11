@@ -5,7 +5,7 @@
 ## Cuándo
 
 - Se abre con **50 Ascensiones en el ciclo** (las de la Memoria Ancestral no cuentan para ese requisito).
-- En el panel de Cordura aparece **"✦ Éter · Trascender"**. Al tocarlo ves el Éter que ganarías, qué se pierde, qué se conserva y las mejoras eternas.
+- Aparece la capa **Trascendencia** con la pestaña **Éter**: el Éter que ganarías, qué se pierde, qué se conserva y las mejoras eternas.
 - Trascender pide **tocar dos veces** el botón, para no hacerlo por error.
 
 ## Cuánto Éter

@@ -2,6 +2,7 @@
 
 **Jugar**
 - [Primeros pasos](Primeros-pasos)
+- [La interfaz por capas](Interfaz)
 - [Edificios](Edificios)
 - [Grimorio](Grimorio)
 - [Ecos y Rituales](Ecos-y-Rituales)

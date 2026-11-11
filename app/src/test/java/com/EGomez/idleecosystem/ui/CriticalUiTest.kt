@@ -22,8 +22,8 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.TranscendDialog
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.ETERNAL_BUY_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.EtherPanel
+import com.EGomez.idleecosystem.ui.screens.main.components.ETERNAL_BUY_TAG
 import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
@@ -56,7 +56,19 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertCountEquals
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
-import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.NEXT_UNLOCK_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MENU_LAYER_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MENU_TAB_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.NEW_BADGE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.BUY_MULTIPLIER_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MUTATION_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MutationCatalog
+import com.EGomez.idleecosystem.ui.screens.BUFF_CHIP_TAG
+import com.EGomez.idleecosystem.ui.components.RunePlate
+import com.EGomez.idleecosystem.ui.components.RuneCaughtNotice
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
+import com.EGomez.idleecosystem.domain.model.RuneCatalog
 import com.EGomez.idleecosystem.ui.screens.main.components.AUTO_BUILDINGS_TAG
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
@@ -422,10 +434,14 @@ class CriticalUiTest {
         var transcended = 0
         var bought: String? = null
         compose.setContent {
-            TranscendDialog(
-                cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
-                onBuyEternal = { bought = it }, onTranscend = { transcended++ }, onDismiss = {}
-            )
+            androidx.compose.foundation.layout.Column(
+                modifier = androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                EtherPanel(
+                    cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
+                    onBuyEternal = { bought = it }, onTranscend = { transcended++ }
+                )
+            }
         }
 
         compose.onNodeWithText("Trascender (+14 Éter)").performClick()
@@ -548,41 +564,129 @@ class CriticalUiTest {
 
     @Composable
     private fun Menu(
-        selectedTab: Int,
-        revealed: SystemReveal,
+        selectedTab: MenuTab,
+        unlocks: MenuUnlocks = MenuUnlocks.ALL,
         buildings: List<Building> = emptyList(),
         upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList(),
         ascensions: Int = 0
     ) {
         MenuSection(
             isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
-            selectedTabIndex = selectedTab, onTabSelected = {},
+            selectedTab = selectedTab, onTabSelected = {},
             buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
             buildings = buildings, upgrades = upgrades, rituals = emptyList(),
             currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
             buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
             onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
             prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
-            revealed = revealed, ascensions = ascensions, onAscendClicked = {}, onShowPrestigeShop = {}
+            unlocks = unlocks, ascensions = ascensions, onAscendClicked = {}, onOpenMadnessMap = {}
         )
     }
 
     @Test
-    fun `undiscovered systems show their requirement`() {
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(false, false, false)) }
+    fun `a new player sees only research and the next discovery`() {
+        // Aunque se pida el Grimorio, sin descubrirlo se muestra Investigación
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE, unlocks = MenuUnlocks()) }
 
         compose.onNodeWithText("Grimorio").assertDoesNotExist()
-        compose.onNodeWithText("Reúne 250 de Conocimiento para descubrir el Grimorio.", substring = true).assertExists()
-        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertExists()
+        compose.onNodeWithTag(MENU_TAB_TAG + "research").assertDoesNotExist()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "life").assertDoesNotExist()
+        compose.onNodeWithText("Próximo descubrimiento: reúne 250 de Conocimiento.").assertExists()
         compose.onNodeWithText("ASCENDER").assertDoesNotExist()
+        compose.onNodeWithTag(BUY_MULTIPLIER_TAG + "1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `tabs and layers appear as they are discovered and new ones are marked`() {
+        var unlocks by mutableStateOf(MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE)))
+        compose.setContent {
+            MenuSection(
+                isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+                selectedTab = MenuTab.RESEARCH, onTabSelected = {},
+                buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+                buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+                currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+                buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+                onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+                prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+                unlocks = unlocks, newTabs = setOf(MenuTab.GRIMOIRE),
+                onAscendClicked = {}, onOpenMadnessMap = {}
+            )
+        }
+
+        // Dos pestañas de la Vida: fila de pestañas, sin fila de capas
+        compose.onNodeWithTag(MENU_TAB_TAG + "grimoire").assertExists()
+        compose.onNodeWithTag(NEW_BADGE_TAG, useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "life").assertDoesNotExist()
+        compose.onNodeWithText("Próximo descubrimiento: encuentra un Eco al investigar.").assertExists()
+
+        // Con la Ascensión aparece la capa nueva y la barra de ASCENDER
+        unlocks = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS, MenuTab.SANITY))
+        compose.onNodeWithTag(MENU_LAYER_TAG + "ascension").assertExists()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "transcendence").assertDoesNotExist()
+        compose.onNodeWithText("ASCENDER").assertExists()
+        compose.onNodeWithText("Próximo descubrimiento: Asciende por primera vez.").assertExists()
     }
 
     @Test
     fun `discovered systems look as before`() {
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal()) }
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE) }
 
-        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(NEXT_UNLOCK_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "transcendence").assertExists()
         compose.onNodeWithText("ASCENDER").assertExists()
+    }
+
+    @Test
+    fun `a rune boost chip names its rune and what it gives`() {
+        val buff = RuneBuff(id = "t1_blood", multiplier = 10.0, expirationTime = 15_000L, description = "", durationMs = 15_000L)
+        compose.setContent { ActiveBuffsDisplay(listOf(buff), clock = { 0L }) }
+
+        compose.onNodeWithTag(BUFF_CHIP_TAG + "t1_blood").assertExists()
+        compose.onNodeWithText("Runa de Sangre").assertExists()
+        compose.onNodeWithText("x10 · 15s").assertExists()
+    }
+
+    @Test
+    fun `a rune plate shows its tier, its name and its real effect`() {
+        compose.setContent { RunePlate(RuneCatalog.T1_BLOOD, masteryLevel = 0) }
+
+        compose.onNodeWithText("COMÚN · DESLIZA").assertExists()
+        compose.onNodeWithText("Runa de Sangre").assertExists()
+        compose.onNodeWithText("Producción x10 durante 15 s").assertExists()
+    }
+
+    @Test
+    fun `rune texts follow mastery and instant rewards`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                // Maestría V: el potenciador dura un 50 % más
+                RunePlate(RuneCatalog.T1_ASH, masteryLevel = 5)
+                RuneCaughtNotice(RuneCatalog.T1_BONE, masteryLevel = 0)
+                RuneCaughtNotice(RuneCatalog.T3_CTHULHU, masteryLevel = 0)
+            }
+        }
+
+        compose.onNodeWithText("Producción x8 durante 30 s").assertExists()
+        compose.onNodeWithText("+2 min de producción al instante").assertExists()
+        compose.onNodeWithText("Producción x30 durante 60 s y +1 Eco").assertExists()
+    }
+
+    @Test
+    fun `the mutation catalog hides the mutations not yet chosen`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                modifier = androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                MutationCatalog(seen = setOf("feverish_notes"), active = com.EGomez.idleecosystem.domain.model.Mutation.FEVERISH_NOTES)
+            }
+        }
+
+        compose.onNodeWithText("Mutaciones descubiertas: 1 de 20").assertExists()
+        compose.onNodeWithText("🧬 Notas Febriles").assertExists()
+        compose.onNodeWithText("ACTIVA").assertExists()
+        compose.onNodeWithTag(MUTATION_ROW_TAG + "hungry_void").assertExists()
+        compose.onNodeWithText("🧬 Vacío Hambriento").assertDoesNotExist()
     }
 
     @Test
@@ -604,7 +708,7 @@ class CriticalUiTest {
         val catalog = com.EGomez.idleecosystem.domain.logic.BuildingCatalog.create()
         val synergy = com.EGomez.idleecosystem.domain.logic.BuildingSynergies.create(catalog)
             .first { it.sourceBuildingId == "b_notes" }
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(), buildings = catalog, upgrades = listOf(synergy)) }
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE, buildings = catalog, upgrades = listOf(synergy)) }
 
         compose.onNodeWithText("Efecto: +1% por unidad de Notas Desordenadas").assertExists()
         compose.onNodeWithText("Efecto: x1").assertDoesNotExist()
@@ -613,7 +717,7 @@ class CriticalUiTest {
     @Test
     fun `the auto chip appears with the building autobuyer milestone`() {
         var ascensions by mutableStateOf(4)
-        compose.setContent { Menu(selectedTab = 0, revealed = SystemReveal(), ascensions = ascensions) }
+        compose.setContent { Menu(selectedTab = MenuTab.RESEARCH, ascensions = ascensions) }
 
         compose.onNodeWithTag(AUTO_BUILDINGS_TAG).assertDoesNotExist()
         ascensions = 5
@@ -683,7 +787,7 @@ class CriticalUiTest {
 
     @Test
     fun `the pantheon shows unlocked gods and hides the rest`() {
-        compose.setContent { Menu(selectedTab = 3, revealed = SystemReveal(), ascensions = 0) }
+        compose.setContent { Menu(selectedTab = MenuTab.PANTHEON, ascensions = 0) }
 
         // En la primera Ascensión ya se puede elegir a Cthulhu
         compose.onNodeWithText("Cthulhu").assertExists()
@@ -755,14 +859,14 @@ class CriticalUiTest {
     }
 
     @Test
-    fun `the attention bar appears after the first ascension and opens the dialog`() {
+    fun `the attention card appears after the first ascension and opens the dialog`() {
         var points by mutableStateOf(0)
-        var tab by mutableStateOf(0)
+        var tab by mutableStateOf(MenuTab.SANITY)
         var opened = 0
         compose.setContent {
             MenuSection(
                 isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
-                selectedTabIndex = tab, onTabSelected = {},
+                selectedTab = tab, onTabSelected = {},
                 buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
                 buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
                 currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
@@ -770,7 +874,7 @@ class CriticalUiTest {
                 onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
                 prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
                 attentionPoints = points, onOpenAttention = { opened++ },
-                attention = mapOf("notes" to 1), onAscendClicked = {}, onShowPrestigeShop = {}
+                attention = mapOf("notes" to 1), onAscendClicked = {}, onOpenMadnessMap = {}
             )
         }
 
@@ -778,8 +882,8 @@ class CriticalUiTest {
         points = 1
         compose.onNodeWithTag(ATTENTION_BAR_TAG).assertExists().performClick()
         assertEquals(1, opened)
-        // Solo vive en la pestaña Investigación
-        tab = 2
+        // Vive en la pestaña Cordura, no en Investigación
+        tab = MenuTab.RESEARCH
         compose.onNodeWithTag(ATTENTION_BAR_TAG).assertDoesNotExist()
     }
 }

@@ -7,7 +7,8 @@ Tras la **primera Trascendencia** la realidad se vuelve maleable. Cada Ascensió
 - En la confirmación de **Ascender** aparece la fila **"Mutación de la próxima vida"** con **Sin mutación** y las tres que ofrece esa Ascensión. Al tocar una se ve qué hace.
 - La oferta depende de cuántas veces has Ascendido: cambia con cada Ascensión y no se puede volver a tirar.
 - La mutación dura **una sola vida**: al Ascender se pierde (salvo que elijas otra).
-- La mutación activa se ve en el panel de Cordura (🧬) y se suma a los efectos del pacto, las runas grabadas y la Marea.
+- La mutación activa se ve en la barra de Ascender (🧬) y se suma a los efectos del pacto, las runas grabadas y la Marea.
+- La pestaña **Mutaciones** (capa Trascendencia) muestra el catálogo de las 20: las que todavía no elegiste se ven como ???, y la activa lleva la marca ACTIVA.
 - Se puede combinar con cualquier pacto, Senda y Prueba de Locura.
 
 ## Las 20 mutaciones

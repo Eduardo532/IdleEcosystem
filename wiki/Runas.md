@@ -64,7 +64,7 @@ Dentro de cada nivel, unas runas son más comunes que otras.
 
 ## Espacios de Runa *(v0.17.2)*
 
-Una runa que ya atrapaste varias veces se puede **grabar** en un espacio del **Altar de Runas** (pestaña Panteón → vista **Runas**). Mientras está grabada da un **bono pasivo permanente**, distinto para cada runa.
+Una runa que ya atrapaste varias veces se puede **grabar** en un espacio del **Altar de Runas** (capa **Ascensión** → pestaña **Runas**). Mientras está grabada da un **bono pasivo permanente**, distinto para cada runa.
 
 - **Espacios:** se ganan superando Pruebas de Locura. Ceguera, Silencio, Amnesia y Mortalidad dan uno cada una (hasta **4**).
 - **Para grabar una runa** hay que haberla atrapado: **10 veces** las de nivel 1, **5** las de nivel 2 y **3** los sigilos de nivel 3. Las capturas se cuentan desde la v0.17.2.

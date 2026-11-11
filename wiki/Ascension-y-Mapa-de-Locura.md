@@ -44,14 +44,14 @@ Según cuántas veces hayas Ascendido en toda la partida, cada vida nueva empiez
 
 La confirmación de Ascender muestra la lista: ✓ los que ya tienes y ★ el que desbloquea la Ascensión que estás por hacer.
 
-**Autocompradores:** se encienden y apagan con el botón **AUTO** (sobre las pestañas para los edificios, junto a "Comprar todas" para el Grimorio y en cada ritual para el ritual automático).
+**Autocompradores:** se encienden y apagan con el botón **AUTO** (sobre la lista de edificios, junto a "Comprar todas" para el Grimorio y en cada ritual para el ritual automático).
 
 - Por defecto nunca gastan más de la **mitad** de tu Conocimiento (se cambia en el panel).
 - El de edificios compra **una unidad de cada edificio por segundo**, del más caro al más barato.
 - El del Grimorio compra las mejoras que entran en ese presupuesto, de la más barata a la más cara.
 - El ritual automático se activa cuando está listo y te alcanzan los Ecos.
 
-**Panel de automatización** *(v0.15.1)*: el engranaje al lado del botón AUTO abre un panel donde eliges el **presupuesto** (10 %, 25 %, 50 %, 75 % o 100 % del Conocimiento), **qué edificios** compra el autocomprador, el autocomprador del Grimorio, el ritual automático y la Ascensión automática. Las secciones bloqueadas dicen con cuántas Ascensiones se abren. La configuración se guarda en el teléfono (no viaja en el código de exportación).
+**Panel de automatización** *(v0.15.1)*: el engranaje al lado del botón AUTO (o la tarjeta **Automatización** de la pestaña Cordura) abre un panel donde eliges el **presupuesto** (10 %, 25 %, 50 %, 75 % o 100 % del Conocimiento), **qué edificios** compra el autocomprador, el autocomprador del Grimorio, el ritual automático y la Ascensión automática. Las secciones bloqueadas dicen con cuántas Ascensiones se abren. La configuración se guarda en el teléfono (no viaja en el código de exportación).
 
 **Ascensión automática** *(desde 10 Ascensiones, apagada por defecto)*: el juego Asciende solo cuando la Cordura que ganarías **iguala o supera** la que ya tienes, es decir, cuando la duplica. Un aviso muestra cuánta ganaste.
 
@@ -61,7 +61,7 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 
 ## Mapa de Locura
 
-La tienda de Cordura: una constelación de **21 nodos** (18 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
+Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura** *(v0.19.0)*. La tienda de Cordura: una constelación de **21 nodos** (18 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
 

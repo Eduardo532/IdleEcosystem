@@ -8,6 +8,8 @@ import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
@@ -65,6 +67,10 @@ data class GameUiState(
     val nextGoal: NextGoal? = null,
     /** Pestañas y paneles descubiertos (los demás se ven como "???"). */
     val revealed: SystemReveal = SystemReveal(),
+    /** Interfaz por capas (v0.19.0): pestañas visibles y las que todavía no se abrieron. */
+    val menuUnlocks: MenuUnlocks = MenuUnlocks(),
+    val newTabs: Set<MenuTab> = emptySet(),
+    val seenMutations: Set<String> = emptySet(),
     /** Ascensiones totales (hitos) y automatizaciones elegidas. */
     val ascensions: Int = 0,
     val automation: AutomationSettings = AutomationSettings(),

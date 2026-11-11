@@ -249,26 +249,7 @@ fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutati
 val MutationGreen = Color(0xFF9CCC65)
 const val MUTATION_CHOICE_TAG = "mutation_choice_"
 
-/** Vistas de la pestaña Panteón: los dioses, las Pruebas y el Altar de Runas. */
-enum class PantheonView { GODS, TRIALS, RUNES }
-
-@Composable
-fun PantheonViewChips(view: PantheonView, trialsLabel: String, runesLabel: String, onSelect: (PantheonView) -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-    ) {
-        TrialChip(stringResource(R.string.pantheon_view_gods), view == PantheonView.GODS, PANTHEON_VIEW_TAG + "gods") { onSelect(PantheonView.GODS) }
-        TrialChip(trialsLabel, view == PantheonView.TRIALS, PANTHEON_VIEW_TAG + "trials") { onSelect(PantheonView.TRIALS) }
-        TrialChip(runesLabel, view == PantheonView.RUNES, PANTHEON_VIEW_TAG + "runes") { onSelect(PantheonView.RUNES) }
-    }
-}
-
 const val TRIAL_CARD_TAG = "trial_card_"
 const val TRIAL_ABANDON_TAG = "trial_abandon"
 const val TRIAL_BAR_TAG = "trial_bar"
 const val TRIAL_CHOICE_TAG = "trial_choice_"
-const val PANTHEON_VIEW_TAG = "pantheon_view_"

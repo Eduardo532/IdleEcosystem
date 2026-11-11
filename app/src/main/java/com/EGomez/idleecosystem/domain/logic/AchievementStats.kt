@@ -133,6 +133,10 @@ object AchievementStat {
     const val ACTIVE_MUTATION_PREFIX = "run.mutation."
     /** "mutation_seen.feverish_notes": esa mutación se eligió alguna vez. */
     const val MUTATION_SEEN_PREFIX = "mutation_seen."
+    /** "ui.seen.grimoire": el jugador ya abrió esa pestaña (v0.19.0; no es un logro). */
+    const val SEEN_TAB_PREFIX = "ui.seen."
+    /** Se marcó lo ya visible al pasar a la interfaz por capas: no todo aparece como nuevo. */
+    const val SEEN_TABS_INIT = "ui.seen_init"
     /** "mutation_with.cthulhu.rlyeh_rises": vida terminada con ese pacto y esa mutación. */
     const val MUTATION_WITH_PREFIX = "mutation_with."
     /** "mutation_path.pu_path_hand.burning_synapse": vida terminada con esa Senda y esa mutación. */

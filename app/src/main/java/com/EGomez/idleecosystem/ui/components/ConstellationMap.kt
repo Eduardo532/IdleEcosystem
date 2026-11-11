@@ -230,7 +230,11 @@ fun ConstellationMap(
                     drawCircle(Color(0xFF15121C), radius, center)
                     drawCircle(base.copy(alpha = if (affordable) 1f else 0.7f), radius, center, style = Stroke(width = 3f))
                 }
-                else -> drawCircle(Color(0xFF3A3A44), radius * 0.75f, center)
+                // Todavía fuera de alcance: un anillo gris (las de adorno son puntos sin anillo)
+                else -> {
+                    drawCircle(Color(0xFF15121C), radius * 0.85f, center)
+                    drawCircle(Color(0xFF55555F), radius * 0.85f, center, style = Stroke(width = 1.5f))
+                }
             }
             // La Senda: doble anillo (gris si su constelación todavía no está completa)
             if (isPath) {

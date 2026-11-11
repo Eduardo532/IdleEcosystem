@@ -8,6 +8,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 
 - **v0.19.1:** la Locura sube de verdad: cada clic suma +0,06 y baja más rápido cuanto más alta está (mantener pulsado la deja cerca del 60 %). Confirmación de Ascender compacta: la Cordura que ganas y una fila por elección (pacto, Prueba, mutación, Senda) que abre su selector; los detalles y los hitos, plegados.
 - **v0.19.2:** el Mapa de Locura pasa a ser un cielo con siete constelaciones (La Mano, El Engranaje, El Sueño, La Mente, El Vacío, El Culto y Lo Arcano), con zoom, colores por estado, vista de lista y una Senda en el centro de cada una (cuatro Sendas nuevas). Diez nodos nuevos: edificios al empezar, edificios más baratos, eventos, runas, rituales, Ecos, Atención y Locura más tranquila. Los nodos flojos de Cordura, edificios y producción se refuerzan. 25 logros propios.
+- **v0.19.3:** el Mapa de Locura usa constelaciones reales (Orión, Osa Mayor, Las Pléyades, Casiopea, Pez Austral, Tauro y Perseo), con la Senda dentro de cada figura y los hilos a la estrella más cercana. La Locura sube de verdad al tocar rápido (~50 %) y al mantener pulsado (~80 %). Los selectores de pacto, Prueba y mutación muestran todas las opciones sin deslizar.
 
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 

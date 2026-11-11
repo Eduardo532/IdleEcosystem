@@ -86,6 +86,14 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Grabar una runa pide atraparla 10 veces (nivel 1), 5 (nivel 2) o 3 (nivel 3). Hay hasta 4 espacios, uno por cada Prueba que los da.
 - Cada runa grabada da un bono pasivo propio que se multiplica con el pacto. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
 
+## Constelaciones del Mapa *(v0.19.2)*
+
+- Siete constelaciones con 3 a 5 estrellas en cadena desde El Despertar; 28 nodos y 7 Sendas. *(Test: `MadnessPathsTest`.)*
+- Una Senda se abre con toda su constelación encendida (o si ya se recorría) y sigue siendo excluyente.
+- Los nodos de efecto de pacto escalan lineal: `1 + (efecto − 1) × nivel` (Planos Imposibles al 10: costos x0,70).
+- Calma Antigua: la Locura que se gana x`(1 − 0,08 × nivel)`, mínimo x0,1. Ojo Interior: +1 de Atención por nivel (máx. 3).
+- El objetivo del logro "El Mapa Completo" es el número de nodos sin Sendas (28). *(Test: `MechanicAchievementsTest`.)*
+
 ## Medidor de Locura
 
 - Sube: clic +0,06, runa +2/+4/+8, ritual +5, Convergencia +20. Baja por segundo `0,05 + 0,007 × Locura` (fórmula cerrada, igual sin conexión); la Letanía de Calma, 40. Mantener pulsado se estabiliza en ~61 %. *(Test: `MadnessMeterTest`.)*

@@ -153,3 +153,10 @@ composeCompiler {
 room {
     schemaDirectory("$projectDir/schemas")
 }
+
+// Los fallos de los tests muestran el mensaje completo en el registro de la CI
+tasks.withType<Test>().configureEach {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}

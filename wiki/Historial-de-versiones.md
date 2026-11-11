@@ -6,6 +6,8 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 
 - **v0.19.0:** interfaz por capas: el menú empieza con una sola pestaña y cada sistema aparece al llegar a él, agrupado en las capas Vida, Ascensión y Trascendencia, con aviso de lo nuevo, punto dorado y una pista del próximo descubrimiento. El Mapa de Locura, la Atención y la automatización pasan a la pestaña Cordura; el Éter y las mejoras eternas, a su pestaña; catálogo de mutaciones. Runas más claras: placa con nombre y efecto real, aviso al capturarlas y chips con el nombre de la runa.
 
+- **v0.19.1:** la Locura sube de verdad: cada clic suma +0,06 y baja más rápido cuanto más alta está (mantener pulsado la deja cerca del 60 %). Confirmación de Ascender compacta: la Cordura que ganas y una fila por elección (pacto, Prueba, mutación, Senda) que abre su selector; los detalles y los hitos, plegados.
+
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 
 Quinta etapa del plan de retención: una segunda capa de prestigio que abre sistemas nuevos.

@@ -15,7 +15,11 @@ Ascender **reinicia la partida** a cambio de **Cordura Residual**, una moneda pe
 | 100M | 10 |
 | 1B | 31 |
 
-Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimiento**. La confirmación de Ascender *(v0.14)* muestra lo generado en esta vida, cuándo llega el siguiente punto y cuánto falta para duplicar. El panel de Cordura también indica cuándo se duplica.
+### La confirmación de Ascender *(v0.19.1)*
+
+Muestra arriba la Cordura que ganas y, debajo, **una fila por cada elección de la próxima vida**: **Pacto**, **Prueba**, **Mutación** y **Senda** (cada una aparece solo cuando existe). Tocar una fila abre su selector; al pulsar **LISTO** vuelves al resumen. Lo demás (qué se pierde y qué se conserva, el ritmo de la Cordura y los hitos) está plegado en **Qué se pierde, qué se conserva e hitos**.
+
+Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimiento**. La confirmación de Ascender *(v0.14)* muestra cuándo se duplicaría la Cordura; en **Qué se pierde, qué se conserva e hitos** está lo generado en esta vida y cuándo llega el siguiente punto. El panel de Cordura también indica cuándo se duplica.
 
 Al Ascender también eliges el **pacto** de tu próxima vida (ver [Panteón](Panteon)) y, si recorres una **Senda**, puedes abandonarla (ver [Sendas](#sendas-v0162)). Desde la tercera Ascensión también puedes elegir una **Prueba de Locura** (ver [Pruebas de Locura](Pruebas-de-Locura)).
 
@@ -42,7 +46,7 @@ Según cuántas veces hayas Ascendido en toda la partida, cada vida nueva empiez
 | 25 | Conservas las sinergias compradas |
 | 50 | Un ritual elegido se activa solo |
 
-La confirmación de Ascender muestra la lista: ✓ los que ya tienes y ★ el que desbloquea la Ascensión que estás por hacer.
+La confirmación de Ascender muestra la lista en **Qué se pierde, qué se conserva e hitos**: ✓ los que ya tienes y ★ el que desbloquea la Ascensión que estás por hacer.
 
 **Autocompradores:** se encienden y apagan con el botón **AUTO** (sobre la lista de edificios, junto a "Comprar todas" para el Grimorio y en cada ritual para el ritual automático).
 
@@ -103,7 +107,7 @@ Al final de las ramas de clic, edificios y sueño hay tres nodos con anillo dora
 | Senda del Engranaje | Todos los edificios | +100 % | 2000 | x2.5 | Sincronía |
 | Senda del Sueño | Ganancia sin conexión | +300 % | 2000 | x2.5 | Eternidad en un Segundo |
 
-**Cambiar de Senda:** solo al Ascender. La confirmación muestra la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
+**Cambiar de Senda:** solo al Ascender. En la confirmación, toca la fila **Senda** para ver la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
 
 ## Progreso sin conexión
 

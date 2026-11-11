@@ -23,6 +23,9 @@ import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
 import com.EGomez.idleecosystem.ui.screens.main.components.EtherPanel
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_DETAILS_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_PICKER_DONE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.components.ETERNAL_BUY_TAG
 import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
@@ -273,9 +276,13 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Senda de la Mano · continúa").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "path").performClick()
         compose.onNodeWithText("recuperas", substring = true).assertExists()
         compose.onNodeWithTag(ABANDON_PATH_TAG).performClick()
         assertTrue(abandon)
+        compose.onNodeWithTag(ASCEND_PICKER_DONE_TAG).performClick()
+        compose.onNodeWithText("Senda de la Mano · se abandona").assertExists()
     }
 
     @Test
@@ -334,6 +341,8 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Sin Prueba").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "trial").performClick()
         compose.onNodeWithTag(TRIAL_CHOICE_TAG + "hunger").performClick()
         assertEquals(Trial.HUNGER, chosen)
         compose.onNodeWithText("Los edificios cuestan x10.").assertExists()
@@ -353,6 +362,7 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "mutation").performClick()
         compose.onNodeWithText("Mutación de la próxima vida").assertExists()
         compose.onNodeWithTag(MUTATION_CHOICE_TAG + "burning_synapse").performClick()
         assertEquals(Mutation.BURNING_SYNAPSE, chosen)
@@ -519,6 +529,10 @@ class CriticalUiTest {
             )
         }
 
+        // A la vista, solo cuándo se duplica; el resto está en los detalles
+        compose.onNodeWithText("x2 al generar 3.60e+07").assertExists()
+        compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertDoesNotExist()
+        compose.onNodeWithTag(ASCEND_DETAILS_TAG).performClick()
         compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertExists()
         compose.onNodeWithText("Siguiente punto: +4 al llegar a 1.60e+07").assertExists()
         compose.onNodeWithText("Para duplicar: +6 al llegar a 3.60e+07").assertExists()
@@ -728,6 +742,8 @@ class CriticalUiTest {
     fun `the ascend dialog lists the milestones and marks the next one`() {
         compose.setContent { AscendDialog(sanityGainFormatted = "3", onConfirm = {}, onDismiss = {}, ascensions = 2) }
 
+        compose.onNodeWithText("Esta será tu Ascensión n.º 3.").assertDoesNotExist()
+        compose.onNodeWithTag(ASCEND_DETAILS_TAG).performClick()
         compose.onNodeWithText("Esta será tu Ascensión n.º 3.").assertExists()
         compose.onNodeWithText("✓ 1: Empiezas cada vida con 10 Sinapsis.").assertExists()
         compose.onNodeWithText("★ 3: Conservas las mejoras de clic del Grimorio.").assertExists()
@@ -836,6 +852,8 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Sin Pacto").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "pact").performClick()
         compose.onNodeWithText("Pacto para la próxima vida").assertExists()
         compose.onNodeWithText("+ Cordura ganada al Ascender x1.25").assertExists()
         compose.onNodeWithTag("${PACT_CHOICE_TAG}cthulhu").performClick()

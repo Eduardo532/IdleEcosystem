@@ -6,16 +6,16 @@ Desde la **quinta Ascensión**, una barra bajo los potenciadores muestra tu **Lo
 
 | Acción | Locura |
 |---|---|
-| Cada clic | +0,06 |
+| Cada clic | +0,12, menos cuanto más alta está (× (1 − Locura/125)) |
 | Runa de nivel 1 / 2 / 3 atrapada | +2 / +4 / +8 |
 | Cada ritual | +5 |
 | La Convergencia | +20 |
 | Letanía de Calma (ritual nuevo, 10 Ecos, recarga 5 min) | −40 |
-| Cada segundo, también sin conexión | −(0,05 + 0,7 % de la Locura) |
+| Cada segundo, también sin conexión | −(0,03 + 0,4 % de la Locura) |
 
-Cuanto más alta está, más rápido baja *(v0.19.1)*. Mantener pulsado (8 clics por segundo) la **estabiliza cerca del 60 %**, y tocar a mano, cerca del 25–30 %. Para pasar de ahí y acercarte al colapso hay que sumar **runas, rituales o la Convergencia**. Si dejas de jugar fuerte, en unos 5 minutos vuelve a 0.
+Cuanto más alta está, más rápido baja y menos suma cada clic *(v0.19.3)*. Tocar rápido a mano (3–4 veces por segundo) la deja **cerca del 50 %**, y mantener pulsado (8 clics por segundo), **cerca del 80 %**. Para llegar al colapso hay que sumar **runas, rituales o la Convergencia**. Si dejas de jugar fuerte, en unos 10 minutos vuelve a 0.
 
-> Antes de la v0.19.1 bajaba 0,2 fijo por segundo y cada clic sumaba 0,02: ni manteniendo pulsado llegaba a subir.
+> Antes de la v0.19.1 bajaba 0,2 fijo por segundo y cada clic sumaba 0,02: ni manteniendo pulsado llegaba a subir. En la v0.19.1, tocando a mano se quedaba en ~23 %.
 
 ## Qué hace
 

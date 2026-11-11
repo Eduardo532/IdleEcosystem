@@ -41,6 +41,12 @@ class MadnessMeter(value: Double = 0.0) {
         value = ((value + floor) * exp(-k * seconds) - floor).coerceIn(0.0, MAX)
     }
 
+    /**
+     * Lo que suma un clic (v0.19.3): menos cuanto más alta está la Locura, así que tocar
+     * rápido la sube de verdad sin llevarla sola al colapso.
+     */
+    fun clickGain(): Double = PER_CLICK * (1.0 - value / CLICK_SOFTCAP).coerceAtLeast(0.0)
+
     /** Cuánto baja por segundo con la Locura actual (para explicarlo en pantalla). */
     fun decayPerSecond(): Double = BASE_DECAY + DECAY_RATE * value
 
@@ -60,18 +66,21 @@ class MadnessMeter(value: Double = 0.0) {
         const val MAX = 100.0
         const val BONUS_PER_POINT = 0.01
         /**
-         * Bajada por segundo: una parte fija y otra proporcional a la Locura. Antes era
-         * 0,2 fija y ni manteniendo pulsado subía (8 clics × 0,02 = 0,16 por segundo).
-         * Ahora mantener pulsado se estabiliza cerca del 60 %; para pasar de ahí y
-         * arriesgar el colapso hay que sumar runas, rituales o la Convergencia.
+         * Bajada por segundo: una parte fija y otra proporcional a la Locura. Hasta la
+         * v0.19.0 era 0,2 fija y ni manteniendo pulsado subía; en la v0.19.1 tocar a mano
+         * se quedaba en ~23 %. Desde la v0.19.3, tocando unas 3–4 veces por segundo se
+         * estabiliza en ~50 % y manteniendo pulsado en ~80 %; para llegar al colapso hay
+         * que sumar runas, rituales o la Convergencia.
          */
-        const val BASE_DECAY = 0.05
-        const val DECAY_RATE = 0.007
+        const val BASE_DECAY = 0.03
+        const val DECAY_RATE = 0.004
         const val OMEN_THRESHOLD = 50.0
         const val OMEN_DIVISOR = 500.0
 
         /** Cuánto sube cada acción. */
-        const val PER_CLICK = 0.06
+        const val PER_CLICK = 0.12
+        /** Con esta Locura un clic ya no suma nada (nunca se alcanza: el colapso es a 100). */
+        const val CLICK_SOFTCAP = 125.0
         const val PER_RITUAL = 5.0
         const val PER_CONVERGENCE = 20.0
         const val CALM_AMOUNT = 40.0

@@ -1104,7 +1104,7 @@ class GameEngine @Inject constructor(
         val rules = trialRules()
         // Manos Atadas: el clic no produce
         if (!rules.noClickKnowledge) addKnowledge(currentClickPower(), isManual = true)
-        addMadness(MadnessMeter.PER_CLICK)
+        addMadness(madness.clickGain())
         clicksThisTide++
 
         // Silencio: no hay Ecos

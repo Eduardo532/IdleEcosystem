@@ -33,6 +33,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.ui.components.ConstellationMap
+import com.EGomez.idleecosystem.ui.components.SkyLayout
 import com.EGomez.idleecosystem.domain.model.Constellation
 import com.EGomez.idleecosystem.ui.theme.MadnessRed
 import androidx.compose.foundation.horizontalScroll
@@ -187,7 +188,10 @@ private fun MapList(
                         fontSize = 13.sp,
                         letterSpacing = 1.sp
                     )
-                    c?.let { Text(tr(it.description), color = Color.Gray, fontSize = 11.sp) }
+                    c?.let {
+                        val figure = SkyLayout.figures[it]?.star?.let { star -> tr(star) + " · " }.orEmpty()
+                        Text(figure + tr(it.description), color = Color.Gray, fontSize = 11.sp)
+                    }
                 }
             }
             items(nodes, key = { it.id }) { node -> MapRow(node, upgrades, currency, node.id == selectedId) { onSelect(node) } }
@@ -279,9 +283,14 @@ private fun NodeCard(
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     node.constellation?.let {
-                        Text(it.titleText().uppercase(), color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                        // El tema y la figura real: "LA MANO · ORIÓN"
+                        val figure = SkyLayout.figures[it]?.star?.let { star -> " · " + tr(star).uppercase() }.orEmpty()
+                        Text(it.titleText().uppercase() + figure, color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     }
                     Text(tr(node.name), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    SkyLayout.starName(node, upgrades)?.let { star ->
+                        Text("★ $star", color = Color.Gray, fontSize = 11.sp, modifier = Modifier.testTag(MAP_STAR_NAME_TAG))
+                    }
                 }
                 if (node.level > 0 || node.maxLevel != null) Text(levelText(node), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
@@ -357,6 +366,7 @@ const val MAP_CHIP_TAG = "map_chip_"
 const val MAP_NODE_ROW_TAG = "map_node_"
 const val MAP_NODE_CARD_TAG = "map_node_card"
 const val MAP_LIST_TAG = "map_list"
+const val MAP_STAR_NAME_TAG = "map_star_name"
 const val CONSTELLATION_MAP_TAG = "constellation_map"
 const val PATH_NOTE_TAG = "path_note"
 

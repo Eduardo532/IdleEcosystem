@@ -17,7 +17,7 @@ Ascender **reinicia la partida** a cambio de **Cordura Residual**, una moneda pe
 
 ### La confirmación de Ascender *(v0.19.1)*
 
-Muestra arriba la Cordura que ganas y, debajo, **una fila por cada elección de la próxima vida**: **Pacto**, **Prueba**, **Mutación** y **Senda** (cada una aparece solo cuando existe). Tocar una fila abre su selector; al pulsar **LISTO** vuelves al resumen. Lo demás (qué se pierde y qué se conserva, el ritmo de la Cordura y los hitos) está plegado en **Qué se pierde, qué se conserva e hitos**.
+Muestra arriba la Cordura que ganas y, debajo, **una fila por cada elección de la próxima vida**: **Pacto**, **Prueba**, **Mutación** y **Senda** (cada una aparece solo cuando existe). Tocar una fila abre su selector, con todas las opciones a la vista en varias filas *(v0.19.3)*; al pulsar **LISTO** vuelves al resumen. Lo demás (qué se pierde y qué se conserva, el ritmo de la Cordura y los hitos) está plegado en **Qué se pierde, qué se conserva e hitos**.
 
 Como es una raíz cuadrada, **duplicar la Cordura exige 4 veces más Conocimiento**. La confirmación de Ascender *(v0.14)* muestra cuándo se duplicaría la Cordura; en **Qué se pierde, qué se conserva e hitos** está lo generado en esta vida y cuándo llega el siguiente punto. El panel de Cordura también indica cuándo se duplica.
 
@@ -72,6 +72,17 @@ Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura**. 
 ### Cómo se usa *(v0.19.2)*
 
 - **Cielo:** pellizca para acercar y arrastra para moverte. Con zoom aparecen los nombres de las estrellas. Toca una estrella para ver su ficha.
+- **Constelaciones reales** *(v0.19.3)*: cada sección es una figura del cielo, con sus estrellas de adorno y sus líneas. La primera estrella que se compra es la más cercana a El Despertar (de ahí sale su hilo), y la Senda está dentro de la figura, unida a su estrella más cercana. La ficha dice el nombre real de cada estrella (por ejemplo, ★ Rigel).
+
+| Sección | Constelación | Estrellas del Mapa, en orden de compra | Senda |
+|---|---|---|---|
+| La Mano | Orión | Rigel, Mintaka, Bellatrix, Betelgeuse | Alnilam, en el cinturón |
+| El Engranaje | Osa Mayor | Phecda, Megrez, Dubhe | en el centro del cazo |
+| El Sueño | Las Pléyades | Atlas, Alcyone, Merope | en el centro del cúmulo |
+| La Mente | Casiopea | Segin, Ruchbah, Navi, Schedar, Caph | bajo la W |
+| El Vacío | Pez Austral | Epsilon, Fomalhaut, Delta | en el centro del pez |
+| El Culto | Tauro | Elnath, Ain, Gamma, Aldebarán | dentro de la V de las Híades |
+| Lo Arcano | Perseo | Eta, Gamma, Mirfak, Algol, Rho | Delta Persei |
 - **Lista:** las mismas estrellas agrupadas por constelación, con su efecto y su costo.
 - **Constelaciones:** los botones de arriba acercan el cielo a una constelación (o filtran la lista) y muestran cuántas estrellas tiene encendidas.
 - **Colores:** gris, todavía no se alcanza; contorno del color de la constelación, se puede comprar (brilla más si te alcanza la Cordura); relleno, comprada; dorado, al máximo o Senda recorrida; rojo con cruz, Senda sellada.

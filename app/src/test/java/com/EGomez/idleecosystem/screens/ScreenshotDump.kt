@@ -8,7 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
@@ -41,15 +42,21 @@ import java.math.BigDecimal
 @Config(sdk = [34], application = Application::class, qualifiers = "es-w360dp-h760dp-xhdpi")
 class ScreenshotDump {
     @get:Rule
-    val compose = createComposeRule()
+    val compose = createAndroidComposeRule<ComponentActivity>()
 
     private fun shot(name: String, content: @Composable () -> Unit) {
         compose.mainClock.autoAdvance = false
         compose.setContent { IdleEcosystemTheme { Box(Modifier.fillMaxSize().background(VoidBlack)) { content() } } }
         compose.mainClock.advanceTimeBy(600)
-        val bmp = compose.onRoot().captureToImage().asAndroidBitmap()
-        val dir = File("build/screens").apply { mkdirs() }
-        File(dir, "$name.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val view = compose.activity.window.decorView
+        val bmp = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        view.draw(android.graphics.Canvas(bmp))
+        val small = Bitmap.createScaledBitmap(bmp, view.width / 2, view.height / 2, true)
+        val out = java.io.ByteArrayOutputStream()
+        small.compress(Bitmap.CompressFormat.PNG, 100, out)
+        val b64 = java.util.Base64.getEncoder().encodeToString(out.toByteArray())
+        b64.chunked(4000).forEachIndexed { i, c -> println("SHOT|$name|$i|$c") }
+        println("SHOT|$name|END|")
     }
 
     private fun buildings(owned: List<Int>) = BuildingCatalog.create().take(owned.size).mapIndexed { i, b ->

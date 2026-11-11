@@ -34,7 +34,8 @@ class ContentTranslationsTest {
         "Tutoriales" to TutorialStep.entries.flatMap { listOf(it.title, it.message) },
         "Panteón" to Pact.entries.flatMap { listOf(it.godName, it.epithet, it.lore) },
         "Pruebas de Locura" to com.EGomez.idleecosystem.domain.model.Trial.entries.flatMap { listOf(it.title, it.rule) },
-        "Mutaciones" to com.EGomez.idleecosystem.domain.model.Mutation.entries.flatMap { listOf(it.title, it.description) }
+        "Mutaciones" to com.EGomez.idleecosystem.domain.model.Mutation.entries.flatMap { listOf(it.title, it.description) },
+        "Constelaciones" to com.EGomez.idleecosystem.domain.model.Constellation.entries.flatMap { listOf(it.title, it.description) }
     )
 
     @Test

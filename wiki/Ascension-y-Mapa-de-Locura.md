@@ -65,47 +65,70 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 
 ## Mapa de Locura
 
-Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura** *(v0.19.0)*. La tienda de Cordura: una constelación de **21 nodos** (18 nodos más las 3 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`). Un nodo solo se puede comprar si su nodo anterior tiene al menos un nivel.
+Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura**. Es la tienda de Cordura: desde la v0.19.2, **un cielo con siete constelaciones** alrededor de **El Despertar**, con **35 estrellas** (28 nodos y 7 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`); algunos tienen un nivel máximo.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
 
-**Efecto neto** *(v0.15)*: al elegir un nodo, el panel muestra cuánto sube el nodo, cuánto baja el bono de tu Cordura y, en los nodos de producción global, el resultado neto. Si el neto es menor que x1, ese nivel baja tu producción.
+### Cómo se usa *(v0.19.2)*
 
-| Nodo | Efecto | Por nivel | Costo base | Crecimiento | Requiere |
+- **Cielo:** pellizca para acercar y arrastra para moverte. Con zoom aparecen los nombres de las estrellas. Toca una estrella para ver su ficha.
+- **Lista:** las mismas estrellas agrupadas por constelación, con su efecto y su costo.
+- **Constelaciones:** los botones de arriba acercan el cielo a una constelación (o filtran la lista) y muestran cuántas estrellas tiene encendidas.
+- **Colores:** gris, todavía no se alcanza; contorno del color de la constelación, se puede comprar (brilla más si te alcanza la Cordura); relleno, comprada; dorado, al máximo o Senda recorrida; rojo con cruz, Senda sellada.
+- **Ficha:** qué da ahora, qué daría el siguiente nivel, el efecto neto de gastar Cordura y el botón **MEJORAR**.
+
+Dentro de cada constelación las estrellas se compran **en cadena**: la primera pide El Despertar y cada una pide la anterior. Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %); entre nodos distintos, los bonos se multiplican.
+
+### Las constelaciones
+
+| Constelación | Nodo | Efecto por nivel | Costo base | Crecimiento | Máx. |
 |---|---|---|---|---|---|
-| El Despertar | Producción global | +10 % | 1 | x1.5 | — |
-| Dedos Inquietos | Clic | +50 % | 5 | x1.5 | El Despertar |
-| Furia Táctil | Clic | +100 % | 25 | x1.6 | Dedos Inquietos |
-| Tormenta Psiónica | Clic | +200 % | 150 | x1.8 | Furia Táctil |
-| La Mano de Dios | Clic | +500 % | 1000 | x2.5 | Tormenta Psiónica |
-| Engranajes Mentales | Edificios 1 a 6 | +20 % | 10 | x1.5 | El Despertar |
-| Sincronía | Todos los edificios | +15 % | 50 | x1.6 | Engranajes Mentales |
-| Sueño Lúcido | Ganancia sin conexión | +50 % | 200 | x1.8 | Sincronía |
-| Eternidad en un Segundo | Ganancia sin conexión | +200 % | 1500 | x2.5 | Sueño Lúcido |
-| Concentración | Producción global | +5 % | 15 | x1.4 | El Despertar |
-| Lógica Alienígena | Producción global | +25 % | 80 | x1.7 | Concentración |
-| Iluminación Oscura | Producción global | +50 % | 400 | x2.0 | Lógica Alienígena |
-| Omnisciencia | Producción global | +150 % | 2500 | x3.0 | Iluminación Oscura |
-| Llamada del Vacío | Cordura ganada al Ascender | +10 % | 100 | x2.0 | Lógica Alienígena |
-| Abismo | Cordura ganada al Ascender | +20 % | 500 | x2.5 | Llamada del Vacío |
-| Singularidad | Cordura ganada al Ascender | +50 % | 5000 | x4.0 | Abismo |
-| Ascensión Cósmica | Producción global | +100 % | 5000 | x5.0 | Omnisciencia |
+| (centro) | El Despertar | Producción +10 % | 1 | x1.5 | — |
+| **La Mano** | Dedos Inquietos | Clic +50 % | 5 | x1.5 | — |
+| | Furia Táctil | Clic +100 % | 25 | x1.6 | — |
+| | Tormenta Psiónica | Clic +200 % | 150 | x1.8 | — |
+| | La Mano de Dios | Clic +500 % | 1000 | x2.5 | — |
+| **El Engranaje** | Engranajes Mentales | Seis primeros edificios +30 % *(antes 20 %)* | 10 | x1.5 | — |
+| | Sincronía | Todos los edificios +25 % *(antes 15 %)* | 50 | x1.6 | — |
+| | Planos Imposibles *(nuevo)* | Edificios −3 % de costo | 150 | x1.8 | 10 |
+| **El Sueño** | Sueño Lúcido | Sin conexión +50 % | 200 | x1.8 | — |
+| | Eternidad en un Segundo | Sin conexión +200 % | 1500 | x2.5 | — |
+| | Visiones Nocturnas *(nuevo)* | Eventos +15 % más seguido y +10 % de fuerza | 300 | x2.0 | 5 |
+| **La Mente** | Concentración | Producción +10 % *(antes 5 %)* | 15 | x1.4 | — |
+| | Lógica Alienígena | Producción +25 % | 80 | x1.7 | — |
+| | Iluminación Oscura | Producción +50 % | 400 | x2.0 | — |
+| | Omnisciencia | Producción +150 % | 2500 | x3.0 | — |
+| | Ascensión Cósmica | Producción +100 % | 5000 | x5.0 | — |
+| **El Vacío** | Llamada del Vacío | Cordura +25 % *(antes 10 %)* | 100 | x2.0 | — |
+| | Abismo | Cordura +40 % *(antes 20 %)* | 500 | x2.5 | — |
+| | Singularidad | Cordura +100 % *(antes 50 %)* | 5000 | x4.0 | — |
+| **El Culto** | Legado del Culto | +5 Notas Desordenadas al empezar | 3 | x2.0 | — |
+| | Biblioteca Heredada *(nuevo)* | +5 Pergaminos Prohibidos al empezar | 20 | x2.0 | 10 |
+| | Reliquias de Familia *(nuevo)* | +3 Artefactos Susurrantes al empezar | 120 | x2.2 | 10 |
+| | Iniciados Fieles *(nuevo)* | +2 Sectarios Novatos al empezar | 600 | x2.5 | 10 |
+| **Lo Arcano** | Ojos del Vacío *(nuevo)* | Runas +10 % más seguido | 40 | x1.8 | 5 |
+| | Liturgia Breve *(nuevo)* | Rituales −5 % de costo y de recarga | 150 | x2.0 | 6 |
+| | Resonancia *(nuevo)* | Probabilidad de Eco +10 % | 400 | x2.2 | 5 |
+| | Ojo Interior *(nuevo)* | +1 punto de Atención | 1000 | x4.0 | 3 |
+| | Calma Antigua *(nuevo)* | La Locura sube 8 % menos | 2500 | x3.0 | 5 |
 
-Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %). Entre nodos distintos, los bonos se multiplican.
+Desde la v0.19.2, El Sueño y El Vacío ya no cuelgan de otras ramas: empiezan en El Despertar. La Prueba que anula la Cordura y el Mapa también anula los edificios iniciales y los efectos de Lo Arcano.
 
-### Legado del Culto *(v0.17.4)*
+### Sendas *(v0.16.2; siete desde la v0.19.2)*
 
-Nodo nuevo junto a El Despertar: **cada vida empieza con 5 Notas Desordenadas por nivel**. Cuesta 3 de Cordura y se duplica por nivel. Sirve para arrancar más rápido y para las vidas en las que el clic no produce.
+Cada constelación tiene en su **centro** una Senda con doble anillo, que se abre cuando **todas sus estrellas tienen al menos un nivel**. Son **excluyentes**: en cuanto una tiene un nivel, las demás quedan **selladas** (con una cruz roja) y no se pueden comprar. Todas cuestan 2000 de Cordura y crecen x2.5.
 
-### Sendas *(v0.16.2)*
+| Senda | Efecto por nivel |
+|---|---|
+| Senda de la Mano | Clic +300 % |
+| Senda del Engranaje | Todos los edificios +100 % |
+| Senda del Sueño | Sin conexión +300 % |
+| Senda de la Mente *(nueva)* | Producción +50 % |
+| Senda del Vacío *(nueva)* | Cordura ganada +50 % |
+| Senda del Culto *(nueva)* | +10 de cada uno de los cinco primeros edificios de producción al empezar |
+| Senda Arcana *(nueva)* | Runas +25 % más seguido, Eco +25 % y rituales −10 % de costo |
 
-Al final de las ramas de clic, edificios y sueño hay tres nodos con anillo dorado: las **Sendas**. Son **excluyentes**: en cuanto una tiene un nivel, las otras dos quedan **selladas** (con una cruz roja) y no se pueden comprar.
-
-| Senda | Efecto | Por nivel | Costo base | Crecimiento | Requiere |
-|---|---|---|---|---|---|
-| Senda de la Mano | Clic | +300 % | 2000 | x2.5 | La Mano de Dios |
-| Senda del Engranaje | Todos los edificios | +100 % | 2000 | x2.5 | Sincronía |
-| Senda del Sueño | Ganancia sin conexión | +300 % | 2000 | x2.5 | Eternidad en un Segundo |
+Si ya recorrías una Senda antes de la v0.19.2, la conservas y puedes seguir subiéndola aunque su constelación no esté completa.
 
 **Cambiar de Senda:** solo al Ascender. En la confirmación, toca la fila **Senda** para ver la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
 

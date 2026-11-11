@@ -235,7 +235,7 @@
     <string name="your_file">YOUR CURRENT FILE</string>
     <string name="ascend_abandon_path">Abandon the %1$s (recover %2$s Sanity)</string>
     <string name="ascend_abandon_hint">You can only change Path when you Ascend.</string>
-    <string name="path_exclusive">Exclusive path: walking it seals the other two.</string>
+    <string name="path_exclusive">Exclusive path: walking it seals the others.</string>
     <string name="path_sealed">Sealed: you already walk the %1$s. You can abandon it when you Ascend.</string>
     <string name="path_sealed_button">Sealed</string>
     <string name="achievements_cat_all">All</string>
@@ -371,4 +371,26 @@
     <string name="ascend_path_abandon">%1$s · abandoned</string>
     <string name="ascend_details">What you lose, what you keep and milestones</string>
     <string name="ascend_choice_done">DONE</string>
+    <string name="map_all">All</string>
+    <string name="map_view_sky">Sky</string>
+    <string name="map_view_list">List</string>
+    <string name="map_zoom_hint">Pinch to zoom · tap a star</string>
+    <string name="map_core">THE AWAKENING</string>
+    <string name="map_max_short">MAX</string>
+    <string name="map_level_of">Level %1$d of %2$d</string>
+    <string name="map_now">Now: %1$s</string>
+    <string name="map_next">Next level: %1$s</string>
+    <string name="map_maxed">MAX LEVEL</string>
+    <string name="map_path_locked">Light up the whole constellation to open its Path.</string>
+    <string name="map_path_locked_button">Constellation incomplete</string>
+    <string name="map_fx_production">Production x%1$s</string>
+    <string name="map_fx_click">Click x%1$s</string>
+    <string name="map_fx_first_buildings">First six buildings x%1$s</string>
+    <string name="map_fx_all_buildings">All buildings x%1$s</string>
+    <string name="map_fx_offline">Offline x%1$s</string>
+    <string name="map_fx_sanity">Sanity gained x%1$s</string>
+    <string name="map_fx_start">+%1$d %2$s at the start of each life</string>
+    <string name="map_fx_attention">+%1$d Attention</string>
+    <string name="map_fx_madness">Madness rises x%1$s</string>
+    <string name="map_fx_cult">+%1$d of the first five production buildings at the start</string>
 </resources>

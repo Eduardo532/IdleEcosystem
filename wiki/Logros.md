@@ -1,6 +1,6 @@
 # Logros
 
-Hay **385 logros**: 113 originales y **272 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **410 logros**: 113 originales y **297 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -88,7 +88,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Cartógrafo de la Locura | Suma 10 niveles en el Mapa de Locura | +1 % |
 | Constelación Propia | Suma 50 niveles en el Mapa de Locura | +1 % |
 | Firmamento Dominado | Suma 150 niveles en el Mapa de Locura | +2 % |
-| El Mapa Completo | Ten al menos 1 nivel en los 18 nodos del Mapa | +2 % |
+| El Mapa Completo | Ten al menos 1 nivel en las 28 estrellas del Mapa (sin contar las Sendas) | +2 % |
 | Obsesión Estelar | Sube un nodo del Mapa a nivel 10 | +1 % |
 | La Estrella Final | Compra Ascensión Cósmica | +1 % |
 | Piloto Automático | Asciende 1 vez de forma automática | +1 % |
@@ -117,7 +117,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Vidas de la Mano | Termina 3 vidas recorriendo la Senda de la Mano | +1 % |
 | Vidas del Engranaje | Termina 3 vidas recorriendo la Senda del Engranaje | +1 % |
 | Vidas del Sueño | Termina 3 vidas recorriendo la Senda del Sueño | +1 % |
-| Las Tres Sendas | Recorre las tres Sendas (en distintas vidas) | +2 % |
+| Las Tres Sendas | Recorre tres Sendas distintas (en distintas vidas) | +1 % |
 | Peregrino | Abandona una Senda al Ascender | +1 % |
 | Errante Eterno | Abandona Sendas 5 veces | +1 % |
 | Más Allá del Velo | Trasciende 1 vez | +1 % |
@@ -142,6 +142,30 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Altar del Durmiente | Consagra el Templo de R'lyeh durante una vida con Cthulhu | +1 % |
 | Sacerdocio del Primogénito | Consagra los Sacerdotes Dementes durante una vida con Nug | +1 % |
 | Garabatos Sagrados | Consagra las Notas Desordenadas durante una vida con Ubbo-Sathla | +1 % |
+| Primera Constelación | Completa una constelación del Mapa de Locura | +1 % |
+| Astrónomo del Abismo | Completa 4 constelaciones | +1 % |
+| Cielo Completo | Completa las 7 constelaciones | +2 % |
+| Primer Pensamiento de la Senda | Recorre la Senda de la Mente | +1 % |
+| Mente Consagrada | Sube la Senda de la Mente a nivel 3 | +1 % |
+| La Mente Absoluta | Sube la Senda de la Mente a nivel 5 | +2 % |
+| Primer Paso en el Vacío | Recorre la Senda del Vacío | +1 % |
+| Vacío Consagrado | Sube la Senda del Vacío a nivel 3 | +1 % |
+| El Vacío Absoluto | Sube la Senda del Vacío a nivel 5 | +2 % |
+| Primer Rito de la Senda | Recorre la Senda del Culto | +1 % |
+| Culto Consagrado | Sube la Senda del Culto a nivel 3 | +1 % |
+| El Culto Absoluto | Sube la Senda del Culto a nivel 5 | +2 % |
+| Primer Signo de la Senda | Recorre la Senda Arcana | +1 % |
+| Arcano Consagrado | Sube la Senda Arcana a nivel 3 | +1 % |
+| Lo Arcano Absoluto | Sube la Senda Arcana a nivel 5 | +2 % |
+| Vidas de la Mente | Termina 3 vidas recorriendo la Senda de la Mente | +1 % |
+| Vidas del Vacío | Termina 3 vidas recorriendo la Senda del Vacío | +1 % |
+| Vidas del Culto | Termina 3 vidas recorriendo la Senda del Culto | +1 % |
+| Vidas Arcanas | Termina 3 vidas recorriendo la Senda Arcana | +1 % |
+| Las Siete Sendas | Recorre las siete Sendas (en distintas vidas) | +2 % |
+| El Sultán del Vacío | Termina una vida con Azathoth recorriendo la Senda del Vacío | +1 % |
+| El Mensajero Arcano | Termina una vida con Nyarlathotep recorriendo la Senda Arcana | +1 % |
+| Las Crías del Culto | Termina una vida con Shub-Niggurath recorriendo la Senda del Culto | +1 % |
+| La Llave y la Mente | Termina una vida con Yog-Sothoth recorriendo la Senda de la Mente | +1 % |
 
 ### Panteón
 
@@ -306,7 +330,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **24 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **25 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

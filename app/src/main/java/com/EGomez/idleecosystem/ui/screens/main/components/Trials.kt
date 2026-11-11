@@ -177,15 +177,17 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
 }
 
 /** Elegir la Prueba de la próxima vida en la confirmación de Ascender. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TrialPicker(trials: List<Trial>, completed: Set<Trial>, selected: Trial?, onSelect: (Trial?) -> Unit) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.trial_choose_title), color = TrialRed, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
+    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
     ) {
         TrialChip(stringResource(R.string.trial_none), selected == null, TRIAL_CHOICE_TAG + "none") { onSelect(null) }
@@ -227,15 +229,17 @@ private fun TrialChip(label: String, selected: Boolean, tag: String, onClick: ()
 }
 
 /** Elegir la mutación de la próxima vida (v0.18.4): tres al azar o ninguna. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutation?) -> Unit) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.mutation_choose_title), color = MutationGreen, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
+    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
     ) {
         TrialChip(stringResource(R.string.mutation_none), selected == null, MUTATION_CHOICE_TAG + "none") { onSelect(null) }

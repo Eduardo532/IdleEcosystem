@@ -375,15 +375,17 @@ fun milestoneText(milestone: AscensionMilestone): Int = when (milestone) {
 }
 
 /** Elegir el pacto de la próxima vida, con lo que da y lo que quita el elegido. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Unit, buildingNames: Map<String, String>) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.pact_choose_title), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
+    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
     ) {
         pacts.forEach { pact ->

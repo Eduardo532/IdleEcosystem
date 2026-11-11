@@ -280,7 +280,7 @@
     <string name="madness_title">Medidor de Locura</string>
     <string name="madness_current">Locura: %1$d%% · producción %2$s</string>
     <string name="madness_info_rise">Sube cuando juegas fuerte: cada clic, cada runa atrapada y cada ritual (la Convergencia, mucho más).</string>
-    <string name="madness_info_fall">Baja sola con el tiempo, también sin conexión. La Letanía de Calma la baja 40 puntos de golpe.</string>
+    <string name="madness_info_fall">Baja sola con el tiempo, también sin conexión, y más rápido cuanto más alta está: mantener pulsado INVESTIGAR la deja cerca del 60%. La Letanía de Calma la baja 40 puntos de golpe.</string>
     <string name="madness_info_omens">Cada punto da +1% de producción. Desde el 50% aparecen presagios: un edificio poseído deja de producir 30 s, o se dispersa una parte de tus Ecos.</string>
     <string name="madness_info_collapse">Al llegar a 100% la mente colapsa: pierdes los potenciadores activos y la producción queda a la mitad durante 1 minuto. Nunca pierdes Conocimiento ni progreso.</string>
     <string name="madness_close">Entendido</string>
@@ -364,4 +364,12 @@
     <string name="buff_short_costs">−%1$d%% costos</string>
     <string name="buff_short_echo">+%1$d%% Eco</string>
     <string name="buff_short_freeze">Congelado</string>
+    <string name="ascend_row_pact">Pacto</string>
+    <string name="ascend_row_trial">Prueba</string>
+    <string name="ascend_row_mutation">Mutación</string>
+    <string name="ascend_row_path">Senda</string>
+    <string name="ascend_path_keep">%1$s · continúa</string>
+    <string name="ascend_path_abandon">%1$s · se abandona</string>
+    <string name="ascend_details">Qué se pierde, qué se conserva e hitos</string>
+    <string name="ascend_choice_done">LISTO</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.domain.model.RuneTier
+import kotlin.math.exp
 import kotlin.random.Random
 
 /**
@@ -27,10 +28,21 @@ class MadnessMeter(value: Double = 0.0) {
         value = (value - amount).coerceAtLeast(0.0)
     }
 
-    /** La Locura baja sola con el tiempo (también sin conexión). */
+    /**
+     * La Locura baja sola con el tiempo (también sin conexión), y más rápido cuanto más
+     * alta está (v0.19.1): cada segundo baja `BASE_DECAY + DECAY_RATE × Locura`.
+     * Se resuelve con la fórmula cerrada de esa ecuación, así que da lo mismo bajar
+     * 600 segundos de una vez que de a uno.
+     */
     fun decay(seconds: Long, multiplier: Double = 1.0) {
-        if (seconds > 0) calm(DECAY_PER_SECOND * seconds * multiplier)
+        if (seconds <= 0 || value <= 0.0) return
+        val k = DECAY_RATE * multiplier
+        val floor = BASE_DECAY / DECAY_RATE
+        value = ((value + floor) * exp(-k * seconds) - floor).coerceIn(0.0, MAX)
     }
+
+    /** Cuánto baja por segundo con la Locura actual (para explicarlo en pantalla). */
+    fun decayPerSecond(): Double = BASE_DECAY + DECAY_RATE * value
 
     fun reset() {
         value = 0.0
@@ -47,12 +59,19 @@ class MadnessMeter(value: Double = 0.0) {
     companion object {
         const val MAX = 100.0
         const val BONUS_PER_POINT = 0.01
-        const val DECAY_PER_SECOND = 0.2
+        /**
+         * Bajada por segundo: una parte fija y otra proporcional a la Locura. Antes era
+         * 0,2 fija y ni manteniendo pulsado subía (8 clics × 0,02 = 0,16 por segundo).
+         * Ahora mantener pulsado se estabiliza cerca del 60 %; para pasar de ahí y
+         * arriesgar el colapso hay que sumar runas, rituales o la Convergencia.
+         */
+        const val BASE_DECAY = 0.05
+        const val DECAY_RATE = 0.007
         const val OMEN_THRESHOLD = 50.0
         const val OMEN_DIVISOR = 500.0
 
         /** Cuánto sube cada acción. */
-        const val PER_CLICK = 0.02
+        const val PER_CLICK = 0.06
         const val PER_RITUAL = 5.0
         const val PER_CONVERGENCE = 20.0
         const val CALM_AMOUNT = 40.0

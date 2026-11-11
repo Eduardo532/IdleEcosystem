@@ -16,7 +16,8 @@ class MadnessMeterTest {
         meter.add(MadnessMeter.perRune(RuneTier.TIER_3_TRACE))
         assertEquals(13.0, meter.value, 1e-9)
         meter.decay(10)
-        assertEquals(11.0, meter.value, 1e-9)
+        // Baja 0,05 + 0,7 % de la Locura por segundo: de 13 a ~11,64 en 10 s
+        assertEquals(11.64, meter.value, 0.01)
         meter.decay(1_000)
         assertEquals(0.0, meter.value, 1e-9)
         assertEquals(100.0, MadnessMeter(250.0).value, 1e-9)
@@ -31,9 +32,48 @@ class MadnessMeterTest {
     }
 
     @Test
-    fun `holding the click alone never fills the meter`() {
-        // Mantener pulsado: 8 clics por segundo, por debajo de lo que baja sola
-        assertTrue(8 * MadnessMeter.PER_CLICK < MadnessMeter.DECAY_PER_SECOND)
+    fun `holding the click settles around sixty percent`() {
+        // Mantener pulsado: 8 clics por segundo durante 10 minutos
+        val meter = MadnessMeter()
+        repeat(600) {
+            repeat(8) { meter.add(MadnessMeter.PER_CLICK) }
+            meter.decay(1)
+        }
+        assertTrue("quedó en ${meter.value}", meter.value in 55.0..65.0)
+        // Tocar a mano (unos 4 clics por segundo) queda más abajo, sin presagios
+        val tapping = MadnessMeter()
+        repeat(600) {
+            repeat(4) { tapping.add(MadnessMeter.PER_CLICK) }
+            tapping.decay(1)
+        }
+        assertTrue("quedó en ${tapping.value}", tapping.value in 20.0..40.0)
+    }
+
+    @Test
+    fun `rituals and runes on top of clicking can reach the collapse`() {
+        val meter = MadnessMeter(60.0)
+        var collapsed = false
+        repeat(30) { second ->
+            repeat(8) { collapsed = meter.add(MadnessMeter.PER_CLICK) || collapsed }
+            if (second % 5 == 0) collapsed = meter.add(MadnessMeter.PER_RITUAL) || collapsed
+            if (second == 10) collapsed = meter.add(MadnessMeter.PER_CONVERGENCE) || collapsed
+            if (second == 20) collapsed = meter.add(MadnessMeter.perRune(RuneTier.TIER_3_TRACE)) || collapsed
+            meter.decay(1)
+        }
+        assertTrue(collapsed)
+    }
+
+    @Test
+    fun `without playing hard it calms down in a few minutes`() {
+        val meter = MadnessMeter(60.0)
+        meter.decay(60)
+        assertTrue(meter.value in 30.0..45.0)
+        meter.decay(300)
+        assertEquals(0.0, meter.value, 1e-9)
+        // Bajar de una vez o de a uno da lo mismo
+        val stepwise = MadnessMeter(80.0).apply { repeat(90) { decay(1) } }
+        val atOnce = MadnessMeter(80.0).apply { decay(90) }
+        assertEquals(atOnce.value, stepwise.value, 1e-6)
     }
 
     @Test

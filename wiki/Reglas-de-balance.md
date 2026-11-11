@@ -88,8 +88,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 ## Medidor de Locura
 
-- Sube: clic +0,02, runa +2/+4/+8, ritual +5, Convergencia +20. Baja 0,2 por segundo (también sin conexión); la Letanía de Calma, 40.
-- Mantener pulsado (8 clics/s = +0,16/s) nunca supera lo que baja sola. *(Test: `MadnessMeterTest`.)*
+- Sube: clic +0,06, runa +2/+4/+8, ritual +5, Convergencia +20. Baja por segundo `0,05 + 0,007 × Locura` (fórmula cerrada, igual sin conexión); la Letanía de Calma, 40. Mantener pulsado se estabiliza en ~61 %. *(Test: `MadnessMeterTest`.)*
 - Bono: `1 + 0,01 × Locura`, como potenciador temporal. Presagios desde el 50 %: probabilidad por segundo `(Locura − 50) / 500`.
 - Colapso al 100 %: se pierden los potenciadores y la producción queda x0,5 durante 60 s. Nunca se pierden recursos. *(Código: `MadnessMeter`.)*
 

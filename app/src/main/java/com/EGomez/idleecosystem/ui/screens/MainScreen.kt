@@ -691,7 +691,7 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
     }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.fillMaxWidth().height(40.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         items(buffs) { buff ->
             // Redondeo hacia arriba: muestra "20s" al empezar y "1s" en el último segundo

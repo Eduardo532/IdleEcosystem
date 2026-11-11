@@ -38,6 +38,9 @@ fun MainTopBar(
     /** Con el menú abierto (v0.18.2): el Conocimiento y su producción, en lugar del título. */
     knowledgeFormatted: String? = null,
     knowledgePerSecond: String? = null,
+    /** Interfaz por capas (v0.19.0): las estadísticas y los logros aparecen al descubrirse. */
+    showStats: Boolean = true,
+    showAchievements: Boolean = true,
     onSettingsClick: () -> Unit,
     onStatsClick: () -> Unit,
     onAchievementsClick: () -> Unit
@@ -65,12 +68,15 @@ fun MainTopBar(
                 IconButton(onClick = onSettingsClick) {
                     Icon(Icons.Default.Settings, stringResource(R.string.cd_settings), tint = Color.Gray)
                 }
-                IconButton(onClick = onStatsClick) {
-                    Icon(Icons.Default.Assessment, stringResource(R.string.cd_statistics), tint = AncientGold)
+                if (showStats) {
+                    IconButton(onClick = onStatsClick, modifier = Modifier.testTag(STATS_BUTTON_TAG)) {
+                        Icon(Icons.Default.Assessment, stringResource(R.string.cd_statistics), tint = AncientGold)
+                    }
                 }
             }
         },
         actions = {
+            if (!showAchievements) return@CenterAlignedTopAppBar
             val hasUnlocked = achievements.any { it.isUnlocked }
             val iconColor = if (hasUnlocked) AncientGold else Color.Gray
 
@@ -120,3 +126,4 @@ fun MainTopBar(
 }
 
 const val COMPACT_KNOWLEDGE_TAG = "compact_knowledge"
+const val STATS_BUTTON_TAG = "stats_button"

@@ -36,7 +36,9 @@ data class RuneBuff(
     val expirationTime: Long,
     val isAutoClick: Boolean = false,
     val freezesBuffs: Boolean = false, // Para Runa de Escarcha
-    val description: String
+    val description: String,
+    /** Duración total (v0.19.0): la barra del chip muestra cuánto queda. 0 = sin barra. */
+    val durationMs: Long = 0
 )
 
 @Singleton
@@ -189,7 +191,8 @@ class RuneManager @Inject constructor(
                     expirationTime = now + duration,
                     isAutoClick = effect.isAutoClick && !splitAutoClick,
                     freezesBuffs = effect.freezesBuffs,
-                    description = rune.description
+                    description = rune.description,
+                    durationMs = duration
                 )
             )
             if (splitAutoClick) {
@@ -197,7 +200,8 @@ class RuneManager @Inject constructor(
                     id = "${rune.id}_auto",
                     expirationTime = now + effect.effectiveAutoClickMs,
                     isAutoClick = true,
-                    description = rune.description
+                    description = rune.description,
+                    durationMs = effect.effectiveAutoClickMs
                 )
             }
             _activeBuffs.update { it + buffs }

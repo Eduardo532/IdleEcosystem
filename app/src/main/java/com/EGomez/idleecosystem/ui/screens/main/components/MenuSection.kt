@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.EGomez.idleecosystem.domain.model.Trial
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.EtherColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -41,7 +40,10 @@ import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.logic.BuildingCalculator
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
-import com.EGomez.idleecosystem.domain.logic.SystemReveal
+import com.EGomez.idleecosystem.domain.logic.MenuLayer
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
+import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.ui.components.sigilColor
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
@@ -66,8 +68,8 @@ fun MenuSection(
     isMenuExpanded: Boolean,
     onToggleMenu: () -> Unit,
     menuWeight: Float,
-    selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit,
+    selectedTab: MenuTab,
+    onTabSelected: (MenuTab) -> Unit,
     buyMultiplier: Int,
     onBuyMultiplierChanged: (Int) -> Unit,
     showPurchased: Boolean,
@@ -79,7 +81,7 @@ fun MenuSection(
     currentEchoes: BigDecimal,
     globalMultiplier: BigDecimal,
     buildingCalculator: BuildingCalculator,
-    buildingCostMultiplier: Double, // NUEVO PARÁMETRO
+    buildingCostMultiplier: Double,
     buildingMilestones: Map<String, List<Int>> = emptyMap(),
     onBuyBuilding: (String) -> Unit,
     onBuyUpgrade: (String) -> Unit,
@@ -89,7 +91,9 @@ fun MenuSection(
     canPrestige: Boolean,
     potentialPrestigeFormatted: String,
     doubleSanityAtFormatted: String? = null,
-    revealed: SystemReveal = SystemReveal(),
+    /** Interfaz por capas (v0.19.0): qué pestañas se ven y cuáles son nuevas. */
+    unlocks: MenuUnlocks = MenuUnlocks.ALL,
+    newTabs: Set<MenuTab> = emptySet(),
     ascensions: Int = 0,
     automation: AutomationSettings = AutomationSettings(),
     onToggleAutoBuildings: () -> Unit = {},
@@ -114,39 +118,30 @@ fun MenuSection(
     onEngraveRune: (String) -> Unit = {},
     onRemoveEngraving: (String) -> Unit = {},
     runeMastery: Map<String, Int> = emptyMap(),
-    activeMutation: com.EGomez.idleecosystem.domain.model.Mutation? = null,
-    transcendRevealed: Boolean = false,
+    activeMutation: Mutation? = null,
+    seenMutations: Set<String> = emptySet(),
+    cycleAscensions: Int = 0,
+    etherGain: Int = 0,
     ether: Int = 0,
-    onOpenTranscend: () -> Unit = {},
+    eternalLevels: Map<String, Int> = emptyMap(),
+    onBuyEternal: (String) -> Unit = {},
+    onTranscend: () -> Unit = {},
     consecrationRevealed: Boolean = false,
     consecrations: Map<String, Int> = emptyMap(),
     onConsecrate: (String) -> Unit = {},
     onAscendClicked: () -> Unit,
-    onShowPrestigeShop: () -> Unit,
+    onOpenMadnessMap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Un sistema sin descubrir se ve como "???" hasta cumplir su requisito
-    val tabs = listOf(
-        stringResource(R.string.tab_research),
-        if (revealed.grimoire) stringResource(R.string.tab_grimoire) else LOCKED_TITLE,
-        if (revealed.rituals) stringResource(R.string.tab_rituals) else LOCKED_TITLE,
-        // El Panteón se descubre junto con la Ascensión, donde se eligen los pactos
-        if (revealed.ascension) stringResource(R.string.tab_pantheon) else LOCKED_TITLE
-    )
+    val tab = unlocks.resolve(selectedTab)
+    // Pruebas: Grimorio Quemado y Silencio cierran su pestaña durante la vida
     val lockedTabText = when {
-        selectedTabIndex == 1 && !revealed.grimoire ->
-            stringResource(R.string.locked_grimoire, SystemReveal.GRIMOIRE_AT.toBeautifulString())
-        selectedTabIndex == 2 && !revealed.rituals -> stringResource(R.string.locked_rituals)
-        selectedTabIndex == 3 && !revealed.ascension ->
-            stringResource(R.string.locked_pantheon, BigDecimal("1000000").toBeautifulString())
-        // Pruebas: Grimorio Quemado y Silencio cierran su pestaña durante la vida
-        selectedTabIndex == 1 && activeTrial?.rules?.noGrimoire == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
-        selectedTabIndex == 2 && activeTrial?.rules?.noRituals == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
+        tab == MenuTab.GRIMOIRE && activeTrial?.rules?.noGrimoire == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
+        tab == MenuTab.RITUALS && activeTrial?.rules?.noRituals == true -> activeTrial?.let { "${tr(it.title)}: ${tr(it.rule)}" }
         else -> null
     }
-    // Pestaña Panteón: los dioses o las Pruebas de Locura
-    var pantheonView by rememberSaveable { mutableStateOf(PantheonView.GODS) }
-    val trialsRevealed = ascensions + 1 >= Trial.REVEAL_AT
+    // Los multiplicadores de compra aparecen cuando ya hay algo que comprar en cantidad
+    val showBuyMultipliers = ascensions > 0 || buildings.sumOf { it.amountOwned } >= BUY_MULTIPLIERS_AT
 
     Column(
         modifier = modifier
@@ -168,10 +163,16 @@ fun MenuSection(
         }
 
         if (menuWeight > 0.2f) {
-            if (selectedTabIndex == 0) {
+            // Capas: Vida, Ascensión y Trascendencia (solo si hay más de una)
+            val layers = unlocks.layers
+            if (layers.size > 1) {
+                LayerBar(layers, tab.layer, newTabs) { layer ->
+                    onTabSelected(unlocks.tabsOf(layer).first())
+                }
+            }
+
+            if (tab == MenuTab.RESEARCH && showBuyMultipliers) {
                 val milestoneLabel = stringResource(R.string.buy_milestone_chip)
-                // Solo los multiplicadores de compra: seis botones del mismo ancho que
-                // siempre caben (lo automático vive en la barra fija bajo las pestañas)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -194,91 +195,80 @@ fun MenuSection(
                 }
             }
 
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = Color.Transparent,
-                contentColor = ArcanePurple,
-                indicator = { tabPositions ->
-                    if (selectedTabIndex < tabPositions.size) {
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = ArcanePurple
+            // Pestañas de la capa actual (una sola pestaña no necesita fila)
+            val layerTabs = unlocks.tabsOf(tab.layer)
+            if (layerTabs.size > 1) {
+                val selectedIndex = layerTabs.indexOf(tab).coerceAtLeast(0)
+                val accent = tab.layer.color()
+                TabRow(
+                    selectedTabIndex = selectedIndex,
+                    containerColor = Color.Transparent,
+                    contentColor = accent,
+                    indicator = { tabPositions ->
+                        if (selectedIndex < tabPositions.size) {
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
+                                color = accent
+                            )
+                        }
+                    }
+                ) {
+                    layerTabs.forEach { item ->
+                        Tab(
+                            selected = item == tab,
+                            onClick = { onTabSelected(item) },
+                            text = { TabTitle(item.title(), item in newTabs) },
+                            selectedContentColor = accent,
+                            unselectedContentColor = Color.Gray,
+                            modifier = Modifier.testTag(MENU_TAB_TAG + item.id)
                         )
                     }
                 }
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { onTabSelected(index) },
-                        text = { Text(title, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
-                        selectedContentColor = ArcanePurple,
-                        unselectedContentColor = Color.Gray
-                    )
-                }
             }
 
-            // Barra fija sobre la lista de edificios (no se desplaza con ella): la Atención
-            // y, con el hito de Ascensión, el autocomprador y su panel
+            // Barra fija sobre la lista de edificios: el autocomprador y su panel
             val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)
-            if (selectedTabIndex == 0 && lockedTabText == null && (attentionPoints > 0 || autobuyer)) {
+            if (tab == MenuTab.RESEARCH && autobuyer) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp, top = 4.dp)
                 ) {
-                    if (attentionPoints > 0) {
-                        AttentionBar(
-                            attention = attention,
-                            points = attentionPoints,
-                            buildings = buildings,
-                            onClick = onOpenAttention,
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                    if (autobuyer) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        AutoChip(
-                            selected = automation.buildings,
-                            onClick = onToggleAutoBuildings,
-                            modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
-                        )
-                        // Panel de automatización: qué edificios, presupuesto, Ascensión automática
-                        IconButton(
-                            onClick = onOpenAutomation,
-                            modifier = Modifier.size(36.dp).testTag(AUTOMATION_SETTINGS_TAG)
-                        ) {
-                            Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
-                        }
+                    Spacer(modifier = Modifier.weight(1f))
+                    AutoChip(
+                        selected = automation.buildings,
+                        onClick = onToggleAutoBuildings,
+                        modifier = Modifier.testTag(AUTO_BUILDINGS_TAG)
+                    )
+                    IconButton(
+                        onClick = onOpenAutomation,
+                        modifier = Modifier.size(36.dp).testTag(AUTOMATION_SETTINGS_TAG)
+                    ) {
+                        Icon(Icons.Default.Settings, stringResource(R.string.cd_automation_settings), tint = AncientGold)
                     }
                 }
             }
 
             // Prueba de Locura en curso: barra fija con su avance; abre la lista de Pruebas
-            if (selectedTabIndex == 0 && activeTrial != null) {
-                TrialBar(activeTrial, trialProgress, deliriumMultiplier) {
-                    pantheonView = PantheonView.TRIALS
-                    onTabSelected(3)
-                }
+            if (tab == MenuTab.RESEARCH && activeTrial != null) {
+                TrialBar(activeTrial, trialProgress, deliriumMultiplier) { onTabSelected(MenuTab.TRIALS) }
             }
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).testTag(MENU_CONTENT_TAG + tab.id),
                 contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             ) {
                 if (lockedTabText != null) {
                     item { LockedSystem(lockedTabText) }
-                } else when (selectedTabIndex) {
-                    0 -> {
+                } else when (tab) {
+                    MenuTab.RESEARCH -> {
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
                                 building = building,
                                 currentFunds = currentKnowledge,
                                 globalMultiplier = globalMultiplier,
                                 calculator = buildingCalculator,
-                                buyMultiplier = buyMultiplier,
-                                costMultiplier = buildingCostMultiplier, // PASAMOS EL DESCUENTO
+                                buyMultiplier = if (showBuyMultipliers) buyMultiplier else 1,
+                                costMultiplier = buildingCostMultiplier,
                                 milestones = buildingMilestones[building.id].orEmpty(),
                                 attentionPoints = attention[building.id] ?: 0,
                                 consecration = consecrations[building.id] ?: 0,
@@ -288,9 +278,11 @@ fun MenuSection(
                                 onBuyClick = { onBuyBuilding(building.id) }
                             )
                         }
+                        // Lo próximo por descubrir, una sola pista a la vez
+                        unlocks.next?.let { next -> item { NextUnlockHint(next) } }
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
-                    1 -> {
+                    MenuTab.GRIMOIRE -> {
                         item {
                             // Cuántas mejoras alcanzan, compradas de la más barata a la más cara
                             val affordableCount = remember(upgrades, currentKnowledge) {
@@ -378,8 +370,7 @@ fun MenuSection(
                             }
                         }
                     }
-                    2 -> {
-                        // --- CONTADOR DE ECOS ---
+                    MenuTab.RITUALS -> {
                         item {
                             Box(
                                 modifier = Modifier
@@ -397,8 +388,6 @@ fun MenuSection(
                                 )
                             }
                         }
-                        // ------------------------
-
                         items(rituals, key = { it.id }) { ritual ->
                             RitualItem(
                                 ritual = ritual,
@@ -410,40 +399,32 @@ fun MenuSection(
                         }
                         item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
-                    3 -> {
-                        if (trialsRevealed) {
-                            item {
-                                PantheonViewChips(
-                                    pantheonView,
-                                    stringResource(R.string.pantheon_view_trials, completedTrials.size, Trial.entries.size),
-                                    stringResource(R.string.pantheon_view_runes, engravedRunes.size, runeSlots)
-                                ) { pantheonView = it }
-                            }
-                        }
-                        val view = if (trialsRevealed) pantheonView else PantheonView.GODS
-                        when (view) {
-                            PantheonView.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
-                            PantheonView.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
-                            PantheonView.GODS -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
-                        }
+                    MenuTab.SANITY -> item {
+                        SanityHub(
+                            sanityFormatted = prestigeCurrencyFormatted,
+                            canPrestige = canPrestige,
+                            potentialPrestigeFormatted = potentialPrestigeFormatted,
+                            ascensions = ascensions,
+                            attentionPoints = attentionPoints,
+                            attentionUsed = Attention.used(attention),
+                            automationUnlocked = autobuyer,
+                            onOpenMap = onOpenMadnessMap,
+                            onOpenAttention = onOpenAttention,
+                            onOpenAutomation = onOpenAutomation
+                        )
                     }
+                    MenuTab.PANTHEON -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
+                    MenuTab.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
+                    MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
+                    MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend) }
+                    MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
                 }
             }
 
-            if (isMenuExpanded && !revealed.ascension) {
+            if (isMenuExpanded && unlocks.has(MenuTab.SANITY)) {
                 HorizontalDivider(color = Color(0xFF333333))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF0D0D0D))
-                        .padding(12.dp)
-                        .testTag(LOCKED_ASCENSION_TAG)
-                ) {
-                    LockedSystem(stringResource(R.string.locked_ascension, BigDecimal("1000000").toBeautifulString()))
-                }
-            } else if (isMenuExpanded) {
-                HorizontalDivider(color = Color(0xFF333333))
-                // Panel de Cordura en una sola fila: deja sitio a la lista de edificios
+                // Barra de Ascensión en una sola fila: la Cordura, el pacto y la mutación de
+                // esta vida, y ASCENDER. El Mapa de Locura y el Éter tienen su pestaña.
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -455,7 +436,7 @@ fun MenuSection(
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 stringResource(R.string.residual_sanity_title),
-                                color = Color(0xFFCF6679),
+                                color = SanityRose,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -471,9 +452,8 @@ fun MenuSection(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    modifier = Modifier.testTag(ACTIVE_PACT_TAG)
+                                    modifier = Modifier.padding(end = 8.dp).testTag(ACTIVE_PACT_TAG)
                                 )
-                                if (transcendRevealed) Spacer(modifier = Modifier.width(8.dp))
                             }
                             // La mutación de esta vida (v0.18.4)
                             activeMutation?.let {
@@ -483,21 +463,8 @@ fun MenuSection(
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
-                                    modifier = Modifier.padding(end = 8.dp).testTag(ACTIVE_MUTATION_TAG)
-                                )
-                            }
-                            // Trascender (v0.18.0): el Éter y el acceso a la segunda capa
-                            if (transcendRevealed) {
-                                Text(
-                                    stringResource(R.string.transcend_link, ether),
-                                    color = EtherColor,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    modifier = Modifier
-                                        .clickable(onClick = onOpenTranscend)
-                                        .padding(vertical = 2.dp)
-                                        .testTag(TRANSCEND_LINK_TAG)
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.testTag(ACTIVE_MUTATION_TAG)
                                 )
                             }
                         }
@@ -512,33 +479,24 @@ fun MenuSection(
                         }
                     }
                     Button(
-                        onClick = onShowPrestigeShop,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A148C), contentColor = Color.White),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        modifier = Modifier.padding(end = 6.dp).height(40.dp)
-                    ) {
-                        Text(stringResource(R.string.shop_button), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
                         onClick = onAscendClicked,
                         enabled = canPrestige,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFCF6679),
+                            containerColor = SanityRose,
                             disabledContainerColor = Color(0xFF333333),
                             contentColor = Color.Black,
                             disabledContentColor = Color.Gray
                         ),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
-                        modifier = Modifier.height(44.dp)
+                        modifier = Modifier.height(44.dp).testTag(ASCEND_BUTTON_TAG)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(stringResource(R.string.ascend), fontWeight = FontWeight.Black, fontSize = 12.sp)
                             if (canPrestige) {
                                 Text("+$potentialPrestigeFormatted", fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                             } else {
-                                Text(stringResource(R.string.ascend_requirement, BigDecimal("1000000").toBeautifulString()), fontSize = 8.sp, maxLines = 1)
+                                Text(stringResource(R.string.ascend_requirement, ASCENSION_REQUIREMENT.toBeautifulString()), fontSize = 8.sp, maxLines = 1)
                             }
                         }
                     }
@@ -557,16 +515,75 @@ fun MenuSection(
     }
 }
 
-private const val LOCKED_TITLE = "???"
-const val LOCKED_ASCENSION_TAG = "locked_ascension"
+/** Fila de capas: cada una con el color de su moneda y una marca si trae algo nuevo. */
+@Composable
+private fun LayerBar(layers: List<MenuLayer>, selected: MenuLayer, newTabs: Set<MenuTab>, onSelect: (MenuLayer) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp)
+    ) {
+        layers.forEach { layer ->
+            val isSelected = layer == selected
+            val color = layer.color()
+            Surface(
+                onClick = { onSelect(layer) },
+                shape = RoundedCornerShape(10.dp),
+                color = if (isSelected) color.copy(alpha = 0.18f) else Color(0xFF202020),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) color else Color(0xFF333333)),
+                modifier = Modifier.weight(1f).height(30.dp).testTag(MENU_LAYER_TAG + layer.name.lowercase())
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    TabTitle(
+                        layer.title(),
+                        isNew = newTabs.any { it.layer == layer },
+                        color = if (isSelected) color else Color.Gray,
+                        fontSize = 12
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Título de pestaña o capa, con un punto dorado si tiene algo sin abrir. */
+@Composable
+private fun TabTitle(title: String, isNew: Boolean, color: Color = Color.Unspecified, fontSize: Int = 13) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            title,
+            color = color,
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.sp,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (isNew) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .background(AncientGold, androidx.compose.foundation.shape.CircleShape)
+                    .testTag(NEW_BADGE_TAG)
+            )
+        }
+    }
+}
+
+/** Unidades compradas a partir de las cuales aparecen los multiplicadores (igual que su tutorial). */
+const val BUY_MULTIPLIERS_AT = 5
+const val MENU_TAB_TAG = "menu_tab_"
+const val MENU_LAYER_TAG = "menu_layer_"
+const val MENU_CONTENT_TAG = "menu_content_"
+const val NEW_BADGE_TAG = "new_badge"
+const val ASCEND_BUTTON_TAG = "ascend_button"
+
 const val AUTO_BUILDINGS_TAG = "auto_buildings"
 const val AUTOMATION_SETTINGS_TAG = "automation_settings"
 const val ACTIVE_PACT_TAG = "active_pact"
-const val TRANSCEND_LINK_TAG = "transcend_link"
 const val ACTIVE_MUTATION_TAG = "active_mutation"
 const val ATTENTION_BAR_TAG = "attention_bar"
 
-/** Un sistema sin descubrir: un candado y lo que falta para verlo. */
 /** Botón de multiplicador de compra: compacto y del mismo ancho que los demás. */
 @Composable
 private fun BuyMultiplierChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -592,78 +609,7 @@ private fun BuyMultiplierChip(label: String, selected: Boolean, onClick: () -> U
 
 const val BUY_MULTIPLIER_TAG = "buy_multiplier_"
 
-/** Barra fija de la Atención: puntos usados y a dónde apuntan; al tocarla abre el reparto. */
-@Composable
-private fun AttentionBar(
-    attention: Map<String, Int>,
-    points: Int,
-    buildings: List<Building>,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val used = Attention.used(attention)
-    val dream = stringResource(R.string.attention_dream)
-    val vigil = stringResource(R.string.attention_vigil)
-    val names = buildings.associate { it.id to tr(it.name) }
-    val targets = attention.filterValues { it > 0 }.entries
-        .sortedByDescending { it.value }
-        .joinToString(" · ") { (id, n) ->
-            val name = when (id) {
-                Attention.DREAM -> dream
-                Attention.VIGIL -> vigil
-                else -> names[id] ?: id
-            }
-            "$name +${(n * Attention.BONUS_PER_POINT * 100).toInt()}%"
-        }
-    val free = points - used
-
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF221530),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (free > 0) AncientGold.copy(alpha = 0.7f) else ArcanePurple.copy(alpha = 0.35f)
-        ),
-        modifier = modifier.testTag(ATTENTION_BAR_TAG)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("◎", color = AncientGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(6.dp))
-            // Una sola línea: los puntos y a dónde apuntan
-            Text(
-                stringResource(R.string.attention_bar_title, used, points),
-                color = AncientGold,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                when {
-                    targets.isEmpty() -> stringResource(R.string.attention_bar_empty)
-                    free > 0 -> stringResource(R.string.attention_bar_free, targets, free)
-                    else -> targets
-                },
-                color = if (targets.isEmpty()) Color.LightGray else Color(0xFFBFA9D9),
-                fontSize = 11.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = Color.Gray,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-    }
-}
-
+/** Una pestaña cerrada por la Prueba en curso: un candado y la regla. */
 @Composable
 private fun LockedSystem(requirement: String) {
     Row(
@@ -717,7 +663,7 @@ fun MenuSectionPreview() {
         isMenuExpanded = true,
         onToggleMenu = {},
         menuWeight = 0.6f,
-        selectedTabIndex = 2,
+        selectedTab = MenuTab.RITUALS,
         onTabSelected = {},
         buyMultiplier = 1,
         onBuyMultiplierChanged = {},
@@ -738,6 +684,6 @@ fun MenuSectionPreview() {
         canPrestige = false,
         potentialPrestigeFormatted = "0",
         onAscendClicked = {},
-        onShowPrestigeShop = {}
+        onOpenMadnessMap = {}
     )
 }

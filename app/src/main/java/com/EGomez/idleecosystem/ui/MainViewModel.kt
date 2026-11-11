@@ -24,6 +24,7 @@ import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -182,6 +183,9 @@ class MainViewModel @Inject constructor(
         echoes = economy.echoes,
         echoesFormatted = economy.echoes.toBeautifulString(),
         revealed = economy.revealed,
+        menuUnlocks = economy.menuUnlocks,
+        newTabs = economy.newTabs,
+        seenMutations = economy.seenMutations,
         ascensions = economy.ascensions,
         activePact = economy.activePact,
         chaosMultiplier = economy.chaosMultiplier,
@@ -358,7 +362,7 @@ class MainViewModel @Inject constructor(
 
     fun toggleTutorial(enabled: Boolean) = engine.setTutorialEnabled(enabled)
 
-    fun onMenuTabSelected(index: Int) = engine.onMenuTabSelected(index)
+    fun onMenuTabSelected(tab: MenuTab) = engine.onMenuTabSelected(tab)
 
     fun onPrestigeShopOpened() = engine.onPrestigeShopOpened()
 

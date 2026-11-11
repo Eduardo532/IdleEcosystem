@@ -1,10 +1,8 @@
-package com.EGomez.idleecosystem.ui.screens.main.dialogs
+package com.EGomez.idleecosystem.ui.screens.main.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,61 +22,66 @@ import com.EGomez.idleecosystem.ui.i18n.tr
 val EtherColor = Color(0xFFB3E5FC)
 
 /**
- * Trascender (v0.18.0): cuánto Éter daría, qué se pierde y qué se conserva, y las
- * mejoras eternas que se compran con Éter. Trascender pide tocar dos veces.
+ * La pestaña Éter (Trascendencia): cuánto Éter daría Trascender, qué se pierde y qué se
+ * conserva, y las mejoras eternas. Desde la v0.19.0 vive en su pestaña en lugar de un
+ * diálogo abierto desde el panel de Cordura. Trascender pide tocar dos veces.
  */
 @Composable
-fun TranscendDialog(
+fun EtherPanel(
     cycleAscensions: Int,
     etherGain: Int,
     ether: Int,
     eternalLevels: Map<String, Int>,
     onBuyEternal: (String) -> Unit,
-    onTranscend: () -> Unit,
-    onDismiss: () -> Unit
+    onTranscend: () -> Unit
 ) {
     var armed by remember { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF12161C),
-        modifier = Modifier.testTag(TRANSCEND_DIALOG_TAG),
-        title = { Text(stringResource(R.string.transcend_title), color = EtherColor, fontWeight = FontWeight.Bold) },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.transcend_ether, ether), color = EtherColor, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(ETHER_PANEL_TAG)) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFF12161C),
+            border = BorderStroke(1.dp, EtherColor.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(stringResource(R.string.transcend_ether, ether), color = EtherColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(
                     stringResource(R.string.transcend_cycle, cycleAscensions, Transcendence.REQUIRED_ASCENSIONS),
                     color = if (cycleAscensions >= Transcendence.REQUIRED_ASCENSIONS) Color(0xFF81C784) else Color.Gray,
                     fontSize = 12.sp
                 )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(stringResource(R.string.transcend_loses), color = Color(0xFFE57373), fontSize = 11.sp)
+                Text(stringResource(R.string.transcend_keeps), color = Color(0xFF81C784), fontSize = 11.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.transcend_loses), color = Color(0xFFE57373), fontSize = 12.sp)
-                Text(stringResource(R.string.transcend_keeps), color = Color(0xFF81C784), fontSize = 12.sp)
-
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(stringResource(R.string.transcend_eternal_title), color = EtherColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                EternalUpgrade.entries.forEach { upgrade ->
-                    EternalRow(upgrade, eternalLevels[upgrade.id] ?: 0, ether, onBuyEternal)
+                Button(
+                    onClick = { if (armed) { armed = false; onTranscend() } else armed = true },
+                    enabled = etherGain > 0,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = EtherColor,
+                        contentColor = Color.Black,
+                        disabledContainerColor = Color(0xFF2E3640),
+                        disabledContentColor = Color.Gray
+                    ),
+                    modifier = Modifier.fillMaxWidth().testTag(TRANSCEND_CONFIRM_TAG)
+                ) {
+                    Text(
+                        when {
+                            etherGain <= 0 -> stringResource(R.string.transcend_locked, Transcendence.REQUIRED_ASCENSIONS)
+                            armed -> stringResource(R.string.transcend_confirm_again)
+                            else -> stringResource(R.string.transcend_confirm, etherGain)
+                        },
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = { if (armed) onTranscend() else armed = true },
-                enabled = etherGain > 0,
-                colors = ButtonDefaults.buttonColors(containerColor = EtherColor, contentColor = Color.Black),
-                modifier = Modifier.testTag(TRANSCEND_CONFIRM_TAG)
-            ) {
-                Text(
-                    if (armed) stringResource(R.string.transcend_confirm_again) else stringResource(R.string.transcend_confirm, etherGain),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color.Gray) }
         }
-    )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(stringResource(R.string.transcend_eternal_title), color = EtherColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        EternalUpgrade.entries.forEach { upgrade ->
+            EternalRow(upgrade, eternalLevels[upgrade.id] ?: 0, ether, onBuyEternal)
+        }
+    }
 }
 
 @Composable
@@ -119,7 +122,7 @@ private fun EternalRow(upgrade: EternalUpgrade, level: Int, ether: Int, onBuy: (
     }
 }
 
-const val TRANSCEND_DIALOG_TAG = "transcend_dialog"
+const val ETHER_PANEL_TAG = "ether_panel"
 const val TRANSCEND_CONFIRM_TAG = "transcend_confirm"
 const val ETERNAL_ROW_TAG = "eternal_row_"
 const val ETERNAL_BUY_TAG = "eternal_buy_"

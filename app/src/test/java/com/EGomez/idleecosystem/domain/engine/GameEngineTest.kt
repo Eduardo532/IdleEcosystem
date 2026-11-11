@@ -29,6 +29,7 @@ import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
@@ -113,6 +114,35 @@ class GameEngineTest {
         scope.cancel()
         engineDispatcher.close()
         database.close()
+    }
+
+    @Test
+    fun `a discovered tab is marked new until it is opened`() = runBlocking {
+        val start = await(engine.economy) { it.menuUnlocks.tabs.isNotEmpty() }
+        assertEquals(setOf(MenuTab.RESEARCH), start.menuUnlocks.tabs)
+        assertTrue(start.newTabs.isEmpty())
+
+        engine.grantKnowledge(BigDecimal(300))
+        val found = await(engine.economy) { MenuTab.GRIMOIRE in it.newTabs }
+        assertTrue(found.menuUnlocks.has(MenuTab.GRIMOIRE))
+
+        engine.onMenuTabSelected(MenuTab.GRIMOIRE)
+        val seen = await(engine.economy) { it.newTabs.isEmpty() }
+        assertTrue(seen.menuUnlocks.has(MenuTab.GRIMOIRE))
+    }
+
+    @Test
+    fun `tabs a returning player already had are not announced as new`() = runBlocking {
+        val saved = StatisticsManager().apply { repeat(3) { trackPrestige(BigDecimal.ONE) } }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1000"), sanity = BigDecimal.ONE, echoes = BigDecimal.ONE,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val economy = await(engine.economy) { it.menuUnlocks.has(MenuTab.TRIALS) }
+        assertTrue(economy.newTabs.isEmpty())
     }
 
     @Test

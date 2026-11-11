@@ -176,7 +176,7 @@ private fun MapList(
             .filter { focus == null || it == focus }
             .map { c -> c to upgrades.filter { it.constellation == c }.sortedBy { MadnessPaths.isPath(it.id) } }
             .filter { it.second.isNotEmpty() }
-    LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), modifier = Modifier.fillMaxSize()) {
+    LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), modifier = Modifier.fillMaxSize().testTag(MAP_LIST_TAG)) {
         groups.forEach { (c, nodes) ->
             item(key = "header_" + (c?.id ?: "core")) {
                 Column(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) {
@@ -356,6 +356,7 @@ const val MAP_VIEW_TOGGLE_TAG = "map_view_"
 const val MAP_CHIP_TAG = "map_chip_"
 const val MAP_NODE_ROW_TAG = "map_node_"
 const val MAP_NODE_CARD_TAG = "map_node_card"
+const val MAP_LIST_TAG = "map_list"
 const val CONSTELLATION_MAP_TAG = "constellation_map"
 const val PATH_NOTE_TAG = "path_note"
 

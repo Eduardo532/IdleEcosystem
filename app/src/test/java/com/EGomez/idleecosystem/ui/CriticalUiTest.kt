@@ -26,6 +26,9 @@ import com.EGomez.idleecosystem.ui.screens.main.components.EtherPanel
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_VIEW_TOGGLE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_CHIP_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_NODE_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_LIST_TAG
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.hasTestTag
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_ROW_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_DETAILS_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_PICKER_DONE_TAG
@@ -761,12 +764,14 @@ class CriticalUiTest {
         compose.onNodeWithTag(MAP_VIEW_TOGGLE_TAG + "list").performClick()
         compose.onNodeWithTag(MAP_CHIP_TAG + "mind").performClick()
         compose.onNodeWithText("LA MENTE").assertExists()
-        compose.onNodeWithTag(MAP_NODE_ROW_TAG + MadnessPaths.MIND).performScrollTo().performClick()
+        compose.onNodeWithTag(MAP_LIST_TAG).performScrollToNode(hasTestTag(MAP_NODE_ROW_TAG + MadnessPaths.MIND))
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + MadnessPaths.MIND).performClick()
         compose.onNodeWithText("Ilumina toda la constelación para abrir su Senda.").assertExists()
         compose.onNodeWithText("Constelación incompleta").assertIsNotEnabled()
 
         compose.onNodeWithTag(MAP_CHIP_TAG + "all").performClick()
-        compose.onNodeWithTag(MAP_NODE_ROW_TAG + "pu_core").performScrollTo().performClick()
+        compose.onNodeWithTag(MAP_LIST_TAG).performScrollToNode(hasTestTag(MAP_NODE_ROW_TAG + "pu_core"))
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + "pu_core").performClick()
         compose.onNodeWithText("Siguiente nivel: Producción x1.10").assertExists()
         compose.onNodeWithText("MEJORAR", substring = true).assertIsEnabled()
     }

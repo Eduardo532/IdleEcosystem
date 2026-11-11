@@ -33,6 +33,13 @@ import androidx.compose.ui.window.DialogProperties
 import com.EGomez.idleecosystem.core.math.toBeautifulString
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.ui.components.ConstellationMap
+import com.EGomez.idleecosystem.domain.model.Constellation
+import com.EGomez.idleecosystem.ui.theme.MadnessRed
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.theme.ArcanePurple
 
@@ -44,127 +51,311 @@ fun PrestigeShopDialog(
     onBuy: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Se guarda el ID, no el objeto: el nodo se busca en la lista ACTUAL. Antes se
-    // guardaba la copia del momento del toque, y tras comprar el panel seguía
-    // mostrando el nivel y el costo viejos hasta cerrar y abrir la tienda.
+    // Se guarda el ID, no el objeto: el nodo se busca en la lista ACTUAL (si no, tras
+    // comprar el panel seguía mostrando el nivel y el costo viejos)
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     val selectedNode = upgrades.find { it.id == selectedId }
+    var listView by rememberSaveable { mutableStateOf(false) }
+    var focusId by rememberSaveable { mutableStateOf<String?>(null) }
+    var focusKey by remember { mutableIntStateOf(0) }
+    val focus = Constellation.fromId(focusId)
+    val present = Constellation.entries.filter { c -> upgrades.any { it.constellation == c } }
+
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF050505))) {
-            Box(modifier = Modifier.fillMaxSize().padding(top = 60.dp, bottom = 150.dp, start = 20.dp, end = 20.dp)) {
-                Box(modifier = Modifier.fillMaxSize().testTag(CONSTELLATION_MAP_TAG)) {
-                    ConstellationMap(upgrades = upgrades, onNodeClick = { node -> selectedId = node.id })
-                }
-            }
-            Column(
-                modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.8f)).padding(16.dp)
+        Column(modifier = Modifier.fillMaxSize().background(Color(0xFF050505))) {
+            // Cabecera: título, Cordura, Cielo/Lista y cerrar
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.madness_map), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text(stringResource(R.string.sanity_amount, currencyFormatted), color = ArcanePurple, fontWeight = FontWeight.Bold)
+                }
+                MapViewToggle(listView) { listView = it }
+                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.White) }
+            }
+            // Constelaciones: acercan el cielo o filtran la lista
+            if (present.isNotEmpty()) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    Column {
-                        Text(stringResource(R.string.madness_map), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Text(stringResource(R.string.sanity_amount, currencyFormatted), color = ArcanePurple, fontWeight = FontWeight.Bold)
+                    ConstellationChip(stringResource(R.string.map_all), AncientGold, focus == null, MAP_CHIP_TAG + "all") {
+                        focusId = null; focusKey++
                     }
-                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.White) }
+                    present.forEach { c ->
+                        val stars = upgrades.filter { it.constellation == c && !MadnessPaths.isPath(it.id) }
+                        ConstellationChip(
+                            "${c.titleText()} ${stars.count { it.level > 0 }}/${stars.size}",
+                            c.color(), focus == c, MAP_CHIP_TAG + c.id
+                        ) { focusId = c.id; focusKey++ }
+                    }
                 }
             }
-            if (selectedNode != null) {
-                val node = selectedNode
-                val parentUnlocked = if (node.parentId == null) true else {
-                    val parent = upgrades.find { it.id == node.parentId }
-                    parent != null && parent.level > 0
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                if (listView) {
+                    MapList(upgrades, focus, currency, selectedId) { selectedId = it.id }
+                } else {
+                    Box(modifier = Modifier.fillMaxSize().testTag(CONSTELLATION_MAP_TAG)) {
+                        ConstellationMap(
+                            upgrades = upgrades,
+                            onNodeClick = { node -> selectedId = node.id },
+                            currency = currency,
+                            selectedId = selectedId,
+                            focus = focus,
+                            focusKey = focusKey
+                        )
+                    }
+                    if (selectedNode == null) {
+                        Text(
+                            stringResource(R.string.map_zoom_hint),
+                            color = Color.Gray,
+                            fontSize = 12.sp,
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)
+                        )
+                    }
                 }
-                Card(
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp)
-                        .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                    border = BorderStroke(1.dp, if (parentUnlocked) ArcanePurple else Color.Gray),
-                    shape = RoundedCornerShape(16.dp)
+            }
+            selectedNode?.let { node -> NodeCard(node, upgrades, currency, onBuy) { selectedId = null } }
+        }
+    }
+}
+
+/** Cielo o lista. */
+@Composable
+private fun MapViewToggle(listView: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.background(Color(0xFF1A1A1A), RoundedCornerShape(10.dp)).padding(2.dp).testTag(MAP_VIEW_TOGGLE_TAG)
+    ) {
+        listOf(false to R.string.map_view_sky, true to R.string.map_view_list).forEach { (value, label) ->
+            val selected = listView == value
+            Text(
+                stringResource(label),
+                color = if (selected) Color.Black else Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .background(if (selected) AncientGold else Color.Transparent, RoundedCornerShape(8.dp))
+                    .clickable { onChange(value) }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                    .testTag(MAP_VIEW_TOGGLE_TAG + if (value) "list" else "sky")
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConstellationChip(label: String, color: Color, selected: Boolean, tag: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(10.dp),
+        color = if (selected) color.copy(alpha = 0.2f) else Color(0xFF151515),
+        border = BorderStroke(1.dp, if (selected) color else Color(0xFF2E2E2E)),
+        modifier = Modifier.testTag(tag)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+            Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(label, color = if (selected) color else Color.LightGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/** La vista de lista: cada constelación con sus estrellas y su Senda. */
+@Composable
+private fun MapList(
+    upgrades: List<PrestigeUpgrade>,
+    focus: Constellation?,
+    currency: BigDecimal,
+    selectedId: String?,
+    onSelect: (PrestigeUpgrade) -> Unit
+) {
+    val groups: List<Pair<Constellation?, List<PrestigeUpgrade>>> =
+        (listOf<Constellation?>(null) + Constellation.entries)
+            .filter { focus == null || it == focus }
+            .map { c -> c to upgrades.filter { it.constellation == c }.sortedBy { MadnessPaths.isPath(it.id) } }
+            .filter { it.second.isNotEmpty() }
+    LazyColumn(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), modifier = Modifier.fillMaxSize()) {
+        groups.forEach { (c, nodes) ->
+            item(key = "header_" + (c?.id ?: "core")) {
+                Column(modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)) {
+                    Text(
+                        c?.titleText()?.uppercase() ?: stringResource(R.string.map_core),
+                        color = c.color(),
+                        fontWeight = FontWeight.Black,
+                        fontSize = 13.sp,
+                        letterSpacing = 1.sp
+                    )
+                    c?.let { Text(tr(it.description), color = Color.Gray, fontSize = 11.sp) }
+                }
+            }
+            items(nodes, key = { it.id }) { node -> MapRow(node, upgrades, currency, node.id == selectedId) { onSelect(node) } }
+        }
+    }
+}
+
+@Composable
+private fun MapRow(node: PrestigeUpgrade, upgrades: List<PrestigeUpgrade>, currency: BigDecimal, selected: Boolean, onClick: () -> Unit) {
+    val state = nodeState(node, upgrades, currency)
+    val color = node.constellation.color()
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(10.dp),
+        color = if (selected) Color(0xFF221A2A) else Color(0xFF131313),
+        border = BorderStroke(1.dp, when {
+            state.sealed -> MadnessRed.copy(alpha = 0.6f)
+            state.affordable -> color
+            node.level > 0 -> color.copy(alpha = 0.45f)
+            else -> Color(0xFF2A2A2A)
+        }),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).testTag(MAP_NODE_ROW_TAG + node.id)
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                if (MadnessPaths.isPath(node.id)) "✦" else if (node.level > 0) "●" else if (state.reachable) "○" else "·",
+                color = if (state.reachable || node.level > 0) color else Color.DarkGray,
+                fontSize = 16.sp,
+                modifier = Modifier.width(22.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    tr(node.name) + if (node.level > 0) " · " + levelText(node) else "",
+                    color = if (state.reachable || node.level > 0) Color.White else Color.Gray,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+                Text(mapNodeEffect(node, maxOf(node.level, 1)), color = Color(0xFFB0BEC5), fontSize = 11.sp, maxLines = 2)
+            }
+            Text(
+                when {
+                    node.isMaxed -> stringResource(R.string.map_max_short)
+                    state.sealed || !state.reachable -> "🔒"
+                    else -> node.currentCost.toBeautifulString()
+                },
+                color = if (state.affordable) AncientGold else Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun levelText(node: PrestigeUpgrade): String =
+    node.maxLevel?.let { stringResource(R.string.map_level_of, node.level, it) } ?: stringResource(R.string.level, node.level)
+
+/** El estado de un nodo para dibujarlo y para su botón. */
+private data class NodeState(val reachable: Boolean, val sealed: Boolean, val affordable: Boolean, val pathLocked: Boolean)
+
+private fun nodeState(node: PrestigeUpgrade, upgrades: List<PrestigeUpgrade>, currency: BigDecimal): NodeState {
+    val isPath = MadnessPaths.isPath(node.id)
+    val sealed = MadnessPaths.isSealed(node, upgrades)
+    val pathLocked = isPath && !MadnessPaths.isAvailable(node, upgrades)
+    val parentOk = isPath || node.parentId == null || (upgrades.find { it.id == node.parentId }?.level ?: 0) > 0
+    val reachable = !sealed && !pathLocked && parentOk
+    return NodeState(reachable, sealed, reachable && !node.isMaxed && currency >= node.currentCost, pathLocked)
+}
+
+/** La ficha del nodo elegido: qué da ahora, qué daría el siguiente nivel y el botón. */
+@Composable
+private fun NodeCard(
+    node: PrestigeUpgrade,
+    upgrades: List<PrestigeUpgrade>,
+    currency: BigDecimal,
+    onBuy: (String) -> Unit,
+    onClose: () -> Unit
+) {
+    val state = nodeState(node, upgrades, currency)
+    val color = node.constellation.color()
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(12.dp).testTag(MAP_NODE_CARD_TAG)
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1E)),
+        border = BorderStroke(1.dp, if (state.reachable) color else Color.Gray),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    node.constellation?.let {
+                        Text(it.titleText().uppercase(), color = color, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    }
+                    Text(tr(node.name), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                }
+                if (node.level > 0 || node.maxLevel != null) Text(levelText(node), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Close, stringResource(R.string.close), tint = Color.Gray, modifier = Modifier.size(18.dp))
+                }
+            }
+            Text(tr(node.description), color = Color.LightGray, fontSize = 13.sp)
+            if (MadnessPaths.isPath(node.id)) {
+                val sealedBy = if (state.sealed) MadnessPaths.active(upgrades) else null
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    when {
+                        sealedBy != null -> stringResource(R.string.path_sealed, tr(sealedBy.name))
+                        state.pathLocked -> stringResource(R.string.map_path_locked)
+                        else -> stringResource(R.string.path_exclusive)
+                    },
+                    color = if (sealedBy != null || state.pathLocked) Color(0xFFE57373) else AncientGold,
+                    fontSize = 12.sp,
+                    modifier = Modifier.testTag(PATH_NOTE_TAG)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            if (node.level > 0) Text(stringResource(R.string.map_now, mapNodeEffect(node, node.level)), color = Color(0xFF81C784), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            if (!node.isMaxed) Text(stringResource(R.string.map_next, mapNodeEffect(node, node.level + 1)), color = Color(0xFFB0BEC5), fontSize = 12.sp)
+            if (state.reachable && !node.isMaxed) SpendPreviewLines(node, currency)
+            Spacer(modifier = Modifier.height(12.dp))
+            val disabledLabel = when {
+                state.sealed -> R.string.path_sealed_button
+                node.isMaxed -> R.string.map_maxed
+                state.pathLocked -> R.string.map_path_locked_button
+                !state.reachable -> R.string.locked_node
+                else -> null
+            }
+            if (disabledLabel != null) {
+                Button(
+                    onClick = {}, enabled = false,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(disabledContainerColor = if (state.sealed) Color(0xFF3A1A1A) else Color(0xFF2A2A2A))
+                ) { Text(stringResource(disabledLabel), color = if (state.sealed) Color(0xFFE57373) else Color.Gray) }
+            } else {
+                val cost = node.currentCost
+                val canAfford = currency >= cost
+                Button(
+                    onClick = { onBuy(node.id) },
+                    enabled = canAfford,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ArcanePurple,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFF333333),
+                        disabledContentColor = Color.LightGray
+                    )
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(tr(node.name), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            if (node.level > 0) Text(stringResource(R.string.level, node.level), color = AncientGold, fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(tr(node.description), color = Color.LightGray, fontSize = 14.sp)
-                        val sealedBy = if (MadnessPaths.isSealed(node, upgrades)) MadnessPaths.active(upgrades) else null
-                        if (MadnessPaths.isPath(node.id)) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(R.string.upgrade_button), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.cost_sanity, cost.toBeautifulString()), fontSize = 10.sp)
+                        if (!canAfford) {
                             Text(
-                                if (sealedBy != null) stringResource(R.string.path_sealed, tr(sealedBy.name))
-                                else stringResource(R.string.path_exclusive),
-                                color = if (sealedBy != null) Color(0xFFE57373) else AncientGold,
-                                fontSize = 12.sp,
-                                modifier = Modifier.testTag(PATH_NOTE_TAG)
+                                stringResource(R.string.missing_sanity, cost.subtract(currency).toBeautifulString()),
+                                fontSize = 10.sp,
+                                color = Color(0xFFE57373)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.current_effect), color = Color.Gray, fontSize = 12.sp)
-                            Text(node.currentEffectDisplay, color = Color(0xFF81C784), fontWeight = FontWeight.Bold)
-                        }
-                        if (parentUnlocked && sealedBy == null) SpendPreviewLines(node, currency)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        if (sealedBy != null) {
-                            Button(
-                                onClick = {}, enabled = false,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color(0xFF3A1A1A))
-                            ) { Text(stringResource(R.string.path_sealed_button), color = Color(0xFFE57373)) }
-                        } else if (parentUnlocked) {
-                            // Antes el botón estaba siempre activo: sin Cordura suficiente
-                            // el toque no hacía nada y no se veía por qué
-                            val cost = node.currentCost
-                            val canAfford = currency >= cost
-                            Button(
-                                onClick = { onBuy(node.id) },
-                                enabled = canAfford,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = ArcanePurple,
-                                    contentColor = Color.White,
-                                    disabledContainerColor = Color(0xFF333333),
-                                    disabledContentColor = Color.LightGray
-                                )
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(stringResource(R.string.upgrade_button), fontWeight = FontWeight.Bold)
-                                    Text(stringResource(R.string.cost_sanity, cost.toBeautifulString()), fontSize = 10.sp)
-                                    if (!canAfford) {
-                                        Text(
-                                            stringResource(R.string.missing_sanity, cost.subtract(currency).toBeautifulString()),
-                                            fontSize = 10.sp,
-                                            color = Color(0xFFE57373)
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            Button(
-                                onClick = {}, enabled = false,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.DarkGray)
-                            ) { Text(stringResource(R.string.locked_node), color = Color.Gray) }
-                        }
                     }
                 }
-            } else {
-                Text(
-                    stringResource(R.string.tap_star),
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp)
-                )
             }
         }
     }
 }
 
+const val MAP_VIEW_TOGGLE_TAG = "map_view_"
+const val MAP_CHIP_TAG = "map_chip_"
+const val MAP_NODE_ROW_TAG = "map_node_"
+const val MAP_NODE_CARD_TAG = "map_node_card"
 const val CONSTELLATION_MAP_TAG = "constellation_map"
 const val PATH_NOTE_TAG = "path_note"
 

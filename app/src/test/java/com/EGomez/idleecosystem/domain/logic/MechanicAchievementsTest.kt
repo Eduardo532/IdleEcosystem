@@ -44,6 +44,7 @@ class MechanicAchievementsTest {
         "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
         "Maestría de runas" to { it.stat?.startsWith("mastery") == true },
         "Mutaciones" to { it.stat?.contains("mutation") == true },
+        "Constelaciones" to { it.stat == AchievementStat.CONSTELLATIONS || it.path in listOf(MadnessPaths.MIND, MadnessPaths.VOID, MadnessPaths.CULT, MadnessPaths.ARCANE) },
         "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 

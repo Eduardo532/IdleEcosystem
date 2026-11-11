@@ -110,7 +110,7 @@ enum class TutorialStep(
     PRESTIGE_SHOP(
         "prestige_shop",
         "Tienda de Prestigio",
-        "Aquí puedes gastar tu Cordura Residual en mejoras eternas. Gastar Cordura reduce tu bono actual, pero las mejoras suelen valer la inversión.",
+        "El Mapa de Locura es un cielo con siete constelaciones: clic, edificios, sueño, producción, Cordura, el culto y lo arcano. Pellizca para acercar, toca una estrella para ver qué da y mejórala con Cordura Residual. Gastar Cordura reduce tu bono actual, pero las mejoras suelen valer la inversión.",
         "Al abrir el diálogo de la Tienda de Prestigio"
     ),
 
@@ -179,8 +179,8 @@ enum class TutorialStep(
 
     PATHS(
         "paths",
-        "Las Tres Sendas",
-        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
+        "Las Sendas",
+        "En el centro de cada constelación del Mapa de Locura hay una Senda, que se abre cuando todas sus estrellas tienen al menos un nivel. Solo puedes recorrer una: al comprarla, las demás quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
         "Al poder comprar la primera Senda"
     ),
 

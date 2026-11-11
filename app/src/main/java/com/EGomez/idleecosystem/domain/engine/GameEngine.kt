@@ -388,6 +388,7 @@ class GameEngine @Inject constructor(
             prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
             statsManager.trackSanitySpent(cost)
             if (MadnessPaths.isPath(id)) statsManager.flag(AchievementStat.walked(id))
+            refreshEngravings()
             recalculate()
             requestSave()
         }
@@ -663,6 +664,7 @@ class GameEngine @Inject constructor(
         val path = MadnessPaths.active(shop)
         put(AchievementStat.PATH_LEVEL, path?.level ?: 0)
         put(AchievementStat.PATHS_WALKED, MadnessPaths.IDS.count { statsManager.counter(AchievementStat.walked(it)).signum() > 0 })
+        put(AchievementStat.CONSTELLATIONS, prestigeShopManager.completedConstellations())
 
         val attention = effectiveAttention()
         put(AchievementStat.ATTENTION_POINTS, attentionPoints())
@@ -1137,9 +1139,7 @@ class GameEngine @Inject constructor(
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
         // Las Sendas, cuando alguna ya se puede comprar
         val shop = prestigeShopManager.upgrades
-        val pathOpen = shop.any { node ->
-            MadnessPaths.isPath(node.id) && shop.any { it.id == node.parentId && it.level > 0 }
-        }
+        val pathOpen = shop.any { node -> MadnessPaths.isPath(node.id) && MadnessPaths.isAvailable(node, shop) }
         if (pathOpen) tutorialManager.triggerStep(TutorialStep.PATHS)
         // Las Pruebas se eligen al Ascender: se presentan cuando la próxima ya puede tener una
         if (ascensions + 1 >= Trial.REVEAL_AT) tutorialManager.triggerStep(TutorialStep.TRIALS)
@@ -1196,7 +1196,7 @@ class GameEngine @Inject constructor(
     /** Puntos de Atención: los de las Ascensiones y, desde la primera, los de las Pruebas. */
     private fun attentionPoints(): Int {
         val base = Attention.available(statsManager.totalPrestiges)
-        return if (base > 0) base + trialReward().attentionPoints else 0
+        return if (base > 0) base + trialReward().attentionPoints + prestigeShopManager.getAttentionBonus() else 0
     }
 
     private fun startTrial(trial: Trial) {
@@ -1211,7 +1211,8 @@ class GameEngine @Inject constructor(
         val trial = activeTrial() ?: return@post
         statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
         deliriumMultiplier = 1.0
-        applyPactModifiers()
+        // refreshEngravings también aplica los modificadores del pacto
+        refreshEngravings()
         recalculate()
         requestSave()
     }
@@ -1221,9 +1222,8 @@ class GameEngine @Inject constructor(
      * Prueba activa (Manos Atadas). Sin ellos, una vida sin clic no podría arrancar.
      */
     private fun applyStartingBuildings() {
-        val start = HashMap<String, Int>()
-        val notes = prestigeShopManager.getStartingNotes()
-        if (notes > 0) start["b_notes"] = notes
+        // El Culto del Mapa de Locura (v0.19.2: varios edificios) y la Prueba activa
+        val start = HashMap(if (trialRules().noSanityBonus) emptyMap() else prestigeShopManager.getStartingBuildings())
         trialRules().startingBuildings.forEach { (id, n) -> start[id] = maxOf(start[id] ?: 0, n) }
         start.forEach { (id, n) ->
             val building = buildingManager.availableBuildings.find { it.id == id } ?: return@forEach
@@ -1301,7 +1301,9 @@ class GameEngine @Inject constructor(
     private fun addMadness(amount: Double) {
         if (!madnessRevealed()) return
         // Marea Alta: la Locura sube más rápido
-        if (madness.add(amount * (currentTide()?.madnessGain ?: 1.0))) collapse() else syncMadness()
+        // Mente Templada (Mapa de Locura): sube menos
+        val gain = amount * (currentTide()?.madnessGain ?: 1.0) * prestigeShopManager.getMadnessGainMultiplier()
+        if (madness.add(gain)) collapse() else syncMadness()
     }
 
     /** El colapso (leve): se pierden los potenciadores y la producción baja a la mitad 1 minuto. */
@@ -1573,6 +1575,9 @@ class GameEngine @Inject constructor(
             .combinedWith(RuneEngraving.combined(engravedRunes()) { masteryLevel(it) })
             .combinedWith(tideEffects)
             .combinedWith(activeMutation()?.effects ?: PactEffects())
+            // Nodos del Mapa de Locura con efectos de pacto (v0.19.2); la Prueba Mente en
+            // Blanco los anula igual que al resto del Mapa
+            .combinedWith(if (trialRules().noSanityBonus) PactEffects() else prestigeShopManager.getMapEffects())
         applyPactModifiers()
     }
 

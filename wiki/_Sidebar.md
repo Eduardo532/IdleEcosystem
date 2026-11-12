@@ -14,6 +14,7 @@
 - [Atención](Atencion)
 - [Pruebas de Locura](Pruebas-de-Locura)
 - [El Velo](El-Velo)
+- [Estrellas](Estrellas)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

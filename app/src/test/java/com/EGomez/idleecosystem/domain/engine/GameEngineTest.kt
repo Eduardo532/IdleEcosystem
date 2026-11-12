@@ -34,6 +34,7 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.StarUpgrade
 import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.RitualState
@@ -662,6 +663,42 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.TEN)
         val state = await(engine.economy) { it.knowledge.signum() > 0 }
         assertFalse(state.veilBroken)
+    }
+
+    @Test
+    fun `stars are born after transcending and their dust buys stellar upgrades`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.STARDUST, BigDecimal(15))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendences == 1 }
+        assertTrue(MenuTab.STARS in before.menuUnlocks.tabs)
+        val production = before.productionPerSecond
+
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id)
+
+        val after = await(engine.economy) { it.starLevels[StarUpgrade.STARLIGHT.id] == 1 }
+        assertTrue(after.stardust < 15.0)
+        if (production.signum() > 0) assertTrue(after.productionPerSecond > production)
+        assertTrue(stats.counter(AchievementStat.starBuyWith("none")).signum() > 0)
+        // Cada segundo nacen Estrellas
+        val later = await(engine.economy) { it.stars > 0.0 }
+        assertTrue(later.starsPerHour > 0.0)
+    }
+
+    @Test
+    fun `there are no stars before the first transcendence`() = runBlocking {
+        engine.grantKnowledge(BigDecimal.TEN)
+        val state = await(engine.economy) { it.knowledge.signum() > 0 }
+        assertFalse(MenuTab.STARS in state.menuUnlocks.tabs)
+        assertEquals(0.0, state.stars, 0.0)
     }
 
     @Test

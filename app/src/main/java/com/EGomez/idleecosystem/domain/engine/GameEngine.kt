@@ -21,6 +21,8 @@ import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
 import com.EGomez.idleecosystem.domain.logic.Transcendence
 import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
 import com.EGomez.idleecosystem.domain.logic.Veil
+import com.EGomez.idleecosystem.domain.logic.StarUpgrade
+import com.EGomez.idleecosystem.domain.logic.Stars
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -132,6 +134,14 @@ data class EconomyState(
     val veilPressing: Boolean = false,
     val veilFactor: BigDecimal = BigDecimal.ONE,
     val veilApproach: Float = 0f,
+    /** Cuando las Estrellas Estén en Posición (v0.19.7). */
+    val stars: Double = 0.0,
+    val stardust: Double = 0.0,
+    val starsPerHour: Double = 0.0,
+    val dustPerSecond: Double = 0.0,
+    val starLevels: Map<String, Int> = emptyMap(),
+    val starsAligned: Boolean = false,
+    val alignmentSecondsLeft: Long = 0,
     val eternalLevels: Map<String, Int> = emptyMap(),
     /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
@@ -684,6 +694,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
         put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
         put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun()))
+        put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
@@ -892,7 +903,8 @@ class GameEngine @Inject constructor(
         runeSlots = runeSlots(),
         masteryRevealed = consecrationRevealed(),
         transcendRevealed = transcendRevealed(),
-        mutationsRevealed = mutationsRevealed()
+        mutationsRevealed = mutationsRevealed(),
+        starsRevealed = starsRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -995,6 +1007,12 @@ class GameEngine @Inject constructor(
 
     private fun grantOfflineGains(diffMillis: Long) {
         val diffSeconds = diffMillis / 1000
+        // Las Estrellas siguen naciendo mientras no juegas
+        if (diffSeconds > 0 && starsRevealed()) {
+            val (stars, dust) = Stars.offline(starCount(), starRate(), diffSeconds)
+            statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
+            addStardust(dust)
+        }
         // La Locura también baja mientras no juegas
         if (diffSeconds > 0) {
             madness.decay(diffSeconds)
@@ -1054,6 +1072,7 @@ class GameEngine @Inject constructor(
         tideTick()
         masteryTick()
         veilTick()
+        starsTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1245,6 +1264,60 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.TRIALS_STARTED)
         deliriumMultiplier = 1.0
         deliriumSeconds = 0
+    }
+
+    // =====================================================================
+    // ESTRELLAS (v0.19.7)
+    // =====================================================================
+
+    private fun starsRevealed(): Boolean = transcendences() >= 1
+
+    private fun starLevel(upgrade: StarUpgrade): Int = statsManager.counter(AchievementStat.starUpgrade(upgrade.id)).toInt()
+
+    private fun starCount(): Double = statsManager.counter(AchievementStat.STARS).toDouble()
+
+    private fun starRate(): Double = Stars.starsPerSecond(starLevel(StarUpgrade.NEBULA), transcendences())
+
+    private fun nowSeconds(): Long = System.currentTimeMillis() / 1000
+
+    private fun starsAligned(): Boolean = starsRevealed() && Stars.isAligned(nowSeconds(), starLevel(StarUpgrade.CONJUNCTION))
+
+    private fun addStardust(amount: Double) {
+        if (amount <= 0.0) return
+        val add = BigDecimal.valueOf(amount)
+        statsManager.counters[AchievementStat.STARDUST] = statsManager.counter(AchievementStat.STARDUST).add(add)
+        statsManager.count(AchievementStat.STARDUST_EARNED, add)
+    }
+
+    /** Cada segundo nacen Estrellas y cada una da Polvo (x5 con las estrellas en posición). */
+    private fun starsTick() {
+        if (!starsRevealed()) return
+        tutorialManager.triggerStep(TutorialStep.STARS)
+        val stars = starCount() + starRate()
+        statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
+        addStardust(Stars.dustPerSecond(stars, starsAligned()))
+    }
+
+    /** Compra un nivel de una mejora estelar con Polvo Estelar. */
+    fun buyStarUpgrade(id: String) = post {
+        val upgrade = StarUpgrade.fromId(id) ?: return@post
+        if (!starsRevealed()) return@post
+        val level = starLevel(upgrade)
+        if (upgrade.isMaxed(level)) return@post
+        val cost = BigDecimal.valueOf(upgrade.cost(level))
+        val dust = statsManager.counter(AchievementStat.STARDUST)
+        if (dust < cost) return@post
+        statsManager.counters[AchievementStat.STARDUST] = dust.subtract(cost)
+        statsManager.counters[AchievementStat.starUpgrade(upgrade.id)] = BigDecimal(level + 1)
+        // Logros: con qué pacto, y durante la alineación (con qué Senda)
+        statsManager.flag(AchievementStat.starBuyWith(activePact.id))
+        if (starsAligned()) {
+            statsManager.count(AchievementStat.ALIGNED_PURCHASES)
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.starAlignedPath(it.id)) }
+        }
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
     }
 
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
@@ -1460,7 +1533,7 @@ class GameEngine @Inject constructor(
     private fun etherGainNow(): Int = Transcendence.etherGain(
         cycleAscensions(),
         cycleSanity(),
-        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)),
+        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)),
         transcendRequired()
     )
 
@@ -1753,7 +1826,8 @@ class GameEngine @Inject constructor(
     /** Lo que multiplica la Cordura ganada al Ascender: Mapa de Locura y pacto de esta vida. */
     private fun sanityGainMultiplier(): BigDecimal =
         prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(
-            pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY))
+            pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY)) *
+                Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY))
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -1795,6 +1869,7 @@ class GameEngine @Inject constructor(
             rules.production * reward.production * deliriumMultiplier *
                 Transcendence.productionMultiplier(eternalLevel(EternalUpgrade.ETERNAL_FIRE))
         ).multiply(Veil.productionFactor(knowledgeThisRun(), veilBroken()))
+            .multiply(BigDecimal.valueOf(Stars.productionMultiplier(starLevel(StarUpgrade.STARLIGHT), starLevel(StarUpgrade.DARK_STARS), starCount())))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -1932,6 +2007,13 @@ class GameEngine @Inject constructor(
             veilPressing = Veil.isPressing(knowledgeThisRun(), veilBroken()),
             veilFactor = Veil.productionFactor(knowledgeThisRun(), veilBroken()),
             veilApproach = Veil.approach(knowledgeThisRun()),
+            stars = starCount(),
+            stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
+            starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,
+            dustPerSecond = if (starsRevealed()) Stars.dustPerSecond(starCount(), starsAligned()) else 0.0,
+            starLevels = StarUpgrade.entries.associate { it.id to starLevel(it) },
+            starsAligned = starsAligned(),
+            alignmentSecondsLeft = Stars.secondsLeft(nowSeconds(), starLevel(StarUpgrade.CONJUNCTION)),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             consecrationRevealed = consecrationRevealed(),
             consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },

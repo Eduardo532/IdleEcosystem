@@ -333,6 +333,8 @@ fun MainScreen(
                             veilPressing = uiState.veilPressing,
                             veilFactor = uiState.veilFactor,
                             onBreakVeil = { viewModel.breakVeil() },
+                            starsUi = uiState.starsUi,
+                            onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
                             runeCatches = uiState.runeCatches,

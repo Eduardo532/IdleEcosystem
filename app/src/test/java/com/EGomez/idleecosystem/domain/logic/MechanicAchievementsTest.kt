@@ -44,6 +44,7 @@ class MechanicAchievementsTest {
         "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
         "Maestría de runas" to { it.stat?.startsWith("mastery") == true },
         "Mutaciones" to { it.stat?.contains("mutation") == true },
+        "Estrellas" to { it.stat in setOf(AchievementStat.STARS, AchievementStat.STARDUST_EARNED, AchievementStat.STAR_LEVELS, AchievementStat.ALIGNED_PURCHASES) || it.stat?.startsWith("star_") == true },
         "Romper el Velo" to { it.stat?.startsWith("veil") == true || it.stat == AchievementStat.FEAT_VEIL_IN_TRIAL },
         "Hitos de Trascendencia" to { it.stat == AchievementStat.TRANSCEND_MILESTONES || it.stat?.startsWith("auto_transcend") == true || it.stat == AchievementStat.FEAT_SHORTCUT },
         "Constelaciones" to { it.stat == AchievementStat.CONSTELLATIONS || it.path in listOf(MadnessPaths.MIND, MadnessPaths.VOID, MadnessPaths.CULT, MadnessPaths.ARCANE) },

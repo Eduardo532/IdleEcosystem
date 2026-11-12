@@ -259,5 +259,12 @@ enum class TutorialStep(
         "El Velo",
         "Tu Conocimiento chocó con el Velo: por encima de él, la producción cae muy rápido. Asciende para empezar de nuevo, o supera las 10 Pruebas de Locura y rómpelo para siempre desde la pestaña Pruebas.",
         "Al chocar con el Velo"
+    ),
+
+    STARS(
+        "stars",
+        "Estrellas y Polvo Estelar",
+        "Tras Trascender empiezan a nacer Estrellas, poco a poco y también sin conexión. Cada una da Polvo Estelar, que compra mejoras estelares en la pestaña Estrellas. Cada media hora las estrellas se ponen en posición unos minutos: entonces el Polvo cae x5.",
+        "Tras la primera Trascendencia"
     )
 }

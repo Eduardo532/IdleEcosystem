@@ -29,11 +29,15 @@ class MadnessPathsTest {
             assertEquals(listOf(MadnessPaths.of(c)), paths.map { it.id })
             val stars = shop.upgrades.filter { it.constellation == c && !MadnessPaths.isPath(it.id) }
             assertTrue("$c necesita estrellas", stars.size >= 3)
-            // La primera cuelga de El Despertar; cada una de las demás, de la anterior
+            // La primera cuelga de El Despertar; cada una de las demás, de una anterior de
+            // su misma constelación (la figura se enciende desde un extremo)
             assertEquals("pu_core", stars.first().parentId)
-            stars.zipWithNext().forEach { (a, b) -> assertEquals(a.id, b.parentId) }
+            stars.drop(1).forEachIndexed { i, star ->
+                assertTrue("${star.id}", star.parentId in stars.take(i + 1).map { it.id })
+            }
         }
-        assertEquals(28, shop.upgrades.count { !MadnessPaths.isPath(it.id) })
+        // v0.19.4: una estrella del Mapa por cada estrella de las siete figuras
+        assertEquals(54, shop.upgrades.count { !MadnessPaths.isPath(it.id) })
     }
 
     @Test
@@ -123,7 +127,8 @@ class MadnessPathsTest {
         node("pu_legacy").level = 2
         node("pu_cult_scrolls").level = 3
         node("pu_cult_artifacts").level = 1
-        assertEquals(mapOf("b_notes" to 10, "b_scrolls" to 15, "b_artifact" to 3), shop.getStartingBuildings())
+        node("pu_cult_flock").level = 2
+        assertEquals(mapOf("b_notes" to 10, "b_scrolls" to 15, "b_artifact" to 3, "b_synapse" to 10), shop.getStartingBuildings())
 
         node("pu_gear_plans").level = 10
         assertEquals(0.70, shop.getMapEffects().buildingCost, 1e-9)
@@ -131,6 +136,13 @@ class MadnessPathsTest {
         assertEquals(2, shop.getAttentionBonus())
         node(PrestigeShopManager.MADNESS_NODE_ID).level = 5
         assertEquals(0.6, shop.getMadnessGainMultiplier(), 1e-9)
+
+        // Los tramos del Engranaje: Engranajes Dobles solo a los edificios 7 a 11
+        node("pu_gear_double").level = 2
+        assertEquals(0, BigDecimal("1.5").compareTo(shop.getBuildingTierMultiplier(8)))
+        assertEquals(0, BigDecimal.ONE.compareTo(shop.getBuildingTierMultiplier(12)))
+        node("pu_void_eye").level = 1
+        assertEquals(1.3, shop.getMapEffects().sanityGain, 1e-9)
     }
 
     @Test

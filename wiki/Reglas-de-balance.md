@@ -88,11 +88,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 ## Constelaciones del Mapa *(v0.19.2)*
 
-- Siete constelaciones con 3 a 5 estrellas en cadena desde El Despertar; 28 nodos y 7 Sendas. *(Test: `MadnessPathsTest`.)*
+- Siete constelaciones reales; desde la v0.19.4 cada estrella de cada figura es un nodo: 54 nodos (con El Despertar) y 7 Sendas. Cada estrella pide una vecina encendida de su figura. *(Tests: `MadnessPathsTest`, `SkyLayoutTest`.)*
 - Una Senda se abre con toda su constelación encendida (o si ya se recorría) y sigue siendo excluyente.
 - Los nodos de efecto de pacto escalan lineal: `1 + (efecto − 1) × nivel` (Planos Imposibles al 10: costos x0,70).
 - Calma Antigua: la Locura que se gana x`(1 − 0,08 × nivel)`, mínimo x0,1. Ojo Interior: +1 de Atención por nivel (máx. 3).
-- El objetivo del logro "El Mapa Completo" es el número de nodos sin Sendas (28). *(Test: `MechanicAchievementsTest`.)*
+- El objetivo del logro "El Mapa Completo" es el número de nodos sin Sendas (54). *(Test: `MechanicAchievementsTest`.)*
 
 ## Medidor de Locura
 

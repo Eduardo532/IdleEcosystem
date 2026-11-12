@@ -142,7 +142,7 @@ internal val MECHANIC_ACHIEVEMENTS_EN: Map<String, String> = mapOf(
     "Suma 150 niveles en el Mapa de Locura" to "Reach 150 total levels in the Map of Madness",
     "El Mapa Completo" to "The Complete Map",
     "Todas las estrellas tienen tu marca." to "Every star bears your mark.",
-    "Ten al menos 1 nivel en las 28 estrellas del Mapa (sin contar las Sendas)" to "Have at least 1 level in all 28 Map stars (Paths aside)",
+    "Ten al menos 1 nivel en las 54 estrellas del Mapa (sin contar las Sendas)" to "Have at least 1 level in all 54 Map stars (Paths aside)",
     "Obsesión Estelar" to "Stellar Obsession",
     "Una estrella brilla diez veces más." to "One star shines ten times brighter.",
     "Sube un nodo del Mapa a nivel 10" to "Raise a Map node to level 10",

@@ -375,36 +375,44 @@ fun milestoneText(milestone: AscensionMilestone): Int = when (milestone) {
 }
 
 /** Elegir el pacto de la próxima vida, con lo que da y lo que quita el elegido. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Unit, buildingNames: Map<String, String>) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.pact_choose_title), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-    ) {
-        pacts.forEach { pact ->
-            val isSelected = pact == selected
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .width(64.dp)
-                    .border(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) pact.sigilColor() else Color(0xFF333333),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onSelect(pact) }
-                    .padding(4.dp)
-                    .testTag("$PACT_CHOICE_TAG${pact.id}")
-            ) {
-                PactSigil(pact, Modifier.size(44.dp))
-                Text(tr(pact.godName), color = Color.White, fontSize = 9.sp, maxLines = 1)
+    // Todos los dioses a la vista en una cuadrícula que llena el ancho (v0.19.4: antes
+    // quedaba un hueco a la derecha); las columnas dependen del ancho disponible
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        val columns = (maxWidth / PACT_CELL_MIN_WIDTH).toInt().coerceIn(3, 6)
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            pacts.chunked(columns).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { pact ->
+                        val isSelected = pact == selected
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) pact.sigilColor() else Color(0xFF333333),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                .clickable { onSelect(pact) }
+                                .padding(vertical = 6.dp, horizontal = 2.dp)
+                                .testTag("$PACT_CHOICE_TAG${pact.id}")
+                        ) {
+                            PactSigil(pact, Modifier.size(52.dp))
+                            Text(
+                                tr(pact.godName),
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                }
             }
         }
     }
@@ -413,4 +421,6 @@ private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Un
 }
 
 const val PACT_CHOICE_TAG = "pact_choice_"
+/** Ancho mínimo de cada dios en el selector de pactos. */
+private val PACT_CELL_MIN_WIDTH = 68.dp
 

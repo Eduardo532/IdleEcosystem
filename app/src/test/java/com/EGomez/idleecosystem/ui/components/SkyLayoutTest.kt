@@ -20,6 +20,9 @@ class SkyLayoutTest {
             assertTrue("$c: nodos y Senda deben ser estrellas de la figura", (figure.nodes + figure.path).all { it in figure.points })
             assertTrue("$c: las líneas unen estrellas de la figura", figure.edges.all { (a, b) -> a in figure.points && b in figure.points })
             assertEquals("$c: sin estrellas repetidas", figure.nodes.size, figure.nodes.toSet().size)
+            // v0.19.4: todas las estrellas de la figura son nodos; la Senda va en un punto vacío
+            assertEquals("$c", figure.points.keys - figure.path, figure.nodes.toSet())
+            assertTrue("$c: la Senda no es una estrella de la figura", figure.edges.none { figure.path in listOf(it.first, it.second) })
         }
     }
 
@@ -41,9 +44,10 @@ class SkyLayoutTest {
         MadnessPaths.IDS.forEach { id ->
             val path = upgrades.first { it.id == id }
             val center = SkyLayout.center(path.constellation!!)
-            assertTrue("$id", (positions.getValue(id) - center).getDistance() < 80f)
+            assertTrue("$id", (positions.getValue(id) - center).getDistance() < 100f)
         }
         assertEquals("Rigel", SkyLayout.starName(upgrades.first { it.id == "pu_click_1" }, upgrades))
-        assertEquals("Algol", SkyLayout.starName(upgrades.first { it.id == PrestigeShopManager.ATTENTION_NODE_ID }, upgrades))
+        assertEquals("Kappa", SkyLayout.starName(upgrades.first { it.id == PrestigeShopManager.ATTENTION_NODE_ID }, upgrades))
+        assertEquals("Algol", SkyLayout.starName(upgrades.first { it.id == PrestigeShopManager.MADNESS_NODE_ID }, upgrades))
     }
 }

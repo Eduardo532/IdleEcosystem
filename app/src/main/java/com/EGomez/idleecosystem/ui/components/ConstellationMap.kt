@@ -192,7 +192,8 @@ fun ConstellationMap(
                 t(figure.star),
                 TextStyle(color = Color.Gray, fontSize = (8 * size).sp, letterSpacing = 1.sp)
             )
-            val top = at(figure.center + Offset(0f, -SkyLayout.LABEL_OFFSET))
+            // (sin salirse por arriba del cielo)
+            val top = at(Offset(figure.center.x, (figure.center.y - SkyLayout.LABEL_OFFSET).coerceAtLeast(40f)))
             drawText(label, topLeft = Offset(top.x - label.size.width / 2f, top.y - label.size.height / 2f))
             drawText(subtitle, topLeft = Offset(top.x - subtitle.size.width / 2f, top.y + label.size.height / 2f))
         }
@@ -274,8 +275,9 @@ fun ConstellationMap(
 
 /**
  * Una constelación real (v0.19.3): sus estrellas con nombre (en unidades del cielo, con
- * respecto a su centro), las líneas de su figura, cuáles son nodos del Mapa (en el orden
- * en que se compran: la primera es la más cercana a El Despertar) y dónde va su Senda.
+ * respecto a su centro), las líneas de su figura, sus nodos del Mapa (desde la v0.19.4,
+ * todas sus estrellas; en el orden de la lista del Mapa, la primera es la más cercana a
+ * El Despertar) y el punto vacío del centro donde va su Senda.
  */
 class SkyFigure(
     val star: String,
@@ -293,7 +295,7 @@ class SkyFigure(
 object SkyLayout {
     const val WIDTH = 1200f
     const val HEIGHT = 1800f
-    const val LABEL_OFFSET = 235f
+    const val LABEL_OFFSET = 265f
     /** Las figuras se dibujan un 30 % más grandes que sus coordenadas, para que respiren. */
     const val FIGURE_SCALE = 1.3f
     val CORE = Offset(600f, 880f)
@@ -301,18 +303,19 @@ object SkyLayout {
     private fun o(x: Int, y: Int) = Offset(x.toFloat(), y.toFloat())
 
     val figures: Map<Constellation, SkyFigure> = linkedMapOf(
-        // La Mano: Orión, el cazador. Su Senda es Alnilam, en medio del cinturón.
+        // La Mano: Orión, el cazador. Su Senda va en el pecho, entre los hombros y el cinturón.
         Constellation.HAND to SkyFigure(
             "Orión", o(220, 540),
             mapOf(
                 "Rigel" to o(70, 100), "Saiph" to o(-55, 110), "Alnitak" to o(-34, 12), "Alnilam" to o(0, 0),
-                "Mintaka" to o(34, -10), "Bellatrix" to o(62, -95), "Betelgeuse" to o(-72, -108), "Meissa" to o(-4, -150)
+                "Mintaka" to o(34, -10), "Bellatrix" to o(62, -95), "Betelgeuse" to o(-72, -108), "Meissa" to o(-4, -150),
+                "★" to o(-3, -52)
             ),
             listOf(
                 "Betelgeuse" to "Bellatrix", "Betelgeuse" to "Alnitak", "Bellatrix" to "Mintaka", "Alnitak" to "Alnilam",
                 "Alnilam" to "Mintaka", "Alnitak" to "Saiph", "Mintaka" to "Rigel", "Meissa" to "Betelgeuse", "Meissa" to "Bellatrix"
             ),
-            listOf("Rigel", "Mintaka", "Bellatrix", "Betelgeuse"), "Alnilam"
+            listOf("Rigel", "Mintaka", "Bellatrix", "Betelgeuse", "Alnilam", "Alnitak", "Saiph", "Meissa"), "★"
         ),
         // La Mente: Casiopea, la reina en su trono (la W).
         Constellation.MIND to SkyFigure(
@@ -332,59 +335,60 @@ object SkyLayout {
                 "Alkaid" to "Mizar", "Mizar" to "Alioth", "Alioth" to "Megrez", "Megrez" to "Dubhe",
                 "Dubhe" to "Merak", "Merak" to "Phecda", "Phecda" to "Megrez"
             ),
-            listOf("Phecda", "Megrez", "Dubhe"), "★"
+            listOf("Alkaid", "Mizar", "Alioth", "Megrez", "Phecda", "Merak", "Dubhe"), "★"
         ),
         // El Sueño: las Pléyades, las siete hermanas.
         Constellation.DREAM to SkyFigure(
             "Las Pléyades", o(990, 1080),
             mapOf(
                 "Atlas" to o(-105, 18), "Pleione" to o(-118, -22), "Alcyone" to o(0, 0), "Merope" to o(48, 52),
-                "Electra" to o(92, -30), "Maia" to o(68, -92), "Taygeta" to o(14, -118), "★" to o(20, -50)
+                "Electra" to o(92, -30), "Maia" to o(68, -92), "Taygeta" to o(14, -118), "★" to o(34, -44)
             ),
             listOf(
                 "Pleione" to "Atlas", "Atlas" to "Alcyone", "Alcyone" to "Merope", "Merope" to "Electra",
                 "Electra" to "Maia", "Maia" to "Taygeta", "Taygeta" to "Alcyone"
             ),
-            listOf("Atlas", "Alcyone", "Merope"), "★"
+            listOf("Pleione", "Atlas", "Alcyone", "Merope", "Electra", "Maia", "Taygeta"), "★"
         ),
         // El Vacío: el Pez Austral y Fomalhaut, la estrella solitaria.
         Constellation.VOID to SkyFigure(
             "Pez Austral", o(780, 1530),
             mapOf(
                 "Epsilon" to o(-72, -34), "Fomalhaut" to o(-125, 8), "Delta" to o(-72, 42), "Gamma" to o(-8, 50),
-                "Beta" to o(55, 34), "Theta" to o(118, 6), "Iota" to o(88, -28), "Mu" to o(12, -44), "★" to o(4, 4)
+                "Beta" to o(55, 34), "Theta" to o(118, 6), "Iota" to o(88, -28), "Mu" to o(12, -44), "★" to o(0, 4)
             ),
             listOf(
                 "Epsilon" to "Fomalhaut", "Fomalhaut" to "Delta", "Delta" to "Gamma", "Gamma" to "Beta",
                 "Beta" to "Theta", "Theta" to "Iota", "Iota" to "Mu", "Mu" to "Epsilon"
             ),
-            listOf("Epsilon", "Fomalhaut", "Delta"), "★"
+            listOf("Epsilon", "Fomalhaut", "Delta", "Gamma", "Beta", "Theta", "Iota", "Mu"), "★"
         ),
-        // El Culto: Tauro, el toro del sacrificio. La Senda va dentro de la V de las Híades.
+        // El Culto: Tauro, el toro del sacrificio. La Senda va en la boca de la V de las Híades.
         Constellation.CULT to SkyFigure(
             "Tauro", o(200, 1080),
             mapOf(
                 "Elnath" to o(128, -118), "Ain" to o(58, -32), "Delta" to o(36, 10), "Gamma" to o(8, 48), "Theta" to o(-24, 16),
-                "Aldebaran" to o(-48, -22), "Zeta" to o(-70, -132), "Lambda" to o(-12, 108), "Omicron" to o(-112, 122), "★" to o(4, -12)
+                "Aldebaran" to o(-48, -22), "Zeta" to o(-70, -132), "Lambda" to o(-12, 108), "Omicron" to o(-112, 122), "★" to o(5, -42)
             ),
             listOf(
                 "Elnath" to "Ain", "Ain" to "Delta", "Delta" to "Gamma", "Gamma" to "Theta", "Theta" to "Aldebaran",
                 "Aldebaran" to "Zeta", "Gamma" to "Lambda", "Lambda" to "Omicron"
             ),
-            listOf("Elnath", "Ain", "Gamma", "Aldebaran"), "★"
+            listOf("Elnath", "Ain", "Delta", "Gamma", "Theta", "Aldebaran", "Zeta", "Lambda", "Omicron"), "★"
         ),
-        // Lo Arcano: Perseo, con la cabeza de Medusa (Algol). Su Senda es Delta Persei.
+        // Lo Arcano: Perseo, con la cabeza de Medusa (Algol). Su Senda va entre sus piernas.
         Constellation.ARCANE to SkyFigure(
             "Perseo", o(400, 1530),
             mapOf(
                 "Eta" to o(-12, -112), "Gamma" to o(-6, -62), "Mirfak" to o(0, 0), "Delta" to o(26, 46), "Epsilon" to o(42, 98),
-                "Zeta" to o(18, 148), "Kappa" to o(-42, 30), "Algol" to o(-80, 62), "Rho" to o(-98, 108)
+                "Zeta" to o(18, 148), "Kappa" to o(-42, 30), "Algol" to o(-80, 62), "Rho" to o(-98, 108),
+                "★" to o(-22, 72)
             ),
             listOf(
                 "Eta" to "Gamma", "Gamma" to "Mirfak", "Mirfak" to "Delta", "Delta" to "Epsilon", "Epsilon" to "Zeta",
                 "Mirfak" to "Kappa", "Kappa" to "Algol", "Algol" to "Rho"
             ),
-            listOf("Eta", "Gamma", "Mirfak", "Algol", "Rho"), "Delta"
+            listOf("Eta", "Gamma", "Mirfak", "Kappa", "Algol", "Rho", "Delta", "Epsilon", "Zeta"), "★"
         )
     )
 

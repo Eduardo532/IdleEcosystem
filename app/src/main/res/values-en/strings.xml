@@ -393,4 +393,5 @@
     <string name="map_fx_attention">+%1$d Attention</string>
     <string name="map_fx_madness">Madness rises x%1$s</string>
     <string name="map_fx_cult">+%1$d of the first five production buildings at the start</string>
+    <string name="map_fx_tier">Buildings %1$d to %2$d x%3$s</string>
 </resources>

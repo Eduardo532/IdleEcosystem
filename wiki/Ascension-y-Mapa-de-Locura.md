@@ -65,7 +65,7 @@ Cada punto de Cordura Residual que tienes da **+10 % a toda la producción**: co
 
 ## Mapa de Locura
 
-Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura**. Es la tienda de Cordura: desde la v0.19.2, **un cielo con siete constelaciones** alrededor de **El Despertar**, con **35 estrellas** (28 nodos y 7 Sendas). Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`); algunos tienen un nivel máximo.
+Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura**. Es la tienda de Cordura: desde la v0.19.2, **un cielo con siete constelaciones** alrededor de **El Despertar**. Desde la v0.19.4, **cada estrella de cada figura es un nodo**: 54 nodos (contando El Despertar) y 7 Sendas. Cada nodo se sube de nivel varias veces y cada nivel cuesta más que el anterior (`costo base × crecimiento^nivel`); algunos tienen un nivel máximo.
 
 > Gastar Cordura en el Mapa **la descuenta de tu Cordura Residual**, así que también baja su +10 % por punto. Vale la pena cuando el nodo da más que lo que pierdes.
 
@@ -74,54 +74,76 @@ Se abre desde la pestaña **Cordura** (capa Ascensión) → **Mapa de Locura**. 
 - **Cielo:** pellizca para acercar y arrastra para moverte. Con zoom aparecen los nombres de las estrellas. Toca una estrella para ver su ficha.
 - **Constelaciones reales** *(v0.19.3)*: cada sección es una figura del cielo, con sus estrellas de adorno y sus líneas. La primera estrella que se compra es la más cercana a El Despertar (de ahí sale su hilo), y la Senda está dentro de la figura, unida a su estrella más cercana. La ficha dice el nombre real de cada estrella (por ejemplo, ★ Rigel).
 
-| Sección | Constelación | Estrellas del Mapa, en orden de compra | Senda |
+| Sección | Constelación | Primera estrella | Senda |
 |---|---|---|---|
-| La Mano | Orión | Rigel, Mintaka, Bellatrix, Betelgeuse | Alnilam, en el cinturón |
-| El Engranaje | Osa Mayor | Phecda, Megrez, Dubhe | en el centro del cazo |
-| El Sueño | Las Pléyades | Atlas, Alcyone, Merope | en el centro del cúmulo |
-| La Mente | Casiopea | Segin, Ruchbah, Navi, Schedar, Caph | bajo la W |
-| El Vacío | Pez Austral | Epsilon, Fomalhaut, Delta | en el centro del pez |
-| El Culto | Tauro | Elnath, Ain, Gamma, Aldebarán | dentro de la V de las Híades |
-| Lo Arcano | Perseo | Eta, Gamma, Mirfak, Algol, Rho | Delta Persei |
-- **Lista:** las mismas estrellas agrupadas por constelación, con su efecto y su costo.
-- **Constelaciones:** los botones de arriba acercan el cielo a una constelación (o filtran la lista) y muestran cuántas estrellas tiene encendidas.
-- **Colores:** gris, todavía no se alcanza; contorno del color de la constelación, se puede comprar (brilla más si te alcanza la Cordura); relleno, comprada; dorado, al máximo o Senda recorrida; rojo con cruz, Senda sellada.
-- **Ficha:** qué da ahora, qué daría el siguiente nivel, el efecto neto de gastar Cordura y el botón **MEJORAR**.
+| La Mano | Orión | Rigel | en el hueco del centro de la figura |
+| El Engranaje | Osa Mayor | Alkaid | en el hueco del centro de la figura |
+| El Sueño | Las Pléyades | Pleione | en el hueco del centro de la figura |
+| La Mente | Casiopea | Segin | en el hueco del centro de la figura |
+| El Vacío | Pez Austral | Epsilon | en el hueco del centro de la figura |
+| El Culto | Tauro | Elnath | en el hueco del centro de la figura |
+| Lo Arcano | Perseo | Eta | en el hueco del centro de la figura |
 
-Dentro de cada constelación las estrellas se compran **en cadena**: la primera pide El Despertar y cada una pide la anterior. Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %); entre nodos distintos, los bonos se multiplican.
+Dentro de cada constelación las estrellas se encienden **siguiendo las líneas de la figura**: la primera (la más cercana a El Despertar) pide El Despertar, y cada una de las demás pide una estrella vecina ya encendida. Dentro de un nodo, los niveles se suman (3 niveles de +10 % = +30 %); entre nodos distintos, los bonos se multiplican.
 
 ### Las constelaciones
 
-| Constelación | Nodo | Efecto por nivel | Costo base | Crecimiento | Máx. |
-|---|---|---|---|---|---|
-| (centro) | El Despertar | Producción +10 % | 1 | x1.5 | — |
-| **La Mano** | Dedos Inquietos | Clic +50 % | 5 | x1.5 | — |
-| | Furia Táctil | Clic +100 % | 25 | x1.6 | — |
-| | Tormenta Psiónica | Clic +200 % | 150 | x1.8 | — |
-| | La Mano de Dios | Clic +500 % | 1000 | x2.5 | — |
-| **El Engranaje** | Engranajes Mentales | Seis primeros edificios +30 % *(antes 20 %)* | 10 | x1.5 | — |
-| | Sincronía | Todos los edificios +25 % *(antes 15 %)* | 50 | x1.6 | — |
-| | Planos Imposibles *(nuevo)* | Edificios −3 % de costo | 150 | x1.8 | 10 |
-| **El Sueño** | Sueño Lúcido | Sin conexión +50 % | 200 | x1.8 | — |
-| | Eternidad en un Segundo | Sin conexión +200 % | 1500 | x2.5 | — |
-| | Visiones Nocturnas *(nuevo)* | Eventos +15 % más seguido y +10 % de fuerza | 300 | x2.0 | 5 |
-| **La Mente** | Concentración | Producción +10 % *(antes 5 %)* | 15 | x1.4 | — |
-| | Lógica Alienígena | Producción +25 % | 80 | x1.7 | — |
-| | Iluminación Oscura | Producción +50 % | 400 | x2.0 | — |
-| | Omnisciencia | Producción +150 % | 2500 | x3.0 | — |
-| | Ascensión Cósmica | Producción +100 % | 5000 | x5.0 | — |
-| **El Vacío** | Llamada del Vacío | Cordura +25 % *(antes 10 %)* | 100 | x2.0 | — |
-| | Abismo | Cordura +40 % *(antes 20 %)* | 500 | x2.5 | — |
-| | Singularidad | Cordura +100 % *(antes 50 %)* | 5000 | x4.0 | — |
-| **El Culto** | Legado del Culto | +5 Notas Desordenadas al empezar | 3 | x2.0 | — |
-| | Biblioteca Heredada *(nuevo)* | +5 Pergaminos Prohibidos al empezar | 20 | x2.0 | 10 |
-| | Reliquias de Familia *(nuevo)* | +3 Artefactos Susurrantes al empezar | 120 | x2.2 | 10 |
-| | Iniciados Fieles *(nuevo)* | +2 Sectarios Novatos al empezar | 600 | x2.5 | 10 |
-| **Lo Arcano** | Ojos del Vacío *(nuevo)* | Runas +10 % más seguido | 40 | x1.8 | 5 |
-| | Liturgia Breve *(nuevo)* | Rituales −5 % de costo y de recarga | 150 | x2.0 | 6 |
-| | Resonancia *(nuevo)* | Probabilidad de Eco +10 % | 400 | x2.2 | 5 |
-| | Ojo Interior *(nuevo)* | +1 punto de Atención | 1000 | x4.0 | 3 |
-| | Calma Antigua *(nuevo)* | La Locura sube 8 % menos | 2500 | x3.0 | 5 |
+| Constelación | Estrella | Nodo | Efecto por nivel | Costo base | Crecimiento | Máx. |
+|---|---|---|---|---|---|---|
+| (centro) | — | El Despertar | Aumenta la Producción Global. | 1 | x1.5 | — |
+| **La Mano · Orión** | Rigel | Dedos Inquietos | Multiplica el poder de clic. | 5 | x1.5 | — |
+|  | Mintaka | Furia Táctil | Clics más potentes. | 25 | x1.6 | — |
+|  | Bellatrix | Tormenta Psiónica | Clics devastadores. | 150 | x1.8 | — |
+|  | Betelgeuse | La Mano de Dios | Poder de clic definitivo. | 1000 | x2.5 | — |
+|  | Alnilam | Cinturón del Cazador | Multiplica el poder de clic. | 60 | x1.6 | — |
+|  | Alnitak | Nudillos de Piedra | Clics todavía más fuertes. | 300 | x1.8 | — |
+|  | Saiph | Golpe Resonante | Un 5% más de probabilidad de Eco por nivel. | 800 | x2.2 | 5 |
+|  | Meissa | Cabeza del Cazador | Clics brutales. | 3000 | x2.6 | — |
+| **El Engranaje · Osa Mayor** | Alkaid | Engranajes Mentales | Multiplica los seis primeros edificios. | 10 | x1.5 | — |
+|  | Mizar | Sincronía | Multiplica TODOS los edificios. | 50 | x1.6 | — |
+|  | Alioth | Planos Imposibles | Los edificios cuestan un 3% menos por nivel. | 150 | x1.8 | 10 |
+|  | Megrez | Ruedas Dentadas | Multiplica los edificios 1 a 6. | 80 | x1.7 | — |
+|  | Phecda | Engranajes Dobles | Multiplica los edificios 7 a 11. | 400 | x1.9 | — |
+|  | Merak | Motor Primordial | Multiplica los edificios 12 a 16. | 2500 | x2.2 | — |
+|  | Dubhe | Aleación Impía | Los edificios cuestan un 2% menos por nivel. | 600 | x2.0 | 10 |
+| **El Sueño · Las Pléyades** | Pleione | Sueño Lúcido | Multiplica ganancia Offline. | 200 | x1.8 | — |
+|  | Atlas | Eternidad en un Segundo | Ganancia Offline masiva. | 1500 | x2.5 | — |
+|  | Alcyone | Visiones Nocturnas | Más eventos, y sus potenciadores más fuertes. | 300 | x2.0 | 5 |
+|  | Merope | Sueño Compartido | Multiplica la ganancia sin conexión. | 250 | x1.8 | — |
+|  | Electra | Pesadilla Útil | Los potenciadores de los eventos, un 15% más fuertes por nivel. | 500 | x2.0 | 5 |
+|  | Maia | Siete Hermanas | Los eventos llegan un 10% más seguido por nivel. | 900 | x2.2 | 5 |
+|  | Taygeta | Desvelo Infinito | Ganancia sin conexión masiva. | 3000 | x2.5 | — |
+| **La Mente · Casiopea** | Segin | Concentración | Multiplicador Global. | 15 | x1.4 | — |
+|  | Ruchbah | Lógica Alienígena | Aumento Global considerable. | 80 | x1.7 | — |
+|  | Navi | Iluminación Oscura | Potenciador Global avanzado. | 400 | x2.0 | — |
+|  | Schedar | Omnisciencia | Multiplicador Global divino. | 2500 | x3.0 | — |
+|  | Caph | Ascensión Cósmica | El Multiplicador Supremo. | 5000 | x5.0 | — |
+| **El Vacío · Pez Austral** | Epsilon | Llamada del Vacío | Multiplica la Cordura obtenida. | 100 | x2.0 | — |
+|  | Fomalhaut | Abismo | Gran bono de Cordura. | 500 | x2.5 | — |
+|  | Delta | Singularidad | Multiplicador masivo de Cordura. | 5000 | x4.0 | — |
+|  | Gamma | Marea Negra | Un 10% más de Cordura por nivel. | 800 | x2.0 | — |
+|  | Beta | Agua sin Luz | Un 15% más de Cordura por nivel. | 2000 | x2.3 | — |
+|  | Theta | Boca del Pez | Un 10% más de probabilidad de Eco por nivel. | 3500 | x2.4 | 5 |
+|  | Iota | Escamas de Sombra | Un 20% más de Cordura por nivel. | 8000 | x2.6 | — |
+|  | Mu | Ojo de Fomalhaut | Un 30% más de Cordura por nivel. | 20000 | x3.0 | — |
+| **El Culto · Tauro** | Elnath | Legado del Culto | Cada vida empieza con 5 Notas Desordenadas por nivel. | 3 | x2.0 | — |
+|  | Ain | Biblioteca Heredada | Cada vida empieza con 5 Pergaminos Prohibidos por nivel. | 20 | x2.0 | 10 |
+|  | Delta | Reliquias de Familia | Cada vida empieza con 3 Artefactos Susurrantes por nivel. | 120 | x2.2 | 10 |
+|  | Gamma | Iniciados Fieles | Cada vida empieza con 2 Sectarios Novatos por nivel. | 600 | x2.5 | 10 |
+|  | Theta | Diezmo de Sangre | Cada vida empieza con 1 Sacerdote Demente por nivel. | 1500 | x2.5 | 10 |
+|  | Aldebaran | Ojo del Toro | Cada vida empieza con 1 Santuario Subterráneo por nivel. | 4000 | x2.7 | 10 |
+|  | Zeta | Cuerno Sagrado | Cada vida empieza con 1 Altar de Hueso por nivel. | 10000 | x3.0 | 10 |
+|  | Lambda | Ofrendas | Los rituales cuestan un 5% menos por nivel. | 700 | x2.0 | 6 |
+|  | Omicron | Rebaño Fiel | Cada vida empieza con 5 Sinapsis Arcanas por nivel. | 1200 | x2.2 | 10 |
+| **Lo Arcano · Perseo** | Eta | Ojos del Vacío | Las runas aparecen un 10% más seguido por nivel. | 40 | x1.8 | 5 |
+|  | Gamma | Liturgia Breve | Los rituales cuestan y tardan en recargar un 5% menos por nivel. | 150 | x2.0 | 6 |
+|  | Mirfak | Resonancia | Un 10% más de probabilidad de Eco por nivel. | 400 | x2.2 | 5 |
+|  | Kappa | Ojo Interior | Un punto más de Atención por nivel. | 1000 | x4.0 | 3 |
+|  | Algol | Calma Antigua | La Locura sube un 8% menos por nivel. | 2500 | x3.0 | 5 |
+|  | Rho | Mirada de Medusa | Las runas aparecen un 8% más seguido por nivel. | 4000 | x2.5 | 5 |
+|  | Delta | Rito Prolongado | Los rituales duran un 10% más por nivel. | 600 | x2.0 | 5 |
+|  | Epsilon | Eco Persistente | Un 8% más de probabilidad de Eco por nivel. | 1500 | x2.2 | 5 |
+|  | Zeta | Llama Errante | Los rituales recargan un 5% más rápido por nivel. | 3500 | x2.4 | 6 |
 
 Desde la v0.19.2, El Sueño y El Vacío ya no cuelgan de otras ramas: empiezan en El Despertar. La Prueba que anula la Cordura y el Mapa también anula los edificios iniciales y los efectos de Lo Arcano.
 

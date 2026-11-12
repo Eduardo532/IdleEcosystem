@@ -394,4 +394,5 @@
     <string name="map_fx_attention">+%1$d de Atención</string>
     <string name="map_fx_madness">La Locura sube x%1$s</string>
     <string name="map_fx_cult">+%1$d de los cinco primeros edificios de producción al empezar</string>
+    <string name="map_fx_tier">Edificios %1$d a %2$d x%3$s</string>
 </resources>

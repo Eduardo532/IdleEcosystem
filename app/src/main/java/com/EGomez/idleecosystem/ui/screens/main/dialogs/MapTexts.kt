@@ -51,6 +51,9 @@ fun mapNodeEffect(node: PrestigeUpgrade, level: Int): String {
         val lines = pactLines(perLevel.scaled(level.toDouble()), buildingNames)
         return if (lines.isEmpty()) "—" else lines.joinToString(" · ") { it.text }
     }
+    PrestigeShopManager.TIER_NODES[node.id]?.let { range ->
+        return stringResource(R.string.map_fx_tier, range.first + 1, range.last + 1, times(mult))
+    }
     return when {
         node.id == PrestigeShopManager.ATTENTION_NODE_ID -> stringResource(R.string.map_fx_attention, level)
         node.id == PrestigeShopManager.MADNESS_NODE_ID ->

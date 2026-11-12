@@ -25,16 +25,31 @@ class PrestigeShopManager @Inject constructor() {
         PrestigeUpgrade("pu_click_2", "Furia Táctil", "Clics más potentes.", BigDecimal("25"), BigDecimal("1.6"), BigDecimal("1.0"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_click_1", constellation = Constellation.HAND),
         PrestigeUpgrade("pu_click_3", "Tormenta Psiónica", "Clics devastadores.", BigDecimal("150"), BigDecimal("1.8"), BigDecimal("2.0"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_click_2", constellation = Constellation.HAND),
         PrestigeUpgrade("pu_click_4", "La Mano de Dios", "Poder de clic definitivo.", BigDecimal("1000"), BigDecimal("2.5"), BigDecimal("5.0"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_click_3", constellation = Constellation.HAND),
+        // v0.19.4: una estrella por cada estrella de Orión
+        PrestigeUpgrade("pu_hand_belt", "Cinturón del Cazador", "Multiplica el poder de clic.", BigDecimal("60"), BigDecimal("1.6"), BigDecimal("0.40"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_click_2", constellation = Constellation.HAND),
+        PrestigeUpgrade("pu_hand_knuckles", "Nudillos de Piedra", "Clics todavía más fuertes.", BigDecimal("300"), BigDecimal("1.8"), BigDecimal("0.80"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_hand_belt", constellation = Constellation.HAND),
+        PrestigeUpgrade("pu_hand_resonant", "Golpe Resonante", "Un 5% más de probabilidad de Eco por nivel.", BigDecimal("800"), BigDecimal("2.2"), BigDecimal("0.05"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_hand_knuckles", constellation = Constellation.HAND, maxLevel = 5, effectsPerLevel = PactEffects(echoChance = 1.05)),
+        PrestigeUpgrade("pu_hand_head", "Cabeza del Cazador", "Clics brutales.", BigDecimal("3000"), BigDecimal("2.6"), BigDecimal("2.5"), UpgradeType.CLICK_MULTIPLIER, parentId = "pu_click_3", constellation = Constellation.HAND),
 
         // EL ENGRANAJE: los edificios (v0.19.2: más fuertes y con Planos Imposibles)
         PrestigeUpgrade("pu_idle_1", "Engranajes Mentales", "Multiplica los seis primeros edificios.", BigDecimal("10"), BigDecimal("1.5"), BigDecimal("0.30"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_core", constellation = Constellation.GEARS),
         PrestigeUpgrade("pu_idle_2", "Sincronía", "Multiplica TODOS los edificios.", BigDecimal("50"), BigDecimal("1.6"), BigDecimal("0.25"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_idle_1", constellation = Constellation.GEARS),
         PrestigeUpgrade("pu_gear_plans", "Planos Imposibles", "Los edificios cuestan un 3% menos por nivel.", BigDecimal("150"), BigDecimal("1.8"), BigDecimal("0.03"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_idle_2", constellation = Constellation.GEARS, maxLevel = 10, effectsPerLevel = PactEffects(buildingCost = 0.97)),
+        // v0.19.4: el resto de la Osa Mayor
+        PrestigeUpgrade("pu_gear_wheels", "Ruedas Dentadas", "Multiplica los edificios 1 a 6.", BigDecimal("80"), BigDecimal("1.7"), BigDecimal("0.25"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_gear_plans", constellation = Constellation.GEARS),
+        PrestigeUpgrade("pu_gear_double", "Engranajes Dobles", "Multiplica los edificios 7 a 11.", BigDecimal("400"), BigDecimal("1.9"), BigDecimal("0.25"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_gear_wheels", constellation = Constellation.GEARS),
+        PrestigeUpgrade("pu_gear_engine", "Motor Primordial", "Multiplica los edificios 12 a 16.", BigDecimal("2500"), BigDecimal("2.2"), BigDecimal("0.25"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_gear_double", constellation = Constellation.GEARS),
+        PrestigeUpgrade("pu_gear_alloy", "Aleación Impía", "Los edificios cuestan un 2% menos por nivel.", BigDecimal("600"), BigDecimal("2.0"), BigDecimal("0.02"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_gear_engine", constellation = Constellation.GEARS, maxLevel = 10, effectsPerLevel = PactEffects(buildingCost = 0.98)),
 
         // EL SUEÑO: sin conexión y los eventos
         PrestigeUpgrade("pu_offline_1", "Sueño Lúcido", "Multiplica ganancia Offline.", BigDecimal("200"), BigDecimal("1.8"), BigDecimal("0.50"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_core", constellation = Constellation.DREAM),
         PrestigeUpgrade("pu_offline_2", "Eternidad en un Segundo", "Ganancia Offline masiva.", BigDecimal("1500"), BigDecimal("2.5"), BigDecimal("2.0"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_offline_1", constellation = Constellation.DREAM),
         PrestigeUpgrade("pu_dream_visions", "Visiones Nocturnas", "Más eventos, y sus potenciadores más fuertes.", BigDecimal("300"), BigDecimal("2.0"), BigDecimal("0.15"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_offline_2", constellation = Constellation.DREAM, maxLevel = 5, effectsPerLevel = PactEffects(eventFrequency = 1.15, eventBuffPower = 1.10)),
+        // v0.19.4: el resto de las Pléyades
+        PrestigeUpgrade("pu_dream_shared", "Sueño Compartido", "Multiplica la ganancia sin conexión.", BigDecimal("250"), BigDecimal("1.8"), BigDecimal("0.30"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_dream_visions", constellation = Constellation.DREAM, effectsPerLevel = PactEffects(offline = 1.30)),
+        PrestigeUpgrade("pu_dream_nightmare", "Pesadilla Útil", "Los potenciadores de los eventos, un 15% más fuertes por nivel.", BigDecimal("500"), BigDecimal("2.0"), BigDecimal("0.15"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_dream_shared", constellation = Constellation.DREAM, maxLevel = 5, effectsPerLevel = PactEffects(eventBuffPower = 1.15)),
+        PrestigeUpgrade("pu_dream_sisters", "Siete Hermanas", "Los eventos llegan un 10% más seguido por nivel.", BigDecimal("900"), BigDecimal("2.2"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_dream_nightmare", constellation = Constellation.DREAM, maxLevel = 5, effectsPerLevel = PactEffects(eventFrequency = 1.10)),
+        PrestigeUpgrade("pu_dream_vigil", "Desvelo Infinito", "Ganancia sin conexión masiva.", BigDecimal("3000"), BigDecimal("2.5"), BigDecimal("0.60"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_dream_sisters", constellation = Constellation.DREAM, effectsPerLevel = PactEffects(offline = 1.60)),
 
         // LA MENTE: la producción de todo (Concentración, el doble que antes)
         PrestigeUpgrade("pu_mind_1", "Concentración", "Multiplicador Global.", BigDecimal("15"), BigDecimal("1.4"), BigDecimal("0.10"), UpgradeType.GLOBAL_MULTIPLIER, parentId = "pu_core", constellation = Constellation.MIND),
@@ -47,12 +62,24 @@ class PrestigeShopManager @Inject constructor() {
         PrestigeUpgrade("pu_void_1", "Llamada del Vacío", "Multiplica la Cordura obtenida.", BigDecimal("100"), BigDecimal("2.0"), BigDecimal("0.25"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_core", constellation = Constellation.VOID),
         PrestigeUpgrade("pu_void_2", "Abismo", "Gran bono de Cordura.", BigDecimal("500"), BigDecimal("2.5"), BigDecimal("0.40"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_1", constellation = Constellation.VOID),
         PrestigeUpgrade("pu_void_3", "Singularidad", "Multiplicador masivo de Cordura.", BigDecimal("5000"), BigDecimal("4.0"), BigDecimal("1.00"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_2", constellation = Constellation.VOID),
+        // v0.19.4: el resto del Pez Austral
+        PrestigeUpgrade("pu_void_tide", "Marea Negra", "Un 10% más de Cordura por nivel.", BigDecimal("800"), BigDecimal("2.0"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_3", constellation = Constellation.VOID, effectsPerLevel = PactEffects(sanityGain = 1.10)),
+        PrestigeUpgrade("pu_void_dark", "Agua sin Luz", "Un 15% más de Cordura por nivel.", BigDecimal("2000"), BigDecimal("2.3"), BigDecimal("0.15"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_tide", constellation = Constellation.VOID, effectsPerLevel = PactEffects(sanityGain = 1.15)),
+        PrestigeUpgrade("pu_void_mouth", "Boca del Pez", "Un 10% más de probabilidad de Eco por nivel.", BigDecimal("3500"), BigDecimal("2.4"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_dark", constellation = Constellation.VOID, maxLevel = 5, effectsPerLevel = PactEffects(echoChance = 1.10)),
+        PrestigeUpgrade("pu_void_scales", "Escamas de Sombra", "Un 20% más de Cordura por nivel.", BigDecimal("8000"), BigDecimal("2.6"), BigDecimal("0.20"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_mouth", constellation = Constellation.VOID, effectsPerLevel = PactEffects(sanityGain = 1.20)),
+        PrestigeUpgrade("pu_void_eye", "Ojo de Fomalhaut", "Un 30% más de Cordura por nivel.", BigDecimal("20000"), BigDecimal("3.0"), BigDecimal("0.30"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_void_scales", constellation = Constellation.VOID, effectsPerLevel = PactEffects(sanityGain = 1.30)),
 
         // EL CULTO: con qué empieza cada vida
         PrestigeUpgrade(STARTING_NOTES_ID, "Legado del Culto", "Cada vida empieza con 5 Notas Desordenadas por nivel.", BigDecimal("3"), BigDecimal("2.0"), BigDecimal(NOTES_PER_LEVEL), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_core", constellation = Constellation.CULT, startingBuilding = "b_notes"),
         PrestigeUpgrade("pu_cult_scrolls", "Biblioteca Heredada", "Cada vida empieza con 5 Pergaminos Prohibidos por nivel.", BigDecimal("20"), BigDecimal("2.0"), BigDecimal("5"), UpgradeType.BUILDING_MULTIPLIER, parentId = STARTING_NOTES_ID, constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_scrolls"),
         PrestigeUpgrade("pu_cult_artifacts", "Reliquias de Familia", "Cada vida empieza con 3 Artefactos Susurrantes por nivel.", BigDecimal("120"), BigDecimal("2.2"), BigDecimal("3"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_scrolls", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_artifact"),
         PrestigeUpgrade("pu_cult_cultists", "Iniciados Fieles", "Cada vida empieza con 2 Sectarios Novatos por nivel.", BigDecimal("600"), BigDecimal("2.5"), BigDecimal("2"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_artifacts", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_cultist"),
+        // v0.19.4: el resto de Tauro
+        PrestigeUpgrade("pu_cult_tithe", "Diezmo de Sangre", "Cada vida empieza con 1 Sacerdote Demente por nivel.", BigDecimal("1500"), BigDecimal("2.5"), BigDecimal("1"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_cultists", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_priest"),
+        PrestigeUpgrade("pu_cult_eye", "Ojo del Toro", "Cada vida empieza con 1 Santuario Subterráneo por nivel.", BigDecimal("4000"), BigDecimal("2.7"), BigDecimal("1"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_tithe", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_sanctuary"),
+        PrestigeUpgrade("pu_cult_horn", "Cuerno Sagrado", "Cada vida empieza con 1 Altar de Hueso por nivel.", BigDecimal("10000"), BigDecimal("3.0"), BigDecimal("1"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_eye", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_altar"),
+        PrestigeUpgrade("pu_cult_offering", "Ofrendas", "Los rituales cuestan un 5% menos por nivel.", BigDecimal("700"), BigDecimal("2.0"), BigDecimal("0.05"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_cultists", constellation = Constellation.CULT, maxLevel = 6, effectsPerLevel = PactEffects(ritualCost = 0.95)),
+        PrestigeUpgrade("pu_cult_flock", "Rebaño Fiel", "Cada vida empieza con 5 Sinapsis Arcanas por nivel.", BigDecimal("1200"), BigDecimal("2.2"), BigDecimal("5"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_cult_offering", constellation = Constellation.CULT, maxLevel = 10, startingBuilding = "b_synapse"),
 
         // LO ARCANO: runas, rituales, Ecos, Atención y Locura
         PrestigeUpgrade("pu_arcane_runes", "Ojos del Vacío", "Las runas aparecen un 10% más seguido por nivel.", BigDecimal("40"), BigDecimal("1.8"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_core", constellation = Constellation.ARCANE, maxLevel = 5, effectsPerLevel = PactEffects(runeFrequency = 1.10)),
@@ -60,6 +87,11 @@ class PrestigeShopManager @Inject constructor() {
         PrestigeUpgrade("pu_arcane_echoes", "Resonancia", "Un 10% más de probabilidad de Eco por nivel.", BigDecimal("400"), BigDecimal("2.2"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_arcane_rituals", constellation = Constellation.ARCANE, maxLevel = 5, effectsPerLevel = PactEffects(echoChance = 1.10)),
         PrestigeUpgrade(ATTENTION_NODE_ID, "Ojo Interior", "Un punto más de Atención por nivel.", BigDecimal("1000"), BigDecimal("4.0"), BigDecimal("1"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_arcane_echoes", constellation = Constellation.ARCANE, maxLevel = 3),
         PrestigeUpgrade(MADNESS_NODE_ID, "Calma Antigua", "La Locura sube un 8% menos por nivel.", BigDecimal("2500"), BigDecimal("3.0"), BigDecimal("0.08"), UpgradeType.BUILDING_MULTIPLIER, parentId = ATTENTION_NODE_ID, constellation = Constellation.ARCANE, maxLevel = 5),
+        // v0.19.4: el resto de Perseo
+        PrestigeUpgrade("pu_arcane_medusa", "Mirada de Medusa", "Las runas aparecen un 8% más seguido por nivel.", BigDecimal("4000"), BigDecimal("2.5"), BigDecimal("0.08"), UpgradeType.BUILDING_MULTIPLIER, parentId = MADNESS_NODE_ID, constellation = Constellation.ARCANE, maxLevel = 5, effectsPerLevel = PactEffects(runeFrequency = 1.08)),
+        PrestigeUpgrade("pu_arcane_rite", "Rito Prolongado", "Los rituales duran un 10% más por nivel.", BigDecimal("600"), BigDecimal("2.0"), BigDecimal("0.10"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_arcane_echoes", constellation = Constellation.ARCANE, maxLevel = 5, effectsPerLevel = PactEffects(ritualDuration = 1.10)),
+        PrestigeUpgrade("pu_arcane_echo", "Eco Persistente", "Un 8% más de probabilidad de Eco por nivel.", BigDecimal("1500"), BigDecimal("2.2"), BigDecimal("0.08"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_arcane_rite", constellation = Constellation.ARCANE, maxLevel = 5, effectsPerLevel = PactEffects(echoChance = 1.08)),
+        PrestigeUpgrade("pu_arcane_flame", "Llama Errante", "Los rituales recargan un 5% más rápido por nivel.", BigDecimal("3500"), BigDecimal("2.4"), BigDecimal("0.05"), UpgradeType.BUILDING_MULTIPLIER, parentId = "pu_arcane_echo", constellation = Constellation.ARCANE, maxLevel = 6, effectsPerLevel = PactEffects(ritualCooldown = 0.95)),
 
         // SENDAS: el centro de cada constelación. Excluyentes (solo una con niveles, ver
         // MadnessPaths) y abiertas al iluminar toda su constelación.
@@ -162,6 +194,14 @@ class PrestigeShopManager @Inject constructor() {
                 val nodeBonus = u.effectMultiplier.multiply(BigDecimal(u.level))
                 val nodeMult = BigDecimal.ONE.add(nodeBonus)
                 multiplier = multiplier.multiply(nodeMult)
+            }
+        }
+
+        // A2. Ruedas Dentadas, Engranajes Dobles y Motor Primordial (v0.19.4): por tramos
+        TIER_NODES.forEach { (id, range) ->
+            val u = upgrades.find { it.id == id }
+            if (u != null && u.level > 0 && buildingIndex in range) {
+                multiplier = multiplier.multiply(BigDecimal.ONE.add(u.effectMultiplier.multiply(BigDecimal(u.level))))
             }
         }
 
@@ -273,6 +313,8 @@ class PrestigeShopManager @Inject constructor() {
         const val STARTING_NOTES_ID = "pu_legacy"
         const val NOTES_PER_LEVEL = 5
         const val ATTENTION_NODE_ID = "pu_arcane_attention"
+        /** Tramos de edificios (índice en el catálogo, 0 = Sinapsis) de los nodos del Engranaje. */
+        val TIER_NODES = mapOf("pu_gear_wheels" to 0..5, "pu_gear_double" to 6..10, "pu_gear_engine" to 11..15)
         const val MADNESS_NODE_ID = "pu_arcane_madness"
         /** Senda del Culto: unidades de cada uno de estos edificios por nivel. */
         const val CULT_PATH_UNITS = 10

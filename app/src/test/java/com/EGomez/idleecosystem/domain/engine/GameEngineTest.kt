@@ -689,7 +689,8 @@ class GameEngineTest {
         if (production.signum() > 0) assertTrue(after.productionPerSecond > production)
         assertTrue(stats.counter(AchievementStat.starBuyWith("none")).signum() > 0)
         // Cada segundo nacen Estrellas
-        await(engine.economy) { it.stars > 0.0 }
+        val later = await(engine.economy) { it.stars > 0.0 }
+        assertTrue(later.starsPerHour > 0.0)
     }
 
     @Test

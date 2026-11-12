@@ -399,4 +399,12 @@
     <string name="automation_transcend_locked">Unlocks with %1$d Transcendences.</string>
     <string name="transcend_milestones_title">Transcendence Milestones (%1$d/%2$d)</string>
     <string name="transcend_milestone_at">Transcendences: %1$d/%2$d</string>
+    <string name="veil_title">The Veil</string>
+    <string name="veil_broken_title">Broken Veil</string>
+    <string name="veil_desc">Past %1$s Knowledge in a life, production falls with the square of how far you exceed it.</string>
+    <string name="veil_reward">Clear the 10 Trials to break it forever: no cap and production x%1$s.</string>
+    <string name="veil_progress">Trials cleared: %1$d/%2$d</string>
+    <string name="veil_break">Break the Veil</string>
+    <string name="veil_broken_desc">There is no Knowledge cap anymore. Production x%1$s forever.</string>
+    <string name="veil_pressing">The Veil slows your production: ÷%1$s. Ascend, or break it in the Trials tab.</string>
 </resources>

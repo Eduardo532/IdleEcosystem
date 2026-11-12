@@ -400,4 +400,12 @@
     <string name="automation_transcend_locked">Se desbloquea con %1$d Trascendencias.</string>
     <string name="transcend_milestones_title">Hitos de Trascendencia (%1$d/%2$d)</string>
     <string name="transcend_milestone_at">Trascendencias: %1$d/%2$d</string>
+    <string name="veil_title">El Velo</string>
+    <string name="veil_broken_title">Velo Roto</string>
+    <string name="veil_desc">Pasados %1$s de Conocimiento en una vida, la producción cae con el cuadrado de lo que lo superas.</string>
+    <string name="veil_reward">Supera las 10 Pruebas para romperlo para siempre: sin tope y producción x%1$s.</string>
+    <string name="veil_progress">Pruebas superadas: %1$d/%2$d</string>
+    <string name="veil_break">Romper el Velo</string>
+    <string name="veil_broken_desc">Ya no hay tope de Conocimiento. Producción x%1$s para siempre.</string>
+    <string name="veil_pressing">El Velo frena tu producción: ÷%1$s. Asciende, o rómpelo en la pestaña Pruebas.</string>
 </resources>

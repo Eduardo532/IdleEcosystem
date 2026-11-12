@@ -113,6 +113,10 @@ fun MenuSection(
     deliriumMultiplier: Double = 1.0,
     earlyPacts: Set<Pact> = emptySet(),
     onAbandonTrial: () -> Unit = {},
+    veilBroken: Boolean = false,
+    veilPressing: Boolean = false,
+    veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
+    onBreakVeil: () -> Unit = {},
     runeSlots: Int = 0,
     engravedRunes: List<String> = emptyList(),
     runeCatches: Map<String, Int> = emptyMap(),
@@ -234,6 +238,7 @@ fun MenuSection(
                     item { LockedSystem(lockedTabText) }
                 } else when (tab) {
                     MenuTab.RESEARCH -> {
+                        if (veilPressing) item(key = "veil_banner") { VeilBanner(veilFactor) }
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
                                 building = building,
@@ -387,7 +392,7 @@ fun MenuSection(
                         )
                     }
                     MenuTab.PANTHEON -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
-                    MenuTab.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
+                    MenuTab.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial, veilBroken, onBreakVeil) }
                     MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                     MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }

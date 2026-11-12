@@ -13,6 +13,7 @@
 - [Panteón](Panteon)
 - [Atención](Atencion)
 - [Pruebas de Locura](Pruebas-de-Locura)
+- [El Velo](El-Velo)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

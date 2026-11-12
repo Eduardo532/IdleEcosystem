@@ -336,6 +336,8 @@ fun MainScreen(
                             onBreakVeil = { viewModel.breakVeil() },
                             starsUi = uiState.starsUi,
                             bestiaryUi = uiState.bestiaryUi,
+                            labLevels = uiState.labLevels,
+                            onBuyLab = { viewModel.buyLab(it) },
                             onUpgradeBeast = { viewModel.upgradeBeast(it) },
                             onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,

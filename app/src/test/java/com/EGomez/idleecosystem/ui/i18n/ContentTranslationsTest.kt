@@ -38,6 +38,7 @@ class ContentTranslationsTest {
         "Constelaciones" to com.EGomez.idleecosystem.domain.model.Constellation.entries.flatMap { listOf(it.title, it.description) },
         "Hitos de Trascendencia" to com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone.entries.flatMap { listOf(it.title, it.description) },
         "Mejoras estelares" to com.EGomez.idleecosystem.domain.logic.StarUpgrade.entries.flatMap { listOf(it.title, it.description) },
+        "Laboratorio" to com.EGomez.idleecosystem.domain.logic.LabExperiment.entries.flatMap { listOf(it.title, it.description) },
         "Bestiario" to com.EGomez.idleecosystem.domain.logic.Bestiary.beasts.flatMap { listOf(it.name, it.lore) } +
             com.EGomez.idleecosystem.domain.logic.Bestiary.families.flatMap { listOf(it.title, it.description) } +
             com.EGomez.idleecosystem.domain.logic.BeastRarity.entries.map { it.title }

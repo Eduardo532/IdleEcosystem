@@ -216,6 +216,7 @@ class MainViewModel @Inject constructor(
             aligned = economy.starsAligned,
             secondsLeft = economy.alignmentSecondsLeft
         ),
+        labLevels = economy.labLevels,
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
             essence = economy.essence,
@@ -449,6 +450,8 @@ class MainViewModel @Inject constructor(
     fun catchEncounter() = engine.catchEncounter()
 
     fun upgradeBeast(id: String) = engine.upgradeBeast(id)
+
+    fun buyLab(id: String) = engine.buyLab(id)
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

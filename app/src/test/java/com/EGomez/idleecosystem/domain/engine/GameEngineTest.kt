@@ -34,6 +34,7 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
 import com.EGomez.idleecosystem.domain.logic.StarUpgrade
@@ -740,6 +741,36 @@ class GameEngineTest {
         val repeated = await(engine.economy) { it.essence > 4 }
         assertEquals(4 + BeastRarity.PRIMORDIAL.duplicateEssence, repeated.essence)
         assertEquals(2, repeated.beastLevels["deep_dagon"])
+    }
+
+    @Test
+    fun `the laboratory spends ether on exponents`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.ETHER, BigDecimal(3))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendences == 1 }
+        assertTrue(MenuTab.LAB in before.menuUnlocks.tabs)
+
+        engine.buyLab(LabExperiment.ARMITAGE.id)
+
+        val after = await(engine.economy) { it.labLevels[LabExperiment.ARMITAGE.id] == 1 }
+        assertEquals(0, after.ether)
+        assertTrue(stats.counter(AchievementStat.FEAT_LAB_EXACT).signum() > 0)
+        assertEquals(0, BigDecimal(3).compareTo(stats.counter(AchievementStat.LAB_ETHER_SPENT)))
+
+        // Sin Éter no se puede subir más
+        engine.buyLab(LabExperiment.ARMITAGE.id)
+        engine.grantKnowledge(BigDecimal.ONE)
+        val still = await(engine.economy) { it.knowledge > after.knowledge }
+        assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
     }
 
     @Test

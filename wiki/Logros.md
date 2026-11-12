@@ -1,6 +1,6 @@
 # Logros
 
-Hay **468 logros**: 113 originales y **355 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **480 logros**: 113 originales y **367 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -211,6 +211,17 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Jaula de Máscaras | Cataloga una criatura durante una vida con Nyarlathotep | +1 % |
 | Rebaño del Culto | Cataloga una criatura recorriendo la Senda del Culto | +1 % |
 | La Mano que Atrapa | Cataloga una criatura recorriendo la Senda de la Mano | +1 % |
+| Primer Experimento | Sube 1 nivel en el Laboratorio | +1 % |
+| Catedrático | Suma 15 niveles en el Laboratorio | +1 % |
+| Decano de Miskatonic | Lleva los 6 experimentos a su nivel máximo | +2 % |
+| Tesis Doctoral | Lleva un experimento a su nivel máximo | +1 % |
+| Cátedra Completa | Lleva 3 experimentos a su nivel máximo | +1 % |
+| Presupuesto de Investigación | Invierte 100 de Éter en el Laboratorio | +1 % |
+| Fondos Ilimitados | Invierte 1.000 de Éter en el Laboratorio | +2 % |
+| Ecuación de Yog-Sothoth | Sube un experimento durante una vida con Yog-Sothoth | +1 % |
+| El Profesor Negro | Sube un experimento durante una vida con Nyarlathotep | +1 % |
+| Mente de Laboratorio | Sube un experimento recorriendo la Senda de la Mente | +1 % |
+| Alquimia Arcana | Sube un experimento recorriendo la Senda Arcana | +1 % |
 
 ### Panteón
 
@@ -384,7 +395,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **29 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **30 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

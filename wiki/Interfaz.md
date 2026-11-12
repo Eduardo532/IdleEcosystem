@@ -19,6 +19,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | **Trascendencia** | celeste (Éter) | Éter | tener 50 Ascensiones en el ciclo |
 | | | Mutaciones | Trascender por primera vez |
 | | | Estrellas | Trascender por primera vez |
+| | | Laboratorio | Trascender por primera vez |
 
 Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 
@@ -39,6 +40,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Éter:** el Éter, el avance del ciclo, qué se pierde y qué se conserva, las mejoras eternas y el botón **TRASCENDER** (pide tocar dos veces).
 - **Mutaciones:** el catálogo de las 20 mutaciones. Las que todavía no elegiste se ven como **???**; la activa lleva la marca **ACTIVA**.
 - **Estrellas:** las Estrellas, el Polvo Estelar, la alineación (con su cuenta atrás) y las seis mejoras estelares. Ver [Estrellas](Estrellas).
+- **Laboratorio:** los seis experimentos de Miskatonic, con su exponente actual y su costo en Éter. Ver [Laboratorio](Laboratorio).
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

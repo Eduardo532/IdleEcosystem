@@ -14,6 +14,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 - **v0.19.6:** Romper el Velo: tope suave en 1e25 de Conocimiento por vida (la producción cae con el cuadrado de lo que lo superas). Superar las 10 Pruebas lo rompe para siempre: sin tope y producción x100. 10 logros nuevos.
 - **v0.19.7:** Cuando las Estrellas Estén en Posición: tras Trascender nacen Estrellas (también sin conexión) que dan Polvo Estelar para seis mejoras estelares. Cada media hora se alinean y el Polvo cae x5. Pestaña nueva Estrellas. 14 logros nuevos.
 - **v0.19.8:** Bestiario: 156 criaturas de los Mitos en 13 familias. Aparecen en encuentros al azar y se catalogan tocándolas; la Esencia de las Pruebas las sube de nivel. Completar una familia duplica su bono. 23 logros nuevos.
+- **v0.19.9:** Laboratorio de Miskatonic: seis experimentos pagados con Éter que suben exponentes (producción, clic, Cordura, Éter), potencian el Bestiario y alejan el Velo. Con esto se completan las cinco mecánicas de la etapa 6. 12 logros nuevos.
 
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 

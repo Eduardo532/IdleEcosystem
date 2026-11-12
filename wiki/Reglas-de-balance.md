@@ -129,6 +129,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Encuentros: cada 90–240 s, divididos por el bono de los Alados (máximo ÷2, mínimo 30 s). Duran 45 s. Peso por rareza 50/28/14/6/2, x2 si aún no se descubrió.
 - Esencia: Prueba `3 + 2·índice` (x3 la primera vez); repetida 1/2/4/8/16; subir del nivel n cuesta `costo de rareza · n · 2`. *(Código: `Bestiary`, `BeastCatalog`; test: `BestiaryTest`.)*
 
+## Laboratorio
+
+- Exponentes: producción `1 + 0,01·n`, clic `1 + 0,02·n`, Cordura `1 + 0,02·n`, Éter `1 + 0,05·n`, bonos del Bestiario `1 + 0,1·n`. Solo se eleva lo que es mayor que 1, y se calcula con log10 para no desbordar.
+- La producción se eleva sobre el total (un factor `total^(e−1)` aplicado a cada edificio). Ecuación del Velo: tope `1e25 · 10^n`. *(Código: `Lab`, `LabExperiment`; test: `LabTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

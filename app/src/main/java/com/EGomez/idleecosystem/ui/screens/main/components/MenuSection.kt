@@ -119,6 +119,8 @@ fun MenuSection(
     onBreakVeil: () -> Unit = {},
     starsUi: StarsUi = StarsUi(),
     bestiaryUi: BestiaryUi = BestiaryUi(),
+    labLevels: Map<String, Int> = emptyMap(),
+    onBuyLab: (String) -> Unit = {},
     onUpgradeBeast: (String) -> Unit = {},
     onBuyStar: (String) -> Unit = {},
     runeSlots: Int = 0,
@@ -402,6 +404,7 @@ fun MenuSection(
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
                     MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
                     MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onUpgradeBeast) }
+                    MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
                 }
             }
 

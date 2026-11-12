@@ -44,6 +44,18 @@ object AchievementStat {
     const val VEIL_DEPTH = "veil_depth"
     const val FEAT_VEIL_IN_TRIAL = "feat.veil_in_trial"
     const val VEIL_BROKEN_WITH_PREFIX = "veil_broken_with."
+    /**
+     * Cuando las Estrellas Estén en Posición (v0.19.7): Estrellas, Polvo Estelar (actual y
+     * ganado), niveles de las mejoras estelares y compras durante la alineación.
+     */
+    const val STARS = "stars"
+    const val STARDUST = "stardust"
+    const val STARDUST_EARNED = "stardust_earned"
+    const val STAR_LEVELS = "star_levels"
+    const val ALIGNED_PURCHASES = "aligned_purchases"
+    const val STAR_UPGRADE_PREFIX = "star_up."
+    const val STAR_BUY_WITH_PREFIX = "star_buy_with."
+    const val STAR_ALIGNED_PATH_PREFIX = "star_aligned_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -85,7 +97,7 @@ object AchievementStat {
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
-        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH
+        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS
     )
 
     // --- Contadores guardados ---
@@ -220,6 +232,9 @@ object AchievementStat {
     fun transcendPath(pathId: String) = TRANSCEND_PATH_PREFIX + pathId
     fun autoTranscendWith(pactId: String) = AUTO_TRANSCEND_WITH_PREFIX + pactId
     fun veilBrokenWith(pactId: String) = VEIL_BROKEN_WITH_PREFIX + pactId
+    fun starUpgrade(id: String) = STAR_UPGRADE_PREFIX + id
+    fun starBuyWith(pactId: String) = STAR_BUY_WITH_PREFIX + pactId
+    fun starAlignedPath(pathId: String) = STAR_ALIGNED_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -233,12 +248,14 @@ object AchievementStat {
         TIDES_PASSED, RUN_TIDES, TIDE_HIGH_RUNES, TIDE_DEAD_RITUALS, TIDE_HIGH_CONVERGENCE, FEAT_STILL_LOW_TIDE, FEAT_TSUNAMI,
         ETHER, ETHER_EARNED, TRANSCENDENCES, MAX_ETHER_GAIN, CYCLE_SANITY, CYCLE_START, ASCENSIONS_PAST, FEAT_EXACT_THRESHOLD, MUTATION_LIVES,
         AUTO_TRANSCENDS, FEAT_SHORTCUT, VEIL_BROKEN, VEIL_TOUCHED, FEAT_VEIL_IN_TRIAL,
+        STARS, STARDUST_EARNED, ALIGNED_PURCHASES,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
 
     private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX,
         RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX, AUTO_TRANSCEND_WITH_PREFIX, VEIL_BROKEN_WITH_PREFIX,
+        STAR_BUY_WITH_PREFIX, STAR_ALIGNED_PATH_PREFIX, STAR_UPGRADE_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

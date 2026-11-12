@@ -117,6 +117,8 @@ fun MenuSection(
     veilPressing: Boolean = false,
     veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
     onBreakVeil: () -> Unit = {},
+    starsUi: StarsUi = StarsUi(),
+    onBuyStar: (String) -> Unit = {},
     runeSlots: Int = 0,
     engravedRunes: List<String> = emptyList(),
     runeCatches: Map<String, Int> = emptyMap(),
@@ -396,6 +398,7 @@ fun MenuSection(
                     MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                     MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
+                    MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
                 }
             }
 

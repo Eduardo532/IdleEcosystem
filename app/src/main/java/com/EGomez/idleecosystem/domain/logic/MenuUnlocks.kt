@@ -19,7 +19,8 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     TRIALS("trials", MenuLayer.ASCENSION),
     RUNES("runes", MenuLayer.ASCENSION),
     ETHER("ether", MenuLayer.TRANSCENDENCE),
-    MUTATIONS("mutations", MenuLayer.TRANSCENDENCE);
+    MUTATIONS("mutations", MenuLayer.TRANSCENDENCE),
+    STARS("stars", MenuLayer.TRANSCENDENCE);
 
     companion object {
         fun fromId(id: String?): MenuTab? = entries.firstOrNull { it.id == id }
@@ -66,7 +67,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             runeSlots: Int,
             masteryRevealed: Boolean,
             transcendRevealed: Boolean,
-            mutationsRevealed: Boolean
+            mutationsRevealed: Boolean,
+            starsRevealed: Boolean = false
         ): MenuUnlocks {
             val tabs = mutableSetOf(MenuTab.RESEARCH)
             if (reveal.grimoire) tabs += MenuTab.GRIMOIRE
@@ -77,6 +79,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (runeSlots > 0 || masteryRevealed) tabs += MenuTab.RUNES
             if (transcendRevealed) tabs += MenuTab.ETHER
             if (mutationsRevealed) tabs += MenuTab.MUTATIONS
+            if (starsRevealed) tabs += MenuTab.STARS
             return MenuUnlocks(tabs)
         }
     }

@@ -408,4 +408,12 @@
     <string name="veil_break">Romper el Velo</string>
     <string name="veil_broken_desc">Ya no hay tope de Conocimiento. Producción x%1$s para siempre.</string>
     <string name="veil_pressing">El Velo frena tu producción: ÷%1$s. Asciende, o rómpelo en la pestaña Pruebas.</string>
+    <string name="tab_stars">Estrellas</string>
+    <string name="stars_title">ESTRELLAS</string>
+    <string name="stars_rate">+%1$s por hora (también sin conexión)</string>
+    <string name="stardust_title">POLVO ESTELAR</string>
+    <string name="stardust_rate">+%1$s/s</string>
+    <string name="stars_aligned">✦ Las estrellas están en posición: Polvo x%1$s · quedan %2$s</string>
+    <string name="stars_next_alignment">Las estrellas se alinean en %1$s</string>
+    <string name="stars_upgrades_title">Mejoras estelares</string>
 </resources>

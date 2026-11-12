@@ -99,6 +99,8 @@ data class GameUiState(
     val milestoneAscensions: Int = 0,
     /** Romper el Velo (v0.19.6). */
     val veilBroken: Boolean = false,
+    /** Cuando las Estrellas Estén en Posición (v0.19.7). */
+    val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
     val veilPressing: Boolean = false,
     val veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
     val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,

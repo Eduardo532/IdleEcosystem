@@ -207,6 +207,15 @@ class MainViewModel @Inject constructor(
         transcendences = economy.transcendences,
         milestoneAscensions = economy.milestoneAscensions,
         veilBroken = economy.veilBroken,
+        starsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(
+            stars = economy.stars,
+            stardust = economy.stardust,
+            starsPerHour = economy.starsPerHour,
+            dustPerSecond = economy.dustPerSecond,
+            levels = economy.starLevels,
+            aligned = economy.starsAligned,
+            secondsLeft = economy.alignmentSecondsLeft
+        ),
         veilPressing = economy.veilPressing,
         veilFactor = economy.veilFactor,
         transcendRequired = economy.transcendRequired,
@@ -427,6 +436,8 @@ class MainViewModel @Inject constructor(
     fun toggleAutoTranscend() = updateAutomation { it.copy(autoTranscend = !it.autoTranscend) }
 
     fun breakVeil() = engine.breakVeil()
+
+    fun buyStarUpgrade(id: String) = engine.buyStarUpgrade(id)
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

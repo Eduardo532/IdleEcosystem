@@ -407,4 +407,12 @@
     <string name="veil_break">Break the Veil</string>
     <string name="veil_broken_desc">There is no Knowledge cap anymore. Production x%1$s forever.</string>
     <string name="veil_pressing">The Veil slows your production: ÷%1$s. Ascend, or break it in the Trials tab.</string>
+    <string name="tab_stars">Stars</string>
+    <string name="stars_title">STARS</string>
+    <string name="stars_rate">+%1$s per hour (offline too)</string>
+    <string name="stardust_title">STARDUST</string>
+    <string name="stardust_rate">+%1$s/s</string>
+    <string name="stars_aligned">✦ The stars are right: Stardust x%1$s · %2$s left</string>
+    <string name="stars_next_alignment">The stars align in %1$s</string>
+    <string name="stars_upgrades_title">Stellar upgrades</string>
 </resources>

@@ -515,6 +515,27 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the stars tab shows the alignment and buys an affordable upgrade`() {
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.StarsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(stars = 12.4, stardust = 40.0, aligned = true, secondsLeft = 95),
+                    onBuy = { bought += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("✦ 12").assertExists()
+        compose.onNodeWithText("✦ Las estrellas están en posición: Polvo x5 · quedan 1:35").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "ether").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("light"), bought)
+    }
+
+    @Test
     fun `the compact research button clicks like the big one`() {
         var clicks = 0
         compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }

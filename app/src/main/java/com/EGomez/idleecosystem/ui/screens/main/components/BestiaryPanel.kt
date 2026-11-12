@@ -1,7 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -83,10 +82,9 @@ fun BestiaryPanel(state: BestiaryUi, onUpgrade: (String) -> Unit) {
                         Text("❖ ${state.essence}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-                val active = state.bonuses.filter { it.value > 1.0001 }
+                val active = state.bonuses.filter { it.value > 1.0001 }.map { (kind, value) -> kind.effectText(((value - 1.0) * 100).roundToInt()) }
                 Text(
-                    if (active.isEmpty()) stringResource(R.string.bestiary_hint)
-                    else active.entries.joinToString(" · ") { (kind, value) -> kind.effectText(((value - 1.0) * 100).roundToInt()) },
+                    if (active.isEmpty()) stringResource(R.string.bestiary_hint) else active.joinToString(" · "),
                     color = Color.LightGray,
                     fontSize = 11.sp
                 )

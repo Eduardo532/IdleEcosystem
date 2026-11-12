@@ -266,5 +266,12 @@ enum class TutorialStep(
         "Estrellas y Polvo Estelar",
         "Tras Trascender empiezan a nacer Estrellas, poco a poco y también sin conexión. Cada una da Polvo Estelar, que compra mejoras estelares en la pestaña Estrellas. Cada media hora las estrellas se ponen en posición unos minutos: entonces el Polvo cae x5.",
         "Tras la primera Trascendencia"
+    ),
+
+    BESTIARY(
+        "bestiary",
+        "El Bestiario",
+        "Superaste una Prueba y ganaste Esencia. Desde ahora aparecen criaturas de los Mitos en encuentros al azar: tócalas antes de que se vayan para catalogarlas en el Bestiario. Cada una da un pequeño bono y la Esencia las sube de nivel.",
+        "Al superar la primera Prueba"
     )
 }

@@ -101,6 +101,8 @@ data class GameUiState(
     val veilBroken: Boolean = false,
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
+    /** Bestiario (v0.19.8). */
+    val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,
     val veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
     val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,

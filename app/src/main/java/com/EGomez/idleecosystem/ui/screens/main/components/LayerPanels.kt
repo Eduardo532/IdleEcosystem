@@ -61,6 +61,7 @@ fun MenuTab.title(): String = stringResource(
         MenuTab.ETHER -> R.string.tab_ether
         MenuTab.MUTATIONS -> R.string.tab_mutations
         MenuTab.STARS -> R.string.tab_stars
+        MenuTab.BESTIARY -> R.string.tab_bestiary
     }
 )
 

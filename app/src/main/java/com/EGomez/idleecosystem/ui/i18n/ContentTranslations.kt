@@ -22,7 +22,7 @@ object ContentTranslations {
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
             TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?:
-            MECHANIC_ACHIEVEMENTS_EN[text] ?: TRIALS[text] ?: ladderName(text)
+            MECHANIC_ACHIEVEMENTS_EN[text] ?: BESTIARY_EN[text] ?: TRIALS[text] ?: ladderName(text)
 
     /** Pruebas de Locura (v0.17.1): nombres y reglas. */
     private val TRIALS = mapOf(
@@ -57,6 +57,14 @@ object ContentTranslations {
         "Memoria Ancestral" to "Ancestral Memory",
         "Cada ciclo empieza con 5 Ascensiones por nivel (cuentan para los hitos, la Atención, los pactos y las Pruebas)." to "Every cycle starts with 5 Ascensions per level (they count for milestones, Attention, pacts and Trials).",
         "Consagrar Edificios" to "Consecrate Buildings",
+        "Primigenia" to "Primordial",
+        "Mítica" to "Mythic",
+        "Rara" to "Rare",
+        "Infrecuente" to "Uncommon",
+        "Común" to "Common",
+        "Al superar la primera Prueba" to "When clearing the first Trial",
+        "Superaste una Prueba y ganaste Esencia. Desde ahora aparecen criaturas de los Mitos en encuentros al azar: tócalas antes de que se vayan para catalogarlas en el Bestiario. Cada una da un pequeño bono y la Esencia las sube de nivel." to "You cleared a Trial and earned Essence. From now on, creatures of the Mythos appear in random encounters: tap them before they leave to catalogue them in the Bestiary. Each one gives a small bonus, and Essence levels them up.",
+        "El Bestiario" to "The Bestiary",
         "Estrellas y Polvo Estelar" to "Stars and Stardust",
         "Éter ganado al Trascender +10 % por nivel." to "Ether gained on Transcending +10% per level.",
         "Polvo de Éter" to "Ether Dust",

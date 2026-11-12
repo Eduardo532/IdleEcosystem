@@ -416,4 +416,23 @@
     <string name="stars_aligned">✦ Las estrellas están en posición: Polvo x%1$s · quedan %2$s</string>
     <string name="stars_next_alignment">Las estrellas se alinean en %1$s</string>
     <string name="stars_upgrades_title">Mejoras estelares</string>
+    <string name="tab_bestiary">Bestiario</string>
+    <string name="bestiary_title">CRIATURAS CATALOGADAS</string>
+    <string name="essence_title">ESENCIA</string>
+    <string name="bestiary_hint">Las criaturas aparecen en encuentros al azar: tócalas antes de que se vayan. Superar Pruebas da Esencia para subirlas de nivel.</string>
+    <string name="bestiary_family_complete">COMPLETA x2</string>
+    <string name="beast_kind_production">+%1$d %% producción</string>
+    <string name="beast_kind_click">+%1$d %% clic</string>
+    <string name="beast_kind_sanity">+%1$d %% Cordura</string>
+    <string name="beast_kind_offline">+%1$d %% sin conexión</string>
+    <string name="beast_kind_ether">+%1$d %% Éter</string>
+    <string name="beast_kind_stardust">+%1$d %% Polvo Estelar</string>
+    <string name="beast_kind_essence">+%1$d %% Esencia</string>
+    <string name="beast_kind_encounter">+%1$d %% encuentros</string>
+    <string name="beast_level">Nivel %1$d/%2$d</string>
+    <string name="beast_per_level">Por nivel: %1$s</string>
+    <string name="beast_upgrade">Subir · ❖ %1$d</string>
+    <string name="encounter_unknown">Algo acecha…</string>
+    <string name="encounter_left">se va en %1$d s</string>
+    <string name="encounter_catch">Catalogar</string>
 </resources>

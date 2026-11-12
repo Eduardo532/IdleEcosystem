@@ -123,6 +123,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Alineación: los primeros `180 + 60·Conjunción` segundos de cada media hora (hora real). Sin conexión no hay alineación.
 - Costos: `base · crecimiento^nivel`. Producción `1,5^Luz · (1 + 0,01·Negras·Estrellas)`. *(Código: `Stars`, `StarUpgrade`; test: `StarsTest`.)*
 
+## Bestiario
+
+- Bono por nivel según rareza: 1 / 2 / 4 / 8 / 15 %. Tipo según la familia; familia completa x2. Suma aditiva dentro de cada tipo. Producción, clic, sin conexión y Cordura entran como efectos de pacto.
+- Encuentros: cada 90–240 s, divididos por el bono de los Alados (máximo ÷2, mínimo 30 s). Duran 45 s. Peso por rareza 50/28/14/6/2, x2 si aún no se descubrió.
+- Esencia: Prueba `3 + 2·índice` (x3 la primera vez); repetida 1/2/4/8/16; subir del nivel n cuesta `costo de rareza · n · 2`. *(Código: `Bestiary`, `BeastCatalog`; test: `BestiaryTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

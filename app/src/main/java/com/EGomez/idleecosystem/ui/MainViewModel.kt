@@ -216,6 +216,13 @@ class MainViewModel @Inject constructor(
             aligned = economy.starsAligned,
             secondsLeft = economy.alignmentSecondsLeft
         ),
+        bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
+            levels = economy.beastLevels,
+            essence = economy.essence,
+            bonuses = economy.beastBonuses,
+            encounterId = economy.encounterId,
+            encounterSecondsLeft = economy.encounterSecondsLeft
+        ),
         veilPressing = economy.veilPressing,
         veilFactor = economy.veilFactor,
         transcendRequired = economy.transcendRequired,
@@ -438,6 +445,10 @@ class MainViewModel @Inject constructor(
     fun breakVeil() = engine.breakVeil()
 
     fun buyStarUpgrade(id: String) = engine.buyStarUpgrade(id)
+
+    fun catchEncounter() = engine.catchEncounter()
+
+    fun upgradeBeast(id: String) = engine.upgradeBeast(id)
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

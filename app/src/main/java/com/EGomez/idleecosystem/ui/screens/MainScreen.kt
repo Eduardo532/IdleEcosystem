@@ -28,6 +28,7 @@ import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.ui.components.RuneCaughtNotice
 import com.EGomez.idleecosystem.ui.components.readableRuneColor
 import com.EGomez.idleecosystem.ui.components.multiplierLabel
+import com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner
 import com.EGomez.idleecosystem.ui.screens.main.components.EtherColor
 import com.EGomez.idleecosystem.ui.screens.main.components.color
 import com.EGomez.idleecosystem.ui.screens.main.components.title
@@ -334,6 +335,8 @@ fun MainScreen(
                             veilFactor = uiState.veilFactor,
                             onBreakVeil = { viewModel.breakVeil() },
                             starsUi = uiState.starsUi,
+                            bestiaryUi = uiState.bestiaryUi,
+                            onUpgradeBeast = { viewModel.upgradeBeast(it) },
                             onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
@@ -365,6 +368,17 @@ fun MainScreen(
                             },
                             // Con el menú abierto, la lista ocupa todo lo que deja la cabecera compacta
                             modifier = if (isMenuExpanded) Modifier.weight(1f) else Modifier.weight(menuWeight)
+                        )
+                    }
+
+                    // Bestiario (v0.19.8): la criatura del encuentro flota arriba de todo
+                    uiState.bestiaryUi.encounterId?.let { id ->
+                        EncounterBanner(
+                            beastId = id,
+                            secondsLeft = uiState.bestiaryUi.encounterSecondsLeft,
+                            known = (uiState.bestiaryUi.levels[id] ?: 0) > 0,
+                            onCatch = { viewModel.catchEncounter() },
+                            modifier = Modifier.align(Alignment.TopCenter).padding(paddingValues).padding(top = 4.dp).zIndex(150f)
                         )
                     }
 

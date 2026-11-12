@@ -34,6 +34,8 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.BeastRarity
+import com.EGomez.idleecosystem.domain.logic.BeastKind
 import com.EGomez.idleecosystem.domain.logic.StarUpgrade
 import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
@@ -699,6 +701,45 @@ class GameEngineTest {
         val state = await(engine.economy) { it.knowledge.signum() > 0 }
         assertFalse(MenuTab.STARS in state.menuUnlocks.tabs)
         assertEquals(0.0, state.stars, 0.0)
+    }
+
+    @Test
+    fun `encounters catalogue creatures and essence levels them up`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 5
+            count(AchievementStat.trial(Trial.entries.first().id))
+            count(AchievementStat.ESSENCE, BigDecimal(20))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.ascensions == 5 }
+        assertTrue(MenuTab.BESTIARY in before.menuUnlocks.tabs)
+
+        engine.forceEncounter("deep_dagon")
+        await(engine.economy) { it.encounterId == "deep_dagon" }
+        engine.catchEncounter()
+
+        val caught = await(engine.economy) { it.beastLevels["deep_dagon"] == 1 }
+        assertEquals(null, caught.encounterId)
+        assertEquals(1.15, caught.beastBonuses.getValue(BeastKind.PRODUCTION), 1e-9)
+        assertTrue(stats.counter(AchievementStat.beastCatchWith("none")).signum() > 0)
+
+        // Subir de nivel cuesta 8 x 1 x 2 = 16 de Esencia
+        engine.upgradeBeast("deep_dagon")
+        val upgraded = await(engine.economy) { it.beastLevels["deep_dagon"] == 2 }
+        assertEquals(4, upgraded.essence)
+
+        // Repetida, la criatura da Esencia según su rareza
+        engine.forceEncounter("deep_dagon")
+        engine.catchEncounter()
+        val repeated = await(engine.economy) { it.essence > 4 }
+        assertEquals(4 + BeastRarity.PRIMORDIAL.duplicateEssence, repeated.essence)
+        assertEquals(2, repeated.beastLevels["deep_dagon"])
     }
 
     @Test

@@ -192,7 +192,8 @@ fun ConstellationMap(
                 t(figure.star),
                 TextStyle(color = Color.Gray, fontSize = (8 * size).sp, letterSpacing = 1.sp)
             )
-            val top = at(figure.center + Offset(0f, -SkyLayout.LABEL_OFFSET))
+            // (sin salirse por arriba del cielo)
+            val top = at(Offset(figure.center.x, (figure.center.y - SkyLayout.LABEL_OFFSET).coerceAtLeast(40f)))
             drawText(label, topLeft = Offset(top.x - label.size.width / 2f, top.y - label.size.height / 2f))
             drawText(subtitle, topLeft = Offset(top.x - subtitle.size.width / 2f, top.y + label.size.height / 2f))
         }
@@ -294,7 +295,7 @@ class SkyFigure(
 object SkyLayout {
     const val WIDTH = 1200f
     const val HEIGHT = 1800f
-    const val LABEL_OFFSET = 235f
+    const val LABEL_OFFSET = 265f
     /** Las figuras se dibujan un 30 % más grandes que sus coordenadas, para que respiren. */
     const val FIGURE_SCALE = 1.3f
     val CORE = Offset(600f, 880f)
@@ -341,7 +342,7 @@ object SkyLayout {
             "Las Pléyades", o(990, 1080),
             mapOf(
                 "Atlas" to o(-105, 18), "Pleione" to o(-118, -22), "Alcyone" to o(0, 0), "Merope" to o(48, 52),
-                "Electra" to o(92, -30), "Maia" to o(68, -92), "Taygeta" to o(14, -118), "★" to o(46, -36)
+                "Electra" to o(92, -30), "Maia" to o(68, -92), "Taygeta" to o(14, -118), "★" to o(34, -44)
             ),
             listOf(
                 "Pleione" to "Atlas", "Atlas" to "Alcyone", "Alcyone" to "Merope", "Merope" to "Electra",
@@ -362,12 +363,12 @@ object SkyLayout {
             ),
             listOf("Epsilon", "Fomalhaut", "Delta", "Gamma", "Beta", "Theta", "Iota", "Mu"), "★"
         ),
-        // El Culto: Tauro, el toro del sacrificio. La Senda va dentro de la V de las Híades.
+        // El Culto: Tauro, el toro del sacrificio. La Senda va en la boca de la V de las Híades.
         Constellation.CULT to SkyFigure(
             "Tauro", o(200, 1080),
             mapOf(
                 "Elnath" to o(128, -118), "Ain" to o(58, -32), "Delta" to o(36, 10), "Gamma" to o(8, 48), "Theta" to o(-24, 16),
-                "Aldebaran" to o(-48, -22), "Zeta" to o(-70, -132), "Lambda" to o(-12, 108), "Omicron" to o(-112, 122), "★" to o(6, -6)
+                "Aldebaran" to o(-48, -22), "Zeta" to o(-70, -132), "Lambda" to o(-12, 108), "Omicron" to o(-112, 122), "★" to o(5, -42)
             ),
             listOf(
                 "Elnath" to "Ain", "Ain" to "Delta", "Delta" to "Gamma", "Gamma" to "Theta", "Theta" to "Aldebaran",

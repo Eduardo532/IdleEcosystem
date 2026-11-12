@@ -33,6 +33,8 @@ import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
+import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -550,6 +552,78 @@ class GameEngineTest {
         engine.buyEternal("memory")
         val bought = await(engine.economy) { it.eternalLevels["memory"] == 1 }
         assertEquals(13, bought.ether)
+    }
+
+    @Test
+    fun `transcendence milestones keep the path and the first stars and shorten the cycle`() = runBlocking {
+        // Doce Trascendencias: todos los hitos. Ciclo de 40 Ascensiones (El Atajo)
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 40
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        // La Senda de la Mano a nivel 2, con su constelación recorrida
+        val path = mutableListOf<PrestigeUpgradeSaveModel>()
+        var id: String? = MadnessPaths.HAND
+        while (id != null) {
+            val node = shop.upgrades.first { it.id == id }
+            path += PrestigeUpgradeSaveModel(node.id, if (id == MadnessPaths.HAND) 2 else 1)
+            id = node.parentId
+        }
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = path, timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.transcendences == 12 && it.etherGain > 0 }
+        assertEquals(40, before.transcendRequired)
+        assertTrue(before.milestoneAscensions >= AscensionMilestone.AUTO_RITUAL.ascensions)
+
+        engine.transcend()
+
+        val after = await(engine.economy) { it.transcendences == 13 }
+        assertEquals(0, after.ascensions)
+        // Memoria de la Máquina: los hitos de Ascensión siguen alcanzados al empezar el ciclo
+        assertTrue(after.milestoneAscensions >= AscensionMilestone.AUTO_RITUAL.ascensions)
+        assertTrue(stats.counter(AchievementStat.FEAT_SHORTCUT).signum() > 0)
+        val nodes = await(engine.prestigeUpgrades) { list -> list.any { it.id == MadnessPaths.HAND && it.level == 2 } }
+        // Senda Eterna: la Senda se queda; Cielo Recordado: El Despertar y las primeras estrellas
+        assertEquals(1, nodes.first { it.id == "pu_core" }.level)
+        nodes.filter { it.parentId == "pu_core" && !MadnessPaths.isPath(it.id) }.forEach { assertEquals(it.id, 1, it.level) }
+        assertTrue(nodes.filter { it.parentId != null && it.parentId != "pu_core" && !MadnessPaths.isPath(it.id) }.all { it.level == 0 })
+
+        // Dejar la Senda que vino del ciclo anterior no devuelve Cordura
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(abandonPath = true)
+        val ascended = await(engine.economy) { it.sanity.signum() > 0 }
+        assertTrue(ascended.sanity < BigDecimal(100))
+    }
+
+    @Test
+    fun `automatic transcendence happens when the ether gain matches the ether held`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(5))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.transcendences == 5 && it.etherGain > 0 }
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, autoTranscend = true))
+
+        val after = await(engine.economy) { it.transcendences == 6 }
+        assertTrue(after.ether > 0)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.AUTO_TRANSCENDS)))
+        assertTrue(stats.counter(AchievementStat.autoTranscendWith("none")).signum() > 0)
     }
 
     @Test

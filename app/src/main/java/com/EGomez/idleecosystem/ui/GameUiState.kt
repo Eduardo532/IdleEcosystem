@@ -95,6 +95,9 @@ data class GameUiState(
     val etherGain: Int = 0,
     val ether: Int = 0,
     val transcendences: Int = 0,
+    /** Hitos de Trascendencia (v0.19.5): Ascensiones que cuentan para los hitos y las que pide Trascender. */
+    val milestoneAscensions: Int = 0,
+    val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,
     val eternalLevels: Map<String, Int> = emptyMap(),
     val transcendNotice: Int? = null,
     /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */

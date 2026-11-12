@@ -311,6 +311,7 @@ fun MainScreen(
                             unlocks = uiState.menuUnlocks,
                             newTabs = uiState.newTabs,
                             ascensions = uiState.ascensions,
+                            milestoneAscensions = uiState.milestoneAscensions,
                             automation = uiState.automation,
                             onToggleAutoBuildings = { viewModel.toggleAutoBuildings() },
                             onToggleAutoGrimoire = { viewModel.toggleAutoGrimoire() },
@@ -340,6 +341,8 @@ fun MainScreen(
                             etherGain = uiState.etherGain,
                             ether = uiState.ether,
                             eternalLevels = uiState.eternalLevels,
+                            transcendences = uiState.transcendences,
+                            transcendRequired = uiState.transcendRequired,
                             onBuyEternal = { viewModel.onBuyEternal(it) },
                             onTranscend = { viewModel.onTranscend() },
                             consecrationRevealed = uiState.consecrationRevealed,
@@ -503,7 +506,7 @@ fun MainScreen(
             if (showAutomationDialog) {
                 AutomationDialog(
                     settings = uiState.automation,
-                    ascensions = uiState.ascensions,
+                    ascensions = uiState.milestoneAscensions,
                     buildings = buildings,
                     rituals = rituals,
                     onBudgetSelected = { viewModel.setAutomationBudget(it) },
@@ -512,7 +515,9 @@ fun MainScreen(
                     onToggleGrimoire = { viewModel.toggleAutoGrimoire() },
                     onToggleAutoAscend = { viewModel.toggleAutoAscend() },
                     onRitualSelected = { viewModel.selectAutoRitual(it) },
-                    onDismiss = { showAutomationDialog = false }
+                    onDismiss = { showAutomationDialog = false },
+                    transcendences = uiState.transcendences,
+                    onToggleAutoTranscend = { viewModel.toggleAutoTranscend() }
                 )
             }
 

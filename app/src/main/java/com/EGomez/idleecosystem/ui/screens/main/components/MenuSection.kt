@@ -94,6 +94,8 @@ fun MenuSection(
     unlocks: MenuUnlocks = MenuUnlocks.ALL,
     newTabs: Set<MenuTab> = emptySet(),
     ascensions: Int = 0,
+    /** Ascensiones que cuentan para los hitos (Memoria de la Máquina las completa). */
+    milestoneAscensions: Int = ascensions,
     automation: AutomationSettings = AutomationSettings(),
     onToggleAutoBuildings: () -> Unit = {},
     onToggleAutoGrimoire: () -> Unit = {},
@@ -123,6 +125,8 @@ fun MenuSection(
     etherGain: Int = 0,
     ether: Int = 0,
     eternalLevels: Map<String, Int> = emptyMap(),
+    transcendences: Int = 0,
+    transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,
     onBuyEternal: (String) -> Unit = {},
     onTranscend: () -> Unit = {},
     consecrationRevealed: Boolean = false,
@@ -165,7 +169,7 @@ fun MenuSection(
             // Capas: Vida, Ascensión y Trascendencia (solo si hay más de una)
             val layers = unlocks.layers
             // El autocomprador (hito de Ascensión) va al final de la fila de capas
-            val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)
+            val autobuyer = AscensionMilestone.BUILDING_AUTOBUYER.isReached(milestoneAscensions)
             val autoControls: (@Composable RowScope.() -> Unit)? = if (tab == MenuTab.RESEARCH && autobuyer) {
                 {
                     AutoChip(
@@ -283,7 +287,7 @@ fun MenuSection(
                                     )
                                 }
                                 // Autocomprador del Grimorio (hito de Ascensión)
-                                if (AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(ascensions)) {
+                                if (AscensionMilestone.GRIMOIRE_AUTOBUYER.isReached(milestoneAscensions)) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     AutoChip(selected = automation.grimoire, onClick = onToggleAutoGrimoire)
                                 }
@@ -361,7 +365,7 @@ fun MenuSection(
                             RitualItem(
                                 ritual = ritual,
                                 currentFunds = currentEchoes,
-                                autoSelected = if (AscensionMilestone.AUTO_RITUAL.isReached(ascensions)) automation.ritualId == ritual.id else null,
+                                autoSelected = if (AscensionMilestone.AUTO_RITUAL.isReached(milestoneAscensions)) automation.ritualId == ritual.id else null,
                                 onToggleAuto = { onToggleAutoRitual(ritual.id) },
                                 onActivate = { onActivateRitual(ritual.id) }
                             )
@@ -385,7 +389,7 @@ fun MenuSection(
                     MenuTab.PANTHEON -> item { PantheonGallery(ascensions, activePact, onPactSelected, earlyPacts) }
                     MenuTab.TRIALS -> item { TrialList(ascensions, activeTrial, trialProgress, completedTrials, onAbandonTrial) }
                     MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
-                    MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend) }
+                    MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
                 }
             }

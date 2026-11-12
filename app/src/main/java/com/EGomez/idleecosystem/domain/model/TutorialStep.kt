@@ -245,5 +245,12 @@ enum class TutorialStep(
         "Mutaciones",
         "Tras Trascender, la realidad se vuelve maleable. Cada Ascensión te ofrece tres mutaciones al azar para la vida siguiente: cada una multiplica mucho un edificio (o algo más) y cobra un precio en otra cosa. Elige una en la confirmación de Ascender, o ninguna. Descubrirlas todas tiene su recompensa.",
         "Tras la primera Trascendencia"
+    ),
+
+    TRANSCEND_MILESTONES(
+        "transcend_milestones",
+        "Hitos de Trascendencia",
+        "Cada Trascendencia te acerca a un Hito de Trascendencia: la automatización desde el primer segundo del ciclo, las primeras estrellas del Mapa, la Senda que no se pierde, la Trascendencia automática, más Atención y un umbral más corto. Míralos en la pestaña Éter de la capa Trascendencia.",
+        "Tras la primera Trascendencia"
     )
 }

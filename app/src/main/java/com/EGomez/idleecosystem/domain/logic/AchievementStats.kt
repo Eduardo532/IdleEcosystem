@@ -34,6 +34,14 @@ object AchievementStat {
     const val PATHS_WALKED = "paths_walked"
     /** Constelaciones del Mapa de Locura completas (v0.19.2). */
     const val CONSTELLATIONS = "constellations"
+    /** Hitos de Trascendencia (v0.19.5): cuántos se alcanzaron y Trascendencias automáticas. */
+    const val TRANSCEND_MILESTONES = "transcend_milestones"
+    const val AUTO_TRANSCENDS = "auto_transcends"
+    const val AUTO_TRANSCEND_WITH_PREFIX = "auto_transcend_with."
+    /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
+    const val CYCLE_PATH_KEPT = "cycle_path_kept"
+    /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
+    const val FEAT_SHORTCUT = "feat.shortcut"
     const val CLICKS = "clicks"
     const val RUNES = "runes"
     const val RUNES_T1 = "runes_t1"
@@ -71,7 +79,7 @@ object AchievementStat {
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
-        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN
+        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES
     )
 
     // --- Contadores guardados ---
@@ -204,6 +212,7 @@ object AchievementStat {
     fun consecratedWith(pactId: String, buildingId: String) = "$CONSECRATED_WITH_PREFIX$pactId.$buildingId"
     fun transcendWith(pactId: String) = TRANSCEND_WITH_PREFIX + pactId
     fun transcendPath(pathId: String) = TRANSCEND_PATH_PREFIX + pathId
+    fun autoTranscendWith(pactId: String) = AUTO_TRANSCEND_WITH_PREFIX + pactId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -216,12 +225,13 @@ object AchievementStat {
         MAX_MADNESS, MAX_MADNESS_STREAK, MADNESS_COLLAPSES, MADNESS_OMENS, RUN_COLLAPSES, FEAT_STEEL_NERVES, FEAT_EDGE,
         TIDES_PASSED, RUN_TIDES, TIDE_HIGH_RUNES, TIDE_DEAD_RITUALS, TIDE_HIGH_CONVERGENCE, FEAT_STILL_LOW_TIDE, FEAT_TSUNAMI,
         ETHER, ETHER_EARNED, TRANSCENDENCES, MAX_ETHER_GAIN, CYCLE_SANITY, CYCLE_START, ASCENSIONS_PAST, FEAT_EXACT_THRESHOLD, MUTATION_LIVES,
+        AUTO_TRANSCENDS, FEAT_SHORTCUT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
 
     private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX,
-        RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX,
+        RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX, AUTO_TRANSCEND_WITH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

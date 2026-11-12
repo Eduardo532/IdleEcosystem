@@ -59,8 +59,8 @@ object MadnessPaths {
     }
 
     /** Toda la Cordura gastada en un nodo: Σ costo base × multiplicador^i, i < nivel. */
-    fun spent(node: PrestigeUpgrade): BigDecimal =
-        (0 until node.level).fold(BigDecimal.ZERO) { acc, i ->
+    fun spent(node: PrestigeUpgrade, fromLevel: Int = 0): BigDecimal =
+        (fromLevel.coerceAtLeast(0) until node.level).fold(BigDecimal.ZERO) { acc, i ->
             acc.add(node.baseCost.multiply(node.costMultiplier.pow(i)))
         }
 }

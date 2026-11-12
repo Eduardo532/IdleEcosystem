@@ -51,8 +51,8 @@ object Transcendence {
      * Éter = ⌊√(Ascensiones del ciclo × log10(1 + Cordura ganada en el ciclo)) × bono⌋.
      * Crece despacio con ambas: más vidas y vidas mejores.
      */
-    fun etherGain(cycleAscensions: Int, cycleSanity: BigDecimal, multiplier: Double = 1.0): Int {
-        if (cycleAscensions < REQUIRED_ASCENSIONS || cycleSanity.signum() <= 0) return 0
+    fun etherGain(cycleAscensions: Int, cycleSanity: BigDecimal, multiplier: Double = 1.0, required: Int = REQUIRED_ASCENSIONS): Int {
+        if (cycleAscensions < required || cycleSanity.signum() <= 0) return 0
         val logSanity = log10(1.0 + cycleSanity.toDouble().coerceAtMost(Double.MAX_VALUE / 2))
         return floor(sqrt(cycleAscensions * logSanity) * multiplier).toInt()
     }
@@ -60,4 +60,40 @@ object Transcendence {
     fun productionMultiplier(fireLevel: Int): Double = 2.0.pow(fireLevel)
     fun sanityMultiplier(level: Int): Double = 1.5.pow(level)
     fun etherMultiplier(level: Int): Double = 1.25.pow(level)
+}
+
+/**
+ * Hitos de Trascendencia (v0.19.5): como los de Ascensión, pero por Trascendencias.
+ * Quitan lo tedioso de volver a empezar un ciclo: la automatización, las primeras
+ * estrellas del Mapa y la Senda se conservan, y Trascender se vuelve automático y más
+ * corto. (Inspirados en los Eternity Milestones de Antimatter Dimensions y Revolution Idle.)
+ */
+enum class TranscendenceMilestone(val transcendences: Int, val title: String, val description: String) {
+    MACHINE_MEMORY(1, "Memoria de la Máquina", "Las automatizaciones de los hitos de Ascensión funcionan desde el inicio de cada ciclo."),
+    REMEMBERED_SKY(2, "Cielo Recordado", "Cada ciclo empieza con El Despertar y la primera estrella de cada constelación a nivel 1."),
+    ETERNAL_PATH(3, "Senda Eterna", "La Senda que recorres y sus niveles no se pierden al Trascender."),
+    AUTO_TRANSCEND(5, "Trascendencia Automática", "Puedes Trascender sola cuando el Éter que ganarías iguale al que tienes."),
+    OPEN_EYES(8, "Mirada Antigua", "La Atención cuenta todas tus Ascensiones desde siempre, no solo las del ciclo."),
+    SHORTCUT(12, "El Atajo", "Trascender pide 40 Ascensiones en el ciclo en lugar de 50.");
+
+    fun isReached(transcendences: Int) = transcendences >= this.transcendences
+
+    companion object {
+        /** Ascensiones del ciclo que pide Trascender con El Atajo. */
+        const val SHORTCUT_ASCENSIONS = 40
+
+        fun reached(transcendences: Int): Int = entries.count { it.isReached(transcendences) }
+
+        fun next(transcendences: Int): TranscendenceMilestone? = entries.firstOrNull { !it.isReached(transcendences) }
+
+        /** Ascensiones del ciclo que pide Trascender. */
+        fun requiredAscensions(transcendences: Int): Int =
+            if (SHORTCUT.isReached(transcendences)) SHORTCUT_ASCENSIONS else Transcendence.REQUIRED_ASCENSIONS
+
+        /**
+         * La regla de la Trascendencia automática: cuando el Éter que se gana es al menos
+         * el que se tiene (lo duplica), y nunca por menos de 1.
+         */
+        fun shouldAutoTranscend(gain: Int, ether: Int): Boolean = gain > 0 && gain >= maxOf(1, ether)
+    }
 }

@@ -395,4 +395,9 @@
     <string name="map_fx_madness">La Locura sube x%1$s</string>
     <string name="map_fx_cult">+%1$d de los cinco primeros edificios de producción al empezar</string>
     <string name="map_fx_tier">Edificios %1$d a %2$d x%3$s</string>
+    <string name="automation_transcend">Trascendencia automática</string>
+    <string name="automation_transcend_hint">Trasciende sola cuando el Éter que ganarías iguala o supera el que tienes.</string>
+    <string name="automation_transcend_locked">Se desbloquea con %1$d Trascendencias.</string>
+    <string name="transcend_milestones_title">Hitos de Trascendencia (%1$d/%2$d)</string>
+    <string name="transcend_milestone_at">Trascendencias: %1$d/%2$d</string>
 </resources>

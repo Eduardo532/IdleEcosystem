@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
 import com.EGomez.idleecosystem.domain.logic.Transcendence
+import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
 import com.EGomez.idleecosystem.ui.i18n.tr
 
 /** Color del Éter. */
@@ -33,7 +34,9 @@ fun EtherPanel(
     ether: Int,
     eternalLevels: Map<String, Int>,
     onBuyEternal: (String) -> Unit,
-    onTranscend: () -> Unit
+    onTranscend: () -> Unit,
+    transcendences: Int = 0,
+    required: Int = Transcendence.REQUIRED_ASCENSIONS
 ) {
     var armed by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(ETHER_PANEL_TAG)) {
@@ -46,8 +49,8 @@ fun EtherPanel(
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(stringResource(R.string.transcend_ether, ether), color = EtherColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    stringResource(R.string.transcend_cycle, cycleAscensions, Transcendence.REQUIRED_ASCENSIONS),
-                    color = if (cycleAscensions >= Transcendence.REQUIRED_ASCENSIONS) Color(0xFF81C784) else Color.Gray,
+                    stringResource(R.string.transcend_cycle, cycleAscensions, required),
+                    color = if (cycleAscensions >= required) Color(0xFF81C784) else Color.Gray,
                     fontSize = 12.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -67,7 +70,7 @@ fun EtherPanel(
                 ) {
                     Text(
                         when {
-                            etherGain <= 0 -> stringResource(R.string.transcend_locked, Transcendence.REQUIRED_ASCENSIONS)
+                            etherGain <= 0 -> stringResource(R.string.transcend_locked, required)
                             armed -> stringResource(R.string.transcend_confirm_again)
                             else -> stringResource(R.string.transcend_confirm, etherGain)
                         },
@@ -77,9 +80,61 @@ fun EtherPanel(
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
+        TranscendMilestoneList(transcendences)
+        Spacer(modifier = Modifier.height(12.dp))
         Text(stringResource(R.string.transcend_eternal_title), color = EtherColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         EternalUpgrade.entries.forEach { upgrade ->
             EternalRow(upgrade, eternalLevels[upgrade.id] ?: 0, ether, onBuyEternal)
+        }
+    }
+}
+
+/**
+ * Los Hitos de Trascendencia (v0.19.5): los alcanzados y el siguiente a la vista, con lo
+ * que dan; los demás solo con su nombre y cuántas Trascendencias piden.
+ */
+@Composable
+fun TranscendMilestoneList(transcendences: Int) {
+    val next = TranscendenceMilestone.next(transcendences)
+    Column(modifier = Modifier.fillMaxWidth().testTag(TRANSCEND_MILESTONES_TAG)) {
+        Text(
+            stringResource(R.string.transcend_milestones_title, TranscendenceMilestone.reached(transcendences), TranscendenceMilestone.entries.size),
+            color = EtherColor,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+        TranscendenceMilestone.entries.forEach { milestone ->
+            val reached = milestone.isReached(transcendences)
+            val shown = reached || milestone == next
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp).testTag(TRANSCEND_MILESTONE_ROW_TAG + milestone.name)
+            ) {
+                Text(
+                    if (reached) "✦" else "◇",
+                    color = if (reached) EtherColor else Color.Gray,
+                    fontSize = 13.sp,
+                    modifier = Modifier.width(20.dp)
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        tr(milestone.title),
+                        color = if (reached) Color.White else Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    if (shown) {
+                        Text(tr(milestone.description), color = if (reached) Color.LightGray else Color.Gray, fontSize = 11.sp)
+                    }
+                    if (!reached) {
+                        Text(
+                            stringResource(R.string.transcend_milestone_at, transcendences, milestone.transcendences),
+                            color = Color.DarkGray,
+                            fontSize = 10.sp
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -123,6 +178,8 @@ private fun EternalRow(upgrade: EternalUpgrade, level: Int, ether: Int, onBuy: (
 }
 
 const val ETHER_PANEL_TAG = "ether_panel"
+const val TRANSCEND_MILESTONES_TAG = "transcend_milestones"
+const val TRANSCEND_MILESTONE_ROW_TAG = "transcend_milestone_"
 const val TRANSCEND_CONFIRM_TAG = "transcend_confirm"
 const val ETERNAL_ROW_TAG = "eternal_row_"
 const val ETERNAL_BUY_TAG = "eternal_buy_"

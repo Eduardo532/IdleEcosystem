@@ -1,6 +1,6 @@
 # Logros
 
-Hay **410 logros**: 113 originales y **297 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **421 logros**: 113 originales y **308 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -133,6 +133,16 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | La Puerta Final | Trasciende durante una vida con Yog-Sothoth | +1 % |
 | Sin Dioses | Trasciende durante una vida Sin Pacto | +1 % |
 | Despertar del Sueño | Trasciende recorriendo la Senda del Sueño | +1 % |
+| La Máquina Recuerda | Alcanza 1 Hito de Trascendencia | +1 % |
+| Memoria Estelar | Alcanza 3 Hitos de Trascendencia | +1 % |
+| Seis Sellos Rotos | Alcanza los 6 Hitos de Trascendencia | +2 % |
+| Ciclo sin Manos | Trasciende 1 vez de forma automática | +1 % |
+| La Rueda Gira Sola | Trasciende 10 veces de forma automática | +2 % |
+| El Rey sin Trono | Trasciende de forma automática durante una vida con Hastur | +1 % |
+| Sueño sin Fin | Trasciende de forma automática durante una vida con Cthulhu | +1 % |
+| El Titiritero | Trasciende de forma automática durante una vida con Nyarlathotep | +1 % |
+| Vacío Perpetuo | Alcanza la Senda Eterna recorriendo la Senda del Vacío | +1 % |
+| Arcano Inmortal | Alcanza la Senda Eterna recorriendo la Senda Arcana | +1 % |
 | Primera Consagración | Consagra un edificio | +1 % |
 | Templos Sagrados | Suma 10 niveles de consagración | +1 % |
 | Arquitecto Divino | Suma 40 niveles de consagración | +1 % |
@@ -330,7 +340,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **25 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **26 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

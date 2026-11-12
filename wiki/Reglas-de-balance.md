@@ -110,6 +110,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Pide 50 Ascensiones en el ciclo. Éter = `⌊√(Ascensiones del ciclo × log10(1 + Cordura del ciclo)) × 1,25^Eco⌋`. *(Código: `Transcendence`; test: `TranscendenceTest`.)*
 - Mejoras eternas: costo `base × crecimiento^nivel`, redondeado hacia arriba. Fuego Eterno x2, Cordura Primordial x1,5 por nivel.
 - Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
+- Hitos de Trascendencia a 1, 2, 3, 5, 8 y 12 Trascendencias. Memoria de la Máquina: los hitos de Ascensión usan `max(Ascensiones, 50)`. El Atajo: umbral 40. Trascendencia automática cuando `Éter ganado ≥ max(1, Éter actual)`. Senda Eterna: al dejarla se devuelve solo lo gastado desde el nivel heredado (`cycle_path_kept`). *(Código: `TranscendenceMilestone`; test: `TranscendenceMilestoneTest`.)*
 
 ## Consagrar edificios
 

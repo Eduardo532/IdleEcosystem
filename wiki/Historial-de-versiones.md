@@ -10,6 +10,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 - **v0.19.2:** el Mapa de Locura pasa a ser un cielo con siete constelaciones (La Mano, El Engranaje, El Sueño, La Mente, El Vacío, El Culto y Lo Arcano), con zoom, colores por estado, vista de lista y una Senda en el centro de cada una (cuatro Sendas nuevas). Diez nodos nuevos: edificios al empezar, edificios más baratos, eventos, runas, rituales, Ecos, Atención y Locura más tranquila. Los nodos flojos de Cordura, edificios y producción se refuerzan. 25 logros propios.
 - **v0.19.3:** el Mapa de Locura usa constelaciones reales (Orión, Osa Mayor, Las Pléyades, Casiopea, Pez Austral, Tauro y Perseo), con la Senda dentro de cada figura y los hilos a la estrella más cercana. La Locura sube de verdad al tocar rápido (~50 %) y al mantener pulsado (~80 %). Los selectores de pacto, Prueba y mutación muestran todas las opciones sin deslizar.
 - **v0.19.4:** cada estrella de las siete constelaciones es un nodo del Mapa: 26 nodos nuevos (clic, tramos de edificios, sin conexión, eventos, Cordura, Ecos, edificios al empezar y rituales). Las Sendas van en el hueco del centro de cada figura. El selector de pactos llena el ancho con iconos más grandes.
+- **v0.19.5:** Hitos de Trascendencia: seis recompensas permanentes por Trascendencias (automatización desde el inicio del ciclo, primeras estrellas encendidas, Senda Eterna, Trascendencia automática, Atención con todas las Ascensiones y Trascender con 40). 11 logros nuevos.
 
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 

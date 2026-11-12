@@ -1,6 +1,6 @@
 # Logros
 
-Hay **431 logros**: 113 originales y **318 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **445 logros**: 113 originales y **332 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -176,6 +176,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Mensajero Arcano | Termina una vida con Nyarlathotep recorriendo la Senda Arcana | +1 % |
 | Las Crías del Culto | Termina una vida con Shub-Niggurath recorriendo la Senda del Culto | +1 % |
 | La Llave y la Mente | Termina una vida con Yog-Sothoth recorriendo la Senda de la Mente | +1 % |
+| Primera Luz | Reúne 1 Estrella | +1 % |
+| Cúmulo Abierto | Reúne 25 Estrellas | +1 % |
+| Vía Láctea | Reúne 100 Estrellas | +2 % |
+| Polvo de Estrellas | Gana 1.000 de Polvo Estelar | +1 % |
+| Nube de Oort | Gana 1 millón de Polvo Estelar | +2 % |
+| Cartógrafo Celeste | Suma 10 niveles de mejoras estelares | +1 % |
+| Arquitecto del Firmamento | Suma 40 niveles de mejoras estelares | +2 % |
+| Las Estrellas Están en Posición | Compra una mejora estelar durante la alineación | +1 % |
+| Conjunción Perfecta | Compra 10 mejoras estelares durante la alineación | +1 % |
+| El Durmiente Despierta | Compra una mejora estelar durante una vida con Cthulhu | +1 % |
+| Sultán de las Estrellas | Compra una mejora estelar durante una vida con Azathoth | +1 % |
+| Vacío Alineado | Compra durante la alineación recorriendo la Senda del Vacío | +1 % |
+| Sueño de Estrellas | Compra durante la alineación recorriendo la Senda del Sueño | +1 % |
 
 ### Panteón
 
@@ -349,7 +362,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **27 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **28 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

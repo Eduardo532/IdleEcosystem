@@ -117,6 +117,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Tope en `1e25` de Conocimiento de la vida. Por encima, producción x`(1e25 / K)²`. Sin conexión: `K³ = K₀³ + 3·P·Velo²·t` (P sin freno). *(Código: `Veil`; test: `VeilTest`.)*
 - Se rompe con las 10 Pruebas superadas (contador `veil_broken`, que no se borra al Trascender). Roto: sin tope y producción x100.
 
+## Estrellas
+
+- Estrellas por segundo: `(1 + 0,25·Nebulosa) · min(1 + 0,1·Trascendencias, 3) / 600`. Polvo: `0,1 · Estrellas` por segundo, x5 alineadas.
+- Alineación: los primeros `180 + 60·Conjunción` segundos de cada media hora (hora real). Sin conexión no hay alineación.
+- Costos: `base · crecimiento^nivel`. Producción `1,5^Luz · (1 + 0,01·Negras·Estrellas)`. *(Código: `Stars`, `StarUpgrade`; test: `StarsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

@@ -415,4 +415,23 @@
     <string name="stars_aligned">✦ The stars are right: Stardust x%1$s · %2$s left</string>
     <string name="stars_next_alignment">The stars align in %1$s</string>
     <string name="stars_upgrades_title">Stellar upgrades</string>
+    <string name="tab_bestiary">Bestiary</string>
+    <string name="bestiary_title">CATALOGUED CREATURES</string>
+    <string name="essence_title">ESSENCE</string>
+    <string name="bestiary_hint">Creatures appear in random encounters: tap them before they leave. Clearing Trials gives Essence to level them up.</string>
+    <string name="bestiary_family_complete">COMPLETE x2</string>
+    <string name="beast_kind_production">+%1$d%% production</string>
+    <string name="beast_kind_click">+%1$d%% click</string>
+    <string name="beast_kind_sanity">+%1$d%% Sanity</string>
+    <string name="beast_kind_offline">+%1$d%% offline</string>
+    <string name="beast_kind_ether">+%1$d%% Ether</string>
+    <string name="beast_kind_stardust">+%1$d%% Stardust</string>
+    <string name="beast_kind_essence">+%1$d%% Essence</string>
+    <string name="beast_kind_encounter">+%1$d%% encounters</string>
+    <string name="beast_level">Level %1$d/%2$d</string>
+    <string name="beast_per_level">Per level: %1$s</string>
+    <string name="beast_upgrade">Level up · ❖ %1$d</string>
+    <string name="encounter_unknown">Something lurks…</string>
+    <string name="encounter_left">leaves in %1$d s</string>
+    <string name="encounter_catch">Catalogue</string>
 </resources>

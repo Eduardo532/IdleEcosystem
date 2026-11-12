@@ -536,6 +536,40 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the bestiary opens a creature file and levels it up`() {
+        val upgraded = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 1), essence = 30),
+                    onUpgrade = { upgraded += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("1 / 156").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
+        compose.onNodeWithText("“El que se alza del fondo cuando la marea muere.”").assertExists()
+        compose.onNodeWithText("Subir · ❖ 16").performClick()
+        assertEquals(listOf("deep_dagon"), upgraded)
+    }
+
+    @Test
+    fun `an unknown encounter hides its name until it is catalogued`() {
+        var caught = 0
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner("deep_dagon", 30, known = false, onCatch = { caught++ })
+        }
+
+        compose.onNodeWithText("Algo acecha…").assertExists()
+        compose.onNodeWithText("Padre Dagón").assertDoesNotExist()
+        compose.onNodeWithText("Catalogar").performClick()
+        assertEquals(1, caught)
+    }
+
+    @Test
     fun `the compact research button clicks like the big one`() {
         var clicks = 0
         compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }

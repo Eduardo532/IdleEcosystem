@@ -23,6 +23,10 @@ import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
 import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.logic.StarUpgrade
 import com.EGomez.idleecosystem.domain.logic.Stars
+import com.EGomez.idleecosystem.domain.logic.Beast
+import com.EGomez.idleecosystem.domain.logic.BeastKind
+import com.EGomez.idleecosystem.domain.logic.BeastRarity
+import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -142,6 +146,12 @@ data class EconomyState(
     val starLevels: Map<String, Int> = emptyMap(),
     val starsAligned: Boolean = false,
     val alignmentSecondsLeft: Long = 0,
+    /** Bestiario (v0.19.8). */
+    val beastLevels: Map<String, Int> = emptyMap(),
+    val essence: Int = 0,
+    val encounterId: String? = null,
+    val encounterSecondsLeft: Int = 0,
+    val beastBonuses: Map<BeastKind, Double> = emptyMap(),
     val eternalLevels: Map<String, Int> = emptyMap(),
     /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
@@ -695,6 +705,11 @@ class GameEngine @Inject constructor(
         put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
         put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun()))
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
+        val beasts = beastLevels()
+        put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
+        put(AchievementStat.BEAST_LEVELS, beasts.values.sum())
+        put(AchievementStat.FAMILIES_COMPLETE, Bestiary.families.count { Bestiary.isFamilyComplete(it.id, beasts) })
+        put(AchievementStat.PRIMORDIALS_SEEN, Bestiary.beasts.count { it.rarity == BeastRarity.PRIMORDIAL && (beasts[it.id] ?: 0) > 0 })
         put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
@@ -904,7 +919,8 @@ class GameEngine @Inject constructor(
         masteryRevealed = consecrationRevealed(),
         transcendRevealed = transcendRevealed(),
         mutationsRevealed = mutationsRevealed(),
-        starsRevealed = starsRevealed()
+        starsRevealed = starsRevealed(),
+        bestiaryRevealed = bestiaryRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1073,6 +1089,7 @@ class GameEngine @Inject constructor(
         masteryTick()
         veilTick()
         starsTick()
+        encounterTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1284,7 +1301,7 @@ class GameEngine @Inject constructor(
 
     private fun addStardust(amount: Double) {
         if (amount <= 0.0) return
-        val add = BigDecimal.valueOf(amount)
+        val add = BigDecimal.valueOf(amount * beastBonus(BeastKind.STARDUST))
         statsManager.counters[AchievementStat.STARDUST] = statsManager.counter(AchievementStat.STARDUST).add(add)
         statsManager.count(AchievementStat.STARDUST_EARNED, add)
     }
@@ -1316,6 +1333,92 @@ class GameEngine @Inject constructor(
             MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.starAlignedPath(it.id)) }
         }
         soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    // =====================================================================
+    // BESTIARIO (v0.19.8)
+    // =====================================================================
+
+    private var encounter: Beast? = null
+    private var encounterSecondsLeft = 0
+    private var nextEncounterIn = Bestiary.MIN_INTERVAL
+
+    private fun beastLevels(): Map<String, Int> =
+        Bestiary.beasts.associate { it.id to statsManager.counter(AchievementStat.beast(it.id)).toInt() }
+
+    private fun beastBonus(kind: BeastKind): Double = Bestiary.bonuses(beastLevels()).getValue(kind)
+
+    /** El Bestiario se abre al superar la primera Prueba (o si ya hay criaturas o Esencia). */
+    private fun bestiaryRevealed(): Boolean =
+        completedTrials().isNotEmpty() || statsManager.counter(AchievementStat.ESSENCE_EARNED).signum() > 0 ||
+            Bestiary.beasts.any { statsManager.counter(AchievementStat.beast(it.id)).signum() > 0 }
+
+    private fun addEssence(amount: Double) {
+        val gained = BigDecimal.valueOf(kotlin.math.floor(amount * beastBonus(BeastKind.ESSENCE)))
+        if (gained.signum() <= 0) return
+        statsManager.counters[AchievementStat.ESSENCE] = statsManager.counter(AchievementStat.ESSENCE).add(gained)
+        statsManager.count(AchievementStat.ESSENCE_EARNED, gained)
+    }
+
+    /** Cada segundo: el encuentro activo se escapa o llega uno nuevo. */
+    private fun encounterTick() {
+        if (!bestiaryRevealed()) return
+        tutorialManager.triggerStep(TutorialStep.BESTIARY)
+        if (encounter != null) {
+            encounterSecondsLeft--
+            if (encounterSecondsLeft <= 0) encounter = null
+            return
+        }
+        nextEncounterIn--
+        if (nextEncounterIn > 0) return
+        encounter = Bestiary.rollEncounter(beastLevels())
+        encounterSecondsLeft = Bestiary.ENCOUNTER_SECONDS
+        nextEncounterIn = Bestiary.nextInterval(beastBonus(BeastKind.ENCOUNTER))
+        soundManager.playSound(SoundType.EVENT_APPEAR)
+    }
+
+    /**
+     * Cataloga la criatura del encuentro: la primera vez se descubre (nivel 1); repetida
+     * da Esencia según su rareza.
+     */
+    fun catchEncounter() = post {
+        val beast = encounter ?: return@post
+        encounter = null
+        val key = AchievementStat.beast(beast.id)
+        val level = statsManager.counter(key).toInt()
+        if (level == 0) statsManager.counters[key] = BigDecimal.ONE
+        else addEssence(beast.rarity.duplicateEssence.toDouble())
+        statsManager.count(AchievementStat.ENCOUNTERS)
+        statsManager.flag(AchievementStat.beastCatchWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.beastCatchPath(it.id)) }
+        if (beast.rarity == BeastRarity.PRIMORDIAL && starsAligned()) statsManager.flag(AchievementStat.FEAT_PRIMORDIAL_ALIGNED)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
+    /** Para los tests: hace aparecer un encuentro con esa criatura. */
+    internal fun forceEncounter(beastId: String) = post {
+        encounter = Bestiary.beast(beastId) ?: return@post
+        encounterSecondsLeft = Bestiary.ENCOUNTER_SECONDS
+    }
+
+    /** Sube de nivel una criatura descubierta con Esencia. */
+    fun upgradeBeast(id: String) = post {
+        val beast = Bestiary.beast(id) ?: return@post
+        val key = AchievementStat.beast(beast.id)
+        val level = statsManager.counter(key).toInt()
+        if (level <= 0 || level >= Bestiary.MAX_LEVEL) return@post
+        val cost = BigDecimal(Bestiary.upgradeCost(beast, level))
+        val essence = statsManager.counter(AchievementStat.ESSENCE)
+        if (essence < cost) return@post
+        statsManager.counters[AchievementStat.ESSENCE] = essence.subtract(cost)
+        statsManager.counters[key] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        refreshEngravings()
         recalculate()
         requestSave()
     }
@@ -1376,6 +1479,8 @@ class GameEngine @Inject constructor(
         val trial = activeTrial() ?: return
         if (trial.rules.delirium) rollDelirium()
         if (knowledgeThisRun() < trial.goal) return
+        // Bestiario: la Prueba da Esencia (x3 la primera vez)
+        addEssence(Bestiary.trialEssence(trial, statsManager.counter(AchievementStat.trial(trial.id)).signum() == 0).toDouble())
         statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
         statsManager.flag(AchievementStat.trial(trial.id))
         statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
@@ -1533,7 +1638,8 @@ class GameEngine @Inject constructor(
     private fun etherGainNow(): Int = Transcendence.etherGain(
         cycleAscensions(),
         cycleSanity(),
-        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)),
+        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
+            beastBonus(BeastKind.ETHER),
         transcendRequired()
     )
 
@@ -1732,6 +1838,8 @@ class GameEngine @Inject constructor(
             // Nodos del Mapa de Locura con efectos de pacto (v0.19.2); la Prueba Mente en
             // Blanco los anula igual que al resto del Mapa
             .combinedWith(if (trialRules().noSanityBonus) PactEffects() else prestigeShopManager.getMapEffects())
+            // Bestiario (v0.19.8): producción, clic, sin conexión y Cordura
+            .combinedWith(Bestiary.effects(beastLevels()))
         applyPactModifiers()
     }
 
@@ -2014,6 +2122,11 @@ class GameEngine @Inject constructor(
             starLevels = StarUpgrade.entries.associate { it.id to starLevel(it) },
             starsAligned = starsAligned(),
             alignmentSecondsLeft = Stars.secondsLeft(nowSeconds(), starLevel(StarUpgrade.CONJUNCTION)),
+            beastLevels = beastLevels(),
+            essence = statsManager.counter(AchievementStat.ESSENCE).toInt(),
+            encounterId = encounter?.id,
+            encounterSecondsLeft = encounterSecondsLeft,
+            beastBonuses = Bestiary.bonuses(beastLevels()),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             consecrationRevealed = consecrationRevealed(),
             consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },

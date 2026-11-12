@@ -1,6 +1,6 @@
 # Logros
 
-Hay **445 logros**: 113 originales y **332 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **468 logros**: 113 originales y **355 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -189,6 +189,28 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Sultán de las Estrellas | Compra una mejora estelar durante una vida con Azathoth | +1 % |
 | Vacío Alineado | Compra durante la alineación recorriendo la Senda del Vacío | +1 % |
 | Sueño de Estrellas | Compra durante la alineación recorriendo la Senda del Sueño | +1 % |
+| Primera Página | Cataloga 1 criatura | +1 % |
+| Naturalista de lo Prohibido | Cataloga 25 criaturas | +1 % |
+| Zoólogo de lo Imposible | Cataloga 75 criaturas | +1 % |
+| El Bestiario Completo | Cataloga las 156 criaturas | +2 % |
+| Ojo Atento | Cataloga 10 encuentros | +1 % |
+| Cazador de Sombras | Cataloga 100 encuentros | +1 % |
+| Nada se Escapa | Cataloga 500 encuentros | +2 % |
+| Domador | Suma 50 niveles de criaturas | +1 % |
+| Pastor de Horrores | Suma 300 niveles de criaturas | +1 % |
+| Señor de las Bestias | Lleva las 156 criaturas a nivel 10 | +2 % |
+| Familia Reunida | Completa 1 familia del Bestiario | +1 % |
+| Árbol Genealógico | Completa 6 familias del Bestiario | +1 % |
+| Todas las Estirpes | Completa las 13 familias del Bestiario | +2 % |
+| Visión Primigenia | Cataloga 1 criatura Primigenia | +1 % |
+| Trece Rostros del Abismo | Cataloga las 13 criaturas Primigenias | +2 % |
+| Destilador | Gana 100 de Esencia | +1 % |
+| Alambique Infinito | Gana 5.000 de Esencia | +2 % |
+| Coleccionista Amarillo | Cataloga una criatura durante una vida con Hastur | +1 % |
+| Rebaño Negro | Cataloga una criatura durante una vida con Shub-Niggurath | +1 % |
+| Jaula de Máscaras | Cataloga una criatura durante una vida con Nyarlathotep | +1 % |
+| Rebaño del Culto | Cataloga una criatura recorriendo la Senda del Culto | +1 % |
+| La Mano que Atrapa | Cataloga una criatura recorriendo la Senda de la Mano | +1 % |
 
 ### Panteón
 
@@ -362,7 +384,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **28 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **29 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

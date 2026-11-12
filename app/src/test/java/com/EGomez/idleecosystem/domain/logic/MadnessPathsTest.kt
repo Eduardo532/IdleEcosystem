@@ -113,8 +113,10 @@ class MadnessPathsTest {
         assertEquals(0, sanity.multiply(BigDecimal("1.5")).compareTo(shop.getPrestigeGainMultiplier()))
         node(MadnessPaths.VOID).level = 0
 
+        // (Diezmo de Sangre, encendido con la constelación, ya da 1 Sacerdote)
+        val priests = shop.getStartingBuildings()["b_priest"] ?: 0
         node(MadnessPaths.CULT).level = 2
-        assertEquals(20, shop.getStartingBuildings()["b_priest"])
+        assertEquals(priests + 20, shop.getStartingBuildings()["b_priest"])
         node(MadnessPaths.CULT).level = 0
 
         val runes = shop.getMapEffects().runeFrequency

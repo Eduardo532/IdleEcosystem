@@ -23,6 +23,7 @@ import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
 import com.EGomez.idleecosystem.ui.screens.main.components.EtherPanel
+import com.EGomez.idleecosystem.ui.screens.main.components.TranscendMilestoneList
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_VIEW_TOGGLE_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_CHIP_TAG
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_NODE_ROW_TAG
@@ -467,6 +468,36 @@ class CriticalUiTest {
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "fire").performScrollTo().performClick()
         assertEquals("fire", bought)
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "trials").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the transcendence milestones show what was reached and what comes next`() {
+        compose.setContent { TranscendMilestoneList(transcendences = 3) }
+
+        compose.onNodeWithText("Hitos de Trascendencia (3/6)").assertExists()
+        compose.onNodeWithText("Senda Eterna").assertExists()
+        // El siguiente se lee entero; los demás, solo su nombre y cuánto falta
+        compose.onNodeWithText("Puedes Trascender sola cuando el Éter que ganarías iguale al que tienes.").assertExists()
+        compose.onNodeWithText("Trascendencias: 3/5").assertExists()
+        compose.onNodeWithText("El Atajo").assertExists()
+        compose.onNodeWithText("Trascender pide 40 Ascensiones en el ciclo en lugar de 50.").assertDoesNotExist()
+    }
+
+    @Test
+    fun `automatic transcendence appears in the automation panel with its milestone`() {
+        var toggled = 0
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.AutomationDialog(
+                settings = com.EGomez.idleecosystem.domain.logic.AutomationSettings(), ascensions = 50,
+                buildings = emptyList(), rituals = emptyList(),
+                onBudgetSelected = {}, onToggleBuildings = {}, onToggleBuildingExcluded = {}, onToggleGrimoire = {},
+                onToggleAutoAscend = {}, onRitualSelected = {}, onDismiss = {},
+                transcendences = 5, onToggleAutoTranscend = { toggled++ }
+            )
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_TRANSCEND_TAG).performScrollTo().performClick()
+        assertEquals(1, toggled)
     }
 
     @Test

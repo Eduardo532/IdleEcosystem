@@ -255,9 +255,13 @@ class PrestigeShopManager @Inject constructor() {
      * Abandona la Senda actual (al Ascender): vuelve a nivel 0 y devuelve la Cordura
      * que se gastó en ella, para que el jugador pueda elegir otra.
      */
-    fun abandonPath(): BigDecimal {
+    /**
+     * Deja la Senda y devuelve la Cordura gastada en ella. Los [keptLevels] que vinieron
+     * del ciclo anterior (Senda Eterna) no se pagaron en este y no se devuelven.
+     */
+    fun abandonPath(keptLevels: Int = 0): BigDecimal {
         val path = MadnessPaths.active(upgrades) ?: return BigDecimal.ZERO
-        val refund = MadnessPaths.spent(path)
+        val refund = MadnessPaths.spent(path, keptLevels)
         path.level = 0
         return refund
     }
@@ -269,6 +273,16 @@ class PrestigeShopManager @Inject constructor() {
      * Si el nodo se puede comprar por su posición en el cielo: su anterior en la cadena
      * tiene nivel o, si es una Senda, su constelación está completa (o ya la recorre).
      */
+    /**
+     * Cielo Recordado (hito de Trascendencia): El Despertar y la primera estrella de cada
+     * constelación empiezan el ciclo a nivel 1.
+     */
+    fun rememberSky() {
+        upgrades.filter { it.id == CORE_NODE_ID || it.parentId == CORE_NODE_ID }
+            .filter { !MadnessPaths.isPath(it.id) }
+            .forEach { if (it.level < 1) it.level = 1 }
+    }
+
     fun canReach(node: PrestigeUpgrade): Boolean {
         if (MadnessPaths.isPath(node.id)) return MadnessPaths.isAvailable(node, upgrades)
         val parentId = node.parentId ?: return true
@@ -310,6 +324,7 @@ class PrestigeShopManager @Inject constructor() {
     fun getStartingKnowledgeBonus(): BigDecimal = BigDecimal.ZERO
 
     companion object {
+        const val CORE_NODE_ID = "pu_core"
         const val STARTING_NOTES_ID = "pu_legacy"
         const val NOTES_PER_LEVEL = 5
         const val ATTENTION_NODE_ID = "pu_arcane_attention"

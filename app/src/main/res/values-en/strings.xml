@@ -394,4 +394,9 @@
     <string name="map_fx_madness">Madness rises x%1$s</string>
     <string name="map_fx_cult">+%1$d of the first five production buildings at the start</string>
     <string name="map_fx_tier">Buildings %1$d to %2$d x%3$s</string>
+    <string name="automation_transcend">Automatic Transcendence</string>
+    <string name="automation_transcend_hint">Transcends on its own when the Ether you would gain matches or exceeds what you have.</string>
+    <string name="automation_transcend_locked">Unlocks with %1$d Transcendences.</string>
+    <string name="transcend_milestones_title">Transcendence Milestones (%1$d/%2$d)</string>
+    <string name="transcend_milestone_at">Transcendences: %1$d/%2$d</string>
 </resources>

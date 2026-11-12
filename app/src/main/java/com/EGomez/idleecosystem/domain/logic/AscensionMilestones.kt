@@ -62,7 +62,9 @@ data class AutomationSettings(
     /** Porcentaje máximo del Conocimiento que pueden gastar los autocompradores. */
     val budgetPercent: Int = DEFAULT_BUDGET_PERCENT,
     /** Ascender sola cuando la Cordura ganada duplique la que se tiene. */
-    val autoAscend: Boolean = false
+    val autoAscend: Boolean = false,
+    /** Trascender sola cuando el Éter ganado iguale al que se tiene (hito de Trascendencia). */
+    val autoTranscend: Boolean = false
 ) {
     val budgetFraction: Double get() = budgetPercent.coerceIn(1, 100) / 100.0
 

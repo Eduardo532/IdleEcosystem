@@ -34,7 +34,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | Mecánica | Inspiración | Idea |
 |---|---|---|
 | **Romper el Velo** | Romper el Infinito | El Conocimiento tiene un tope, el Velo, que obliga a Ascender. Superar las 10 Pruebas lo rompe y deja crecer sin límite. |
-| **Hitos de Trascendencia** | Hitos de Eternidad | Ventajas por número de Trascendencias: conservar la automatización, Ascensión automática, autocompra del Mapa de Locura. |
+| **Hitos de Trascendencia** ✅ *v0.19.5* | Hitos de Eternidad | Seis ventajas por número de Trascendencias: automatización desde el inicio del ciclo, primeras estrellas encendidas, Senda Eterna, Trascendencia automática, Atención con todas las Ascensiones y Trascender con 40. Ver [Trascender](Trascender). |
 | **Cuando las Estrellas Estén en Posición** | Estrellas y Polvo Estelar | Tras Trascender se generan Estrellas lentamente; dan Polvo Estelar para un grupo de mejoras propio. |
 | **Bestiario** | Zoológico y Animales | Criaturas invocadas con Esencia de las Pruebas (Gato de Ulthar, Shoggoth, Byakhee, Profundo, Mi-Go, Ghoul), cada una con un multiplicador propio. |
 | **Laboratorio de Miskatonic** | Laboratorio | Con Éter se suben exponentes (producción ^1,01 por nivel) en lugar de multiplicadores. |

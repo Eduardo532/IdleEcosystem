@@ -205,6 +205,8 @@ class MainViewModel @Inject constructor(
         etherGain = economy.etherGain,
         ether = economy.ether,
         transcendences = economy.transcendences,
+        milestoneAscensions = economy.milestoneAscensions,
+        transcendRequired = economy.transcendRequired,
         eternalLevels = economy.eternalLevels,
         consecrationRevealed = economy.consecrationRevealed,
         consecrations = economy.consecrations,
@@ -418,6 +420,8 @@ class MainViewModel @Inject constructor(
     fun setAutomationBudget(percent: Int) = updateAutomation { it.copy(budgetPercent = percent) }
 
     fun toggleAutoAscend() = updateAutomation { it.copy(autoAscend = !it.autoAscend) }
+
+    fun toggleAutoTranscend() = updateAutomation { it.copy(autoTranscend = !it.autoTranscend) }
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

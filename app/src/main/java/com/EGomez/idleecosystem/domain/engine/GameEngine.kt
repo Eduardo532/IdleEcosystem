@@ -19,6 +19,7 @@ import com.EGomez.idleecosystem.domain.logic.BuffMath
 import com.EGomez.idleecosystem.domain.logic.Consecration
 import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
 import com.EGomez.idleecosystem.domain.logic.Transcendence
+import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -123,6 +124,8 @@ data class EconomyState(
     val etherGain: Int = 0,
     val ether: Int = 0,
     val transcendences: Int = 0,
+    val milestoneAscensions: Int = 0,
+    val transcendRequired: Int = Transcendence.REQUIRED_ASCENSIONS,
     val eternalLevels: Map<String, Int> = emptyMap(),
     /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
@@ -174,7 +177,7 @@ sealed interface EngineEffect {
     /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
     data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
     /** Se Trascendió y se ganó [ether] de Éter. */
-    data class Transcended(val ether: Int) : EngineEffect
+    data class Transcended(val ether: Int, val auto: Boolean = false) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -444,7 +447,7 @@ class GameEngine @Inject constructor(
      * a las decisiones del jugador, y compran de a una unidad: empiezan lentos.
      */
     private fun runAutomation() {
-        val ascensions = statsManager.totalPrestiges
+        val ascensions = milestoneAscensions()
         var changed = false
         if (automation.buildings && AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) {
             changed = autoBuyBuildings() || changed
@@ -469,8 +472,31 @@ class GameEngine @Inject constructor(
             }
             return
         }
+        // Trascendencia automática (hito): cuando el Éter ganado iguale al que se tiene
+        if (automation.autoTranscend && TranscendenceMilestone.AUTO_TRANSCEND.isReached(transcendences()) &&
+            TranscendenceMilestone.shouldAutoTranscend(etherGainNow(), statsManager.counter(AchievementStat.ETHER).toInt())
+        ) {
+            performTranscend(auto = true)
+            return
+        }
         if (changed) requestSave()
     }
+
+    private fun transcendences(): Int = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt()
+
+    /**
+     * Las Ascensiones que cuentan para los hitos de Ascensión. Con Memoria de la Máquina
+     * (hito de Trascendencia) todos están alcanzados desde el inicio del ciclo.
+     */
+    private fun milestoneAscensions(): Int {
+        val real = statsManager.totalPrestiges
+        return if (TranscendenceMilestone.MACHINE_MEMORY.isReached(transcendences())) {
+            maxOf(real, AscensionMilestone.entries.maxOf { it.ascensions })
+        } else real
+    }
+
+    /** Ascensiones del ciclo que pide Trascender (El Atajo las baja). */
+    private fun transcendRequired(): Int = TranscendenceMilestone.requiredAscensions(transcendences())
 
     /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
     private fun autoBuyBuildings(): Boolean {
@@ -574,16 +600,19 @@ class GameEngine @Inject constructor(
         }
         // Cambiar de Senda solo se puede al Ascender: devuelve todo lo gastado en ella
         if (abandonPath) {
-            prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath())
+            val kept = statsManager.counter(AchievementStat.CYCLE_PATH_KEPT).toInt()
+            prestigeManager.residualSanity = prestigeManager.residualSanity.add(prestigeShopManager.abandonPath(kept))
+            statsManager.counters.remove(AchievementStat.CYCLE_PATH_KEPT)
         }
 
         // Hitos de Ascensión: lo que la nueva vida conserva o trae de entrada
         val ascensions = statsManager.totalPrestiges
+        val milestones = milestoneAscensions()
         // El pacto de la vida nueva (uno bloqueado no se puede elegir)
         setPact(if (nextPact.isUnlocked(ascensions, earlyPacts())) nextPact else Pact.NONE)
         buildingManager.resetForPrestige()
-        upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, ascensions) })
-        if (AscensionMilestone.STARTING_SYNAPSES.isReached(ascensions)) {
+        upgradeManager.resetForPrestige(keep = { AscensionMilestone.keepsOnAscension(it, milestones) })
+        if (AscensionMilestone.STARTING_SYNAPSES.isReached(milestones)) {
             buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
                 ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
@@ -647,6 +676,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_LEVELS, mastery.sum())
         put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
+        put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
         put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
@@ -1133,7 +1163,8 @@ class GameEngine @Inject constructor(
         if (synergyAvailable) tutorialManager.triggerStep(TutorialStep.SYNERGIES)
         val ascensions = statsManager.totalPrestiges
         if (ascensions >= 1) tutorialManager.triggerStep(TutorialStep.ASCENSION_MILESTONES)
-        if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(ascensions)) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
+        if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(milestoneAscensions())) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
+        if (transcendences() >= 1) tutorialManager.triggerStep(TutorialStep.TRANSCEND_MILESTONES)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1195,7 +1226,9 @@ class GameEngine @Inject constructor(
 
     /** Puntos de Atención: los de las Ascensiones y, desde la primera, los de las Pruebas. */
     private fun attentionPoints(): Int {
-        val base = Attention.available(statsManager.totalPrestiges)
+        // Ojos Abiertos (hito de Trascendencia): cuentan todas las Ascensiones desde siempre
+        val counted = if (TranscendenceMilestone.OPEN_EYES.isReached(transcendences())) totalAscensionsEver() else statsManager.totalPrestiges
+        val base = Attention.available(counted)
         return if (base > 0) base + trialReward().attentionPoints + prestigeShopManager.getAttentionBonus() else 0
     }
 
@@ -1395,11 +1428,12 @@ class GameEngine @Inject constructor(
     private fun etherGainNow(): Int = Transcendence.etherGain(
         cycleAscensions(),
         cycleSanity(),
-        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO))
+        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)),
+        transcendRequired()
     )
 
     private fun transcendRevealed(): Boolean =
-        cycleAscensions() >= Transcendence.REQUIRED_ASCENSIONS || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
+        cycleAscensions() >= transcendRequired() || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
 
     // =====================================================================
     // CONSAGRAR EDIFICIOS (v0.18.1)
@@ -1448,15 +1482,23 @@ class GameEngine @Inject constructor(
      * Se conservan los logros, las estadísticas, el Éter y las mejoras eternas; las
      * Pruebas y las runas grabadas solo si se compró la mejora que las recuerda.
      */
-    fun transcend() = post {
+    fun transcend() = post { performTranscend(auto = false) }
+
+    private fun performTranscend(auto: Boolean) {
         val gain = etherGainNow()
-        if (gain <= 0) return@post
+        if (gain <= 0) return
         val cycle = cycleAscensions()
+        val shortcut = TranscendenceMilestone.SHORTCUT.isReached(transcendences())
 
         // Logros: con qué pacto y Senda se Trascendió
         statsManager.flag(AchievementStat.transcendWith(activePact.id))
         MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.transcendPath(it.id)) }
         if (cycle == Transcendence.REQUIRED_ASCENSIONS) statsManager.flag(AchievementStat.FEAT_EXACT_THRESHOLD)
+        if (shortcut && cycle == TranscendenceMilestone.SHORTCUT_ASCENSIONS) statsManager.flag(AchievementStat.FEAT_SHORTCUT)
+        if (auto) {
+            statsManager.count(AchievementStat.AUTO_TRANSCENDS)
+            statsManager.flag(AchievementStat.autoTranscendWith(activePact.id))
+        }
         statsManager.count(AchievementStat.TRANSCENDENCES)
         statsManager.count(AchievementStat.ETHER, BigDecimal(gain))
         statsManager.count(AchievementStat.ETHER_EARNED, BigDecimal(gain))
@@ -1483,7 +1525,14 @@ class GameEngine @Inject constructor(
         knowledge = BigDecimal.ZERO
         echoes = BigDecimal.ZERO
         prestigeManager.residualSanity = BigDecimal.ZERO
-        prestigeShopManager.upgrades.forEach { it.level = 0 }
+        // Hitos de Trascendencia: la Senda (Senda Eterna) y las primeras estrellas (Cielo Recordado)
+        val reached = transcendences()
+        val keptPath = MadnessPaths.active(prestigeShopManager.upgrades)
+            ?.takeIf { TranscendenceMilestone.ETERNAL_PATH.isReached(reached) }
+        prestigeShopManager.upgrades.forEach { if (it !== keptPath) it.level = 0 }
+        statsManager.counters.remove(AchievementStat.CYCLE_PATH_KEPT)
+        if (keptPath != null) statsManager.counters[AchievementStat.CYCLE_PATH_KEPT] = BigDecimal(keptPath.level)
+        if (TranscendenceMilestone.REMEMBERED_SKY.isReached(reached)) prestigeShopManager.rememberSky()
         buildingManager.resetForPrestige()
         upgradeManager.resetForPrestige()
         runeManager.hideRune()
@@ -1495,14 +1544,14 @@ class GameEngine @Inject constructor(
         loadMadness()
         deliriumMultiplier = 1.0
         setPact(Pact.NONE)
-        if (AscensionMilestone.STARTING_SYNAPSES.isReached(start)) {
+        if (AscensionMilestone.STARTING_SYNAPSES.isReached(maxOf(start, milestoneAscensions()))) {
             buildingManager.availableBuildings.firstOrNull { it.type == BuildingType.CLICK }
                 ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
         applyStartingBuildings()
 
         soundManager.playSound(SoundType.ACHIEVEMENT)
-        _effects.trySend(EngineEffect.Transcended(gain))
+        _effects.trySend(EngineEffect.Transcended(gain, auto))
         recalculate()
         requestSave(replace = true)
     }
@@ -1845,6 +1894,8 @@ class GameEngine @Inject constructor(
             etherGain = etherGainNow(),
             ether = statsManager.counter(AchievementStat.ETHER).toInt(),
             transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
+            milestoneAscensions = milestoneAscensions(),
+            transcendRequired = transcendRequired(),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             consecrationRevealed = consecrationRevealed(),
             consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },

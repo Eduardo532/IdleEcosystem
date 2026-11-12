@@ -273,5 +273,12 @@ enum class TutorialStep(
         "El Bestiario",
         "Superaste una Prueba y ganaste Esencia. Desde ahora aparecen criaturas de los Mitos en encuentros al azar: tócalas antes de que se vayan para catalogarlas en el Bestiario. Cada una da un pequeño bono y la Esencia las sube de nivel.",
         "Al superar la primera Prueba"
+    ),
+
+    LAB(
+        "lab",
+        "El Laboratorio de Miskatonic",
+        "En la Universidad Miskatonic se experimenta con lo que no debería medirse. En la pestaña Laboratorio, el Éter paga experimentos que elevan la producción, el clic, la Cordura y el Éter a un exponente: crecen más cuanto más grandes son.",
+        "Tras la primera Trascendencia"
     )
 }

@@ -87,8 +87,9 @@ object Bestiary {
     }
 
     /** Los bonos que entran por los efectos de pacto: producción, clic, sin conexión y Cordura. */
-    fun effects(levels: Map<String, Int>): PactEffects {
-        val b = bonuses(levels)
+    fun effects(levels: Map<String, Int>): PactEffects = effectsOf(bonuses(levels))
+
+    fun effectsOf(b: Map<BeastKind, Double>): PactEffects {
         return PactEffects(
             production = b.getValue(BeastKind.PRODUCTION),
             click = b.getValue(BeastKind.CLICK),

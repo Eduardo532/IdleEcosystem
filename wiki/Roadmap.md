@@ -37,7 +37,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **Hitos de Trascendencia** ✅ *v0.19.5* | Hitos de Eternidad | Seis ventajas por número de Trascendencias: automatización desde el inicio del ciclo, primeras estrellas encendidas, Senda Eterna, Trascendencia automática, Atención con todas las Ascensiones y Trascender con 40. Ver [Trascender](Trascender). |
 | **Cuando las Estrellas Estén en Posición** ✅ *v0.19.7* | Estrellas y Polvo Estelar | Tras Trascender nacen Estrellas (también sin conexión) que dan Polvo Estelar para seis mejoras estelares. Cada media hora se alinean y el Polvo cae x5. Ver [Estrellas](Estrellas). |
 | **Bestiario** ✅ *v0.19.8* | Zoológico y Animales | 156 criaturas en 13 familias. Se descubren en encuentros al azar y se suben de nivel con Esencia de las Pruebas; completar una familia duplica su bono. Ver [Bestiario](Bestiario). |
-| **Laboratorio de Miskatonic** | Laboratorio | Con Éter se suben exponentes (producción ^1,01 por nivel) en lugar de multiplicadores. |
+| **Laboratorio de Miskatonic** ✅ *v0.19.9* | Laboratorio | Seis experimentos pagados con Éter que suben exponentes: producción, clic, Cordura y Éter, además de potenciar el Bestiario y alejar el Velo. Ver [Laboratorio](Laboratorio). |
 
 ### Etapa 7: profundidad de Trascender
 

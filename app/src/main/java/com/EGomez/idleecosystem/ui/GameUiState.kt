@@ -101,6 +101,8 @@ data class GameUiState(
     val veilBroken: Boolean = false,
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
+    /** Laboratorio de Miskatonic (v0.19.9). */
+    val labLevels: Map<String, Int> = emptyMap(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

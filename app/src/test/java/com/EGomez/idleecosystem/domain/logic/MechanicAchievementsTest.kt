@@ -44,6 +44,7 @@ class MechanicAchievementsTest {
         "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
         "Maestría de runas" to { it.stat?.startsWith("mastery") == true },
         "Mutaciones" to { it.stat?.contains("mutation") == true },
+        "Laboratorio" to { it.stat?.startsWith("lab") == true || it.stat == AchievementStat.FEAT_LAB_EXACT },
         "Bestiario" to { it.stat?.startsWith("beast") == true || it.stat in setOf(AchievementStat.ESSENCE_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED) },
         "Estrellas" to { it.stat in setOf(AchievementStat.STARS, AchievementStat.STARDUST_EARNED, AchievementStat.STAR_LEVELS, AchievementStat.ALIGNED_PURCHASES) || it.stat?.startsWith("star_") == true },
         "Romper el Velo" to { it.stat?.startsWith("veil") == true || it.stat == AchievementStat.FEAT_VEIL_IN_TRIAL },

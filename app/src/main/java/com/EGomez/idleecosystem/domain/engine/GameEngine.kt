@@ -27,6 +27,8 @@ import com.EGomez.idleecosystem.domain.logic.Beast
 import com.EGomez.idleecosystem.domain.logic.BeastKind
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.Lab
+import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -138,6 +140,9 @@ data class EconomyState(
     val veilPressing: Boolean = false,
     val veilFactor: BigDecimal = BigDecimal.ONE,
     val veilApproach: Float = 0f,
+    val veilThreshold: BigDecimal = Veil.THRESHOLD,
+    /** Laboratorio de Miskatonic (v0.19.9). */
+    val labLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -601,8 +606,7 @@ class GameEngine @Inject constructor(
         nextTrial: Trial? = null,
         nextMutation: Mutation? = null
     ): BigDecimal? {
-        val finalPotential = prestigeManager.calculatePotentialPrestige(knowledgeThisRun())
-            .multiply(sanityGainMultiplier())
+        val finalPotential = labSanity(prestigeManager.calculatePotentialPrestige(knowledgeThisRun()).multiply(sanityGainMultiplier()))
         if (finalPotential.signum() <= 0) return null
 
         // Logros: la vida que termina (pacto, Senda, hazañas) antes de reiniciarla
@@ -703,7 +707,9 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
         put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
-        put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun()))
+        put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun(), veilThreshold()))
+        put(AchievementStat.LAB_LEVELS, LabExperiment.entries.sumOf { labLevel(it) })
+        put(AchievementStat.LAB_MAXED, LabExperiment.entries.count { it.isMaxed(labLevel(it)) })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -920,7 +926,8 @@ class GameEngine @Inject constructor(
         transcendRevealed = transcendRevealed(),
         mutationsRevealed = mutationsRevealed(),
         starsRevealed = starsRevealed(),
-        bestiaryRevealed = bestiaryRevealed()
+        bestiaryRevealed = bestiaryRevealed(),
+        labRevealed = labRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1041,7 +1048,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(pact.offline))
             .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal.valueOf(trialReward().offline * if (trialRules().noOffline) 0.0 else 1.0))
-            .let { rate -> Veil.offlineGain(knowledgeThisRun(), rate, diffSeconds, veilBroken()) }
+            .let { rate -> Veil.offlineGain(knowledgeThisRun(), rate, diffSeconds, veilBroken(), veilThreshold()) }
 
         if (gains.signum() > 0) {
             addKnowledge(gains, isManual = false)
@@ -1190,7 +1197,9 @@ class GameEngine @Inject constructor(
         }
     }
 
-    private fun currentClickPower(): BigDecimal = buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
+    /** El poder de clic, elevado por el Polvo de Ibn Ghazi (Laboratorio). */
+    private fun currentClickPower(): BigDecimal =
+        Lab.pow(buildingManager.getClickBuildingBonus().max(BigDecimal.ONE), LabExperiment.IBN_GHAZI.exponent(labLevel(LabExperiment.IBN_GHAZI)))
 
     /** Tutoriales de las mecánicas de la v0.14, cada uno cuando su sistema entra en juego. */
     private fun triggerDepthTutorials() {
@@ -1209,6 +1218,7 @@ class GameEngine @Inject constructor(
         if (ascensions >= 1) tutorialManager.triggerStep(TutorialStep.ASCENSION_MILESTONES)
         if (AscensionMilestone.BUILDING_AUTOBUYER.isReached(milestoneAscensions())) tutorialManager.triggerStep(TutorialStep.AUTOMATION)
         if (transcendences() >= 1) tutorialManager.triggerStep(TutorialStep.TRANSCEND_MILESTONES)
+        if (labRevealed()) tutorialManager.triggerStep(TutorialStep.LAB)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1348,7 +1358,13 @@ class GameEngine @Inject constructor(
     private fun beastLevels(): Map<String, Int> =
         Bestiary.beasts.associate { it.id to statsManager.counter(AchievementStat.beast(it.id)).toInt() }
 
-    private fun beastBonus(kind: BeastKind): Double = Bestiary.bonuses(beastLevels()).getValue(kind)
+    /** Los bonos del Bestiario, elevados por la Disección de Dyer (Laboratorio). */
+    private fun beastBonuses(): Map<BeastKind, Double> {
+        val exponent = LabExperiment.DYER.exponent(labLevel(LabExperiment.DYER))
+        return Bestiary.bonuses(beastLevels()).mapValues { Lab.pow(it.value, exponent) }
+    }
+
+    private fun beastBonus(kind: BeastKind): Double = beastBonuses().getValue(kind)
 
     /** El Bestiario se abre al superar la primera Prueba (o si ya hay criaturas o Esencia). */
     private fun bestiaryRevealed(): Boolean =
@@ -1423,11 +1439,49 @@ class GameEngine @Inject constructor(
         requestSave()
     }
 
+    // =====================================================================
+    // LABORATORIO DE MISKATONIC (v0.19.9)
+    // =====================================================================
+
+    private fun labLevel(experiment: LabExperiment): Int = statsManager.counter(AchievementStat.lab(experiment.id)).toInt()
+
+    private fun labRevealed(): Boolean = transcendences() >= 1
+
+    private fun veilThreshold(): BigDecimal = Lab.veilThreshold(labLevel(LabExperiment.VEIL))
+
+    /** La Cordura ganada, elevada por las Sales Esenciales y redondeada hacia abajo. */
+    private fun labSanity(gain: BigDecimal): BigDecimal {
+        val exponent = LabExperiment.CURWEN.exponent(labLevel(LabExperiment.CURWEN))
+        return if (exponent == 1.0) gain else Lab.pow(gain, exponent).setScale(0, java.math.RoundingMode.FLOOR)
+    }
+
+    /** Sube un experimento del Laboratorio con Éter. */
+    fun buyLab(id: String) = post {
+        val experiment = LabExperiment.fromId(id) ?: return@post
+        if (!labRevealed()) return@post
+        val level = labLevel(experiment)
+        if (experiment.isMaxed(level)) return@post
+        val cost = BigDecimal(experiment.cost(level))
+        val ether = statsManager.counter(AchievementStat.ETHER)
+        if (ether < cost) return@post
+        if (ether.compareTo(cost) == 0) statsManager.flag(AchievementStat.FEAT_LAB_EXACT)
+        statsManager.counters[AchievementStat.ETHER] = ether.subtract(cost)
+        if (statsManager.counters[AchievementStat.ETHER]!!.signum() == 0) statsManager.counters.remove(AchievementStat.ETHER)
+        statsManager.counters[AchievementStat.lab(experiment.id)] = BigDecimal(level + 1)
+        statsManager.count(AchievementStat.LAB_ETHER_SPENT, cost)
+        statsManager.flag(AchievementStat.labBuyWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.labBuyPath(it.id)) }
+        soundManager.playSound(SoundType.BUY)
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
 
     /** El Velo frena esta vida: se anota para el logro y se explica una vez. */
     private fun veilTick() {
-        if (Veil.isPressing(knowledgeThisRun(), veilBroken())) {
+        if (Veil.isPressing(knowledgeThisRun(), veilBroken(), veilThreshold())) {
             statsManager.flag(AchievementStat.VEIL_TOUCHED)
             tutorialManager.triggerStep(TutorialStep.VEIL)
         }
@@ -1635,13 +1689,17 @@ class GameEngine @Inject constructor(
         return if (statsManager.counter(AchievementStat.TRANSCENDENCES).signum() == 0) counted.max(statsManager.lifetimeSanity) else counted
     }
 
-    private fun etherGainNow(): Int = Transcendence.etherGain(
-        cycleAscensions(),
-        cycleSanity(),
-        Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
-            beastBonus(BeastKind.ETHER),
-        transcendRequired()
-    )
+    private fun etherGainNow(): Int {
+        val gain = Transcendence.etherGain(
+            cycleAscensions(),
+            cycleSanity(),
+            Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
+                beastBonus(BeastKind.ETHER),
+            transcendRequired()
+        )
+        // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
+        return kotlin.math.floor(Lab.pow(gain.toDouble(), LabExperiment.PNAKOTIC.exponent(labLevel(LabExperiment.PNAKOTIC)))).toInt()
+    }
 
     private fun transcendRevealed(): Boolean =
         cycleAscensions() >= transcendRequired() || statsManager.counter(AchievementStat.TRANSCENDENCES).signum() > 0
@@ -1839,7 +1897,7 @@ class GameEngine @Inject constructor(
             // Blanco los anula igual que al resto del Mapa
             .combinedWith(if (trialRules().noSanityBonus) PactEffects() else prestigeShopManager.getMapEffects())
             // Bestiario (v0.19.8): producción, clic, sin conexión y Cordura
-            .combinedWith(Bestiary.effects(beastLevels()))
+            .combinedWith(Bestiary.effectsOf(beastBonuses()))
         applyPactModifiers()
     }
 
@@ -1976,7 +2034,7 @@ class GameEngine @Inject constructor(
         val trialProduction = BigDecimal.valueOf(
             rules.production * reward.production * deliriumMultiplier *
                 Transcendence.productionMultiplier(eternalLevel(EternalUpgrade.ETERNAL_FIRE))
-        ).multiply(Veil.productionFactor(knowledgeThisRun(), veilBroken()))
+        ).multiply(Veil.productionFactor(knowledgeThisRun(), veilBroken(), veilThreshold()))
             .multiply(BigDecimal.valueOf(Stars.productionMultiplier(starLevel(StarUpgrade.STARLIGHT), starLevel(StarUpgrade.DARK_STARS), starCount())))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
@@ -2035,13 +2093,20 @@ class GameEngine @Inject constructor(
             building.currentMultiplier = specificMult.multiply(globalMultiplier, MathContext.DECIMAL64)
         }
 
+        // Fórmula de Armitage (Laboratorio): la producción total elevada a un exponente
+        val armitage = Lab.factorFor(buildingManager.getTotalProductionPerSecond(), LabExperiment.ARMITAGE.exponent(labLevel(LabExperiment.ARMITAGE)))
+        if (armitage.compareTo(BigDecimal.ONE) != 0) {
+            buildings.filter { it.type != BuildingType.CLICK }.forEach {
+                it.currentMultiplier = it.currentMultiplier.multiply(armitage, MathContext.DECIMAL64)
+            }
+        }
         productionPerSecond = buildingManager.getTotalProductionPerSecond()
         baseProductionPerSecond = if (temporaryMult.signum() > 0) {
             productionPerSecond.divide(temporaryMult, MathContext.DECIMAL64)
         } else productionPerSecond
 
         val gainMultiplier = sanityGainMultiplier()
-        potentialPrestige = prestigeManager.calculatePotentialPrestige(knowledgeThisRun()).multiply(gainMultiplier)
+        potentialPrestige = labSanity(prestigeManager.calculatePotentialPrestige(knowledgeThisRun()).multiply(gainMultiplier))
         // Una vez por segundo basta: solo cambia al cruzar un punto de Cordura
         prestigePacing = prestigeManager.pacing(knowledgeThisRun(), gainMultiplier)
 
@@ -2112,9 +2177,11 @@ class GameEngine @Inject constructor(
             milestoneAscensions = milestoneAscensions(),
             transcendRequired = transcendRequired(),
             veilBroken = veilBroken(),
-            veilPressing = Veil.isPressing(knowledgeThisRun(), veilBroken()),
-            veilFactor = Veil.productionFactor(knowledgeThisRun(), veilBroken()),
-            veilApproach = Veil.approach(knowledgeThisRun()),
+            veilPressing = Veil.isPressing(knowledgeThisRun(), veilBroken(), veilThreshold()),
+            veilFactor = Veil.productionFactor(knowledgeThisRun(), veilBroken(), veilThreshold()),
+            veilApproach = Veil.approach(knowledgeThisRun(), veilThreshold()),
+            veilThreshold = veilThreshold(),
+            labLevels = LabExperiment.entries.associate { it.id to labLevel(it) },
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,
@@ -2126,7 +2193,7 @@ class GameEngine @Inject constructor(
             essence = statsManager.counter(AchievementStat.ESSENCE).toInt(),
             encounterId = encounter?.id,
             encounterSecondsLeft = encounterSecondsLeft,
-            beastBonuses = Bestiary.bonuses(beastLevels()),
+            beastBonuses = beastBonuses(),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             consecrationRevealed = consecrationRevealed(),
             consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },

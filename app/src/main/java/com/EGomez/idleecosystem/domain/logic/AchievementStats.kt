@@ -71,6 +71,14 @@ object AchievementStat {
     const val BEAST_CATCH_WITH_PREFIX = "beast_with."
     const val BEAST_CATCH_PATH_PREFIX = "beast_path."
     const val FEAT_PRIMORDIAL_ALIGNED = "feat.primordial_aligned"
+    /** Laboratorio de Miskatonic (v0.19.9): niveles, experimentos al máximo y Éter invertido. */
+    const val LAB_PREFIX = "lab."
+    const val LAB_LEVELS = "lab_levels"
+    const val LAB_MAXED = "lab_maxed"
+    const val LAB_ETHER_SPENT = "lab_ether_spent"
+    const val LAB_BUY_WITH_PREFIX = "lab_with."
+    const val LAB_BUY_PATH_PREFIX = "lab_path."
+    const val FEAT_LAB_EXACT = "feat.lab_exact"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -113,7 +121,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, FAMILIES_COMPLETE, PRIMORDIALS_SEEN
+        BEASTS_SEEN, BEAST_LEVELS, FAMILIES_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
     )
 
     // --- Contadores guardados ---
@@ -254,6 +262,9 @@ object AchievementStat {
     fun beast(id: String) = BEAST_PREFIX + id
     fun beastCatchWith(pactId: String) = BEAST_CATCH_WITH_PREFIX + pactId
     fun beastCatchPath(pathId: String) = BEAST_CATCH_PATH_PREFIX + pathId
+    fun lab(id: String) = LAB_PREFIX + id
+    fun labBuyWith(pactId: String) = LAB_BUY_WITH_PREFIX + pactId
+    fun labBuyPath(pathId: String) = LAB_BUY_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -268,6 +279,7 @@ object AchievementStat {
         ETHER, ETHER_EARNED, TRANSCENDENCES, MAX_ETHER_GAIN, CYCLE_SANITY, CYCLE_START, ASCENSIONS_PAST, FEAT_EXACT_THRESHOLD, MUTATION_LIVES,
         AUTO_TRANSCENDS, FEAT_SHORTCUT, VEIL_BROKEN, VEIL_TOUCHED, FEAT_VEIL_IN_TRIAL,
         STARS, STARDUST_EARNED, ALIGNED_PURCHASES, ESSENCE_EARNED, ENCOUNTERS, FEAT_PRIMORDIAL_ALIGNED,
+        LAB_ETHER_SPENT, FEAT_LAB_EXACT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -276,6 +288,7 @@ object AchievementStat {
         RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX, AUTO_TRANSCEND_WITH_PREFIX, VEIL_BROKEN_WITH_PREFIX,
         STAR_BUY_WITH_PREFIX, STAR_ALIGNED_PATH_PREFIX, STAR_UPGRADE_PREFIX,
         BEAST_PREFIX, BEAST_CATCH_WITH_PREFIX, BEAST_CATCH_PATH_PREFIX,
+        LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

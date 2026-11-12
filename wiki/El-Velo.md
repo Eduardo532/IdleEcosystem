@@ -4,7 +4,7 @@
 
 ## Cómo frena
 
-- El Velo está en **1 septillón (1e25) de Conocimiento generado en una vida**.
+- El Velo está en **1 septillón (1e25) de Conocimiento generado en una vida**. La *Ecuación del Velo* del [Laboratorio](Laboratorio) lo aleja 10 veces por nivel.
 - Por debajo no cambia nada.
 - Por encima, la producción (también la de clic y la de sin conexión) se multiplica por **(Velo / Conocimiento)²**:
 

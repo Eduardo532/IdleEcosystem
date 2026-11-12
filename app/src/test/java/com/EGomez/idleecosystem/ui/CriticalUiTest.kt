@@ -570,6 +570,23 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the laboratory shows each exponent and buys an affordable experiment`() {
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.LabPanel(5, mapOf("armitage" to 2), onBuy = { bought += it })
+            }
+        }
+
+        compose.onNodeWithText("Ahora: ^1.02").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "ibn_ghazi").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "pnakotic").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("ibn_ghazi"), bought)
+    }
+
+    @Test
     fun `the compact research button clicks like the big one`() {
         var clicks = 0
         compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }

@@ -435,4 +435,11 @@
     <string name="encounter_unknown">Algo acecha…</string>
     <string name="encounter_left">se va en %1$d s</string>
     <string name="encounter_catch">Catalogar</string>
+    <string name="tab_lab">Laboratorio</string>
+    <string name="lab_title">LABORATORIO DE MISKATONIC</string>
+    <string name="lab_hint">El Éter paga experimentos que suben exponentes: cuanto más grande es algo, más crece.</string>
+    <string name="lab_level">%1$d/%2$d</string>
+    <string name="lab_now">Ahora: %1$s</string>
+    <string name="lab_now_veil">El Velo está en %1$s</string>
+    <string name="lab_cost">%1$d Éter</string>
 </resources>

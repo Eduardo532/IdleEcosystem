@@ -21,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.core.math.toBeautifulString
+import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.model.Trial
+import java.math.BigDecimal
+import java.math.MathContext
 import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -61,9 +64,13 @@ fun TrialList(
     activeTrial: Trial?,
     progress: Float,
     completed: Set<Trial>,
-    onAbandon: () -> Unit
+    onAbandon: () -> Unit,
+    veilBroken: Boolean = false,
+    onBreakVeil: () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+        VeilCard(completed.size, veilBroken, onBreakVeil)
+        Spacer(modifier = Modifier.height(8.dp))
         Text(stringResource(R.string.trials_intro), color = Color.Gray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Trial.entries.forEach { trial ->
@@ -252,6 +259,77 @@ fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutati
 
 val MutationGreen = Color(0xFF9CCC65)
 const val MUTATION_CHOICE_TAG = "mutation_choice_"
+const val VEIL_CARD_TAG = "veil_card"
+const val VEIL_BREAK_TAG = "veil_break"
+const val VEIL_BANNER_TAG = "veil_banner"
+
+private val VeilViolet = Color(0xFFB39DDB)
+
+/**
+ * Romper el Velo (v0.19.6), arriba de las Pruebas: el tope, cuántas Pruebas faltan y el
+ * botón para romperlo cuando están las 10. Roto, solo recuerda lo que da.
+ */
+@Composable
+fun VeilCard(completedTrials: Int, broken: Boolean, onBreak: () -> Unit) {
+    val total = Trial.entries.size
+    val ready = Veil.canBreak(completedTrials, broken)
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = if (broken) Color(0xFF17131F) else Color(0xFF15121A),
+        border = BorderStroke(1.dp, VeilViolet.copy(alpha = if (broken || ready) 0.8f else 0.35f)),
+        modifier = Modifier.fillMaxWidth().testTag(VEIL_CARD_TAG)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                if (broken) "✧ " + stringResource(R.string.veil_broken_title) else "🜏 " + stringResource(R.string.veil_title),
+                color = VeilViolet,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            if (broken) {
+                Text(stringResource(R.string.veil_broken_desc, multiplier(Veil.BROKEN_PRODUCTION)), color = Color.LightGray, fontSize = 11.sp)
+            } else {
+                Text(stringResource(R.string.veil_desc, Veil.THRESHOLD.toBeautifulString()), color = Color.LightGray, fontSize = 11.sp)
+                Text(stringResource(R.string.veil_reward, multiplier(Veil.BROKEN_PRODUCTION)), color = Color.Gray, fontSize = 11.sp)
+                Spacer(modifier = Modifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = { (completedTrials.toFloat() / total).coerceIn(0f, 1f) },
+                    color = VeilViolet,
+                    trackColor = Color(0xFF2A2A2A),
+                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
+                )
+                Text(stringResource(R.string.veil_progress, completedTrials.coerceAtMost(total), total), color = Color.Gray, fontSize = 10.sp)
+                if (ready) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Button(
+                        onClick = onBreak,
+                        colors = ButtonDefaults.buttonColors(containerColor = VeilViolet, contentColor = Color.Black),
+                        modifier = Modifier.fillMaxWidth().testTag(VEIL_BREAK_TAG)
+                    ) { Text(stringResource(R.string.veil_break), fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    }
+}
+
+/** Aviso arriba de Investigación cuando el Velo frena la producción de esta vida. */
+@Composable
+fun VeilBanner(factor: BigDecimal) {
+    val divisor = if (factor.signum() > 0) BigDecimal.ONE.divide(factor, MathContext.DECIMAL64) else BigDecimal.ZERO
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF1A1424),
+        border = BorderStroke(1.dp, VeilViolet.copy(alpha = 0.6f)),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).testTag(VEIL_BANNER_TAG)
+    ) {
+        Text(
+            "🜏 " + stringResource(R.string.veil_pressing, divisor.toBeautifulString()),
+            color = VeilViolet,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(10.dp)
+        )
+    }
+}
 
 const val TRIAL_CARD_TAG = "trial_card_"
 const val TRIAL_ABANDON_TAG = "trial_abandon"

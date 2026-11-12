@@ -1,6 +1,6 @@
 # Logros
 
-Hay **421 logros**: 113 originales y **308 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **431 logros**: 113 originales y **318 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -246,6 +246,15 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Prueba Relámpago | Supera una Prueba en menos de 20 minutos | +1 % |
 | Penitente | Empieza 25 Pruebas de Locura | +1 % |
 | Escritura Febril | Supera Manos Atadas con la mutación Notas Febriles | +1 % |
+| Rozar el Velo | Choca con el Velo en una vida | +1 % |
+| El Velo Rasgado | Rompe el Velo | +2 % |
+| Un Paso al Otro Lado | Supera el Velo por 10 veces en una vida | +1 % |
+| Donde No Llega la Luz | Supera el Velo por 100.000 veces en una vida | +1 % |
+| El Abismo sin Fondo | Supera el Velo por mil billones de veces en una vida | +2 % |
+| El Velo Amarillo | Supera el Velo por 1.000 veces en una vida con Hastur | +1 % |
+| Todas las Puertas Abiertas | Supera el Velo por 1.000 veces en una vida con Yog-Sothoth | +1 % |
+| Mente sin Velo | Supera el Velo por 10 veces recorriendo la Senda de la Mente | +1 % |
+| Sueño sin Velo | Supera el Velo por 10 veces recorriendo la Senda del Sueño | +1 % |
 
 ### Arcanos
 
@@ -340,7 +349,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **26 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **27 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

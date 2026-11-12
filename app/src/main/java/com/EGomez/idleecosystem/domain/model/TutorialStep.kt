@@ -252,5 +252,12 @@ enum class TutorialStep(
         "Hitos de Trascendencia",
         "Cada Trascendencia te acerca a un Hito de Trascendencia: la automatización desde el primer segundo del ciclo, las primeras estrellas del Mapa, la Senda que no se pierde, la Trascendencia automática, más Atención y un umbral más corto. Míralos en la pestaña Éter de la capa Trascendencia.",
         "Tras la primera Trascendencia"
+    ),
+
+    VEIL(
+        "veil",
+        "El Velo",
+        "Tu Conocimiento chocó con el Velo: por encima de él, la producción cae muy rápido. Asciende para empezar de nuevo, o supera las 10 Pruebas de Locura y rómpelo para siempre desde la pestaña Pruebas.",
+        "Al chocar con el Velo"
     )
 }

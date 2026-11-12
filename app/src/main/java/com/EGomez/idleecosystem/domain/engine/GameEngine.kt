@@ -20,6 +20,7 @@ import com.EGomez.idleecosystem.domain.logic.Consecration
 import com.EGomez.idleecosystem.domain.logic.EternalUpgrade
 import com.EGomez.idleecosystem.domain.logic.Transcendence
 import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
+import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
 import com.EGomez.idleecosystem.domain.logic.AchievementContext
@@ -126,6 +127,11 @@ data class EconomyState(
     val transcendences: Int = 0,
     val milestoneAscensions: Int = 0,
     val transcendRequired: Int = Transcendence.REQUIRED_ASCENSIONS,
+    /** Romper el Velo (v0.19.6). */
+    val veilBroken: Boolean = false,
+    val veilPressing: Boolean = false,
+    val veilFactor: BigDecimal = BigDecimal.ONE,
+    val veilApproach: Float = 0f,
     val eternalLevels: Map<String, Int> = emptyMap(),
     /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
@@ -677,6 +683,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
         put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
+        put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun()))
         put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
         put(AchievementStat.LIFETIME_SANITY, statsManager.lifetimeSanity)
@@ -1000,7 +1007,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(pact.offline))
             .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal.valueOf(trialReward().offline * if (trialRules().noOffline) 0.0 else 1.0))
-            .multiply(BigDecimal(diffSeconds))
+            .let { rate -> Veil.offlineGain(knowledgeThisRun(), rate, diffSeconds, veilBroken()) }
 
         if (gains.signum() > 0) {
             addKnowledge(gains, isManual = false)
@@ -1046,6 +1053,7 @@ class GameEngine @Inject constructor(
         madnessTick()
         tideTick()
         masteryTick()
+        veilTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1237,6 +1245,30 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.TRIALS_STARTED)
         deliriumMultiplier = 1.0
         deliriumSeconds = 0
+    }
+
+    private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
+
+    /** El Velo frena esta vida: se anota para el logro y se explica una vez. */
+    private fun veilTick() {
+        if (Veil.isPressing(knowledgeThisRun(), veilBroken())) {
+            statsManager.flag(AchievementStat.VEIL_TOUCHED)
+            tutorialManager.triggerStep(TutorialStep.VEIL)
+        }
+    }
+
+    /**
+     * Rompe el Velo para siempre (v0.19.6): pide las 10 Pruebas superadas. Desaparece el
+     * tope y la producción se multiplica por [Veil.BROKEN_PRODUCTION].
+     */
+    fun breakVeil() = post {
+        if (!Veil.canBreak(completedTrials().size, veilBroken())) return@post
+        statsManager.counters[AchievementStat.VEIL_BROKEN] = BigDecimal.ONE
+        statsManager.flag(AchievementStat.veilBrokenWith(activePact.id))
+        if (activeTrial() != null) statsManager.flag(AchievementStat.FEAT_VEIL_IN_TRIAL)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        recalculate()
+        requestSave()
     }
 
     /** Abandona la Prueba de esta vida: sus reglas se levantan, sin recompensa. */
@@ -1762,7 +1794,7 @@ class GameEngine @Inject constructor(
         val trialProduction = BigDecimal.valueOf(
             rules.production * reward.production * deliriumMultiplier *
                 Transcendence.productionMultiplier(eternalLevel(EternalUpgrade.ETERNAL_FIRE))
-        )
+        ).multiply(Veil.productionFactor(knowledgeThisRun(), veilBroken()))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -1896,6 +1928,10 @@ class GameEngine @Inject constructor(
             transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
             milestoneAscensions = milestoneAscensions(),
             transcendRequired = transcendRequired(),
+            veilBroken = veilBroken(),
+            veilPressing = Veil.isPressing(knowledgeThisRun(), veilBroken()),
+            veilFactor = Veil.productionFactor(knowledgeThisRun(), veilBroken()),
+            veilApproach = Veil.approach(knowledgeThisRun()),
             eternalLevels = EternalUpgrade.entries.associate { it.id to eternalLevel(it) },
             consecrationRevealed = consecrationRevealed(),
             consecrations = buildingManager.availableBuildings.associate { it.id to consecrationLevel(it.id) }.filterValues { it > 0 },

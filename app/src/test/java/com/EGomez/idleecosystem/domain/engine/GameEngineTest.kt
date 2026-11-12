@@ -34,6 +34,7 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -624,6 +626,42 @@ class GameEngineTest {
         assertTrue(after.ether > 0)
         assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.AUTO_TRANSCENDS)))
         assertTrue(stats.counter(AchievementStat.autoTranscendWith("none")).signum() > 0)
+    }
+
+    @Test
+    fun `the veil slows a life past the cap until it is broken with every trial`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 20
+            Trial.entries.forEach { count(AchievementStat.trial(it.id)) }
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal.ZERO, sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.ascensions == 20 }
+        engine.grantKnowledge(Veil.THRESHOLD.multiply(BigDecimal.TEN))
+
+        val pressed = await(engine.economy) { it.veilPressing }
+        assertEquals(0, BigDecimal("0.01").compareTo(pressed.veilFactor))
+        await(engine.economy) { stats.counter(AchievementStat.VEIL_TOUCHED).signum() > 0 }
+
+        engine.breakVeil()
+
+        val broken = await(engine.economy) { it.veilBroken }
+        assertFalse(broken.veilPressing)
+        assertEquals(0, BigDecimal.valueOf(Veil.BROKEN_PRODUCTION).compareTo(broken.veilFactor))
+        assertTrue(stats.counter(AchievementStat.veilBrokenWith("none")).signum() > 0)
+    }
+
+    @Test
+    fun `the veil cannot be broken without every trial`() = runBlocking {
+        engine.breakVeil()
+        engine.grantKnowledge(BigDecimal.TEN)
+        val state = await(engine.economy) { it.knowledge.signum() > 0 }
+        assertFalse(state.veilBroken)
     }
 
     @Test

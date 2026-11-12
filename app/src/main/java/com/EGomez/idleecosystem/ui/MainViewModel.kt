@@ -206,6 +206,9 @@ class MainViewModel @Inject constructor(
         ether = economy.ether,
         transcendences = economy.transcendences,
         milestoneAscensions = economy.milestoneAscensions,
+        veilBroken = economy.veilBroken,
+        veilPressing = economy.veilPressing,
+        veilFactor = economy.veilFactor,
         transcendRequired = economy.transcendRequired,
         eternalLevels = economy.eternalLevels,
         consecrationRevealed = economy.consecrationRevealed,
@@ -422,6 +425,8 @@ class MainViewModel @Inject constructor(
     fun toggleAutoAscend() = updateAutomation { it.copy(autoAscend = !it.autoAscend) }
 
     fun toggleAutoTranscend() = updateAutomation { it.copy(autoTranscend = !it.autoTranscend) }
+
+    fun breakVeil() = engine.breakVeil()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

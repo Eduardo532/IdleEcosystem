@@ -112,6 +112,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
 - Hitos de Trascendencia a 1, 2, 3, 5, 8 y 12 Trascendencias. Memoria de la Máquina: los hitos de Ascensión usan `max(Ascensiones, 50)`. El Atajo: umbral 40. Trascendencia automática cuando `Éter ganado ≥ max(1, Éter actual)`. Senda Eterna: al dejarla se devuelve solo lo gastado desde el nivel heredado (`cycle_path_kept`). *(Código: `TranscendenceMilestone`; test: `TranscendenceMilestoneTest`.)*
 
+## El Velo
+
+- Tope en `1e25` de Conocimiento de la vida. Por encima, producción x`(1e25 / K)²`. Sin conexión: `K³ = K₀³ + 3·P·Velo²·t` (P sin freno). *(Código: `Veil`; test: `VeilTest`.)*
+- Se rompe con las 10 Pruebas superadas (contador `veil_broken`, que no se borra al Trascender). Roto: sin tope y producción x100.
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

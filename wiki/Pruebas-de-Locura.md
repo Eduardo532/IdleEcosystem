@@ -38,6 +38,10 @@ Cuatro Pruebas adelantan a un Dios Exterior: desde que las superas puedes elegir
 - Grimorio Quemado → Yog-Sothoth (30)
 - Delirio → Azathoth (50)
 
+## El Velo *(v0.19.6)*
+
+Superar las 10 Pruebas permite **romper el Velo**, el tope suave al Conocimiento de una vida. Ver [El Velo](El-Velo).
+
 ## Logros
 
 Las Pruebas traen **22 logros** (categoría **Pruebas** en la lista de logros): uno por cada Prueba, superar 1, 3, 5 y las 10, superar una en menos de 20 minutos, empezar 25 y retos con un dios concreto (por ejemplo, Manos Atadas con Nyarlathotep o Insomnio con Cthulhu). Dos de ellos son secretos.

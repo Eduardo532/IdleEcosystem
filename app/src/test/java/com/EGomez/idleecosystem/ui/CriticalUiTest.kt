@@ -385,7 +385,7 @@ class CriticalUiTest {
             androidx.compose.foundation.layout.Column(
                 androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
             ) {
-                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER)) { abandoned++ }
+                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER), onAbandon = { abandoned++ })
             }
         }
 
@@ -498,6 +498,20 @@ class CriticalUiTest {
 
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_TRANSCEND_TAG).performScrollTo().performClick()
         assertEquals(1, toggled)
+    }
+
+    @Test
+    fun `the veil card shows the trials left and breaks with all of them`() {
+        var broke = 0
+        var completed by mutableStateOf(4)
+        compose.setContent { com.EGomez.idleecosystem.ui.screens.main.components.VeilCard(completed, broken = false, onBreak = { broke++ }) }
+
+        compose.onNodeWithText("Pruebas superadas: 4/10").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VEIL_BREAK_TAG).assertDoesNotExist()
+
+        completed = 10
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VEIL_BREAK_TAG).performClick()
+        assertEquals(1, broke)
     }
 
     @Test

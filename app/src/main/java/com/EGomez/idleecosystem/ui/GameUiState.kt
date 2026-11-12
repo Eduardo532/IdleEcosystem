@@ -97,6 +97,10 @@ data class GameUiState(
     val transcendences: Int = 0,
     /** Hitos de Trascendencia (v0.19.5): Ascensiones que cuentan para los hitos y las que pide Trascender. */
     val milestoneAscensions: Int = 0,
+    /** Romper el Velo (v0.19.6). */
+    val veilBroken: Boolean = false,
+    val veilPressing: Boolean = false,
+    val veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
     val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,
     val eternalLevels: Map<String, Int> = emptyMap(),
     val transcendNotice: Int? = null,

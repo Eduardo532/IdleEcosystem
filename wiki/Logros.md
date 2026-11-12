@@ -88,7 +88,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Cartógrafo de la Locura | Suma 10 niveles en el Mapa de Locura | +1 % |
 | Constelación Propia | Suma 50 niveles en el Mapa de Locura | +1 % |
 | Firmamento Dominado | Suma 150 niveles en el Mapa de Locura | +2 % |
-| El Mapa Completo | Ten al menos 1 nivel en las 28 estrellas del Mapa (sin contar las Sendas) | +2 % |
+| El Mapa Completo | Ten al menos 1 nivel en las 54 estrellas del Mapa (sin contar las Sendas) | +2 % |
 | Obsesión Estelar | Sube un nodo del Mapa a nivel 10 | +1 % |
 | La Estrella Final | Compra Ascensión Cósmica | +1 % |
 | Piloto Automático | Asciende 1 vez de forma automática | +1 % |

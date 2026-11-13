@@ -17,6 +17,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -92,11 +97,15 @@ fun BeastKind.nameText(): String = stringResource(
     }
 )
 
-/** El dibujo de una criatura: a color si se conoce, como silueta si no. */
+/**
+ * La ilustración de una criatura: a color si se conoce, en sombra si no. [large] usa la imagen
+ * grande (tarjeta y visor); si no, la miniatura, que pesa mucho menos en memoria.
+ */
 @Composable
-fun BeastPortrait(beast: Beast, known: Boolean, modifier: Modifier = Modifier) {
+fun BeastPortrait(beast: Beast, known: Boolean, modifier: Modifier = Modifier, large: Boolean = false) {
     // v0.19.11: cada criatura tiene su ilustración propia; las que no se conocen se ven en sombra
-    com.EGomez.idleecosystem.ui.components.BeastArt.drawables[beast.id]?.let { res ->
+    val art = com.EGomez.idleecosystem.ui.components.BeastArt
+    (if (large) art.drawables[beast.id] else art.thumbs[beast.id])?.let { res ->
         androidx.compose.foundation.Image(
             painter = androidx.compose.ui.res.painterResource(res),
             contentDescription = if (known) tr(beast.name) else null,
@@ -302,17 +311,15 @@ private fun DomainGrid(domainId: String, levels: Map<String, Int>, onSelect: (St
             }
             Text(tr(domain.description), color = Color.Gray, fontSize = 10.sp)
             Spacer(modifier = Modifier.height(6.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-                maxItemsInEachRow = 5,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                beasts.forEach { beast ->
-                    BeastTile(beast, levels[beast.id] ?: 0, Modifier.weight(1f)) { onSelect(beast.id) }
+            // v0.19.12: dos columnas de filas compactas (miniatura pequeña + nombre, rareza y
+            // nivel), para que las ilustraciones no tapen la información
+            beasts.chunked(2).forEach { pair ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
+                    pair.forEach { beast ->
+                        BeastTile(beast, levels[beast.id] ?: 0, Modifier.weight(1f)) { onSelect(beast.id) }
+                    }
+                    if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                 }
-                // Huecos para que la última fila mantenga el tamaño de las casillas
-                repeat((5 - beasts.size % 5) % 5) { Spacer(modifier = Modifier.weight(1f)) }
             }
         }
     }
@@ -326,18 +333,27 @@ private fun BeastTile(beast: Beast, level: Int, modifier: Modifier, onClick: () 
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
         color = if (known) Color(0xFF1C1C22) else Color(0xFF101012),
-        border = BorderStroke(1.dp, if (known) rarity else rarity.copy(alpha = 0.25f)),
-        modifier = modifier.aspectRatio(1f).testTag(BEAST_TILE_TAG + beast.id)
+        border = BorderStroke(1.dp, if (known) rarity.copy(alpha = 0.7f) else rarity.copy(alpha = 0.2f)),
+        modifier = modifier.testTag(BEAST_TILE_TAG + beast.id)
     ) {
-        Box {
-            BeastPortrait(beast, known, Modifier.fillMaxSize().padding(3.dp))
-            if (known) {
+        Row(modifier = Modifier.padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            BeastPortrait(beast, known, Modifier.size(42.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "$level",
-                    color = rarity,
-                    fontSize = 9.sp,
+                    if (known) tr(beast.name) else "???",
+                    color = if (known) Color.White else Color.Gray,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 4.dp, bottom = 1.dp)
+                    maxLines = 2,
+                    lineHeight = 13.sp,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    if (known) beast.rarity.label() + " · " + stringResource(R.string.beast_level_short, level) else beast.rarity.label(),
+                    color = if (known) rarity else rarity.copy(alpha = 0.6f),
+                    fontSize = 9.sp,
+                    maxLines = 1
                 )
             }
         }
@@ -360,6 +376,8 @@ fun CreatureCardContent(beast: Beast, level: Int, shards: Int, onPick: () -> Uni
     val domain = Bestiary.domainOf(beast)
     val rarity = beast.rarity.uiColor()
     val per = (beast.rarity.bonusPerLevel * 100).roundToInt()
+    var viewing by remember { mutableStateOf(false) }
+    if (viewing) BeastImageViewer(beast) { viewing = false }
     run {
         Surface(
             shape = RoundedCornerShape(18.dp),
@@ -381,13 +399,20 @@ fun CreatureCardContent(beast: Beast, level: Int, shards: Int, onPick: () -> Uni
                 )
                 Text(tr(domain.title), color = Color(domain.color), fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(8.dp))
+                // v0.19.12: la ilustración ocupa el ancho de la tarjeta; tocarla la abre en grande
                 Box(
                     modifier = Modifier
-                        .size(200.dp)
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color(0xFF0C0C10))
-                ) { BeastPortrait(beast, known, Modifier.fillMaxSize().padding(8.dp)) }
-                Spacer(modifier = Modifier.height(10.dp))
+                        .then(if (known) Modifier.clickable { viewing = true } else Modifier)
+                        .testTag(CREATURE_IMAGE_TAG)
+                ) { BeastPortrait(beast, known, Modifier.fillMaxSize().padding(6.dp), large = true) }
+                if (known) {
+                    Text(stringResource(R.string.beast_zoom_hint), color = Color.DarkGray, fontSize = 10.sp, modifier = Modifier.padding(top = 2.dp))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 if (known) {
                     Text(
                         "“" + tr(beast.lore) + "”",
@@ -396,6 +421,23 @@ fun CreatureCardContent(beast: Beast, level: Int, shards: Int, onPick: () -> Uni
                         fontStyle = FontStyle.Italic,
                         textAlign = TextAlign.Center
                     )
+                    com.EGomez.idleecosystem.domain.logic.BeastLore.history(beast.id)?.let { history ->
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            stringResource(R.string.beast_history_title).uppercase(),
+                            color = Color(domain.color),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Black,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            tr(history),
+                            color = Color(0xFFCFC8BE),
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                            modifier = Modifier.fillMaxWidth().padding(top = 2.dp).testTag(CREATURE_HISTORY_TAG)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(stringResource(R.string.beast_level, level, Bestiary.MAX_LEVEL), color = rarity, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     LinearProgressIndicator(
@@ -429,6 +471,88 @@ fun CreatureCardContent(beast: Beast, level: Int, shards: Int, onPick: () -> Uni
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.close), color = Color.Gray) }
+            }
+        }
+    }
+}
+
+/**
+ * La ilustración a pantalla completa (v0.19.12): se acerca pellizcando (hasta x5), se mueve
+ * arrastrando y el doble toque alterna entre x1 y x2,5.
+ */
+@Composable
+fun BeastImageViewer(beast: Beast, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) { BeastImageViewerContent(beast, onDismiss) }
+}
+
+@Composable
+fun BeastImageViewerContent(beast: Beast, onDismiss: () -> Unit) {
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    var size by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
+    // Que la imagen no se salga del todo de la pantalla al moverla
+    fun clamp(o: androidx.compose.ui.geometry.Offset, s: Float): androidx.compose.ui.geometry.Offset {
+        val maxX = size.width * (s - 1f) / 2f
+        val maxY = size.height * (s - 1f) / 2f
+        return androidx.compose.ui.geometry.Offset(o.x.coerceIn(-maxX, maxX), o.y.coerceIn(-maxY, maxY))
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xF2050507))
+            .testTag(BEAST_VIEWER_TAG)
+    ) {
+        BeastPortrait(
+            beast,
+            known = true,
+            large = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .align(Alignment.Center)
+                .onSizeChanged { size = it }
+                .pointerInput(beast.id) {
+                    detectTapGestures(onDoubleTap = { tap ->
+                        if (scale > 1.01f) {
+                            scale = 1f
+                            offset = androidx.compose.ui.geometry.Offset.Zero
+                        } else {
+                            scale = 2.5f
+                            val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+                            offset = clamp((center - tap) * 1.5f, scale)
+                        }
+                    })
+                }
+                .pointerInput(beast.id) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        scale = (scale * zoom).coerceIn(1f, 5f)
+                        offset = if (scale <= 1f) androidx.compose.ui.geometry.Offset.Zero else clamp(offset + pan, scale)
+                    }
+                }
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().background(Color(0xAA050507)).padding(12.dp)
+        ) {
+            Text(tr(beast.name), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(beast.rarity.label() + " · " + tr(Bestiary.domainOf(beast).title), color = beast.rarity.uiColor(), fontSize = 12.sp)
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xAA050507)).padding(8.dp)
+        ) {
+            Text(stringResource(R.string.beast_viewer_hint), color = Color.Gray, fontSize = 11.sp)
+            TextButton(onClick = onDismiss, modifier = Modifier.testTag(BEAST_VIEWER_CLOSE_TAG)) {
+                Text(stringResource(R.string.close), color = SealTeal, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -556,6 +680,10 @@ const val DOMAIN_CHIP_TAG = "beast_domain_chip_"
 const val DOMAIN_GRID_TAG = "beast_domain_"
 const val BEAST_TILE_TAG = "beast_tile_"
 const val CREATURE_CARD_TAG = "creature_card"
+const val CREATURE_IMAGE_TAG = "creature_image"
+const val CREATURE_HISTORY_TAG = "creature_history"
+const val BEAST_VIEWER_TAG = "beast_viewer"
+const val BEAST_VIEWER_CLOSE_TAG = "beast_viewer_close"
 const val PICK_WITH_SHARDS_TAG = "pick_with_shards"
 const val SUMMON_ONE_TAG = "summon_one"
 const val SUMMON_TEN_TAG = "summon_ten"

@@ -22,7 +22,7 @@ object ContentTranslations {
     fun english(text: String): String? =
         BUILDINGS[text] ?: UPGRADES[text] ?: RITUALS[text] ?: SHOP[text] ?: RUNES[text] ?:
             TUTORIAL[text] ?: EVENTS[text] ?: ACHIEVEMENTS[text] ?: LADDER[text] ?: SYNERGIES[text] ?: PACTS[text] ?:
-            MECHANIC_ACHIEVEMENTS_EN[text] ?: BESTIARY_EN[text] ?: TRIALS[text] ?: ladderName(text)
+            MECHANIC_ACHIEVEMENTS_EN[text] ?: BESTIARY_EN[text] ?: BEAST_LORE_EN[text] ?: TRIALS[text] ?: ladderName(text)
 
     /** Pruebas de Locura (v0.17.1): nombres y reglas. */
     private val TRIALS = mapOf(

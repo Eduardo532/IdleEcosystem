@@ -17,6 +17,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 - **v0.19.9:** Laboratorio de Miskatonic: seis experimentos pagados con Éter que suben exponentes (producción, clic, Cordura, Éter), potencian el Bestiario y alejan el Velo. Con esto se completan las cinco mecánicas de la etapa 6. 12 logros nuevos.
 - **v0.19.10:** El Bestiario pasa a gachapón: 312 criaturas dibujadas en 8 Dominios, Sellos Antiguos (moneda que nunca se reinicia, de clics, compras con Conocimiento, logros, Pruebas, Ascensiones, encuentros y ofrenda diaria), invocaciones con garantías, Fragmentos y tarjetas de criatura. El juego deja de usar emojis.
 - **v0.19.11:** cada una de las 312 criaturas del Bestiario tiene su propia ilustración, en estilo de grabado antiguo en tinta como carta coleccionable oscura, con el brillo del color de su Dominio. Reemplazan a los dibujos generados por código.
+- **v0.19.12:** cada criatura tiene su historia, tres o cuatro frases sobre quién es y qué hace. La tarjeta muestra la ilustración más grande, y tocarla la abre a pantalla completa con zoom. La colección pasa a filas compactas con miniatura, nombre, rareza y nivel.
 
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 

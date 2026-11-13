@@ -578,11 +578,11 @@ class CriticalUiTest {
         }
 
         val dagon = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon"))
-        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and dagon).assertExists()
-        compose.onNode(androidx.compose.ui.test.hasText("Primigenia · Nv 4") and dagon).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and dagon, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Primigenia · Nv 4") and dagon, useUnmergedTree = true).assertExists()
         val unknown = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling"))
-        compose.onNode(androidx.compose.ui.test.hasText("???") and unknown).assertExists()
-        compose.onNode(androidx.compose.ui.test.hasText("Cría de Innsmouth") and unknown).assertDoesNotExist()
+        compose.onNode(androidx.compose.ui.test.hasText("???") and unknown, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Cría de Innsmouth") and unknown, useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test

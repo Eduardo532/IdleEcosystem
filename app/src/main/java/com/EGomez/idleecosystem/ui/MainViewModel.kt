@@ -219,7 +219,13 @@ class MainViewModel @Inject constructor(
         labLevels = economy.labLevels,
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
-            essence = economy.essence,
+            seals = economy.seals,
+            shards = economy.shards,
+            sealPrice = economy.sealPrice,
+            canBuySeals = economy.knowledge >= economy.sealPrice,
+            sinceMythic = economy.sinceMythic,
+            sincePrimordial = economy.sincePrimordial,
+            dailyStreak = economy.dailyStreak,
             bonuses = economy.beastBonuses,
             encounterId = economy.encounterId,
             encounterSecondsLeft = economy.encounterSecondsLeft
@@ -286,6 +292,15 @@ class MainViewModel @Inject constructor(
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.trialNotice == trial) it.copy(trialNotice = null) else it }
+                }
+            }
+            is EngineEffect.Summoned -> _uiState.update { it.copy(summonResults = effect.results) }
+            is EngineEffect.SealsFound -> {
+                val notice = SealNotice(effect.amount, effect.source)
+                _uiState.update { it.copy(sealNotice = notice) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.sealNotice === notice) it.copy(sealNotice = null) else it }
                 }
             }
             is EngineEffect.AchievementUnlocked -> {
@@ -449,7 +464,13 @@ class MainViewModel @Inject constructor(
 
     fun catchEncounter() = engine.catchEncounter()
 
-    fun upgradeBeast(id: String) = engine.upgradeBeast(id)
+    fun summon(count: Int) = engine.summon(count)
+
+    fun buySeals() = engine.buySeals()
+
+    fun pickWithShards(id: String) = engine.pickWithShards(id)
+
+    fun dismissSummonResults() = _uiState.update { it.copy(summonResults = null) }
 
     fun buyLab(id: String) = engine.buyLab(id)
 

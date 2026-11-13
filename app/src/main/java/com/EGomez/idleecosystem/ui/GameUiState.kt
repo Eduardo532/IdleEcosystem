@@ -110,6 +110,9 @@ data class GameUiState(
     val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,
     val eternalLevels: Map<String, Int> = emptyMap(),
     val transcendNotice: Int? = null,
+    /** Bestiario (v0.19.10): lo que salió al invocar y el último Sello encontrado. */
+    val summonResults: List<com.EGomez.idleecosystem.domain.logic.SummonResult>? = null,
+    val sealNotice: SealNotice? = null,
     /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
     val consecrations: Map<String, Int> = emptyMap(),
@@ -173,3 +176,6 @@ data class MadnessNotice(
     val echoesLost: String? = null,
     val collapse: Boolean = false
 )
+
+/** Un aviso de Sellos Antiguos encontrados (clic, ofrenda diaria o encuentro). */
+data class SealNotice(val amount: Int, val source: com.EGomez.idleecosystem.domain.engine.SealSource)

@@ -136,7 +136,7 @@ fun AscendDialog(
                 if (mutationOffer.isNotEmpty()) {
                     ChoiceRow(
                         stringResource(R.string.ascend_row_mutation),
-                        selectedMutation?.let { "🧬 " + tr(it.title) } ?: stringResource(R.string.mutation_none),
+                        selectedMutation?.let { tr(it.title) } ?: stringResource(R.string.mutation_none),
                         if (selectedMutation != null) MutationGreen else Color.Gray,
                         AscendChoice.MUTATION
                     ) { open = it }

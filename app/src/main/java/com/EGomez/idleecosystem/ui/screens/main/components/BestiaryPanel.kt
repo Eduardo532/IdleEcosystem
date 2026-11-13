@@ -165,11 +165,11 @@ fun BestiaryPanel(
                     color = Color.LightGray,
                     fontSize = 11.sp
                 )
-                Text(
-                    BeastRarity.entries.joinToString(" · ") { "%.1f%%".format(java.util.Locale.US, it.weight / 100.0) },
-                    color = Color.Gray,
-                    fontSize = 10.sp
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    BeastRarity.entries.forEach {
+                        Text("%.1f%%".format(java.util.Locale.US, it.weight / 100.0), color = it.uiColor(), fontSize = 10.sp)
+                    }
+                }
             }
         }
 
@@ -206,17 +206,22 @@ fun BestiaryPanel(
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Bestiary.domains.forEach { domain ->
                 val count = Bestiary.beastsOf(domain.id).count { (state.levels[it.id] ?: 0) > 0 }
-                FilterChip(
-                    selected = domain.id == domainId,
+                val chosen = domain.id == domainId
+                Surface(
                     onClick = { domainId = domain.id },
-                    label = { Text(tr(domain.title) + " $count/${Bestiary.beastsOf(domain.id).size}", fontSize = 11.sp) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(domain.color).copy(alpha = 0.25f),
-                        selectedLabelColor = Color.White,
-                        labelColor = Color.Gray
-                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (chosen) Color(domain.color).copy(alpha = 0.22f) else Color(0xFF151515),
+                    border = BorderStroke(1.dp, Color(domain.color).copy(alpha = if (chosen) 0.9f else 0.3f)),
                     modifier = Modifier.testTag(DOMAIN_CHIP_TAG + domain.id)
-                )
+                ) {
+                    Text(
+                        tr(domain.title) + " $count/${Bestiary.beastsOf(domain.id).size}",
+                        color = if (chosen) Color.White else Color.Gray,
+                        fontSize = 11.sp,
+                        fontWeight = if (chosen) FontWeight.Bold else FontWeight.Normal,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                    )
+                }
             }
         }
         DomainGrid(domainId, state.levels) { selected = it }
@@ -322,11 +327,16 @@ private fun BeastTile(beast: Beast, level: Int, modifier: Modifier, onClick: () 
  */
 @Composable
 fun CreatureCard(beast: Beast, level: Int, shards: Int, onPick: () -> Unit, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) { CreatureCardContent(beast, level, shards, onPick, onDismiss) }
+}
+
+@Composable
+fun CreatureCardContent(beast: Beast, level: Int, shards: Int, onPick: () -> Unit, onDismiss: () -> Unit) {
     val known = level > 0
     val domain = Bestiary.domainOf(beast)
     val rarity = beast.rarity.uiColor()
     val per = (beast.rarity.bonusPerLevel * 100).roundToInt()
-    Dialog(onDismissRequest = onDismiss) {
+    run {
         Surface(
             shape = RoundedCornerShape(18.dp),
             color = Color(0xFF15151A),
@@ -404,10 +414,15 @@ fun CreatureCard(beast: Beast, level: Int, shards: Int, onPick: () -> Unit, onDi
  * Lo que salió al invocar: las criaturas aparecen una tras otra con su rareza, y una marca
  * de "Nueva", "+1 nivel" o los Fragmentos que dieron.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SummonResultsDialog(results: List<SummonResult>, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = onDismiss) { SummonResultsContent(results, onDismiss) }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SummonResultsContent(results: List<SummonResult>, onDismiss: () -> Unit) {
+    run {
         Surface(
             shape = RoundedCornerShape(18.dp),
             color = Color(0xFF121218),

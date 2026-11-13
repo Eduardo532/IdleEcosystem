@@ -460,7 +460,7 @@ S.update({
 "out_dancer": "The Dancing Specter, a ghostly translucent figure in tattered gown dancing in a ruined ballroom to distant flutes.",
 "out_scream": "The Incarnate Scream, a shrieking spectral figure that is nothing but a giant screaming mouth and trailing wisps.",
 # ---------------------------------------------------------------- Lo Arcano
-"arc_alhazred": "The Shadow of Alhazred, the ghostly mad Arab poet in flowing robes and turban, a spectral figure dictating from a floating open Necronomicon, desert ruins of Irem behind, burning sigils in the air.",
+"arc_alhazred": "The Shadow of Alhazred, the ghostly mad Arab poet in flowing robes and turban, a spectral figure dictating from a floating open forbidden tome, desert ruins of Irem behind, burning sigils in the air.",
 "arc_threshold": "The Guardian of the Threshold, a colossal veiled figure made of pages and ink standing at a doorway between a vast library and a starry void, holding a key and a quill.",
 "arc_curwen": "Joseph Curwen, a pale gaunt 18th-century warlock in a powdered wig and dark coat, rising from a cloud of blue-grey essential salts in his laboratory, alembics and urns.",
 "arc_eibon": "Eibon, a bearded Hyperborean wizard in rich robes with an amulet, stepping through a magical portal toward the planet Saturn, a toad-like idol of Tsathoggua nearby.",
@@ -502,7 +502,7 @@ S.update({
 })
 
 S.update({
-"arc_tome": "A living tome, a huge ancient leather-bound grimoire with iron clasps hovering above a lectern, reading itself aloud through a mouth formed in its spine, pages flapping, glowing runes rising from the text.",
+"arc_tome": "A living tome, a huge ancient leather-bound grimoire with iron clasps hovering above a lectern, reading itself aloud through a mouth formed in its spine, pages flapping, glowing runes rising from the pages.",
 "arc_ephraim": "Ephraim Waite, an old bearded warlock with burning eyes in a dark Innsmouth study, his ghostly soul flowing out of his withered body toward a young woman's silhouette.",
 "arc_asenath": "Asenath Waite, a dark-haired young woman in 1920s clothing with intense bulging staring eyes that are not her own, the shadow of an old bearded man cast on the wall behind her.",
 "arc_west": "Herbert West, a slim pale blond doctor with round spectacles in a surgical apron raising a syringe of glowing green reagent beside a sheet-covered body in a dim morgue.",
@@ -514,7 +514,7 @@ S.update({
 "arc_cultist": "A hooded cultist in a dark robe kneeling inside a chalk pentagram, chanting a name over and over, candles flickering, something forming in the smoke above.",
 "arc_arkhamwitch": "The Arkham witch, a gaunt woman in a ragged 1692 Puritan dress floating out of a gallows noose, hair wild, eyes glowing, crows around the hanging tree.",
 "arc_alchemist": "The mad alchemist, a wild-haired old man in a leather apron distilling his own black shadow through glass alembics and retorts, his body casting no shadow.",
-"arc_bottleimp": "The bottle imp, a small grinning horned imp sitting inside a corked glass bottle, holding up a long scroll of fine print, candlelight on the glass.",
+"arc_bottleimp": "The bottle imp, a small grinning horned imp sitting inside a corked glass bottle, holding up a long scroll of tiny illegible fine print, candlelight on the glass.",
 "arc_ouroboros": "The Ouroboros, a great scaled serpent devouring its own tail forming a perfect circle around alchemical symbols and stars.",
 "arc_swamplady": "The Swamp Lady, a mysterious old woman in a misty bayou offering a vial of glowing remedy, jars of herbs and bones hanging from her shack.",
 "arc_exorcist": "The fallen exorcist, a priest in a torn cassock clutching a broken crucifix, a demon's face emerging from his own shadow.",
@@ -522,17 +522,17 @@ S.update({
 "arc_homunculus": "A homunculus, a tiny wrinkled humanoid creature with large eyes sitting inside an alchemist's glass jar on a cluttered shelf.",
 "arc_rat": "A witch's familiar rat with an unsettling small human face, perched on a skull beside a candle.",
 "arc_candle": "The Obedient Flame, a candle whose flame has a small face and arms, bowing, on an old candlestick.",
-"arc_quill": "The Writing Quill, a black feather quill writing by itself on parchment, glowing ink letters rising off the page.",
+"arc_quill": "The Writing Quill, a black raven feather quill writing by itself on old parchment, glowing ink sigils curling up off the page like smoke.",
 "arc_toad": "The grimoire toad, a warty toad nestled between the pages of an old spellbook, golden eyes.",
 "arc_blackcandle": "A black candle whose dark flame casts light backward, illuminating a looming figure behind the viewer.",
 "arc_skull": "The Talking Skull, a grinning human skull with a candle on top, its jaw open as if laughing, on a stack of books.",
 "arc_bitingbook": "The Biting Grimoire, an old book with rows of sharp teeth along its pages snapping at a gloved hand.",
 "arc_doll": "A witch's doll, a stitched cloth poppet with button eyes and pins stuck in it, lying on a table.",
 "arc_witchcat": "A witch's black cat with green eyes carrying a rolled message in its mouth on a moonlit rooftop.",
-"arc_broom": "The Restless Broom, a witch's broom sweeping by itself across a dark floor at midnight, a clock striking twelve.",
+"arc_broom": "The Restless Broom, a witch's broom sweeping by itself across a dark floor at midnight, an old clock striking twelve.",
 "arc_glory": "The Hand of Glory, a severed mummified hand with candles burning from each fingertip, opening a locked door.",
 "arc_ring": "The Hungry Ring, a gold ring with a toothed mouth tightening around a finger, blood drops.",
-"arc_ink": "Living ink, a black inkwell overflowing with sentient ink that crawls across the margins of a manuscript.",
+"arc_ink": "Living ink, a black inkwell overflowing with sentient ink that crawls like tendrils across the margins of an old manuscript.",
 "arc_pentacle": "The Wandering Pentacle, a glowing pentagram drawing itself on a stone floor.",
 "arc_owl": "A familiar owl perched on a wizard's shoulder reading an open spellbook.",
 })
@@ -566,4 +566,11 @@ S.update({
 "out_bloated": "The Bloated Woman, a monstrously huge avatar in ornate silks holding a black folding fan that only half hides a face full of countless small mouths and tentacles, in a dim temple with red lanterns.",
 "out_bloodytongue": "The Bloody Tongue, a faceless giant cloaked figure with a single long blood-red tentacle in place of a face, howling on a mountain peak under a full moon.",
 "out_sandman": "The Black Sandman, a hooded gaunt figure sprinkling glittering black sand from his fingers into the eyes of a sleeping dreamer in a dark bedroom.",
+})
+
+S.update({
+"arc_reanimated": "A reanimated man, a pale stitched figure sitting up stiffly on an old laboratory table with wild empty glowing eyes, a vial of glowing green fluid beside him, brass lab equipment.",
+"arc_jenkin": "Brown Jenkin, a large rat with a tiny bearded evil human face and small human hands, creeping across a bed toward the hand of a sleeping student in an attic with slanted walls.",
+"arc_golem": "A clay golem, a massive crude humanoid of cracked clay with a parchment scroll on its tongue and glowing eye holes, standing in a dusty old attic.",
+"arc_arkhamwitch": "The Arkham witch, a gaunt woman in a ragged 1692 Puritan dress floating free above an old hanging tree with a broken rope, hair wild, eyes glowing, crows circling.",
 })

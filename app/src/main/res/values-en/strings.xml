@@ -472,4 +472,22 @@
     <string name="beast_history_title">Lore</string>
     <string name="beast_zoom_hint">Tap the illustration to see it larger</string>
     <string name="beast_viewer_hint">Pinch to zoom · drag to move · double tap to enlarge</string>
+    <string name="tab_dream">Dream</string>
+    <string name="dream_title">THE DEEP SLEEP</string>
+    <string name="dream_hint">A dreamed cycle yields less, but waking up pays Dream Points for the Dream Tree.</string>
+    <string name="dream_points_label">DREAM POINTS</string>
+    <string name="dream_active">You are dreaming: production, click and Sanity at %1$s</string>
+    <string name="dream_best">Best life of this Dream: %1$s Knowledge</string>
+    <string name="dream_pending">On Transcending: +%1$d Dream Points</string>
+    <string name="dream_pending_hint">Beat your best Dream (over 10B Knowledge in one life) to earn Points.</string>
+    <string name="dream_wake">Wake up now (no Points)</string>
+    <string name="dream_next">The next cycle will be a Dream</string>
+    <string name="dream_next_hint">You enter it by Transcending. Production, click and Sanity at %1$s until you Transcend again.</string>
+    <string name="dream_earned">Dream Points earned in total: %1$d</string>
+    <string name="dream_tree_title">DREAM TREE</string>
+    <string name="dream_requires">Requires %1$s</string>
+    <string name="dream_cost">%1$d DP</string>
+    <string name="dream_respec">Reset the tree (refunds %1$d DP)</string>
+    <string name="dream_banner">Deep Sleep: production, click and Sanity at %1$s</string>
+    <string name="dream_notice">☾ You woke up: +%1$d Dream Points</string>
 </resources>

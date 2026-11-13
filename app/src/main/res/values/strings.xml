@@ -473,4 +473,22 @@
     <string name="beast_history_title">Historia</string>
     <string name="beast_zoom_hint">Toca la ilustración para verla en grande</string>
     <string name="beast_viewer_hint">Pellizca para acercar · arrastra para mover · doble toque para ampliar</string>
+    <string name="tab_dream">Sueño</string>
+    <string name="dream_title">EL SUEÑO PROFUNDO</string>
+    <string name="dream_hint">Un ciclo soñado rinde menos, pero al despertar paga Puntos de Sueño para el Árbol del Sueño.</string>
+    <string name="dream_points_label">PUNTOS DE SUEÑO</string>
+    <string name="dream_active">Estás soñando: producción, clic y Cordura a %1$s</string>
+    <string name="dream_best">Mejor vida de este Sueño: %1$s de Conocimiento</string>
+    <string name="dream_pending">Al Trascender: +%1$d Puntos de Sueño</string>
+    <string name="dream_pending_hint">Supera tu mejor Sueño (más de 10B de Conocimiento en una vida) para ganar Puntos.</string>
+    <string name="dream_wake">Despertar ahora (sin Puntos)</string>
+    <string name="dream_next">El próximo ciclo será un Sueño</string>
+    <string name="dream_next_hint">Se entra al Trascender. Producción, clic y Cordura a %1$s hasta volver a Trascender.</string>
+    <string name="dream_earned">Puntos de Sueño ganados en total: %1$d</string>
+    <string name="dream_tree_title">ÁRBOL DEL SUEÑO</string>
+    <string name="dream_requires">Requiere %1$s</string>
+    <string name="dream_cost">%1$d PS</string>
+    <string name="dream_respec">Reiniciar el árbol (devuelve %1$d PS)</string>
+    <string name="dream_banner">Sueño Profundo: producción, clic y Cordura a %1$s</string>
+    <string name="dream_notice">☾ Despertaste: +%1$d Puntos de Sueño</string>
 </resources>

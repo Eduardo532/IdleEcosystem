@@ -97,6 +97,25 @@ object AchievementStat {
     const val LAB_BUY_WITH_PREFIX = "lab_with."
     const val LAB_BUY_PATH_PREFIX = "lab_path."
     const val FEAT_LAB_EXACT = "feat.lab_exact"
+    /**
+     * El Sueño Profundo (v0.20.0): si el próximo ciclo será un Sueño, si este lo es, el
+     * mejor Conocimiento de una vida en este Sueño y en todos, Puntos de Sueño (los que hay
+     * y los ganados en total), Sueños completados y nodos del árbol.
+     */
+    const val DREAM_NEXT = "dream_next"
+    const val DREAM_ACTIVE = "dream_active"
+    const val DREAM_CYCLE_BEST = "dream_cycle_best"
+    const val DREAM_BEST = "dream_best"
+    const val DREAM_POINTS = "dream_points"
+    const val DREAM_POINTS_EARNED = "dream_points_earned"
+    const val DREAMS_COMPLETED = "dreams_completed"
+    const val DREAM_WAKES = "dream_wakes"
+    const val DREAM_RESPECS = "dream_respecs"
+    const val DREAM_NODE_PREFIX = "dream."
+    const val DREAM_LEVELS = "dream_levels"
+    const val DREAM_NODES = "dream_nodes"
+    const val DREAM_END_WITH_PREFIX = "dream_with."
+    const val DREAM_END_PATH_PREFIX = "dream_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -139,7 +158,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES
     )
 
     // --- Contadores guardados ---
@@ -283,6 +302,9 @@ object AchievementStat {
     fun lab(id: String) = LAB_PREFIX + id
     fun labBuyWith(pactId: String) = LAB_BUY_WITH_PREFIX + pactId
     fun labBuyPath(pathId: String) = LAB_BUY_PATH_PREFIX + pathId
+    fun dreamNode(id: String) = DREAM_NODE_PREFIX + id
+    fun dreamEndWith(pactId: String) = DREAM_END_WITH_PREFIX + pactId
+    fun dreamEndPath(pathId: String) = DREAM_END_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -299,6 +321,7 @@ object AchievementStat {
         STARS, STARDUST_EARNED, ALIGNED_PURCHASES, ESSENCE_EARNED, ENCOUNTERS, FEAT_PRIMORDIAL_ALIGNED,
         SEALS_EARNED, SEALS_BOUGHT, CLICK_SEALS, SUMMONS, SHARDS_EARNED, SHARD_PICKS, DAILY_BEST_STREAK,
         LAB_ETHER_SPENT, FEAT_LAB_EXACT,
+        DREAM_NEXT, DREAM_ACTIVE, DREAM_CYCLE_BEST, DREAM_BEST, DREAM_POINTS, DREAM_POINTS_EARNED, DREAMS_COMPLETED, DREAM_WAKES, DREAM_RESPECS,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -308,6 +331,7 @@ object AchievementStat {
         STAR_BUY_WITH_PREFIX, STAR_ALIGNED_PATH_PREFIX, STAR_UPGRADE_PREFIX,
         BEAST_PREFIX, BEAST_CATCH_WITH_PREFIX, BEAST_CATCH_PATH_PREFIX,
         LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
+        DREAM_NODE_PREFIX, DREAM_END_WITH_PREFIX, DREAM_END_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

@@ -43,7 +43,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 
 | Mecánica | Inspiración | Idea |
 |---|---|---|
-| **Las Tierras del Sueño** | Dilatación | Una vida especial donde todo se eleva a ^0,75. Produce Puntos de Sueño y da puntos para un árbol de Sueño con reinicio libre. |
+| **El Sueño Profundo** ✅ *v0.20.0* | Dilatación | Desde la 3ª Trascendencia, un ciclo soñado donde producción, clic y Cordura se elevan a ^0,75. Al Trascender paga Puntos de Sueño para un árbol de 8 nodos con reinicio libre. Ver [El Sueño Profundo](El-Sueno-Profundo). |
 | **Cadena de Invocación** | Generadores | Invocaciones de 8 niveles: la 1 produce Conocimiento y cada una produce a la de abajo. |
 | **Letargo** | Ralentización | Frenar la producción a cambio de Ascensiones o Cordura extra, para vidas largas. |
 | **Pruebas de Trascendencia** | Desafíos de Eternidad | Las Pruebas con niveles de dificultad I a V, cada uno con más restricciones y mejor recompensa. |

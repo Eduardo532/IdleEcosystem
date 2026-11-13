@@ -17,6 +17,7 @@
 - [Estrellas](Estrellas)
 - [Bestiario](Bestiario)
 - [Laboratorio](Laboratorio)
+- [El Sueño Profundo](El-Sueno-Profundo)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

@@ -280,5 +280,12 @@ enum class TutorialStep(
         "El Laboratorio de Miskatonic",
         "En la Universidad Miskatonic se experimenta con lo que no debería medirse. En la pestaña Laboratorio, el Éter paga experimentos que elevan la producción, el clic, la Cordura y el Éter a un exponente: crecen más cuanto más grandes son.",
         "Tras la primera Trascendencia"
+    ),
+
+    DEEP_SLEEP(
+        "deep_sleep",
+        "El Sueño Profundo",
+        "Tres veces trascendiste, y ahora puedes bajar los setenta peldaños. En la pestaña Sueño elige que el próximo ciclo sea un Sueño Profundo: mientras dura, la producción, el clic y la Cordura se elevan a ^0,75. Al Trascender desde el Sueño ganas Puntos de Sueño según tu mejor vida, y con ellos compras el Árbol del Sueño, que vale en todos los ciclos.",
+        "Tras la tercera Trascendencia"
     )
 }

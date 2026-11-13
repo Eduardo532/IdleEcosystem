@@ -134,6 +134,22 @@ object GameIcons {
         }
     }
 
+    /** Luna creciente con una estrella: el Sueño Profundo. */
+    val Moon: ImageVector by lazy {
+        icon("Moon") {
+            moveTo(20f, 14.5f)
+            curveTo(18.8f, 15.1f, 17.5f, 15.4f, 16f, 15.4f)
+            curveTo(11.3f, 15.4f, 7.6f, 11.7f, 7.6f, 7f)
+            curveTo(7.6f, 5.5f, 7.9f, 4.2f, 8.5f, 3f)
+            curveTo(5.2f, 4.4f, 3f, 7.6f, 3f, 11.4f)
+            curveTo(3f, 16.7f, 7.3f, 21f, 12.6f, 21f)
+            curveTo(16.4f, 21f, 19.6f, 18.8f, 20f, 14.5f)
+            close()
+            moveTo(17f, 3f); lineTo(17f, 7f)
+            moveTo(15f, 5f); lineTo(19f, 5f)
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

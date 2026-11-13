@@ -667,6 +667,58 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the dream panel toggles the next dream and buys from the tree`() {
+        val toggles = mutableListOf<Boolean>()
+        val bought = mutableListOf<String>()
+        var respecs = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(points = 2, levels = mapOf("steps" to 1)),
+                    onSetNext = { toggles += it },
+                    onWake = {},
+                    onBuy = { bought += it },
+                    onRespec = { respecs++ }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_NEXT_TAG).performClick()
+        assertEquals(listOf(true), toggles)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BUY_TAG + "flame").performScrollTo().performClick()
+        // Kadath pide Inquanok: bloqueado
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BUY_TAG + "kadath").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_RESPEC_TAG).performScrollTo().performClick()
+        assertEquals(listOf("flame"), bought)
+        assertEquals(1, respecs)
+    }
+
+    @Test
+    fun `while dreaming the panel shows the pending points and lets you wake up`() {
+        var woken = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamBanner(0.75)
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(active = true, pending = 8, cycleBest = java.math.BigDecimal("1e14")),
+                    onSetNext = {},
+                    onWake = { woken++ },
+                    onBuy = {},
+                    onRespec = {}
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BANNER_TAG).assertExists()
+        compose.onNodeWithText("Al Trascender: +8 Puntos de Sueño").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_NEXT_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_WAKE_TAG).performClick()
+        assertEquals(1, woken)
+    }
+
+    @Test
     fun `the compact research button clicks like the big one`() {
         var clicks = 0
         compose.setContent { CompactResearchButton("12", onManualClick = { _, _, _ -> clicks++ }) }

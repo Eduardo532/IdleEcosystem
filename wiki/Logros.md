@@ -1,6 +1,6 @@
 # Logros
 
-Hay **489 logros**: 113 originales y **376 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **505 logros**: 113 originales y **392 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -230,6 +230,21 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Profesor Negro | Sube un experimento durante una vida con Nyarlathotep | +1 % |
 | Mente de Laboratorio | Sube un experimento recorriendo la Senda de la Mente | +1 % |
 | Alquimia Arcana | Sube un experimento recorriendo la Senda Arcana | +1 % |
+| Primer Descenso | Trasciende desde un Sueño Profundo | +1 % |
+| Viajero Onírico | Completa 5 Sueños Profundos | +1 % |
+| Rey de Ilek-Vad | Completa 15 Sueños Profundos | +2 % |
+| Moneda de Sueño | Gana 10 Puntos de Sueño en total | +1 % |
+| Riqueza Onírica | Gana 50 Puntos de Sueño en total | +1 % |
+| Señor de las Tierras del Sueño | Gana 150 Puntos de Sueño en total | +2 % |
+| Primera Raíz | Sube 1 nivel en el Árbol del Sueño | +1 % |
+| Ramas de Ónix | Suma 30 niveles en el Árbol del Sueño | +1 % |
+| El Árbol Completo | Ten al menos un nivel en los 8 nodos del Árbol del Sueño | +2 % |
+| Visión Nocturna | Alcanza 1Qa de Conocimiento en una vida de un Sueño | +1 % |
+| La Ciudad del Ocaso | Alcanza 1Sx de Conocimiento en una vida de un Sueño | +2 % |
+| En su Casa de R'lyeh | Trasciende desde un Sueño con el pacto de Cthulhu | +1 % |
+| Audiencia en el Castillo de Ónix | Trasciende desde un Sueño con el pacto de Nyarlathotep | +1 % |
+| Soñador Nato | Trasciende desde un Sueño recorriendo la Senda del Sueño | +1 % |
+| Sueño sin Sueños | Trasciende desde un Sueño recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -403,7 +418,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **31 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **32 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

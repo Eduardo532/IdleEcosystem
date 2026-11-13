@@ -267,7 +267,7 @@ S.update({
 "cos_gasgiant": "A conscious gas giant planet whose swirling storm bands form a brooding face, its great storm spot a single watching eye, lightning thoughts flashing in the clouds, small moons orbiting.",
 "cos_algoleye": "The Eye of Algol, a demon star in the shape of a vast eye with a burning iris and eyelid of dark gas, half-closed in its three-day blink, withered husks of dead things drifting before it.",
 "cos_sower": "The Sower of Galaxies, a tall hooded cosmic figure with a body of starry void, striding through space and scattering spiral galaxies from its hand like seeds from a sack.",
-"migo_surgeon": "A Mi-Go brain surgeon, a pink crustacean-fungus creature with pincers and alien surgical instruments, delicately extracting a glowing brain from a sleeping man on an operating table, an empty metal cylinder waiting.",
+"migo_surgeon": "A Mi-Go surgeon, a pink crustacean-fungus creature with delicate pincers holding strange glowing alien instruments in a dim laboratory, a shelf of sealed brass cylinders behind it, a sleeping figure under a sheet in the shadows.",
 "migo_canister": "A brain in a cylinder, a living human brain floating in fluid inside a riveted metal canister, connected by cables to brass machines with a camera lens eye and a phonograph horn speaker, on a dusty farmhouse table.",
 "migo_mimic": "A Mi-Go voice mimic, a pink winged fungal creature hiding in the dark woods beside a farmhouse, holding a brass phonograph horn that speaks with a human voice, glowing window behind.",
 "sta_colour": "The Colour Out of Space, an indescribable shimmering unearthly colour rising like luminous mist from an old stone well on a blighted farm, withered grey trees and twisted crops glowing faintly.",

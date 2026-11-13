@@ -36,7 +36,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **Romper el Velo** ✅ *v0.19.6* | Romper el Infinito | Tope suave en 1e25 de Conocimiento por vida (producción ÷(K/Velo)²). Superar las 10 Pruebas lo rompe para siempre: sin tope y producción x100. Ver [El Velo](El-Velo). |
 | **Hitos de Trascendencia** ✅ *v0.19.5* | Hitos de Eternidad | Seis ventajas por número de Trascendencias: automatización desde el inicio del ciclo, primeras estrellas encendidas, Senda Eterna, Trascendencia automática, Atención con todas las Ascensiones y Trascender con 40. Ver [Trascender](Trascender). |
 | **Cuando las Estrellas Estén en Posición** ✅ *v0.19.7* | Estrellas y Polvo Estelar | Tras Trascender nacen Estrellas (también sin conexión) que dan Polvo Estelar para seis mejoras estelares. Cada media hora se alinean y el Polvo cae x5. Ver [Estrellas](Estrellas). |
-| **Bestiario** ✅ *v0.19.8 · v0.19.10* | Zoológico y Animales | 312 criaturas dibujadas en 8 Dominios. Se consiguen invocando (gachapón) con Sellos Antiguos, una moneda que nunca se reinicia; las repetidas suben de nivel y dan Fragmentos al máximo. Ver [Bestiario](Bestiario). |
+| **Bestiario** ✅ *v0.19.8 · v0.19.10 · v0.19.11* | Zoológico y Animales | 312 criaturas ilustradas en 8 Dominios. Se consiguen invocando (gachapón) con Sellos Antiguos, una moneda que nunca se reinicia; las repetidas suben de nivel y dan Fragmentos al máximo. Ver [Bestiario](Bestiario). |
 | **Laboratorio de Miskatonic** ✅ *v0.19.9* | Laboratorio | Seis experimentos pagados con Éter que suben exponentes: producción, clic, Cordura y Éter, además de potenciar el Bestiario y alejar el Velo. Ver [Laboratorio](Laboratorio). |
 
 ### Etapa 7: profundidad de Trascender

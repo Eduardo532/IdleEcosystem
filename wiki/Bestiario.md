@@ -1,6 +1,6 @@
 # Bestiario *(v0.19.8, gachapón desde v0.19.10)*
 
-El **Bestiario** reúne **312 criaturas de los Mitos** en **8 Dominios** de 39. Cada criatura tiene **su propio dibujo**, hecho por código a partir de sus rasgos: cuerpo, ojos, tentáculos, alas, cuernos, corona, colmillos, aura y lo que lleva en la mano. Se abre en la capa Ascensión con la **primera Ascensión**.
+El **Bestiario** reúne **312 criaturas de los Mitos** en **8 Dominios** de 39. Cada criatura tiene **su propia ilustración** (v0.19.11), en un estilo común de grabado antiguo en tinta con un brillo del color de su Dominio, como una carta coleccionable oscura. Las Míticas y Primigenias tienen escenas más grandiosas, con toques dorados. Las criaturas que aún no tienes se ven como una sombra. Se abre en la capa Ascensión con la **primera Ascensión**.
 
 ## Sellos Antiguos
 
@@ -28,7 +28,7 @@ Lo Arcano multiplica los Sellos que se ganan (hasta x3). La Esencia de la v0.19.
 
 ## Bonos
 
-Cada criatura suma un bono por nivel según su rareza: Común +1 %, Infrecuente +2 %, Rara +4 %, Mítica +8 % y Primigenia +15 %. El bono va al tipo de su Dominio. **Completar un Dominio duplica lo que dan sus criaturas.** Tocar una criatura abre su **tarjeta**, con su dibujo, su historia, su nivel y lo que da.
+Cada criatura suma un bono por nivel según su rareza: Común +1 %, Infrecuente +2 %, Rara +4 %, Mítica +8 % y Primigenia +15 %. El bono va al tipo de su Dominio. **Completar un Dominio duplica lo que dan sus criaturas.** Tocar una criatura abre su **tarjeta**, con su ilustración, su historia, su nivel y lo que da.
 
 | Dominio | Suma a |
 |---|---|

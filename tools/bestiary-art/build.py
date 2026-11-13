@@ -1,68 +1,53 @@
-"""Compila las ilustraciones del Bestiario (v0.19.11).
+#!/usr/bin/env python3
+"""Ilustraciones del Bestiario (v0.19.11).
 
-    python3 tools/bestiary-art/build.py [id ...]
+Cada criatura tiene una imagen generada con la IA de Figma a partir de su descripción en
+prompts.py (estilo común: grabado antiguo en tinta + carta coleccionable oscura).
 
-src/<id>.svg tiene solo el dibujo de cada criatura (hecho a mano, un archivo por
-criatura). Este script lo envuelve en la carta común (frame.py), lo dibuja con Chromium
-(Playwright) y guarda app/src/main/res/drawable-nodpi/beast_<id>.webp. Las criaturas sin
-SVG propio pueden traer su imagen ya hecha en ai/<id>.png (ilustraciones generadas).
+  ai/<id>.png          original de 1024 px descargado de Figma (no se sube al repo)
+  master/<id>.webp     copia maestra de 512 px que sí se guarda en el repo
+  app/.../drawable-nodpi/beast_<id>.webp   lo que usa el juego (384 px)
+
+Uso:
+  python3 build.py            convierte todo lo nuevo de ai/ y regenera BeastArt.kt
+  python3 build.py --sheet    además deja out/sheet.png con todas las ilustraciones
 """
-import sys, os, re, glob, subprocess, json
+import glob, os, re, sys
+from PIL import Image, ImageDraw
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
-sys.path.insert(0, HERE)
-from frame import wrap, eye
-
-CATALOG = os.path.join(ROOT, 'app/src/main/java/com/EGomez/idleecosystem/domain/logic/BeastCatalog.kt')
 RES = os.path.join(ROOT, 'app/src/main/res/drawable-nodpi')
-OUT = os.path.join(HERE, 'out')
-RARITY = {'COMMON': 'C', 'UNCOMMON': 'U', 'RARE': 'R', 'MYTHIC': 'M', 'PRIMORDIAL': 'P'}
-INFO = {m.group(1): (m.group(3), RARITY[m.group(4)], m.group(2)) for m in re.finditer(
-    r'Beast\("([^"]+)", "([^"]+)", "(?:[^"\\]|\\.)*", "([^"]+)", BeastRarity\.(\w+)', open(CATALOG, encoding='utf-8').read())}
-EYE = re.compile(r'<eye\s+cx="([\d.]+)"\s+cy="([\d.]+)"(?:\s+r="([\d.]+)")?(\s+slit="1")?\s*/>')
-SIZE_APP = 256
+CATALOG = os.path.join(ROOT, 'app/src/main/java/com/EGomez/idleecosystem/domain/logic/BeastCatalog.kt')
+MASTER_SIZE, MASTER_Q = 512, 88
+APP_SIZE, APP_Q = 384, 75
 
 
-def expand(body):
-    return EYE.sub(lambda m: eye(float(m.group(1)), float(m.group(2)), float(m.group(3) or 4), bool(m.group(4))), body)
+def catalog():
+    s = open(CATALOG, encoding='utf-8').read()
+    return [m.group(1) for m in re.finditer(r'Beast\("([^"]+)"', s)]
 
 
-def seed_of(bid):
-    return sum(ord(c) * (i + 1) for i, c in enumerate(bid)) % 97
-
-
-def render(ids=None, size=512):
-    os.makedirs(f'{OUT}/svg', exist_ok=True)
-    os.makedirs(f'{OUT}/png', exist_ok=True)
-    jobs = []
-    for f in sorted(glob.glob(f'{HERE}/src/*.svg')):
-        bid = os.path.basename(f)[:-4]
-        if ids and bid not in ids:
-            continue
-        domain, rarity, _ = INFO[bid]
-        out = f'{OUT}/svg/{bid}.svg'
-        open(out, 'w', encoding='utf-8').write(wrap(expand(open(f, encoding='utf-8').read()), domain, rarity, seed_of(bid)))
-        jobs.append((out, f'{OUT}/png/{bid}.png'))
-    json.dump({'size': size, 'jobs': jobs}, open(f'{OUT}/jobs.json', 'w'))
-    npm_root = subprocess.check_output(['npm', 'root', '-g'], text=True).strip()
-    subprocess.run(['node', f'{HERE}/render_many.js', f'{OUT}/jobs.json'], check=True, env={**os.environ, 'NODE_PATH': npm_root})
-    return [j[1] for j in jobs]
-
-
-def export(pngs):
-    """Guarda cada ilustración como WebP de 256 px en los recursos de la app."""
-    from PIL import Image
+def convert():
+    os.makedirs(os.path.join(HERE, 'master'), exist_ok=True)
     os.makedirs(RES, exist_ok=True)
-    for p in pngs:
+    for p in sorted(glob.glob(os.path.join(HERE, 'ai', '*.png'))):
         bid = os.path.basename(p)[:-4]
-        Image.open(p).convert('RGB').resize((SIZE_APP, SIZE_APP), Image.LANCZOS).save(f'{RES}/beast_{bid}.webp', 'WEBP', quality=86, method=6)
+        m = os.path.join(HERE, 'master', bid + '.webp')
+        if not os.path.exists(m) or os.path.getmtime(m) < os.path.getmtime(p):
+            Image.open(p).convert('RGB').resize((MASTER_SIZE, MASTER_SIZE), Image.LANCZOS).save(m, 'WEBP', quality=MASTER_Q, method=6)
+    for m in sorted(glob.glob(os.path.join(HERE, 'master', '*.webp'))):
+        bid = os.path.basename(m)[:-5]
+        out = os.path.join(RES, f'beast_{bid}.webp')
+        if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(m):
+            Image.open(m).convert('RGB').resize((APP_SIZE, APP_SIZE), Image.LANCZOS).save(out, 'WEBP', quality=APP_Q, method=6)
 
 
 def write_index():
     """BeastArt.kt: el recurso de cada criatura que ya tiene ilustración (referencias
     directas a R.drawable para que el reductor de recursos no las quite)."""
-    ids = sorted(os.path.basename(p)[6:-5] for p in glob.glob(f'{RES}/beast_*.webp'))
+    known = set(catalog())
+    ids = sorted(i for i in (os.path.basename(p)[6:-5] for p in glob.glob(f'{RES}/beast_*.webp')) if i in known)
     lines = ['package com.EGomez.idleecosystem.ui.components', '', 'import com.EGomez.idleecosystem.R', '',
              '// Generado por tools/bestiary-art/build.py: no editar a mano.', '',
              '/** La ilustración de cada criatura del Bestiario (v0.19.11). */',
@@ -72,30 +57,32 @@ def write_index():
         lines[-1] = lines[-1].rstrip(',')
     lines += ['    )', '}', '']
     open(os.path.join(ROOT, 'app/src/main/java/com/EGomez/idleecosystem/ui/components/BeastArt.kt'), 'w', encoding='utf-8').write('\n'.join(lines))
+    return ids
 
 
-def sheet(pngs, out, cols=6, cell=200):
-    from PIL import Image, ImageDraw
-    rows = (len(pngs) + cols - 1) // cols
-    W = Image.new('RGB', (cols * cell, rows * (cell + 16)), (10, 10, 12))
+def sheet(ids, out, cols=8, cell=160):
+    rows = (len(ids) + cols - 1) // cols
+    W = Image.new('RGB', (cols * cell, rows * (cell + 14)), (10, 10, 12))
     d = ImageDraw.Draw(W)
-    for i, p in enumerate(pngs):
-        x, y = (i % cols) * cell, (i // cols) * (cell + 16)
-        W.paste(Image.open(p).resize((cell, cell)), (x, y))
-        d.text((x + 4, y + cell + 2), INFO[os.path.basename(p)[:-4]][2], fill=(220, 210, 190))
+    for k, bid in enumerate(ids):
+        im = Image.open(os.path.join(HERE, 'master', bid + '.webp')).resize((cell - 4, cell - 4))
+        x, y = (k % cols) * cell, (k // cols) * (cell + 14)
+        W.paste(im, (x + 2, y + 2))
+        d.text((x + 3, y + cell), bid, fill=(200, 190, 170))
+    os.makedirs(os.path.dirname(out), exist_ok=True)
     W.save(out)
 
 
 if __name__ == '__main__':
-    ids = sys.argv[1:] or None
-    pngs = render(ids)
-    export(pngs)
-    # Ilustraciones ya hechas (generadas): ai/<id>.png
-    from PIL import Image
-    for p in sorted(glob.glob(f'{HERE}/ai/*.png')):
-        bid = os.path.basename(p)[:-4]
-        if not ids or bid in ids:
-            Image.open(p).convert('RGB').resize((SIZE_APP, SIZE_APP), Image.LANCZOS).save(f'{RES}/beast_{bid}.webp', 'WEBP', quality=86, method=6)
-    write_index()
-    sheet(pngs, f'{OUT}/sheet.png')
-    print(len(pngs), 'ilustraciones')
+    # quita las ilustraciones viejas (SVG) que ya no tienen maestra
+    masters = {os.path.basename(m)[:-5] for m in glob.glob(os.path.join(HERE, 'master', '*.webp'))}
+    convert()
+    masters = {os.path.basename(m)[:-5] for m in glob.glob(os.path.join(HERE, 'master', '*.webp'))}
+    for f in glob.glob(f'{RES}/beast_*.webp'):
+        if os.path.basename(f)[6:-5] not in masters:
+            os.remove(f)
+    ids = write_index()
+    missing = [i for i in catalog() if i not in set(ids)]
+    print(f'{len(ids)} con ilustración, {len(missing)} pendientes')
+    if '--sheet' in sys.argv:
+        sheet(ids, os.path.join(HERE, 'out', 'sheet.png'))

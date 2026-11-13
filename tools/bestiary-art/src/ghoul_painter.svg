@@ -1,0 +1,28 @@
+<!-- Modelo de Pickman: un necrófago posando en un taburete frente a un lienzo a medio pintar -->
+<!-- el lienzo y el caballete -->
+<path class="ink" d="M146 196 L154 60 M186 196 L170 60 M150 150 L182 150" style="stroke:#6d4c41;stroke-width:3"/>
+<path class="b2" d="M140 60 L192 56 L192 126 L140 130 Z" style="fill:#e5dcc6"/>
+<path class="b" d="M152 120 C150 100 158 88 166 86 C176 88 182 100 180 120 Z" style="fill:#5b4e44"/>
+<circle cx="164" cy="98" r="2" fill="#c0392b"/><circle cx="172" cy="98" r="2" fill="#c0392b"/>
+<path class="lnt" d="M146 66 C160 64 176 64 188 64 M144 76 C150 74 156 74 160 76"/>
+<!-- taburete -->
+<path class="ink" d="M50 196 L60 160 M110 196 L100 160 M80 196 L80 160" style="stroke:#6d4c41;stroke-width:3"/>
+<path class="b2" d="M48 160 L112 160 L110 152 L50 152 Z" style="fill:#7a5a3a"/>
+<!-- el modelo sentado -->
+<path class="b" d="M54 152 C50 128 56 104 74 92 C88 84 104 86 112 98 C120 112 118 134 110 152 Z"/>
+<path class="sh" d="M54 152 C50 128 56 104 74 92 C68 112 66 134 68 152 Z"/>
+<path class="ln" d="M70 116 C78 120 88 120 96 116 M68 132 C78 136 90 136 100 132"/>
+<path class="b" d="M60 150 C56 164 54 178 56 194 L66 194 C66 180 68 166 72 156 Z"/>
+<path class="b" d="M104 150 C112 162 114 178 112 194 L102 194 C102 180 100 166 96 156 Z"/>
+<path class="bn" d="M56 194 l-6 2 M60 195 l-2 4 M108 194 l6 2 M104 195 l2 4"/>
+<path class="b" d="M106 106 C120 104 128 110 132 118 L126 122 C122 116 116 114 108 116 Z"/>
+<path class="bn" d="M132 118 l4 -2 M131 122 l5 0"/>
+<!-- cabeza girada hacia el pintor -->
+<path class="b" d="M66 70 C64 50 76 38 92 38 C108 38 118 50 116 68 C114 80 108 88 98 92 L94 98 C82 98 72 90 68 80 Z"/>
+<path class="b" d="M112 68 C124 68 134 72 140 80 C130 86 118 84 108 80 Z"/>
+<path class="dk" d="M138 80 C128 86 118 84 108 80 C116 88 128 90 140 82 Z"/>
+<path class="bn" d="M118 82 l1 4 l2 -4 M126 83 l1 4 l2 -4"/>
+<eye cx="88" cy="62" r="3.8"/>
+<eye cx="104" cy="60" r="3.8"/>
+<path class="b2" d="M70 52 L62 38 L76 46 Z M100 40 L104 24 L110 40 Z"/>
+<path class="hl" d="M70 60 C72 50 78 44 86 41"/>

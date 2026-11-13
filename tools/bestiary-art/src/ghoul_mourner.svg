@@ -1,0 +1,23 @@
+<!-- Plañidero Hambriento: un necrófago con velo de luto que llora junto a un ataúd y, entre lágrimas, se relame -->
+<!-- el ataúd -->
+<path class="b2" d="M108 196 L100 150 L118 122 L176 122 L190 150 L184 196 Z" style="fill:#4a2f22"/>
+<path class="sh" d="M150 122 L176 122 L190 150 L184 196 L156 196 Z"/>
+<path class="ln" d="M100 150 L190 150 M146 126 L146 194"/>
+<path class="mt" d="M140 136 L152 136 M146 130 L146 144" style="fill:none;stroke-width:2"/>
+<path class="ac" d="M120 118 C116 108 122 102 120 96 C126 102 128 110 120 118 Z" style="fill:#FFC86A"/>
+<path class="ink" d="M120 118 L120 124" style="stroke-width:2"/>
+<!-- cuerpo con ropa de luto -->
+<path class="b2" d="M22 200 C22 164 38 132 66 120 C88 112 106 122 110 144 C114 164 108 184 104 200 Z" style="fill:#25222a"/>
+<path class="sx" d="M22 200 C22 164 38 132 62 122 C52 146 48 172 50 200 Z"/>
+<path class="b" d="M98 146 C108 138 116 140 118 148 C116 156 108 158 100 154 Z"/>
+<path class="bn" d="M116 146 l4 -2 M118 150 l5 0 M116 154 l4 2"/>
+<!-- cabeza con velo -->
+<path class="b" d="M44 104 C42 82 56 68 74 68 C92 68 104 82 102 100 C101 110 96 118 88 122 L58 122 C50 118 45 112 44 104 Z"/>
+<path class="b" d="M98 100 C108 100 116 104 120 110 C110 116 100 114 92 110 Z"/>
+<path class="dk" d="M120 110 C110 116 100 114 92 110 C100 118 110 120 122 112 Z"/>
+<path class="ac" d="M114 114 C118 116 122 116 124 112" style="fill:none;stroke:#c0392b;stroke-width:1.6"/>
+<eye cx="64" cy="94" r="3.2"/>
+<eye cx="80" cy="94" r="3.2"/>
+<path class="ac" d="M64 98 C64 104 62 108 62 112 M80 98 C80 104 82 108 82 112" style="fill:none;stroke:#bfe3ff;stroke-width:1.4"/>
+<path d="M36 112 C30 84 46 58 74 56 C102 56 114 78 108 104 C100 86 88 78 74 78 C58 78 44 90 36 112 Z" fill="#1a1620" opacity=".85" stroke="#120E0B" stroke-width="1.6"/>
+<path class="lnt" d="M44 96 C52 84 62 78 74 78 M54 70 C64 66 76 66 86 70" style="stroke:#4a4458"/>

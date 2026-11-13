@@ -1,0 +1,26 @@
+<!-- Topo Pálido: un topo enorme y blanco, con manos como palas, que cava hacia abajo; vemos un corte de la tierra con capas de siglos -->
+<path d="M0 0 L200 0 L200 200 L0 200 Z" fill="#4a3c2e"/>
+<path d="M0 40 C50 36 120 44 200 38 L200 80 C130 86 60 78 0 84 Z" fill="#5a4a38"/>
+<path d="M0 120 C60 114 130 124 200 118 L200 160 C130 166 60 158 0 164 Z" fill="#3a2e22"/>
+<path class="dt" d="M0 0 L200 0 L200 200 L0 200 Z"/>
+<path class="ln" d="M0 40 C50 36 120 44 200 38 M0 84 C60 78 130 86 200 80 M0 120 C60 114 130 124 200 118 M0 164 C60 158 130 166 200 160" style="stroke:#2a2018"/>
+<g class="bn"><path d="M20 100 l14 -4 M30 140 c-3 0 -2 5 1 4"/><circle cx="172" cy="104" r="5"/><circle class="dk" cx="170" cy="103" r="1"/><circle class="dk" cx="174" cy="103" r="1"/><path d="M150 176 l20 4"/></g>
+<g class="b2" style="fill:#7a6a54"><ellipse cx="40" cy="60" rx="6" ry="4"/><ellipse cx="160" cy="140" rx="8" ry="5"/><ellipse cx="60" cy="180" rx="5" ry="3"/></g>
+<!-- túnel vertical -->
+<path d="M70 0 C72 40 66 100 74 144 C80 164 120 164 126 144 C134 80 128 40 130 0 Z" fill="#140f0b"/>
+<!-- el topo cabeza abajo -->
+<g transform="translate(0 34)">
+<path class="b" d="M80 10 C76 40 78 70 88 90 C94 100 106 100 112 90 C122 70 124 40 120 10 Z" style="fill:#e8ddd0"/>
+<path class="sh" d="M110 10 C118 40 118 70 112 90 C108 96 104 98 100 98 C108 76 112 44 110 10 Z"/>
+<path class="ln" d="M86 30 C94 34 106 34 114 30 M84 50 C94 54 106 54 116 50 M86 70 C94 74 106 74 114 70"/>
+<path class="b" d="M92 92 C94 104 98 112 100 118 C102 112 106 104 108 92 Z" style="fill:#e8c4c4"/>
+<path class="ac" d="M96 116 C98 120 102 120 104 116" style="fill:#e89a9a"/>
+<g class="ink" style="stroke-width:.8"><path d="M94 108 L82 106 M94 110 L82 112 M106 108 L118 106 M106 110 L118 112"/></g>
+<!-- manos-pala -->
+<path class="b" d="M82 76 C70 84 62 98 60 112 C66 118 76 116 80 108 C84 100 88 92 90 86 Z" style="fill:#f0c9c0"/>
+<path class="b" d="M118 76 C130 84 138 98 140 112 C134 118 124 116 120 108 C116 100 112 92 110 86 Z" style="fill:#f0c9c0"/>
+<path class="ink" d="M60 112 l-2 6 M66 116 l-1 6 M72 116 l0 6 M140 112 l2 6 M134 116 l1 6 M128 116 l0 6" style="stroke-width:1.6"/>
+<eye cx="94" cy="96" r="1.4"/>
+<eye cx="106" cy="96" r="1.4"/>
+</g>
+<g class="b2" style="fill:#7a6a54"><circle cx="64" cy="162" r="2.4"/><circle cx="136" cy="164" r="2"/><circle cx="100" cy="172" r="1.8"/></g>

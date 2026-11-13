@@ -1,0 +1,24 @@
+<!-- Niño Cambiado: una cuna de mimbre; dentro, envuelto en mantillas de encaje, un bebé necrófago de orejas puntiagudas -->
+<path class="b2" d="M30 150 C30 186 170 186 170 150 L162 120 L38 120 Z" style="fill:#8a6a44"/>
+<path class="lnt" d="M40 130 L46 176 M54 128 L58 180 M68 128 L70 182 M84 128 L84 184 M100 128 L100 184 M116 128 L116 184 M132 128 L130 182 M146 128 L142 180 M160 130 L154 176 M36 140 C70 146 130 146 164 140 M34 158 C70 166 130 166 166 158" style="stroke:#3a2a18"/>
+<path class="sh" d="M140 122 L162 120 L170 150 C168 166 156 176 140 180 Z"/>
+<path class="b2" d="M38 120 C40 108 160 108 162 120 C150 126 50 126 38 120 Z" style="fill:#a8865a"/>
+<!-- mantilla de encaje -->
+<path class="b" d="M52 120 C56 100 80 92 100 92 C124 92 146 100 150 120 C130 128 70 128 52 120 Z" style="fill:#e9e1d0"/>
+<path class="lnt" d="M60 116 c3 -3 6 0 9 -3 c3 3 6 0 9 3 c3 -3 6 0 9 -3 c3 3 6 0 9 3 c3 -3 6 0 9 -3 c3 3 6 0 9 3 c3 -3 6 0 9 -3 c3 3 6 0 9 3" style="stroke:#8a7c62"/>
+<!-- manita con garras -->
+<path class="b" d="M126 100 C134 96 142 100 140 108 C138 114 130 114 126 110 Z"/>
+<path class="bn" d="M138 100 l4 -4 M140 104 l5 -2 M140 108 l5 0"/>
+<!-- cabeza -->
+<path class="b" d="M74 82 C72 60 84 48 100 48 C116 48 128 60 126 80 C124 96 114 104 100 104 C86 104 76 96 74 82 Z"/>
+<path class="sh" d="M114 52 C124 60 128 74 124 88 C120 98 112 103 104 104 C114 92 118 72 114 52 Z"/>
+<path class="b" d="M76 70 L58 52 L72 74 Z M124 70 L142 52 L128 74 Z"/>
+<path class="b" d="M86 92 C82 98 74 100 68 98 C76 96 82 92 86 88 Z"/>
+<path class="dk" d="M86 92 C94 98 108 98 114 92 C106 94 94 94 86 92 Z"/>
+<path class="bn" d="M90 93 l1 4 l2 -4 M106 93 l1 4 l2 -4"/>
+<eye cx="91" cy="74" r="4.4"/>
+<eye cx="109" cy="74" r="4.4"/>
+<path class="lnt" d="M96 52 C98 46 102 46 104 52"/>
+<!-- sonajero abandonado -->
+<path class="mt" d="M40 106 L28 96 M24 92 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0" style="fill:none;stroke-width:1.6"/>
+<path class="hl" d="M80 66 C82 56 88 50 96 49"/>

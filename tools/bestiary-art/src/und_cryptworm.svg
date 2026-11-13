@@ -1,0 +1,21 @@
+<!-- Gran Lombriz de Cripta: atraviesa cementerios enteros en una noche; sale entre lápidas con la boca de anillos dentados -->
+<path class="b2" d="M0 150 C40 140 80 150 120 144 C150 140 180 148 200 144 L200 200 L0 200 Z" style="fill:#2f2a24"/>
+<path class="dt" d="M0 150 C40 140 80 150 120 144 C150 140 180 148 200 144 L200 200 L0 200 Z"/>
+<!-- lápidas -->
+<path class="b2" d="M14 150 L14 116 C14 104 36 104 36 116 L36 150 Z" style="fill:#6b6560"/>
+<path class="b2" d="M160 148 L162 104 C162 92 184 92 186 104 L186 148 Z" style="fill:#6b6560"/>
+<path class="b2" d="M146 152 L140 118 L152 114 L158 150 Z" style="fill:#5a544e"/>
+<path class="ln" d="M20 122 L30 122 M25 116 L25 136 M168 112 L180 112 M174 106 L174 128" style="stroke:#3a3530"/>
+<!-- el cuerpo de la lombriz -->
+<path d="M60 200 C60 150 70 110 96 86" fill="none" stroke="#120E0B" stroke-width="44" stroke-linecap="round"/>
+<path d="M60 200 C60 150 70 110 96 86" fill="none" stroke="url(#wash)" stroke-width="38" stroke-linecap="round"/>
+<path d="M50 200 C50 150 58 116 80 94" fill="none" stroke="url(#hatch)" stroke-width="14" opacity=".75"/>
+<path class="ln" d="M42 180 L80 186 M42 160 L82 168 M46 140 L86 150 M54 120 L92 132 M66 104 L100 116"/>
+<!-- boca de anillos -->
+<ellipse class="b" cx="104" cy="80" rx="26" ry="20" transform="rotate(-30 104 80)"/>
+<ellipse class="dk" cx="106" cy="78" rx="18" ry="13" transform="rotate(-30 106 78)"/>
+<g class="bn"><path d="M96 66 l2 6 l3 -5 M108 62 l0 6 l4 -4 M118 70 l-4 4 l5 2 M118 84 l-5 -1 l2 5 M108 92 l-1 -5 l-4 3 M94 88 l4 -3 l-5 -2 M90 76 l5 1 l-2 -5"/></g>
+<ellipse cx="108" cy="77" rx="7" ry="5" transform="rotate(-30 108 77)" fill="#3a0f14"/>
+<!-- tierra que salta -->
+<g class="b2" style="fill:#4a4038"><circle cx="134" cy="56" r="3"/><circle cx="140" cy="40" r="2.2"/><circle cx="120" cy="40" r="2.6"/><circle cx="72" cy="58" r="2.4"/></g>
+<path class="hl" d="M56 180 C58 148 66 122 82 102"/>

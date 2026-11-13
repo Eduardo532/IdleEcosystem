@@ -1,0 +1,27 @@
+<!-- Perro de Cripta: un perro flaco y sin pelo, de costillas marcadas, que olfatea el suelo entre tumbas -->
+<path class="b2" d="M0 170 C40 164 80 172 120 166 C150 162 180 168 200 166 L200 200 L0 200 Z" style="fill:#2f2a24"/>
+<path class="b2" d="M150 166 L152 120 C152 108 176 108 178 120 L178 166 Z" style="fill:#5d5852"/>
+<path class="ln" d="M158 126 L172 126 M165 118 L165 144" style="stroke:#3a3530"/>
+<!-- cola -->
+<path class="ink" d="M40 104 C26 96 18 84 16 70" style="stroke-width:4"/>
+<path class="ink" d="M40 104 C26 96 18 84 16 70" style="stroke:#b09a88;stroke-width:2"/>
+<!-- patas -->
+<path class="b" d="M46 120 L40 150 L44 170 L52 170 L50 150 L56 124 Z"/>
+<path class="b" d="M64 124 L62 150 L68 170 L76 170 L72 150 L74 126 Z"/>
+<path class="b" d="M112 124 L116 150 L112 170 L120 170 L126 150 L122 122 Z"/>
+<path class="b" d="M126 120 L134 146 L132 170 L140 170 L144 146 L136 116 Z"/>
+<path class="bn" d="M40 170 l-4 3 M44 170 l0 4 M64 170 l-4 3 M68 170 l0 4 M112 170 l-4 3 M116 170 l0 4 M132 170 l-4 3 M136 170 l0 4"/>
+<!-- cuerpo -->
+<path class="b" d="M38 100 C42 86 62 80 90 82 C116 84 134 88 140 104 C140 118 128 128 110 128 C86 130 58 128 44 122 C38 116 36 108 38 100 Z"/>
+<path class="sh" d="M44 122 C58 128 86 130 110 128 C126 128 136 120 140 110 C136 124 120 132 100 132 C76 132 56 128 44 122 Z"/>
+<path class="ln" d="M64 90 C62 100 62 112 66 122 M74 88 C72 100 72 112 76 124 M84 86 C82 100 82 112 86 126 M94 86 C92 100 94 112 96 126 M104 88 C102 100 104 112 106 126"/>
+<!-- cuello bajo y cabeza olfateando el suelo -->
+<path class="b" d="M130 96 C140 106 148 120 152 136 L144 140 C140 126 132 114 124 106 Z"/>
+<path class="b" d="M140 132 C146 124 158 124 164 132 C172 140 178 152 180 160 C172 164 160 160 152 154 C144 148 138 140 140 132 Z"/>
+<path class="sh" d="M164 132 C172 140 178 152 180 160 C174 162 168 160 162 158 C168 150 168 140 164 132 Z"/>
+<path class="b" d="M144 126 L138 112 L150 122 Z"/>
+<path class="dk" d="M180 160 C176 164 168 164 162 160 C168 166 176 168 182 164 Z"/>
+<ellipse class="dk" cx="180" cy="158" rx="2" ry="1.4"/>
+<eye cx="156" cy="138" r="2.8"/>
+<path class="lnt" d="M182 164 C186 166 188 168 190 172 M178 166 C180 170 180 172 182 176" style="opacity:.7"/>
+<path class="hl" d="M50 94 C66 86 90 84 112 86"/>

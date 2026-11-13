@@ -1,0 +1,24 @@
+<!-- Escarabajo de Sarcófago: un escarabajo enorme de caparazón dorado con jeroglíficos, de guardia sobre la tapa de un sarcófago -->
+<path class="b2" d="M30 200 L40 150 C60 140 140 140 160 150 L170 200 Z" style="fill:#3a5a7a"/>
+<path class="mt" d="M44 160 L156 160 M48 176 L152 176 M50 192 L150 192" style="fill:none;stroke-width:3"/>
+<path class="sh" d="M140 148 C152 150 160 152 162 156 L170 200 L146 200 Z"/>
+<!-- patas -->
+<g class="ink" style="stroke-width:3"><path d="M72 104 L48 92 L36 104 M70 122 L42 124 L34 140 M76 138 L56 154 L52 168 M128 104 L152 92 L164 104 M130 122 L158 124 L166 140 M124 138 L144 154 L148 168"/></g>
+<!-- caparazón -->
+<path class="mt" d="M64 100 C62 78 80 64 100 64 C120 64 138 78 136 100 C136 130 120 152 100 156 C80 152 64 130 64 100 Z" style="fill:url(#gold)"/>
+<path class="ink" d="M100 66 L100 156" style="stroke-width:2"/>
+<path class="sh" d="M100 64 C120 64 138 78 136 100 C136 130 120 152 100 156 Z" style="opacity:.35"/>
+<g fill="none" stroke="#6a4a10" stroke-width="1.4">
+<path d="M76 88 L88 88 M82 82 L82 96 M76 110 C80 104 88 104 90 110 C88 116 80 116 76 110 M78 130 L88 124 L88 136 Z"/>
+<path d="M112 86 C116 80 124 80 126 86 L126 96 L112 96 Z M112 112 L126 112 M119 104 L119 120 M112 130 C116 136 122 136 126 130"/>
+</g>
+<!-- cabeza con cuernos -->
+<path class="b" d="M82 66 C82 52 118 52 118 66 C118 70 112 72 100 72 C88 72 82 70 82 66 Z" style="fill:#2a2418"/>
+<path class="b" d="M84 58 C78 46 82 34 92 30 C88 40 90 50 94 56 Z M116 58 C122 46 118 34 108 30 C112 40 110 50 106 56 Z" style="fill:#2a2418"/>
+<path class="b" d="M94 54 C96 40 98 30 100 22 C102 30 104 40 106 54 Z" style="fill:#2a2418"/>
+<eye cx="90" cy="62" r="2.6"/>
+<eye cx="110" cy="62" r="2.6"/>
+<path class="hl" d="M72 94 C74 80 84 70 96 68"/>
+<!-- rata huyendo -->
+<path class="b2" d="M168 186 C162 180 164 172 172 172 C180 172 186 178 188 186 Z" style="fill:#5a4e44"/>
+<path class="ink" d="M168 186 C160 190 150 188 146 182" style="stroke-width:1.4"/>

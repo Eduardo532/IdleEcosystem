@@ -51,9 +51,7 @@ data class Beast(
     val name: String,
     val lore: String,
     val domainId: String,
-    val rarity: BeastRarity,
-    /** Receta del dibujo: arquetipo y rasgos (ver CreatureArt). */
-    val art: String
+    val rarity: BeastRarity
 )
 
 /** Lo que salió en una invocación. */

@@ -44,7 +44,9 @@ data class ArtSpec(
     val mouths: Boolean = false,
     val rings: Boolean = false,
     val drips: Boolean = false,
-    val hood: Boolean = false
+    val hood: Boolean = false,
+    /** Lo que lleva en la mano: bastón, libro, farol, daga, matraz, orbe, vela, pergamino, llave… */
+    val prop: String? = null
 ) {
     companion object {
         /** "squid e2 t6 c g" -> arquetipo squid, 2 ojos, 6 tentáculos, corona y aura. */
@@ -66,6 +68,7 @@ data class ArtSpec(
                     'r' -> spec.copy(rings = true)
                     'd' -> spec.copy(drips = true)
                     'k' -> spec.copy(hood = true)
+                    'p' -> spec.copy(prop = token.drop(1))
                     else -> spec
                 }
             }
@@ -86,7 +89,9 @@ private data class Anchors(
     val body: Offset,
     val bodyR: Float,
     /** Los ojos se reparten por el cuerpo y no solo por la cabeza (masas, enjambres). */
-    val eyesOnBody: Boolean = false
+    val eyesOnBody: Boolean = false,
+    /** La mano derecha, donde va el objeto que lleva. */
+    val hand: Offset = Offset(66f, 64f)
 )
 
 @Composable
@@ -118,7 +123,7 @@ private class CreaturePainter(
     val widthScale = 0.9f + rnd.nextFloat() * 0.2f
 
     val line = tint
-    val fill = lerp(Color(0xFF0B0B0F), tint, 0.24f)
+    val fill = lerp(Color(0xFF0B0B0F), tint, 0.30f)
     val detail = lerp(tint, Color.White, 0.35f)
     val shade = lerp(Color(0xFF050507), tint, 0.12f)
     val strokeW get() = 2.1f * unit
@@ -181,14 +186,16 @@ private class CreaturePainter(
         if (spec.fangs) fangs(a)
         eyes(a)
         if (spec.drips) drips(a)
+        spec.prop?.let { prop(it, a.hand) }
         if (spec.rings) ringsFront(a)
     }
 
     // ------------------------------------------------------------------ anclas
     fun anchorsFor(arch: String): Anchors = when (arch) {
-        "humanoid" -> Anchors(Offset(50f, 30f), 9f * headScale, Offset(50f, 46f), 34f, Offset(50f, 86f), 34f, Offset(50f, 34f), Offset(50f, 62f), 20f)
-        "fishman" -> Anchors(Offset(50f, 32f), 11f * headScale, Offset(50f, 48f), 34f, Offset(50f, 86f), 30f, Offset(50f, 37f), Offset(50f, 62f), 18f)
-        "ghoul" -> Anchors(Offset(40f, 40f), 10f * headScale, Offset(55f, 46f), 30f, Offset(55f, 84f), 30f, Offset(32f, 44f), Offset(56f, 58f), 18f)
+        "humanoid" -> Anchors(Offset(50f, 30f), 9f * headScale, Offset(50f, 46f), 34f, Offset(50f, 86f), 34f, Offset(50f, 34f), Offset(50f, 62f), 20f, hand = Offset(62f, 70f))
+        "figure" -> Anchors(Offset(50f, 22f), 8f * headScale, Offset(50f, 38f), 32f, Offset(50f, 90f), 24f, Offset(50f, 26f), Offset(50f, 52f), 14f, hand = Offset(68f, 62f))
+        "fishman" -> Anchors(Offset(50f, 30f), 11f * headScale, Offset(50f, 48f), 34f, Offset(50f, 86f), 30f, Offset(50f, 36f), Offset(50f, 62f), 18f, hand = Offset(74f, 72f))
+        "ghoul" -> Anchors(Offset(40f, 40f), 10f * headScale, Offset(55f, 46f), 30f, Offset(55f, 84f), 30f, Offset(32f, 44f), Offset(56f, 58f), 18f, hand = Offset(36f, 86f))
         "blob" -> Anchors(Offset(50f, 52f), 22f, Offset(50f, 46f), 36f, Offset(50f, 78f), 50f, Offset(50f, 66f), Offset(50f, 56f), 28f, eyesOnBody = true)
         "worm" -> Anchors(Offset(38f, 30f), 12f * headScale, Offset(50f, 50f), 30f, Offset(50f, 62f), 40f, Offset(30f, 32f), Offset(50f, 60f), 20f)
         "bat" -> Anchors(Offset(50f, 38f), 8f * headScale, Offset(50f, 52f), 44f, Offset(50f, 74f), 18f, Offset(50f, 42f), Offset(50f, 58f), 12f)
@@ -210,11 +217,11 @@ private class CreaturePainter(
         "mask" -> Anchors(Offset(50f, 46f), 22f, Offset(50f, 46f), 40f, Offset(50f, 74f), 30f, Offset(50f, 62f), Offset(50f, 48f), 22f)
         "book" -> Anchors(Offset(50f, 46f), 16f, Offset(50f, 46f), 40f, Offset(50f, 74f), 36f, Offset(50f, 60f), Offset(50f, 52f), 24f, eyesOnBody = true)
         "swarm" -> Anchors(Offset(50f, 50f), 28f, Offset(50f, 46f), 40f, Offset(50f, 76f), 40f, Offset(50f, 60f), Offset(50f, 50f), 30f, eyesOnBody = true)
-        "golem" -> Anchors(Offset(50f, 26f), 9f * headScale, Offset(50f, 44f), 36f, Offset(50f, 88f), 30f, Offset(50f, 30f), Offset(50f, 58f), 20f)
-        "colossus" -> Anchors(Offset(50f, 22f), 8f * headScale, Offset(50f, 40f), 46f, Offset(50f, 92f), 40f, Offset(50f, 26f), Offset(50f, 60f), 28f)
+        "golem" -> Anchors(Offset(50f, 26f), 9f * headScale, Offset(50f, 44f), 36f, Offset(50f, 88f), 30f, Offset(50f, 30f), Offset(50f, 58f), 20f, hand = Offset(74f, 66f))
+        "colossus" -> Anchors(Offset(50f, 30f), 8f * headScale, Offset(50f, 40f), 46f, Offset(50f, 92f), 40f, Offset(50f, 34f), Offset(50f, 56f), 28f, hand = Offset(86f, 84f))
         "planet" -> Anchors(Offset(50f, 50f), 24f, Offset(50f, 50f), 46f, Offset(50f, 72f), 34f, Offset(50f, 60f), Offset(50f, 50f), 24f, eyesOnBody = true)
         "vortex" -> Anchors(Offset(50f, 50f), 10f, Offset(50f, 50f), 44f, Offset(50f, 70f), 40f, Offset(50f, 56f), Offset(50f, 50f), 28f)
-        "wraith" -> Anchors(Offset(50f, 30f), 10f * headScale, Offset(50f, 44f), 38f, Offset(50f, 80f), 30f, Offset(50f, 36f), Offset(50f, 60f), 20f)
+        "wraith" -> Anchors(Offset(50f, 30f), 10f * headScale, Offset(50f, 44f), 38f, Offset(50f, 80f), 30f, Offset(50f, 36f), Offset(50f, 60f), 20f, hand = Offset(76f, 68f))
         "toad" -> Anchors(Offset(50f, 46f), 16f, Offset(50f, 50f), 36f, Offset(50f, 66f), 36f, Offset(50f, 60f), Offset(50f, 62f), 24f)
         "spider" -> Anchors(Offset(50f, 40f), 10f, Offset(50f, 52f), 40f, Offset(50f, 66f), 30f, Offset(50f, 46f), Offset(50f, 58f), 16f)
         "mouth" -> Anchors(Offset(50f, 30f), 12f, Offset(50f, 52f), 44f, Offset(50f, 78f), 40f, Offset(50f, 54f), Offset(50f, 54f), 26f)
@@ -235,22 +242,39 @@ private class CreaturePainter(
                 circle(50f, 30f, 9f * headScale)
             }
             "fishman" -> {
-                shape(path { m(38f, 44f); c(30f, 56f, 32f, 76f, 36f, 88f); l(64f, 88f); c(68f, 76f, 70f, 56f, 62f, 44f); close() })
-                // brazos con manos palmeadas
-                strokeOnly(path { m(38f, 48f); q(28f, 62f, 30f, 74f) })
-                strokeOnly(path { m(62f, 48f); q(72f, 62f, 70f, 74f) })
-                shape(path { m(30f, 74f); l(25f, 80f); l(30f, 78f); l(32f, 82f); l(33f, 76f); close() })
-                shape(path { m(70f, 74f); l(75f, 80f); l(70f, 78f); l(68f, 82f); l(67f, 76f); close() })
-                // escamas
-                for (i in 0..2) strokeOnly(path { m(42f, 56f + i * 9f); q(50f, 60f + i * 9f, 58f, 56f + i * 9f) }, detail, strokeW * 0.5f)
+                // cuerpo encorvado de hombros anchos, piernas cortas y pies palmeados
+                shape(path { m(44f, 42f); c(36f, 42f, 30f, 46f, 32f, 54f); c(34f, 64f, 38f, 72f, 40f, 78f); l(38f, 90f); l(46f, 90f); l(48f, 78f); l(52f, 78f); l(54f, 90f); l(62f, 90f); l(60f, 78f); c(62f, 72f, 66f, 64f, 68f, 54f); c(70f, 46f, 64f, 42f, 56f, 42f); close() })
+                shape(path { m(36f, 90f); l(32f, 93f); l(48f, 93f); l(46f, 90f); close() })
+                shape(path { m(54f, 90f); l(52f, 93f); l(68f, 93f); l(64f, 90f); close() })
+                // brazos largos con manos palmeadas
+                strokeOnly(path { m(34f, 50f); q(24f, 62f, 26f, 72f) }, line, strokeW * 1.6f)
+                strokeOnly(path { m(66f, 50f); q(76f, 62f, 74f, 72f) }, line, strokeW * 1.6f)
+                shape(path { m(26f, 72f); l(20f, 78f); l(25f, 76f); l(26f, 80f); l(28f, 75f); close() })
+                shape(path { m(74f, 72f); l(80f, 78f); l(75f, 76f); l(74f, 80f); l(72f, 75f); close() })
+                // escamas en el pecho
+                for (row in 0..2) for (col in 0..2) {
+                    val x = 43f + col * 7f - row % 2 * 3.5f
+                    val y = 52f + row * 7f
+                    strokeOnly(path { m(x - 3f, y); q(x, y + 3.5f, x + 3f, y) }, detail, strokeW * 0.45f)
+                }
                 val hr = 11f * headScale
-                oval(50f, 32f, hr * 1.1f, hr)
-                // aleta dorsal sobre la cabeza
-                shape(path { m(42f, 32f - hr * 0.6f); l(46f, 32f - hr * 1.5f); l(50f, 32f - hr * 0.9f); l(54f, 32f - hr * 1.6f); l(58f, 32f - hr * 0.6f); close() })
-                // agallas y boca ancha
-                strokeOnly(path { m(40f, 34f); l(42f, 38f) }, detail, strokeW * 0.6f)
-                strokeOnly(path { m(60f, 34f); l(58f, 38f) }, detail, strokeW * 0.6f)
-                strokeOnly(path { m(43f, 38f); q(50f, 41f, 57f, 38f) }, detail, strokeW * 0.7f)
+                // aleta dorsal y cabeza ancha de pez con agallas y boca enorme
+                shape(path { m(42f, 30f - hr * 0.7f); l(45f, 30f - hr * 1.5f); l(49f, 30f - hr * 0.95f); l(53f, 30f - hr * 1.6f); l(58f, 30f - hr * 0.7f); close() })
+                oval(50f, 30f, hr * 1.3f, hr * 0.95f)
+                strokeOnly(path { m(50f - hr * 1.15f, 32f); l(50f - hr * 0.95f, 36f); m(50f + hr * 1.15f, 32f); l(50f + hr * 0.95f, 36f) }, detail, strokeW * 0.6f)
+                shape(path { m(50f - hr * 0.8f, 34f); q(50f, 34f + hr * 0.75f, 50f + hr * 0.8f, 34f); q(50f, 36f, 50f - hr * 0.8f, 34f); close() }, Color(0xFF07090A), detail, strokeW * 0.6f)
+            }
+            "figure" -> {
+                // piernas y pies
+                shape(path { m(43f, 64f); l(41f, 90f); l(47f, 90f); l(49f, 66f); close() })
+                shape(path { m(51f, 66f); l(53f, 90f); l(59f, 90f); l(57f, 64f); close() })
+                // abrigo
+                shape(path { m(46f, 30f); c(38f, 31f, 37f, 34f, 37f, 40f); l(38f, 70f); l(62f, 70f); l(63f, 40f); c(63f, 34f, 62f, 31f, 54f, 30f); close() })
+                strokeOnly(path { m(50f, 32f); l(50f, 70f); m(46f, 30f); l(50f, 42f); l(54f, 30f) }, detail, strokeW * 0.5f)
+                // brazos
+                strokeOnly(path { m(38f, 36f); q(32f, 50f, 33f, 62f) }, line, strokeW * 1.8f)
+                strokeOnly(path { m(62f, 36f); q(68f, 48f, 68f, 62f) }, line, strokeW * 1.8f)
+                circle(50f, 22f, 8f * headScale)
             }
             "ghoul" -> {
                 // lomo encorvado, brazos largos hasta el suelo
@@ -316,8 +340,8 @@ private class CreaturePainter(
                 } else oval(48f, 56f, 22f * w, 11f)
                 // patas
                 listOf(32f, 40f, 58f, 64f).forEach { x ->
-                    if (angular) strokeOnly(path { m(x, 62f); l(x - 3f, 72f); l(x + 1f, 82f) })
-                    else strokeOnly(path { m(x, 62f); l(x, 82f) })
+                    if (angular) strokeOnly(path { m(x, 62f); l(x - 3f, 72f); l(x + 1f, 82f) }, line, strokeW * 1.7f)
+                    else strokeOnly(path { m(x, 62f); l(x, 82f) }, line, strokeW * 1.7f)
                 }
                 // cola
                 strokeOnly(path { m(28f, 52f); if (angular) { l(18f, 44f); l(14f, 48f) } else q(20f, 50f, 22f, 44f) })
@@ -479,9 +503,17 @@ private class CreaturePainter(
                 shape(path { m(50f - hr, 26f - hr); l(50f + hr, 26f - hr); l(50f + hr, 26f + hr * 0.9f); l(50f - hr, 26f + hr * 0.9f); close() })
             }
             "colossus" -> {
-                shape(path { m(50f, 28f); c(30f, 30f, 18f, 36f, 14f, 50f); l(12f, 82f); l(22f, 82f); l(26f, 56f); c(30f, 70f, 32f, 84f, 30f, 96f); l(70f, 96f); c(68f, 84f, 70f, 70f, 74f, 56f); l(78f, 82f); l(88f, 82f); l(86f, 50f); c(82f, 36f, 70f, 30f, 50f, 28f); close() })
-                strokeOnly(path { m(40f, 46f); q(50f, 52f, 60f, 46f) }, detail, strokeW * 0.6f)
-                circle(50f, 22f, 8f * headScale)
+                // brazos larguísimos que llegan al suelo
+                strokeOnly(path { m(24f, 40f); c(14f, 54f, 12f, 70f, 14f, 84f) }, line, strokeW * 3.6f)
+                strokeOnly(path { m(24f, 40f); c(14f, 54f, 12f, 70f, 14f, 84f) }, fill, strokeW * 2.2f)
+                strokeOnly(path { m(76f, 40f); c(86f, 54f, 88f, 70f, 86f, 84f) }, line, strokeW * 3.6f)
+                strokeOnly(path { m(76f, 40f); c(86f, 54f, 88f, 70f, 86f, 84f) }, fill, strokeW * 2.2f)
+                circle(14f, 86f, 4.5f)
+                circle(86f, 86f, 4.5f)
+                // torso enorme y encorvado con la cabeza hundida entre los hombros
+                shape(path { m(50f, 24f); c(32f, 24f, 20f, 30f, 22f, 46f); c(24f, 58f, 32f, 70f, 36f, 74f); l(34f, 92f); l(44f, 92f); l(46f, 76f); l(54f, 76f); l(56f, 92f); l(66f, 92f); l(64f, 74f); c(68f, 70f, 76f, 58f, 78f, 46f); c(80f, 30f, 68f, 24f, 50f, 24f); close() })
+                strokeOnly(path { m(36f, 48f); q(50f, 56f, 64f, 48f); m(40f, 60f); q(50f, 64f, 60f, 60f) }, detail, strokeW * 0.6f)
+                circle(50f, 30f, 8f * headScale)
             }
             "planet" -> {
                 circle(50f, 50f, 24f)
@@ -577,6 +609,7 @@ private class CreaturePainter(
         val radius = if (a.eyesOnBody) a.bodyR * 0.7f else a.headR * 0.55f
         val base = when {
             n == 1 -> listOf(Offset(cx, cy))
+            n == 2 && spec.archetype == "fishman" -> listOf(Offset(cx - a.headR * 0.85f, cy - a.headR * 0.25f), Offset(cx + a.headR * 0.85f, cy - a.headR * 0.25f))
             n == 2 -> listOf(Offset(cx - radius * 0.6f, cy - radius * 0.1f), Offset(cx + radius * 0.6f, cy - radius * 0.1f))
             n == 3 -> listOf(Offset(cx - radius * 0.6f, cy), Offset(cx + radius * 0.6f, cy), Offset(cx, cy - radius * 0.6f))
             n <= 6 -> (0 until n).map { i ->
@@ -592,7 +625,8 @@ private class CreaturePainter(
         }
         val size = when {
             spec.archetype == "eye" -> 2.4f
-            n <= 2 -> (a.headR * 0.22f).coerceIn(1.6f, 3.6f)
+            n <= 2 && spec.archetype == "fishman" -> (a.headR * 0.34f).coerceIn(2.6f, 4.6f)
+            n <= 2 -> (a.headR * 0.27f).coerceIn(2.0f, 4.2f)
             n <= 6 -> 2.0f
             else -> 1.6f + rnd.nextFloat()
         }
@@ -735,6 +769,103 @@ private class CreaturePainter(
         val (bx, by) = a.body
         val rx = a.bodyR + 16f
         scope.drawArc(detail, 0f, 180f, false, p(bx - rx, by - 7f), Size(r(rx * 2), r(14f)), style = Stroke(width = strokeW * 0.8f))
+    }
+
+    /** El objeto que lleva en la mano, dibujado a partir de [hand]. */
+    fun prop(name: String, hand: Offset) {
+        val (x, y) = hand
+        val glow = lerp(eyeColor, Color.White, 0.3f)
+        val metal = lerp(detail, Color(0xFFB0BEC5), 0.4f)
+        when (name) {
+            "staff" -> {
+                strokeOnly(path { m(x, y - 34f); l(x + 2f, y + 22f) }, Color(0xFF8D6E63), strokeW * 1.4f)
+                scope.drawCircle(glow, r(3.6f), p(x, y - 36f))
+            }
+            "scepter" -> {
+                strokeOnly(path { m(x, y - 16f); l(x + 1f, y + 12f) }, Color(0xFFFFC107), strokeW * 1.2f)
+                shape(path { m(x - 4f, y - 18f); l(x, y - 26f); l(x + 4f, y - 18f); l(x, y - 14f); close() }, Color(0xFFFFD54F), Color(0xFFFFA000), strokeW * 0.6f)
+            }
+            "trident" -> {
+                strokeOnly(path { m(x, y - 30f); l(x + 2f, y + 22f) }, metal, strokeW * 1.2f)
+                strokeOnly(path { m(x - 6f, y - 38f); l(x - 6f, y - 30f); l(x + 6f, y - 30f); l(x + 6f, y - 38f); m(x, y - 40f); l(x, y - 30f) }, metal, strokeW)
+            }
+            "book" -> shape(path { m(x - 6f, y - 4f); l(x + 6f, y - 6f); l(x + 7f, y + 6f); l(x - 5f, y + 8f); close() }, Color(0xFF4E342E), detail, strokeW * 0.7f)
+            "lantern" -> {
+                strokeOnly(path { m(x, y); l(x, y + 4f) }, metal, strokeW * 0.6f)
+                shape(path { m(x - 4f, y + 4f); l(x + 4f, y + 4f); l(x + 5f, y + 14f); l(x - 5f, y + 14f); close() }, glow.copy(alpha = 0.85f), metal, strokeW * 0.6f)
+                scope.drawCircle(Brush.radialGradient(listOf(glow.copy(alpha = 0.5f), Color.Transparent), center = p(x, y + 9f), radius = r(14f)), r(14f), p(x, y + 9f))
+            }
+            "dagger" -> {
+                shape(path { m(x - 1.5f, y); l(x, y - 16f); l(x + 1.5f, y); close() }, metal, line, strokeW * 0.4f)
+                strokeOnly(path { m(x - 4f, y); l(x + 4f, y); m(x, y); l(x, y + 5f) }, Color(0xFF8D6E63), strokeW * 0.8f)
+            }
+            "flask" -> {
+                shape(path { m(x - 1.5f, y - 10f); l(x + 1.5f, y - 10f); l(x + 1.5f, y - 5f); l(x + 6f, y + 4f); q(x, y + 8f, x - 6f, y + 4f); l(x - 1.5f, y - 5f); close() }, glow.copy(alpha = 0.7f), detail, strokeW * 0.6f)
+            }
+            "syringe" -> {
+                shape(path { m(x - 2f, y - 10f); l(x + 2f, y - 10f); l(x + 2f, y + 4f); l(x - 2f, y + 4f); close() }, Color(0xFF9CCC65), detail, strokeW * 0.5f)
+                strokeOnly(path { m(x, y + 4f); l(x, y + 10f); m(x - 3f, y - 10f); l(x + 3f, y - 10f); m(x, y - 10f); l(x, y - 14f) }, metal, strokeW * 0.6f)
+            }
+            "orb" -> {
+                scope.drawCircle(Brush.radialGradient(listOf(glow, glow.copy(alpha = 0f)), center = p(x, y - 4f), radius = r(9f)), r(9f), p(x, y - 4f))
+                circle(x, y - 4f, 4.5f, glow.copy(alpha = 0.8f), detail)
+            }
+            "candle" -> {
+                shape(path { m(x - 2.5f, y - 6f); l(x + 2.5f, y - 6f); l(x + 2.5f, y + 6f); l(x - 2.5f, y + 6f); close() }, Color(0xFFEDE7D9), detail, strokeW * 0.4f)
+                shape(path { m(x, y - 13f); q(x + 3f, y - 9f, x, y - 7f); q(x - 3f, y - 9f, x, y - 13f); close() }, Color(0xFFFFB74D), Color(0xFFFFE082), strokeW * 0.3f)
+            }
+            "scroll" -> {
+                shape(path { m(x - 6f, y - 6f); l(x + 6f, y - 6f); l(x + 6f, y + 6f); l(x - 6f, y + 6f); close() }, Color(0xFFD7CCC8), Color(0xFF8D6E63), strokeW * 0.5f)
+                strokeOnly(path { m(x - 4f, y - 2f); l(x + 4f, y - 2f); m(x - 4f, y + 1f); l(x + 3f, y + 1f) }, Color(0xFF5D4037), strokeW * 0.3f)
+            }
+            "key" -> {
+                scope.drawCircle(Color(0xFFCFD8DC), r(3f), p(x, y - 8f), style = Stroke(width = strokeW * 0.8f))
+                strokeOnly(path { m(x, y - 5f); l(x, y + 8f); m(x, y + 4f); l(x + 3f, y + 4f); m(x, y + 7f); l(x + 3f, y + 7f) }, Color(0xFFCFD8DC), strokeW * 0.8f)
+            }
+            "mirror" -> {
+                oval(x, y - 6f, 4.5f, 6f, glow.copy(alpha = 0.35f), Color(0xFFFFD54F))
+                strokeOnly(path { m(x, y); l(x, y + 8f) }, Color(0xFFFFD54F), strokeW * 0.8f)
+            }
+            "broom" -> {
+                strokeOnly(path { m(x - 10f, y - 24f); l(x + 6f, y + 14f) }, Color(0xFF8D6E63), strokeW * 1.1f)
+                shape(path { m(x + 4f, y + 10f); l(x + 14f, y + 22f); l(x + 4f, y + 24f); l(x, y + 14f); close() }, Color(0xFFBCAAA4), Color(0xFF8D6E63), strokeW * 0.5f)
+            }
+            "shovel" -> {
+                strokeOnly(path { m(x, y - 20f); l(x, y + 10f) }, Color(0xFF8D6E63), strokeW * 1.1f)
+                shape(path { m(x - 5f, y + 10f); l(x + 5f, y + 10f); l(x + 4f, y + 20f); l(x, y + 23f); l(x - 4f, y + 20f); close() }, metal, line, strokeW * 0.5f)
+            }
+            "flute" -> {
+                strokeOnly(path { m(x - 8f, y - 10f); l(x + 6f, y + 4f) }, Color(0xFFD7CCC8), strokeW * 1.2f)
+                for (i in 0..2) scope.drawCircle(Color(0xFF3E2723), r(0.7f), p(x - 4f + i * 3.5f, y - 6f + i * 3.5f))
+            }
+            "drum" -> {
+                oval(x, y + 2f, 7f, 2.5f, Color(0xFFD7CCC8), line)
+                shape(path { m(x - 7f, y + 2f); l(x - 7f, y + 12f); q(x, y + 16f, x + 7f, y + 12f); l(x + 7f, y + 2f); q(x, y + 6f, x - 7f, y + 2f); close() }, Color(0xFF6D4C41), line, strokeW * 0.6f)
+            }
+            "harp" -> {
+                strokeOnly(path { m(x - 6f, y + 10f); q(x - 8f, y - 12f, x + 6f, y - 14f); l(x + 6f, y + 10f); close() }, Color(0xFFFFD54F), strokeW * 0.9f)
+                for (i in 0..3) strokeOnly(path { m(x - 4f + i * 3f, y - 8f + i); l(x - 4f + i * 3f, y + 9f) }, Color(0xFFFFF8E1), strokeW * 0.25f)
+            }
+            "bell" -> {
+                shape(path { m(x - 5f, y + 6f); q(x - 5f, y - 6f, x, y - 7f); q(x + 5f, y - 6f, x + 5f, y + 6f); close() }, Color(0xFFFFD54F), Color(0xFFFFA000), strokeW * 0.6f)
+                scope.drawCircle(Color(0xFFFFA000), r(1.4f), p(x, y + 7f))
+            }
+            "net" -> {
+                strokeOnly(path { m(x - 6f, y - 6f); l(x + 6f, y + 10f); m(x + 6f, y - 6f); l(x - 6f, y + 10f); m(x - 6f, y + 2f); l(x + 6f, y + 2f); m(x, y - 6f); l(x, y + 10f) }, detail, strokeW * 0.4f)
+            }
+            "quill" -> {
+                shape(path { m(x, y + 6f); q(x + 2f, y - 8f, x + 8f, y - 16f); q(x + 4f, y - 4f, x, y + 6f); close() }, Color(0xFFEDE7D9), detail, strokeW * 0.4f)
+            }
+            "brush" -> {
+                strokeOnly(path { m(x - 4f, y + 8f); l(x + 4f, y - 8f) }, Color(0xFF8D6E63), strokeW * 0.9f)
+                scope.drawCircle(Color(0xFFE57373), r(2f), p(x + 4.5f, y - 9f))
+            }
+            "spear" -> {
+                strokeOnly(path { m(x, y - 28f); l(x + 1f, y + 20f) }, Color(0xFF8D6E63), strokeW * 1.1f)
+                shape(path { m(x - 2.5f, y - 28f); l(x, y - 36f); l(x + 2.5f, y - 28f); close() }, metal, line, strokeW * 0.4f)
+            }
+            else -> {}
+        }
     }
 
     fun sparkles() {

@@ -11,7 +11,7 @@ import kotlin.random.Random
 class BestiaryTest {
 
     private val archetypes = setOf(
-        "humanoid", "fishman", "ghoul", "blob", "worm", "bat", "bird", "hound", "goat", "cat", "rat", "serpent", "insect",
+        "humanoid", "figure", "fishman", "ghoul", "blob", "worm", "bat", "bird", "hound", "goat", "cat", "rat", "serpent", "insect",
         "squid", "jelly", "tree", "eye", "flame", "crystal", "star", "cone", "barrel", "mask", "book", "swarm", "golem",
         "colossus", "planet", "vortex", "wraith", "toad", "spider", "mouth", "crab", "fish"
     )

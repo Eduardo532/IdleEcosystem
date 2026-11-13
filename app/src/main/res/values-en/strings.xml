@@ -468,4 +468,8 @@
     <string name="seals_found_click">You found an Elder Seal</string>
     <string name="seals_found_daily">Daily offering: +%1$d Elder Seals</string>
     <string name="seals_found_encounter">The creature left %1$d Elder Seals</string>
+    <string name="beast_level_short">Lv %1$d</string>
+    <string name="beast_history_title">Lore</string>
+    <string name="beast_zoom_hint">Tap the illustration to see it larger</string>
+    <string name="beast_viewer_hint">Pinch to zoom · drag to move · double tap to enlarge</string>
 </resources>

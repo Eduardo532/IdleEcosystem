@@ -469,4 +469,8 @@
     <string name="seals_found_click">Encontraste un Sello Antiguo</string>
     <string name="seals_found_daily">Ofrenda diaria: +%1$d Sellos Antiguos</string>
     <string name="seals_found_encounter">La criatura dejó %1$d Sellos Antiguos</string>
+    <string name="beast_level_short">Nv %1$d</string>
+    <string name="beast_history_title">Historia</string>
+    <string name="beast_zoom_hint">Toca la ilustración para verla en grande</string>
+    <string name="beast_viewer_hint">Pellizca para acercar · arrastra para mover · doble toque para ampliar</string>
 </resources>

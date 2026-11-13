@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.ui
 
 import android.app.Application
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -550,9 +551,51 @@ class CriticalUiTest {
 
         compose.onNodeWithText("1 / 312").assertExists()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
-        compose.onNodeWithText("Padre Dagón").assertExists()
+        val inCard = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_CARD_TAG))
+        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and inCard).assertExists()
         compose.onNodeWithText("“El que se alza del fondo cuando la marea muere.”").assertExists()
         compose.onNodeWithText("+30 % producción").assertExists()
+        // v0.19.12: la historia larga y el visor con zoom
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_HISTORY_TAG).performScrollTo()
+            .assertTextEquals(com.EGomez.idleecosystem.domain.logic.BeastLore.history("deep_dagon")!!)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_IMAGE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_CLOSE_TAG).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the collection shows names, rarity and level next to small pictures`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 4)),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}
+                )
+            }
+        }
+
+        val dagon = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon"))
+        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and dagon, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Primigenia · Nv 4") and dagon, useUnmergedTree = true).assertExists()
+        val unknown = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling"))
+        compose.onNode(androidx.compose.ui.test.hasText("???") and unknown, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Cría de Innsmouth") and unknown, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unknown creature's picture cannot be opened`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.CreatureCardContent(
+                com.EGomez.idleecosystem.domain.logic.Bestiary.beast("deep_spawnling")!!, level = 0, shards = 0, onPick = {}, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_IMAGE_TAG).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_HISTORY_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -575,7 +618,7 @@ class CriticalUiTest {
         assertEquals(listOf(1), summons)
 
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling").performScrollTo().performClick()
-        compose.onNodeWithText("???").assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("???") and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_CARD_TAG))).assertExists()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.PICK_WITH_SHARDS_TAG).performClick()
         assertEquals(listOf("deep_spawnling"), picked)
     }

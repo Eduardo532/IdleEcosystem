@@ -36,7 +36,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Panteón:** los dioses y sus pactos.
 - **Pruebas:** las Pruebas de Locura, su avance y el botón para abandonar la actual.
 - **Runas:** el Altar de Runas, con los espacios, las runas grabadas y la maestría.
-- **Bestiario:** los Sellos Antiguos y los Fragmentos, el Altar de Invocación (x1 y x10, con garantías), la compra de Sellos con Conocimiento y la colección por Dominio, con la ilustración de cada criatura. Tocar una abre su tarjeta. Los encuentros flotan arriba de la pantalla, en cualquier pestaña. Ver [Bestiario](Bestiario).
+- **Bestiario:** los Sellos Antiguos y los Fragmentos, el Altar de Invocación (x1 y x10, con garantías), la compra de Sellos con Conocimiento y la colección por Dominio, con una fila por criatura (miniatura, nombre, rareza y nivel). Tocar una abre su tarjeta, con su historia y su ilustración, que se puede ver a pantalla completa y ampliar. Los encuentros flotan arriba de la pantalla, en cualquier pestaña. Ver [Bestiario](Bestiario).
 - **Éter:** el Éter, el avance del ciclo, qué se pierde y qué se conserva, las mejoras eternas y el botón **TRASCENDER** (pide tocar dos veces).
 - **Mutaciones:** el catálogo de las 20 mutaciones. Las que todavía no elegiste se ven como **???**; la activa lleva la marca **ACTIVA**.
 - **Estrellas:** las Estrellas, el Polvo Estelar, la alineación (con su cuenta atrás) y las seis mejoras estelares. Ver [Estrellas](Estrellas).

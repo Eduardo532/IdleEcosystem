@@ -44,6 +44,17 @@ class MechanicAchievementsTest {
         "Consagrar edificios" to { it.stat?.startsWith("consecrat") == true },
         "Maestría de runas" to { it.stat?.startsWith("mastery") == true },
         "Mutaciones" to { it.stat?.contains("mutation") == true },
+        "Laboratorio" to { it.stat?.startsWith("lab") == true || it.stat == AchievementStat.FEAT_LAB_EXACT },
+        "Bestiario" to {
+            it.stat?.startsWith("beast") == true || it.stat in setOf(
+                AchievementStat.SEALS_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED, AchievementStat.SUMMONS,
+                AchievementStat.SEALS_BOUGHT, AchievementStat.DAILY_BEST_STREAK, AchievementStat.SHARD_PICKS, AchievementStat.CLICK_SEALS
+            )
+        },
+        "Estrellas" to { it.stat in setOf(AchievementStat.STARS, AchievementStat.STARDUST_EARNED, AchievementStat.STAR_LEVELS, AchievementStat.ALIGNED_PURCHASES) || it.stat?.startsWith("star_") == true },
+        "Romper el Velo" to { it.stat?.startsWith("veil") == true || it.stat == AchievementStat.FEAT_VEIL_IN_TRIAL },
+        "Hitos de Trascendencia" to { it.stat == AchievementStat.TRANSCEND_MILESTONES || it.stat?.startsWith("auto_transcend") == true || it.stat == AchievementStat.FEAT_SHORTCUT },
+        "Constelaciones" to { it.stat == AchievementStat.CONSTELLATIONS || it.path in listOf(MadnessPaths.MIND, MadnessPaths.VOID, MadnessPaths.CULT, MadnessPaths.ARCANE) },
         "Pruebas de Locura" to { it.stat?.startsWith("trial") == true || it.stat == AchievementStat.TRIALS_COMPLETED || it.stat == AchievementStat.FEAT_TRIAL_FAST }
     )
 

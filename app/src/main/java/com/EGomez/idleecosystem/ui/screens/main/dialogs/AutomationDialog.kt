@@ -24,6 +24,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.logic.AutomationSettings
+import com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone
 import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -47,7 +48,9 @@ fun AutomationDialog(
     onToggleGrimoire: () -> Unit,
     onToggleAutoAscend: () -> Unit,
     onRitualSelected: (String?) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    transcendences: Int = 0,
+    onToggleAutoTranscend: () -> Unit = {}
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(
@@ -147,6 +150,25 @@ fun AutomationDialog(
                             RitualChoice(tr(ritual.name), settings.ritualId == ritual.id) { onRitualSelected(ritual.id) }
                         }
                     } else Locked(AscensionMilestone.AUTO_RITUAL)
+
+                    // --- Trascendencia automática (hito de Trascendencia), cuando la capa existe ---
+                    if (transcendences > 0) {
+                        SectionTitle(stringResource(R.string.automation_transcend))
+                        if (TranscendenceMilestone.AUTO_TRANSCEND.isReached(transcendences)) {
+                            SwitchRow(
+                                stringResource(R.string.automation_transcend_hint),
+                                settings.autoTranscend,
+                                onToggleAutoTranscend,
+                                modifier = Modifier.testTag(AUTO_TRANSCEND_TAG)
+                            )
+                        } else {
+                            Text(
+                                stringResource(R.string.automation_transcend_locked, TranscendenceMilestone.AUTO_TRANSCEND.transcendences),
+                                color = Color.Gray,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -200,3 +222,4 @@ private fun Locked(milestone: AscensionMilestone) {
 }
 
 const val AUTO_ASCEND_TAG = "auto_ascend"
+const val AUTO_TRANSCEND_TAG = "auto_transcend"

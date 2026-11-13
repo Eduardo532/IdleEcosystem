@@ -16,7 +16,7 @@ enum class TutorialStep(
     MENU_INTRO(
         "menu_intro",
         "Gestión Arcana",
-        "Necesitas expandirte. Despliega el Menú Inferior tocando la barra de título o la flecha para ver tus opciones de construcción. Las pestañas marcadas con ??? se descubren más adelante: el candado indica qué te falta.",
+        "Necesitas expandirte. Despliega el Menú Inferior tocando la flecha para ver tus opciones de construcción. Al principio solo hay una pestaña: cada sistema nuevo aparece cuando llegas a él, y la línea con candado al final de la lista te dice qué viene después.",
         "Al tener > 10 de conocimiento"
     ),
     FIRST_BUILDING(
@@ -28,7 +28,7 @@ enum class TutorialStep(
     BUY_MULTIPLIERS(
         "buy_multipliers",
         "Producción en Masa",
-        "Usa los botones sobre las pestañas para comprar varios edificios a la vez: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta.",
+        "Ya puedes comprar varios edificios a la vez con los botones sobre la lista: de 'x1' a 'x100', 'MAX' (todo lo que alcance tu saldo) y 'HITO' (justo lo que falta para el siguiente hito del edificio, donde se desbloquean mejoras y logros). La barra de cada edificio muestra cuánto falta.",
         "Tras comprar 5 edificios totales"
     ),
 
@@ -36,7 +36,7 @@ enum class TutorialStep(
     UPGRADES_TAB(
         "upgrades_tab",
         "Potenciación",
-        "Has desbloqueado la segunda pestaña (Grimorio). Aquí puedes adquirir tecnologías que multiplican la eficiencia de tus edificios y tus clicks.",
+        "Has descubierto el Grimorio, una pestaña nueva junto a Investigación. Aquí puedes adquirir tecnologías que multiplican la eficiencia de tus edificios y tus clicks.",
         "Al entrar a la pestaña 1 (Mejoras) por primera vez"
     ),
     TOP_BAR_INFO(
@@ -56,7 +56,7 @@ enum class TutorialStep(
     RITUALS_TAB(
         "rituals_tab",
         "Rituales",
-        "En la tercera pestaña (Rituales), puedes gastar tus Ecos para activar bonificaciones temporales masivas. Úsalos para romper límites de producción.",
+        "En la pestaña Rituales puedes gastar tus Ecos para activar bonificaciones temporales masivas. Úsalos para romper límites de producción.",
         "Al entrar a la pestaña 2 (Rituales) con Ecos > 0"
     ),
 
@@ -110,7 +110,7 @@ enum class TutorialStep(
     PRESTIGE_SHOP(
         "prestige_shop",
         "Tienda de Prestigio",
-        "Aquí puedes gastar tu Cordura Residual en mejoras eternas. Gastar Cordura reduce tu bono actual, pero las mejoras suelen valer la inversión.",
+        "El Mapa de Locura es un cielo con siete constelaciones: clic, edificios, sueño, producción, Cordura, el culto y lo arcano. Pellizca para acercar, toca una estrella para ver qué da y mejórala con Cordura Residual. Gastar Cordura reduce tu bono actual, pero las mejoras suelen valer la inversión.",
         "Al abrir el diálogo de la Tienda de Prestigio"
     ),
 
@@ -166,7 +166,7 @@ enum class TutorialStep(
     PACTS(
         "pacts",
         "Pactos con los Dioses",
-        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la pestaña Panteón verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
+        "Al Ascender puedes sellar un pacto para tu próxima vida. Cada dios da ventajas y exige un precio según su mito; 'Sin Pacto' te deja más Cordura. En la capa Ascensión, pestaña Panteón, verás a los dioses que ya puedes invocar y, con más Ascensiones, aparecerán otros más poderosos.",
         "Al poder Ascender por primera vez"
     ),
 
@@ -179,8 +179,8 @@ enum class TutorialStep(
 
     PATHS(
         "paths",
-        "Las Tres Sendas",
-        "Al final de las ramas de clic, edificios y sueño del Mapa de Locura esperan tres Sendas. Solo puedes recorrer una: al comprarla, las otras dos quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
+        "Las Sendas",
+        "En el centro de cada constelación del Mapa de Locura hay una Senda, que se abre cuando todas sus estrellas tienen al menos un nivel. Solo puedes recorrer una: al comprarla, las demás quedan selladas. Si quieres cambiar, al Ascender puedes abandonarla y recuperar toda la Cordura que pusiste en ella.",
         "Al poder comprar la primera Senda"
     ),
 
@@ -194,14 +194,14 @@ enum class TutorialStep(
     TRIALS(
         "trials",
         "Pruebas de Locura",
-        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la pestaña Panteón verás todas las Pruebas.",
+        "Ya puedes enfrentar Pruebas de Locura: vidas con una regla alterada y una meta de Conocimiento. Elígela al Ascender, junto con el pacto. Si llegas a la meta, la Prueba se supera y su recompensa queda para siempre; algunas adelantan a los Dioses Exteriores. En la capa Ascensión, pestaña Pruebas, verás todas.",
         "Al poder elegir la primera Prueba"
     ),
 
     RUNE_SLOTS(
         "rune_slots",
         "El Altar de Runas",
-        "Superar la Prueba te dio un Espacio de Runa. En la pestaña Panteón, vista Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
+        "Superar la Prueba te dio un Espacio de Runa. En la capa Ascensión, pestaña Runas, graba una runa que hayas atrapado varias veces: su bono queda activo para siempre y cambiarla es gratis. Cada runa da un bono distinto.",
         "Al ganar el primer espacio de runa"
     ),
 
@@ -222,7 +222,7 @@ enum class TutorialStep(
     TRANSCEND(
         "transcend",
         "Trascender",
-        "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Toca \"Éter · Trascender\" en el panel de Cordura para ver qué ganarías.",
+        "Cincuenta vidas y el ciclo pesa. Ahora puedes Trascender: reinicias casi todo (Cordura, Mapa, Ascensiones, Pruebas y runas grabadas) a cambio de Éter, que compra mejoras eternas que nunca se pierden. Los logros se quedan contigo. Abre la capa nueva, Trascendencia, para ver qué ganarías.",
         "Al tener 50 Ascensiones en el ciclo"
     ),
 
@@ -244,6 +244,41 @@ enum class TutorialStep(
         "mutations",
         "Mutaciones",
         "Tras Trascender, la realidad se vuelve maleable. Cada Ascensión te ofrece tres mutaciones al azar para la vida siguiente: cada una multiplica mucho un edificio (o algo más) y cobra un precio en otra cosa. Elige una en la confirmación de Ascender, o ninguna. Descubrirlas todas tiene su recompensa.",
+        "Tras la primera Trascendencia"
+    ),
+
+    TRANSCEND_MILESTONES(
+        "transcend_milestones",
+        "Hitos de Trascendencia",
+        "Cada Trascendencia te acerca a un Hito de Trascendencia: la automatización desde el primer segundo del ciclo, las primeras estrellas del Mapa, la Senda que no se pierde, la Trascendencia automática, más Atención y un umbral más corto. Míralos en la pestaña Éter de la capa Trascendencia.",
+        "Tras la primera Trascendencia"
+    ),
+
+    VEIL(
+        "veil",
+        "El Velo",
+        "Tu Conocimiento chocó con el Velo: por encima de él, la producción cae muy rápido. Asciende para empezar de nuevo, o supera las 10 Pruebas de Locura y rómpelo para siempre desde la pestaña Pruebas.",
+        "Al chocar con el Velo"
+    ),
+
+    STARS(
+        "stars",
+        "Estrellas y Polvo Estelar",
+        "Tras Trascender empiezan a nacer Estrellas, poco a poco y también sin conexión. Cada una da Polvo Estelar, que compra mejoras estelares en la pestaña Estrellas. Cada media hora las estrellas se ponen en posición unos minutos: entonces el Polvo cae x5.",
+        "Tras la primera Trascendencia"
+    ),
+
+    BESTIARY(
+        "bestiary",
+        "El Bestiario",
+        "Ascendiste y recibiste tu primer Sello Antiguo. En el Bestiario puedes gastar Sellos para invocar a 312 criaturas de los Mitos: cada una da un bono y las repetidas suben de nivel. Los Sellos llegan con las Ascensiones, las Pruebas, los logros, los encuentros, la ofrenda diaria, muy de vez en cuando al hacer clic, y comprándolos con Conocimiento.",
+        "Tras la primera Ascensión"
+    ),
+
+    LAB(
+        "lab",
+        "El Laboratorio de Miskatonic",
+        "En la Universidad Miskatonic se experimenta con lo que no debería medirse. En la pestaña Laboratorio, el Éter paga experimentos que elevan la producción, el clic, la Cordura y el Éter a un exponente: crecen más cuanto más grandes son.",
         "Tras la primera Trascendencia"
     )
 }

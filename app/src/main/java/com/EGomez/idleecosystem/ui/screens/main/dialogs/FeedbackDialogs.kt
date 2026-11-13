@@ -12,6 +12,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.ui.screens.main.components.MutationPicker
+import com.EGomez.idleecosystem.ui.screens.main.components.MutationGreen
 import com.EGomez.idleecosystem.ui.screens.main.components.TrialPicker
 import com.EGomez.idleecosystem.domain.model.PrestigeUpgrade
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
@@ -29,7 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -94,35 +96,87 @@ fun AscendDialog(
     selectedMutation: Mutation? = null,
     onMutationSelected: (Mutation?) -> Unit = {}
 ) {
+    // Cada elección se abre en su propio selector; el resumen queda corto
+    var open by remember { mutableStateOf<AscendChoice?>(null) }
+    var showDetails by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.ascend_question), color = AncientGold, fontWeight = FontWeight.Black) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.ascend_lose), color = Color.White)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.ascend_keep), color = Color.Gray, fontSize = 13.sp)
-                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     stringResource(R.string.ascend_gain, sanityGainFormatted),
                     color = ArcanePurple,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
-                // Cuánto más rendiría esperar: la Cordura crece con la raíz del Conocimiento
-                if (pacing != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(stringResource(R.string.ascend_generated, pacing.generated), color = Color.Gray, fontSize = 12.sp)
-                    Text(stringResource(R.string.ascend_next_point, pacing.nextGain, pacing.nextAt), color = Color.Gray, fontSize = 12.sp)
-                    if (pacing.doubleGain != null && pacing.doubleAt != null) {
-                        Text(stringResource(R.string.ascend_double, pacing.doubleGain, pacing.doubleAt), color = Color.Gray, fontSize = 12.sp)
-                    }
+                // Una sola pista de ritmo: cuándo se duplicaría (o el siguiente punto)
+                pacing?.let {
+                    Text(
+                        if (it.doubleAt != null) stringResource(R.string.sanity_double_short, it.doubleAt)
+                        else stringResource(R.string.ascend_next_point, it.nextGain, it.nextAt),
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
                 }
-                if (pacts.isNotEmpty()) PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
-                if (trials.isNotEmpty()) TrialPicker(trials, completedTrials, selectedTrial, onTrialSelected)
-                if (mutationOffer.isNotEmpty()) MutationPicker(mutationOffer, selectedMutation, onMutationSelected)
-                if (activePath != null) AbandonPathOption(activePath, abandonPath, onAbandonPathChanged)
-                if (ascensions != null) AscensionMilestoneList(ascensions)
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // La próxima vida: una fila por elección
+                if (pacts.isNotEmpty()) {
+                    ChoiceRow(stringResource(R.string.ascend_row_pact), tr(selectedPact.godName), selectedPact.sigilColor(), AscendChoice.PACT) { open = it }
+                }
+                if (trials.isNotEmpty()) {
+                    ChoiceRow(
+                        stringResource(R.string.ascend_row_trial),
+                        selectedTrial?.let { tr(it.title) } ?: stringResource(R.string.trial_none),
+                        if (selectedTrial != null) Color(0xFFCF6679) else Color.Gray,
+                        AscendChoice.TRIAL
+                    ) { open = it }
+                }
+                if (mutationOffer.isNotEmpty()) {
+                    ChoiceRow(
+                        stringResource(R.string.ascend_row_mutation),
+                        selectedMutation?.let { tr(it.title) } ?: stringResource(R.string.mutation_none),
+                        if (selectedMutation != null) MutationGreen else Color.Gray,
+                        AscendChoice.MUTATION
+                    ) { open = it }
+                }
+                if (activePath != null) {
+                    ChoiceRow(
+                        stringResource(R.string.ascend_row_path),
+                        stringResource(if (abandonPath) R.string.ascend_path_abandon else R.string.ascend_path_keep, tr(activePath.name)),
+                        if (abandonPath) Color(0xFFE57373) else AncientGold,
+                        AscendChoice.PATH
+                    ) { open = it }
+                }
+
+                // Lo demás, plegado: qué se pierde, el ritmo completo y los hitos
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDetails = !showDetails }
+                        .padding(vertical = 10.dp)
+                        .testTag(ASCEND_DETAILS_TAG)
+                ) {
+                    Text(if (showDetails) "▾" else "▸", color = Color.Gray, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(R.string.ascend_details), color = Color.Gray, fontSize = 12.sp)
+                }
+                if (showDetails) {
+                    Text(stringResource(R.string.ascend_lose), color = Color.White, fontSize = 13.sp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(stringResource(R.string.ascend_keep), color = Color.Gray, fontSize = 12.sp)
+                    if (pacing != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(stringResource(R.string.ascend_generated, pacing.generated), color = Color.Gray, fontSize = 12.sp)
+                        Text(stringResource(R.string.ascend_next_point, pacing.nextGain, pacing.nextAt), color = Color.Gray, fontSize = 12.sp)
+                        if (pacing.doubleGain != null && pacing.doubleAt != null) {
+                            Text(stringResource(R.string.ascend_double, pacing.doubleGain, pacing.doubleAt), color = Color.Gray, fontSize = 12.sp)
+                        }
+                    }
+                    if (ascensions != null) AscensionMilestoneList(ascensions)
+                }
             }
         },
         containerColor = Color(0xFF1E1E1E),
@@ -138,7 +192,66 @@ fun AscendDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = Color.Gray) }
         }
     )
+
+    // El selector de la elección abierta, encima del resumen
+    open?.let { choice ->
+        AlertDialog(
+            onDismissRequest = { open = null },
+            containerColor = Color(0xFF1E1E1E),
+            modifier = Modifier.testTag(ASCEND_PICKER_TAG),
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    when (choice) {
+                        AscendChoice.PACT -> PactPicker(pacts, selectedPact, onPactSelected, buildingNames)
+                        AscendChoice.TRIAL -> TrialPicker(trials, completedTrials, selectedTrial, onTrialSelected)
+                        AscendChoice.MUTATION -> MutationPicker(mutationOffer, selectedMutation, onMutationSelected)
+                        AscendChoice.PATH -> activePath?.let { AbandonPathOption(it, abandonPath, onAbandonPathChanged) }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { open = null },
+                    colors = ButtonDefaults.buttonColors(containerColor = AncientGold, contentColor = Color.Black),
+                    modifier = Modifier.testTag(ASCEND_PICKER_DONE_TAG)
+                ) { Text(stringResource(R.string.ascend_choice_done), fontWeight = FontWeight.Bold) }
+            }
+        )
+    }
 }
+
+/** Las elecciones de la próxima vida que se abren desde la confirmación de Ascender. */
+enum class AscendChoice { PACT, TRIAL, MUTATION, PATH }
+
+/** Una fila de la confirmación: qué se elige, lo elegido y una flecha para cambiarlo. */
+@Composable
+private fun ChoiceRow(label: String, value: String, valueColor: Color, choice: AscendChoice, onOpen: (AscendChoice) -> Unit) {
+    Surface(
+        onClick = { onOpen(choice) },
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF262626),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).testTag(ASCEND_ROW_TAG + choice.name.lowercase())
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, color = Color.Gray, fontSize = 13.sp, modifier = Modifier.width(76.dp))
+            Text(
+                value,
+                color = valueColor,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Text("›", color = Color.Gray, fontSize = 18.sp)
+        }
+    }
+}
+
+const val ASCEND_ROW_TAG = "ascend_row_"
+const val ASCEND_DETAILS_TAG = "ascend_details"
+const val ASCEND_PICKER_TAG = "ascend_picker"
+const val ASCEND_PICKER_DONE_TAG = "ascend_picker_done"
 
 /** Cambiar de Senda solo se puede al Ascender: se abandona y se recupera su Cordura. */
 @Composable
@@ -266,30 +379,40 @@ fun milestoneText(milestone: AscensionMilestone): Int = when (milestone) {
 private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Unit, buildingNames: Map<String, String>) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.pact_choose_title), color = AncientGold, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(vertical = 6.dp)
-    ) {
-        pacts.forEach { pact ->
-            val isSelected = pact == selected
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .width(64.dp)
-                    .border(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) pact.sigilColor() else Color(0xFF333333),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    .clickable { onSelect(pact) }
-                    .padding(4.dp)
-                    .testTag("$PACT_CHOICE_TAG${pact.id}")
-            ) {
-                PactSigil(pact, Modifier.size(44.dp))
-                Text(tr(pact.godName), color = Color.White, fontSize = 9.sp, maxLines = 1)
+    // Todos los dioses a la vista en una cuadrícula que llena el ancho (v0.19.4: antes
+    // quedaba un hueco a la derecha); las columnas dependen del ancho disponible
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        val columns = (maxWidth / PACT_CELL_MIN_WIDTH).toInt().coerceIn(3, 6)
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            pacts.chunked(columns).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { pact ->
+                        val isSelected = pact == selected
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) pact.sigilColor() else Color(0xFF333333),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                .clickable { onSelect(pact) }
+                                .padding(vertical = 6.dp, horizontal = 2.dp)
+                                .testTag("$PACT_CHOICE_TAG${pact.id}")
+                        ) {
+                            PactSigil(pact, Modifier.size(52.dp))
+                            Text(
+                                tr(pact.godName),
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                }
             }
         }
     }
@@ -298,4 +421,6 @@ private fun PactPicker(pacts: List<Pact>, selected: Pact, onSelect: (Pact) -> Un
 }
 
 const val PACT_CHOICE_TAG = "pact_choice_"
+/** Ancho mínimo de cada dios en el selector de pactos. */
+private val PACT_CELL_MIN_WIDTH = 68.dp
 

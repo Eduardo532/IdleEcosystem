@@ -9,7 +9,7 @@ Reunir **Conocimiento**. Con él compras edificios que producen más Conocimient
 1. **Investiga.** Toca el botón central de **INVESTIGAR**: cada toque da Conocimiento. Si **mantienes el dedo**, sigue haciendo clics solo (8 por segundo).
 2. **Compra tu primer edificio.** Abre el menú de abajo (desliza o toca la flecha). La **Sinapsis Arcana** aumenta el poder de cada clic; las **Notas Desordenadas** producen Conocimiento solas.
 3. **Desbloquea el resto.** Cada edificio aparece cuando tienes al menos uno del anterior.
-4. **Descubre los sistemas.** En una partida nueva, algunas pestañas se ven como **???** con un candado y lo que falta para descubrirlas:
+4. **Descubre los sistemas.** Al principio el menú tiene una sola pestaña. Cada sistema aparece cuando llegas a él, con un aviso y un punto dorado, y al final de la lista una línea con candado te dice cuál es el próximo y qué falta. Ver [La interfaz por capas](Interfaz).
 
 | Sistema | Se descubre al... |
 |---|---|
@@ -23,7 +23,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al cerrar el ju
 
 - **Arriba al centro:** tu Conocimiento y la producción por segundo.
 - **Botón de logros (arriba a la derecha):** la línea dorada de su borde inferior avanza hacia tu **próxima meta**, el logro pendiente más cercano. Ábrelo para verla completa.
-- **Etiquetas de colores bajo el contador:** los efectos activos de runas, con su tiempo restante.
+- **Chips bajo el contador:** los potenciadores activos, cada uno con el nombre y el color de su runa, lo que da, los segundos que quedan y una barra que se vacía.
 
 ## Tutoriales
 

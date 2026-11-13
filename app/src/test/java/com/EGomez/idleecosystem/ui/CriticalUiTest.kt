@@ -1,6 +1,7 @@
 package com.EGomez.idleecosystem.ui
 
 import android.app.Application
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -22,8 +23,18 @@ import com.EGomez.idleecosystem.ui.screens.main.dialogs.ABANDON_PATH_TAG
 import androidx.compose.ui.test.assertTextContains
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AscendPacing
 import com.EGomez.idleecosystem.ui.screens.main.dialogs.AchievementsDialog
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.TranscendDialog
-import com.EGomez.idleecosystem.ui.screens.main.dialogs.ETERNAL_BUY_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.EtherPanel
+import com.EGomez.idleecosystem.ui.screens.main.components.TranscendMilestoneList
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_VIEW_TOGGLE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_CHIP_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_NODE_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.MAP_LIST_TAG
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.hasTestTag
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_DETAILS_TAG
+import com.EGomez.idleecosystem.ui.screens.main.dialogs.ASCEND_PICKER_DONE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.ETERNAL_BUY_TAG
 import com.EGomez.idleecosystem.domain.model.Trial
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.foundation.verticalScroll
@@ -56,7 +67,19 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertCountEquals
 import com.EGomez.idleecosystem.ui.screens.main.components.InfoSection
 import com.EGomez.idleecosystem.ui.screens.main.components.MenuSection
-import com.EGomez.idleecosystem.ui.screens.main.components.LOCKED_ASCENSION_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.NEXT_UNLOCK_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MENU_LAYER_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MENU_TAB_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.NEW_BADGE_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.BUY_MULTIPLIER_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MUTATION_ROW_TAG
+import com.EGomez.idleecosystem.ui.screens.main.components.MutationCatalog
+import com.EGomez.idleecosystem.ui.screens.BUFF_CHIP_TAG
+import com.EGomez.idleecosystem.ui.components.RunePlate
+import com.EGomez.idleecosystem.ui.components.RuneCaughtNotice
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
+import com.EGomez.idleecosystem.domain.model.RuneCatalog
 import com.EGomez.idleecosystem.ui.screens.main.components.AUTO_BUILDINGS_TAG
 import com.EGomez.idleecosystem.domain.logic.SystemReveal
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
@@ -261,9 +284,13 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Senda de la Mano · continúa").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "path").performClick()
         compose.onNodeWithText("recuperas", substring = true).assertExists()
         compose.onNodeWithTag(ABANDON_PATH_TAG).performClick()
         assertTrue(abandon)
+        compose.onNodeWithTag(ASCEND_PICKER_DONE_TAG).performClick()
+        compose.onNodeWithText("Senda de la Mano · se abandona").assertExists()
     }
 
     @Test
@@ -322,6 +349,8 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Sin Prueba").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "trial").performClick()
         compose.onNodeWithTag(TRIAL_CHOICE_TAG + "hunger").performClick()
         assertEquals(Trial.HUNGER, chosen)
         compose.onNodeWithText("Los edificios cuestan x10.").assertExists()
@@ -341,6 +370,7 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "mutation").performClick()
         compose.onNodeWithText("Mutación de la próxima vida").assertExists()
         compose.onNodeWithTag(MUTATION_CHOICE_TAG + "burning_synapse").performClick()
         assertEquals(Mutation.BURNING_SYNAPSE, chosen)
@@ -356,7 +386,7 @@ class CriticalUiTest {
             androidx.compose.foundation.layout.Column(
                 androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
             ) {
-                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER)) { abandoned++ }
+                TrialList(ascensions = 5, activeTrial = Trial.SILENCE, progress = 0.4f, completed = setOf(Trial.HUNGER), onAbandon = { abandoned++ })
             }
         }
 
@@ -411,7 +441,7 @@ class CriticalUiTest {
             if (showInfo) TideInfoDialog(TidePhase.HIGH) { showInfo = false }
         }
 
-        compose.onNodeWithText("🌊 Marea Alta · 4:32").assertExists()
+        compose.onNodeWithText("Marea Alta · 4:32").assertExists()
         compose.onNodeWithText("Luego: Marea Baja").assertExists()
         compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
         compose.onNodeWithText("Marea Muerta").assertExists()
@@ -422,10 +452,14 @@ class CriticalUiTest {
         var transcended = 0
         var bought: String? = null
         compose.setContent {
-            TranscendDialog(
-                cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
-                onBuyEternal = { bought = it }, onTranscend = { transcended++ }, onDismiss = {}
-            )
+            androidx.compose.foundation.layout.Column(
+                modifier = androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                EtherPanel(
+                    cycleAscensions = 50, etherGain = 14, ether = 3, eternalLevels = mapOf("trials" to 1),
+                    onBuyEternal = { bought = it }, onTranscend = { transcended++ }
+                )
+            }
         }
 
         compose.onNodeWithText("Trascender (+14 Éter)").performClick()
@@ -435,6 +469,201 @@ class CriticalUiTest {
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "fire").performScrollTo().performClick()
         assertEquals("fire", bought)
         compose.onNodeWithTag(ETERNAL_BUY_TAG + "trials").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the transcendence milestones show what was reached and what comes next`() {
+        compose.setContent { TranscendMilestoneList(transcendences = 3) }
+
+        compose.onNodeWithText("Hitos de Trascendencia (3/6)").assertExists()
+        compose.onNodeWithText("Senda Eterna").assertExists()
+        // El siguiente se lee entero; los demás, solo su nombre y cuánto falta
+        compose.onNodeWithText("Puedes Trascender sola cuando el Éter que ganarías iguale al que tienes.").assertExists()
+        compose.onNodeWithText("Trascendencias: 3/5").assertExists()
+        compose.onNodeWithText("El Atajo").assertExists()
+        compose.onNodeWithText("Trascender pide 40 Ascensiones en el ciclo en lugar de 50.").assertDoesNotExist()
+    }
+
+    @Test
+    fun `automatic transcendence appears in the automation panel with its milestone`() {
+        var toggled = 0
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.AutomationDialog(
+                settings = com.EGomez.idleecosystem.domain.logic.AutomationSettings(), ascensions = 50,
+                buildings = emptyList(), rituals = emptyList(),
+                onBudgetSelected = {}, onToggleBuildings = {}, onToggleBuildingExcluded = {}, onToggleGrimoire = {},
+                onToggleAutoAscend = {}, onRitualSelected = {}, onDismiss = {},
+                transcendences = 5, onToggleAutoTranscend = { toggled++ }
+            )
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.AUTO_TRANSCEND_TAG).performScrollTo().performClick()
+        assertEquals(1, toggled)
+    }
+
+    @Test
+    fun `the veil card shows the trials left and breaks with all of them`() {
+        var broke = 0
+        var completed by mutableStateOf(4)
+        compose.setContent { com.EGomez.idleecosystem.ui.screens.main.components.VeilCard(completed, broken = false, onBreak = { broke++ }) }
+
+        compose.onNodeWithText("Pruebas superadas: 4/10").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VEIL_BREAK_TAG).assertDoesNotExist()
+
+        completed = 10
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VEIL_BREAK_TAG).performClick()
+        assertEquals(1, broke)
+    }
+
+    @Test
+    fun `the stars tab shows the alignment and buys an affordable upgrade`() {
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.StarsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(stars = 12.4, stardust = 40.0, aligned = true, secondsLeft = 95),
+                    onBuy = { bought += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("✦ 12").assertExists()
+        compose.onNodeWithText("✦ Las estrellas están en posición: Polvo x5 · quedan 1:35").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "ether").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("light"), bought)
+    }
+
+    @Test
+    fun `the bestiary card shows the lore and bonus of a creature`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 2), seals = 30),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}
+                )
+            }
+        }
+
+        compose.onNodeWithText("1 / 312").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
+        val inCard = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_CARD_TAG))
+        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and inCard).assertExists()
+        compose.onNodeWithText("“El que se alza del fondo cuando la marea muere.”").assertExists()
+        compose.onNodeWithText("+30 % producción").assertExists()
+        // v0.19.12: la historia larga y el visor con zoom
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_HISTORY_TAG).performScrollTo()
+            .assertTextEquals(com.EGomez.idleecosystem.domain.logic.BeastLore.history("deep_dagon")!!)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_IMAGE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_CLOSE_TAG).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the collection shows names, rarity and level next to small pictures`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 4)),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}
+                )
+            }
+        }
+
+        val dagon = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon"))
+        compose.onNode(androidx.compose.ui.test.hasText("Padre Dagón") and dagon, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Primigenia · Nv 4") and dagon, useUnmergedTree = true).assertExists()
+        val unknown = androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling"))
+        compose.onNode(androidx.compose.ui.test.hasText("???") and unknown, useUnmergedTree = true).assertExists()
+        compose.onNode(androidx.compose.ui.test.hasText("Cría de Innsmouth") and unknown, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unknown creature's picture cannot be opened`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.CreatureCardContent(
+                com.EGomez.idleecosystem.domain.logic.Bestiary.beast("deep_spawnling")!!, level = 0, shards = 0, onPick = {}, onDismiss = {}
+            )
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_IMAGE_TAG).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_VIEWER_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_HISTORY_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `summoning buttons spend seals and a missing creature can be chosen with shards`() {
+        val summons = mutableListOf<Int>()
+        val picked = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(seals = 50, shards = 40),
+                    onSummon = { summons += it }, onBuySeals = {}, onPickWithShards = { picked += it }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SUMMON_ONE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SUMMON_TEN_TAG).performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf(1), summons)
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling").performScrollTo().performClick()
+        compose.onNode(androidx.compose.ui.test.hasText("???") and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag(com.EGomez.idleecosystem.ui.screens.main.components.CREATURE_CARD_TAG))).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.PICK_WITH_SHARDS_TAG).performClick()
+        assertEquals(listOf("deep_spawnling"), picked)
+    }
+
+    @Test
+    fun `an encounter shows a silhouette and gives seals`() {
+        var caught = 0
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner("deep_dagon", 30, onCatch = { caught++ })
+        }
+
+        compose.onNodeWithText("Algo acecha…").assertExists()
+        compose.onNodeWithText("Padre Dagón").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ENCOUNTER_CATCH_TAG).performClick()
+        assertEquals(1, caught)
+    }
+
+    @Test
+    fun `summon results show what came out`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.SummonResultsDialog(
+                listOf(com.EGomez.idleecosystem.domain.logic.SummonResult("deep_dagon", isNew = true, level = 1, shards = 0)),
+                onDismiss = {}
+            )
+        }
+        compose.mainClock.advanceTimeBy(1000)
+        compose.onNodeWithText("Padre Dagón").assertExists()
+        compose.onNodeWithText("NUEVA").assertExists()
+    }
+
+    @Test
+    fun `the laboratory shows each exponent and buys an affordable experiment`() {
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.LabPanel(5, mapOf("armitage" to 2), onBuy = { bought += it })
+            }
+        }
+
+        compose.onNodeWithText("Ahora: ^1.02").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "ibn_ghazi").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "pnakotic").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("ibn_ghazi"), bought)
     }
 
     @Test
@@ -503,6 +732,10 @@ class CriticalUiTest {
             )
         }
 
+        // A la vista, solo cuándo se duplica; el resto está en los detalles
+        compose.onNodeWithText("x2 al generar 3.60e+07").assertExists()
+        compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertDoesNotExist()
+        compose.onNodeWithTag(ASCEND_DETAILS_TAG).performClick()
         compose.onNodeWithText("Generado en esta vida: 9.50e+06").assertExists()
         compose.onNodeWithText("Siguiente punto: +4 al llegar a 1.60e+07").assertExists()
         compose.onNodeWithText("Para duplicar: +6 al llegar a 3.60e+07").assertExists()
@@ -548,41 +781,129 @@ class CriticalUiTest {
 
     @Composable
     private fun Menu(
-        selectedTab: Int,
-        revealed: SystemReveal,
+        selectedTab: MenuTab,
+        unlocks: MenuUnlocks = MenuUnlocks.ALL,
         buildings: List<Building> = emptyList(),
         upgrades: List<com.EGomez.idleecosystem.domain.model.Upgrade> = emptyList(),
         ascensions: Int = 0
     ) {
         MenuSection(
             isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
-            selectedTabIndex = selectedTab, onTabSelected = {},
+            selectedTab = selectedTab, onTabSelected = {},
             buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
             buildings = buildings, upgrades = upgrades, rituals = emptyList(),
             currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
             buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
             onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
             prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
-            revealed = revealed, ascensions = ascensions, onAscendClicked = {}, onShowPrestigeShop = {}
+            unlocks = unlocks, ascensions = ascensions, onAscendClicked = {}, onOpenMadnessMap = {}
         )
     }
 
     @Test
-    fun `undiscovered systems show their requirement`() {
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(false, false, false)) }
+    fun `a new player sees only research and the next discovery`() {
+        // Aunque se pida el Grimorio, sin descubrirlo se muestra Investigación
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE, unlocks = MenuUnlocks()) }
 
         compose.onNodeWithText("Grimorio").assertDoesNotExist()
-        compose.onNodeWithText("Reúne 250 de Conocimiento para descubrir el Grimorio.", substring = true).assertExists()
-        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertExists()
+        compose.onNodeWithTag(MENU_TAB_TAG + "research").assertDoesNotExist()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "life").assertDoesNotExist()
+        compose.onNodeWithText("Próximo descubrimiento: reúne 250 de Conocimiento.").assertExists()
         compose.onNodeWithText("ASCENDER").assertDoesNotExist()
+        compose.onNodeWithTag(BUY_MULTIPLIER_TAG + "1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `tabs and layers appear as they are discovered and new ones are marked`() {
+        var unlocks by mutableStateOf(MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE)))
+        compose.setContent {
+            MenuSection(
+                isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+                selectedTab = MenuTab.RESEARCH, onTabSelected = {},
+                buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+                buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+                currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+                buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+                onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+                prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+                unlocks = unlocks, newTabs = setOf(MenuTab.GRIMOIRE),
+                onAscendClicked = {}, onOpenMadnessMap = {}
+            )
+        }
+
+        // Dos pestañas de la Vida: fila de pestañas, sin fila de capas
+        compose.onNodeWithTag(MENU_TAB_TAG + "grimoire").assertExists()
+        compose.onNodeWithTag(NEW_BADGE_TAG, useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "life").assertDoesNotExist()
+        compose.onNodeWithText("Próximo descubrimiento: encuentra un Eco al investigar.").assertExists()
+
+        // Con la Ascensión aparece la capa nueva y la barra de ASCENDER
+        unlocks = MenuUnlocks(setOf(MenuTab.RESEARCH, MenuTab.GRIMOIRE, MenuTab.RITUALS, MenuTab.SANITY))
+        compose.onNodeWithTag(MENU_LAYER_TAG + "ascension").assertExists()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "transcendence").assertDoesNotExist()
+        compose.onNodeWithText("ASCENDER").assertExists()
+        compose.onNodeWithText("Próximo descubrimiento: Asciende por primera vez.").assertExists()
     }
 
     @Test
     fun `discovered systems look as before`() {
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal()) }
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE) }
 
-        compose.onNodeWithTag(LOCKED_ASCENSION_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(NEXT_UNLOCK_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(MENU_LAYER_TAG + "transcendence").assertExists()
         compose.onNodeWithText("ASCENDER").assertExists()
+    }
+
+    @Test
+    fun `a rune boost chip names its rune and what it gives`() {
+        val buff = RuneBuff(id = "t1_blood", multiplier = 10.0, expirationTime = 15_000L, description = "", durationMs = 15_000L)
+        compose.setContent { ActiveBuffsDisplay(listOf(buff), clock = { 0L }) }
+
+        compose.onNodeWithTag(BUFF_CHIP_TAG + "t1_blood").assertExists()
+        compose.onNodeWithText("Runa de Sangre").assertExists()
+        compose.onNodeWithText("x10 · 15s").assertExists()
+    }
+
+    @Test
+    fun `a rune plate shows its tier, its name and its real effect`() {
+        compose.setContent { RunePlate(RuneCatalog.T1_BLOOD, masteryLevel = 0) }
+
+        compose.onNodeWithText("COMÚN · DESLIZA").assertExists()
+        compose.onNodeWithText("Runa de Sangre").assertExists()
+        compose.onNodeWithText("Producción x10 durante 15 s").assertExists()
+    }
+
+    @Test
+    fun `rune texts follow mastery and instant rewards`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                // Maestría V: el potenciador dura un 50 % más
+                RunePlate(RuneCatalog.T1_ASH, masteryLevel = 5)
+                RuneCaughtNotice(RuneCatalog.T1_BONE, masteryLevel = 0)
+                RuneCaughtNotice(RuneCatalog.T3_CTHULHU, masteryLevel = 0)
+            }
+        }
+
+        compose.onNodeWithText("Producción x8 durante 30 s").assertExists()
+        compose.onNodeWithText("+2 min de producción al instante").assertExists()
+        compose.onNodeWithText("Producción x30 durante 60 s y +1 Eco").assertExists()
+    }
+
+    @Test
+    fun `the mutation catalog hides the mutations not yet chosen`() {
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                modifier = androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                MutationCatalog(seen = setOf("feverish_notes"), active = com.EGomez.idleecosystem.domain.model.Mutation.FEVERISH_NOTES)
+            }
+        }
+
+        compose.onNodeWithText("Mutaciones descubiertas: 1 de 20").assertExists()
+        compose.onNodeWithText("Notas Febriles").assertExists()
+        compose.onNodeWithText("ACTIVA").assertExists()
+        compose.onNodeWithTag(MUTATION_ROW_TAG + "hungry_void").assertExists()
+        compose.onNodeWithText("Vacío Hambriento").assertDoesNotExist()
     }
 
     @Test
@@ -604,7 +925,7 @@ class CriticalUiTest {
         val catalog = com.EGomez.idleecosystem.domain.logic.BuildingCatalog.create()
         val synergy = com.EGomez.idleecosystem.domain.logic.BuildingSynergies.create(catalog)
             .first { it.sourceBuildingId == "b_notes" }
-        compose.setContent { Menu(selectedTab = 1, revealed = SystemReveal(), buildings = catalog, upgrades = listOf(synergy)) }
+        compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE, buildings = catalog, upgrades = listOf(synergy)) }
 
         compose.onNodeWithText("Efecto: +1% por unidad de Notas Desordenadas").assertExists()
         compose.onNodeWithText("Efecto: x1").assertDoesNotExist()
@@ -613,7 +934,7 @@ class CriticalUiTest {
     @Test
     fun `the auto chip appears with the building autobuyer milestone`() {
         var ascensions by mutableStateOf(4)
-        compose.setContent { Menu(selectedTab = 0, revealed = SystemReveal(), ascensions = ascensions) }
+        compose.setContent { Menu(selectedTab = MenuTab.RESEARCH, ascensions = ascensions) }
 
         compose.onNodeWithTag(AUTO_BUILDINGS_TAG).assertDoesNotExist()
         ascensions = 5
@@ -624,10 +945,32 @@ class CriticalUiTest {
     fun `the ascend dialog lists the milestones and marks the next one`() {
         compose.setContent { AscendDialog(sanityGainFormatted = "3", onConfirm = {}, onDismiss = {}, ascensions = 2) }
 
+        compose.onNodeWithText("Esta será tu Ascensión n.º 3.").assertDoesNotExist()
+        compose.onNodeWithTag(ASCEND_DETAILS_TAG).performClick()
         compose.onNodeWithText("Esta será tu Ascensión n.º 3.").assertExists()
         compose.onNodeWithText("✓ 1: Empiezas cada vida con 10 Sinapsis.").assertExists()
         compose.onNodeWithText("★ 3: Conservas las mejoras de clic del Grimorio.").assertExists()
         compose.onNodeWithText("· 5: Autocomprador de edificios.").assertExists()
+    }
+
+    @Test
+    fun `the madness map list shows constellations and locked paths`() {
+        val upgrades = com.EGomez.idleecosystem.domain.logic.PrestigeShopManager().upgrades.map { it.copy() }
+        compose.setContent { PrestigeShopDialog(upgrades, "50", BigDecimal(50), {}, {}) }
+
+        compose.onNodeWithTag(MAP_VIEW_TOGGLE_TAG + "list").performClick()
+        compose.onNodeWithTag(MAP_CHIP_TAG + "mind").performClick()
+        compose.onNodeWithText("LA MENTE").assertExists()
+        compose.onNodeWithTag(MAP_LIST_TAG).performScrollToNode(hasTestTag(MAP_NODE_ROW_TAG + MadnessPaths.MIND))
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + MadnessPaths.MIND).performClick()
+        compose.onNodeWithText("Ilumina toda la constelación para abrir su Senda.").assertExists()
+        compose.onNodeWithText("Constelación incompleta").assertIsNotEnabled()
+
+        compose.onNodeWithTag(MAP_CHIP_TAG + "all").performClick()
+        compose.onNodeWithTag(MAP_LIST_TAG).performScrollToNode(hasTestTag(MAP_NODE_ROW_TAG + "pu_core"))
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + "pu_core").performClick()
+        compose.onNodeWithText("Siguiente nivel: Producción x1.10").assertExists()
+        compose.onNodeWithText("MEJORAR", substring = true).assertIsEnabled()
     }
 
     @Test
@@ -683,7 +1026,7 @@ class CriticalUiTest {
 
     @Test
     fun `the pantheon shows unlocked gods and hides the rest`() {
-        compose.setContent { Menu(selectedTab = 3, revealed = SystemReveal(), ascensions = 0) }
+        compose.setContent { Menu(selectedTab = MenuTab.PANTHEON, ascensions = 0) }
 
         // En la primera Ascensión ya se puede elegir a Cthulhu
         compose.onNodeWithText("Cthulhu").assertExists()
@@ -732,6 +1075,8 @@ class CriticalUiTest {
             )
         }
 
+        compose.onNodeWithText("Sin Pacto").assertExists()
+        compose.onNodeWithTag(ASCEND_ROW_TAG + "pact").performClick()
         compose.onNodeWithText("Pacto para la próxima vida").assertExists()
         compose.onNodeWithText("+ Cordura ganada al Ascender x1.25").assertExists()
         compose.onNodeWithTag("${PACT_CHOICE_TAG}cthulhu").performClick()
@@ -755,14 +1100,14 @@ class CriticalUiTest {
     }
 
     @Test
-    fun `the attention bar appears after the first ascension and opens the dialog`() {
+    fun `the attention card appears after the first ascension and opens the dialog`() {
         var points by mutableStateOf(0)
-        var tab by mutableStateOf(0)
+        var tab by mutableStateOf(MenuTab.SANITY)
         var opened = 0
         compose.setContent {
             MenuSection(
                 isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
-                selectedTabIndex = tab, onTabSelected = {},
+                selectedTab = tab, onTabSelected = {},
                 buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
                 buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
                 currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
@@ -770,7 +1115,7 @@ class CriticalUiTest {
                 onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
                 prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
                 attentionPoints = points, onOpenAttention = { opened++ },
-                attention = mapOf("notes" to 1), onAscendClicked = {}, onShowPrestigeShop = {}
+                attention = mapOf("notes" to 1), onAscendClicked = {}, onOpenMadnessMap = {}
             )
         }
 
@@ -778,8 +1123,8 @@ class CriticalUiTest {
         points = 1
         compose.onNodeWithTag(ATTENTION_BAR_TAG).assertExists().performClick()
         assertEquals(1, opened)
-        // Solo vive en la pestaña Investigación
-        tab = 2
+        // Vive en la pestaña Cordura, no en Investigación
+        tab = MenuTab.RESEARCH
         compose.onNodeWithTag(ATTENTION_BAR_TAG).assertDoesNotExist()
     }
 }

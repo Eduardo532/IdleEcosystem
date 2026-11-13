@@ -86,10 +86,17 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Grabar una runa pide atraparla 10 veces (nivel 1), 5 (nivel 2) o 3 (nivel 3). Hay hasta 4 espacios, uno por cada Prueba que los da.
 - Cada runa grabada da un bono pasivo propio que se multiplica con el pacto. *(Código: `RuneEngraving`; test: `RuneEngravingTest`.)*
 
+## Constelaciones del Mapa *(v0.19.2)*
+
+- Siete constelaciones reales; desde la v0.19.4 cada estrella de cada figura es un nodo: 54 nodos (con El Despertar) y 7 Sendas. Cada estrella pide una vecina encendida de su figura. *(Tests: `MadnessPathsTest`, `SkyLayoutTest`.)*
+- Una Senda se abre con toda su constelación encendida (o si ya se recorría) y sigue siendo excluyente.
+- Los nodos de efecto de pacto escalan lineal: `1 + (efecto − 1) × nivel` (Planos Imposibles al 10: costos x0,70).
+- Calma Antigua: la Locura que se gana x`(1 − 0,08 × nivel)`, mínimo x0,1. Ojo Interior: +1 de Atención por nivel (máx. 3).
+- El objetivo del logro "El Mapa Completo" es el número de nodos sin Sendas (54). *(Test: `MechanicAchievementsTest`.)*
+
 ## Medidor de Locura
 
-- Sube: clic +0,02, runa +2/+4/+8, ritual +5, Convergencia +20. Baja 0,2 por segundo (también sin conexión); la Letanía de Calma, 40.
-- Mantener pulsado (8 clics/s = +0,16/s) nunca supera lo que baja sola. *(Test: `MadnessMeterTest`.)*
+- Sube: clic `0,12 × (1 − Locura/125)`, runa +2/+4/+8, ritual +5, Convergencia +20. Baja por segundo `0,03 + 0,004 × Locura` (fórmula cerrada, igual sin conexión); la Letanía de Calma, 40. Tocar 4 veces por segundo se estabiliza en ~57 % y mantener pulsado en ~80 %. *(Test: `MadnessMeterTest`.)*
 - Bono: `1 + 0,01 × Locura`, como potenciador temporal. Presagios desde el 50 %: probabilidad por segundo `(Locura − 50) / 500`.
 - Colapso al 100 %: se pierden los potenciadores y la producción queda x0,5 durante 60 s. Nunca se pierden recursos. *(Código: `MadnessMeter`.)*
 
@@ -103,6 +110,30 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Pide 50 Ascensiones en el ciclo. Éter = `⌊√(Ascensiones del ciclo × log10(1 + Cordura del ciclo)) × 1,25^Eco⌋`. *(Código: `Transcendence`; test: `TranscendenceTest`.)*
 - Mejoras eternas: costo `base × crecimiento^nivel`, redondeado hacia arriba. Fuego Eterno x2, Cordura Primordial x1,5 por nivel.
 - Los logros de Ascensiones cuentan las Ascensiones de todos los ciclos (`ascensions_past`).
+- Hitos de Trascendencia a 1, 2, 3, 5, 8 y 12 Trascendencias. Memoria de la Máquina: los hitos de Ascensión usan `max(Ascensiones, 50)`. El Atajo: umbral 40. Trascendencia automática cuando `Éter ganado ≥ max(1, Éter actual)`. Senda Eterna: al dejarla se devuelve solo lo gastado desde el nivel heredado (`cycle_path_kept`). *(Código: `TranscendenceMilestone`; test: `TranscendenceMilestoneTest`.)*
+
+## El Velo
+
+- Tope en `1e25` de Conocimiento de la vida. Por encima, producción x`(1e25 / K)²`. Sin conexión: `K³ = K₀³ + 3·P·Velo²·t` (P sin freno). *(Código: `Veil`; test: `VeilTest`.)*
+- Se rompe con las 10 Pruebas superadas (contador `veil_broken`, que no se borra al Trascender). Roto: sin tope y producción x100.
+
+## Estrellas
+
+- Estrellas por segundo: `(1 + 0,25·Nebulosa) · min(1 + 0,1·Trascendencias, 3) / 600`. Polvo: `0,1 · Estrellas` por segundo, x5 alineadas.
+- Alineación: los primeros `180 + 60·Conjunción` segundos de cada media hora (hora real). Sin conexión no hay alineación.
+- Costos: `base · crecimiento^nivel`. Producción `1,5^Luz · (1 + 0,01·Negras·Estrellas)`. *(Código: `Stars`, `StarUpgrade`; test: `StarsTest`.)*
+
+## Bestiario
+
+- Bono por nivel según rareza: 1 / 2 / 4 / 8 / 15 %. Tipo según el Dominio; Dominio completo x2. Suma aditiva dentro de cada tipo; Sellos como mucho x3 y encuentros como mucho x2.
+- Invocar: 10 Sellos (x10: 90). Pesos 5500/2700/1200/450/150. Garantías: Mítica+ a las 40 sin una y Primigenia a las 120 sin una (contadores permanentes).
+- Repetidas: +1 nivel (máximo 10). Al máximo, Fragmentos 1/2/4/10/25. Elegir una que falte: 30/60/120/300/750.
+- Sellos: clic 0,05 %; compra con Conocimiento `1e5 · 2,2^compras` por 5 Sellos (sin reinicio); logro 2 (secreto 10); Prueba `5 + 2·índice` (x3 la primera vez); Ascensión 1 (+5 cada 10); encuentro 1/1/2/3/5; ofrenda diaria `5 + (racha − 1)` hasta 15. *(Código: `Bestiary`, `BeastCatalog`, `CreatureArt`; test: `BestiaryTest`.)*
+
+## Laboratorio
+
+- Exponentes: producción `1 + 0,01·n`, clic `1 + 0,02·n`, Cordura `1 + 0,02·n`, Éter `1 + 0,05·n`, bonos del Bestiario `1 + 0,1·n`. Solo se eleva lo que es mayor que 1, y se calcula con log10 para no desbordar.
+- La producción se eleva sobre el total (un factor `total^(e−1)` aplicado a cada edificio). Ecuación del Velo: tope `1e25 · 10^n`. *(Código: `Lab`, `LabExperiment`; test: `LabTest`.)*
 
 ## Consagrar edificios
 

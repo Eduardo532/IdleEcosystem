@@ -67,7 +67,8 @@ class GamePreferences @Inject constructor(
             excludedBuildings = prefs.getString(KEY_AUTO_EXCLUDED, null)
                 ?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet(),
             budgetPercent = prefs.getInt(KEY_AUTO_BUDGET, AutomationSettings.DEFAULT_BUDGET_PERCENT),
-            autoAscend = prefs.getBoolean(KEY_AUTO_ASCEND, false)
+            autoAscend = prefs.getBoolean(KEY_AUTO_ASCEND, false),
+            autoTranscend = prefs.getBoolean(KEY_AUTO_TRANSCEND, false)
         )
         set(value) = prefs.edit()
             .putBoolean(KEY_AUTO_BUILDINGS, value.buildings)
@@ -75,6 +76,7 @@ class GamePreferences @Inject constructor(
             .putString(KEY_AUTO_EXCLUDED, value.excludedBuildings.joinToString(","))
             .putInt(KEY_AUTO_BUDGET, value.budgetPercent)
             .putBoolean(KEY_AUTO_ASCEND, value.autoAscend)
+            .putBoolean(KEY_AUTO_TRANSCEND, value.autoTranscend)
             .apply { if (value.ritualId == null) remove(KEY_AUTO_RITUAL) else putString(KEY_AUTO_RITUAL, value.ritualId) }
             .apply()
 
@@ -117,6 +119,7 @@ class GamePreferences @Inject constructor(
         private const val KEY_AUTO_EXCLUDED = "auto_excluded_buildings"
         private const val KEY_AUTO_BUDGET = "auto_budget_percent"
         private const val KEY_AUTO_ASCEND = "auto_ascend"
+        private const val KEY_AUTO_TRANSCEND = "auto_transcend"
         private const val KEY_ATTENTION = "attention"
 
         /** Lectura sin Hilt, para attachBaseContext de la Activity. */

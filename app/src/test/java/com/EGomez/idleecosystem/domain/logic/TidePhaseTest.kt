@@ -30,8 +30,10 @@ class TidePhaseTest {
 
     @Test
     fun `low tide calms madness twice as fast`() {
-        val meter = MadnessMeter(50.0)
-        meter.decay(10, TidePhase.LOW.madnessDecay)
-        assertEquals(46.0, meter.value, 1e-9)
+        // 10 segundos de Marea Baja calman lo mismo que 20 de marea normal
+        val low = MadnessMeter(50.0).apply { decay(10, TidePhase.LOW.madnessDecay) }
+        val normal = MadnessMeter(50.0).apply { decay(20) }
+        assertEquals(normal.value, low.value, 1e-9)
+        assertTrue(low.value < 50.0)
     }
 }

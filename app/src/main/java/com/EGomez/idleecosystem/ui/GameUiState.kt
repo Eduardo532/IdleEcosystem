@@ -8,6 +8,8 @@ import com.EGomez.idleecosystem.domain.logic.AutomationSettings
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.MenuUnlocks
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.RuneBuff
 import com.EGomez.idleecosystem.domain.logic.RuneState
@@ -65,6 +67,10 @@ data class GameUiState(
     val nextGoal: NextGoal? = null,
     /** Pestañas y paneles descubiertos (los demás se ven como "???"). */
     val revealed: SystemReveal = SystemReveal(),
+    /** Interfaz por capas (v0.19.0): pestañas visibles y las que todavía no se abrieron. */
+    val menuUnlocks: MenuUnlocks = MenuUnlocks(),
+    val newTabs: Set<MenuTab> = emptySet(),
+    val seenMutations: Set<String> = emptySet(),
     /** Ascensiones totales (hitos) y automatizaciones elegidas. */
     val ascensions: Int = 0,
     val automation: AutomationSettings = AutomationSettings(),
@@ -89,8 +95,24 @@ data class GameUiState(
     val etherGain: Int = 0,
     val ether: Int = 0,
     val transcendences: Int = 0,
+    /** Hitos de Trascendencia (v0.19.5): Ascensiones que cuentan para los hitos y las que pide Trascender. */
+    val milestoneAscensions: Int = 0,
+    /** Romper el Velo (v0.19.6). */
+    val veilBroken: Boolean = false,
+    /** Cuando las Estrellas Estén en Posición (v0.19.7). */
+    val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
+    /** Laboratorio de Miskatonic (v0.19.9). */
+    val labLevels: Map<String, Int> = emptyMap(),
+    /** Bestiario (v0.19.8). */
+    val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
+    val veilPressing: Boolean = false,
+    val veilFactor: java.math.BigDecimal = java.math.BigDecimal.ONE,
+    val transcendRequired: Int = com.EGomez.idleecosystem.domain.logic.Transcendence.REQUIRED_ASCENSIONS,
     val eternalLevels: Map<String, Int> = emptyMap(),
     val transcendNotice: Int? = null,
+    /** Bestiario (v0.19.10): lo que salió al invocar y el último Sello encontrado. */
+    val summonResults: List<com.EGomez.idleecosystem.domain.logic.SummonResult>? = null,
+    val sealNotice: SealNotice? = null,
     /** Consagración (v0.18.1): si se ve y el nivel de cada edificio consagrado. */
     val consecrationRevealed: Boolean = false,
     val consecrations: Map<String, Int> = emptyMap(),
@@ -154,3 +176,6 @@ data class MadnessNotice(
     val echoesLost: String? = null,
     val collapse: Boolean = false
 )
+
+/** Un aviso de Sellos Antiguos encontrados (clic, ofrenda diaria o encuentro). */
+data class SealNotice(val amount: Int, val source: com.EGomez.idleecosystem.domain.engine.SealSource)

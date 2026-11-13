@@ -2,6 +2,23 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.19.x *(en pruebas)*
+
+- **v0.19.0:** interfaz por capas: el menú empieza con una sola pestaña y cada sistema aparece al llegar a él, agrupado en las capas Vida, Ascensión y Trascendencia, con aviso de lo nuevo, punto dorado y una pista del próximo descubrimiento. El Mapa de Locura, la Atención y la automatización pasan a la pestaña Cordura; el Éter y las mejoras eternas, a su pestaña; catálogo de mutaciones. Runas más claras: placa con nombre y efecto real, aviso al capturarlas y chips con el nombre de la runa.
+
+- **v0.19.1:** la Locura sube de verdad: cada clic suma +0,06 y baja más rápido cuanto más alta está (mantener pulsado la deja cerca del 60 %). Confirmación de Ascender compacta: la Cordura que ganas y una fila por elección (pacto, Prueba, mutación, Senda) que abre su selector; los detalles y los hitos, plegados.
+- **v0.19.2:** el Mapa de Locura pasa a ser un cielo con siete constelaciones (La Mano, El Engranaje, El Sueño, La Mente, El Vacío, El Culto y Lo Arcano), con zoom, colores por estado, vista de lista y una Senda en el centro de cada una (cuatro Sendas nuevas). Diez nodos nuevos: edificios al empezar, edificios más baratos, eventos, runas, rituales, Ecos, Atención y Locura más tranquila. Los nodos flojos de Cordura, edificios y producción se refuerzan. 25 logros propios.
+- **v0.19.3:** el Mapa de Locura usa constelaciones reales (Orión, Osa Mayor, Las Pléyades, Casiopea, Pez Austral, Tauro y Perseo), con la Senda dentro de cada figura y los hilos a la estrella más cercana. La Locura sube de verdad al tocar rápido (~50 %) y al mantener pulsado (~80 %). Los selectores de pacto, Prueba y mutación muestran todas las opciones sin deslizar.
+- **v0.19.4:** cada estrella de las siete constelaciones es un nodo del Mapa: 26 nodos nuevos (clic, tramos de edificios, sin conexión, eventos, Cordura, Ecos, edificios al empezar y rituales). Las Sendas van en el hueco del centro de cada figura. El selector de pactos llena el ancho con iconos más grandes.
+- **v0.19.5:** Hitos de Trascendencia: seis recompensas permanentes por Trascendencias (automatización desde el inicio del ciclo, primeras estrellas encendidas, Senda Eterna, Trascendencia automática, Atención con todas las Ascensiones y Trascender con 40). 11 logros nuevos.
+- **v0.19.6:** Romper el Velo: tope suave en 1e25 de Conocimiento por vida (la producción cae con el cuadrado de lo que lo superas). Superar las 10 Pruebas lo rompe para siempre: sin tope y producción x100. 10 logros nuevos.
+- **v0.19.7:** Cuando las Estrellas Estén en Posición: tras Trascender nacen Estrellas (también sin conexión) que dan Polvo Estelar para seis mejoras estelares. Cada media hora se alinean y el Polvo cae x5. Pestaña nueva Estrellas. 14 logros nuevos.
+- **v0.19.8:** Bestiario: 156 criaturas de los Mitos en 13 familias. Aparecen en encuentros al azar y se catalogan tocándolas; la Esencia de las Pruebas las sube de nivel. Completar una familia duplica su bono. 23 logros nuevos.
+- **v0.19.9:** Laboratorio de Miskatonic: seis experimentos pagados con Éter que suben exponentes (producción, clic, Cordura, Éter), potencian el Bestiario y alejan el Velo. Con esto se completan las cinco mecánicas de la etapa 6. 12 logros nuevos.
+- **v0.19.10:** El Bestiario pasa a gachapón: 312 criaturas dibujadas en 8 Dominios, Sellos Antiguos (moneda que nunca se reinicia, de clics, compras con Conocimiento, logros, Pruebas, Ascensiones, encuentros y ofrenda diaria), invocaciones con garantías, Fragmentos y tarjetas de criatura. El juego deja de usar emojis.
+- **v0.19.11:** cada una de las 312 criaturas del Bestiario tiene su propia ilustración, en estilo de grabado antiguo en tinta como carta coleccionable oscura, con el brillo del color de su Dominio. Reemplazan a los dibujos generados por código.
+- **v0.19.12:** cada criatura tiene su historia, tres o cuatro frases sobre quién es y qué hace. La tarjeta muestra la ilustración más grande, y tocarla la abre a pantalla completa con zoom. La colección pasa a filas compactas con miniatura, nombre, rareza y nivel.
+
 ## v0.18.4 · "Segunda Capa" *(oficial, 11 nov 2026)*
 
 Quinta etapa del plan de retención: una segunda capa de prestigio que abre sistemas nuevos.

@@ -29,9 +29,18 @@ import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
+import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.LabExperiment
+import com.EGomez.idleecosystem.domain.logic.BeastRarity
+import com.EGomez.idleecosystem.domain.logic.BeastKind
+import com.EGomez.idleecosystem.domain.logic.StarUpgrade
+import com.EGomez.idleecosystem.domain.logic.Veil
+import com.EGomez.idleecosystem.domain.logic.AscensionMilestone
 import com.EGomez.idleecosystem.domain.model.RitualState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -45,6 +54,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -113,6 +123,35 @@ class GameEngineTest {
         scope.cancel()
         engineDispatcher.close()
         database.close()
+    }
+
+    @Test
+    fun `a discovered tab is marked new until it is opened`() = runBlocking {
+        val start = await(engine.economy) { it.menuUnlocks.tabs.isNotEmpty() }
+        assertEquals(setOf(MenuTab.RESEARCH), start.menuUnlocks.tabs)
+        assertTrue(start.newTabs.isEmpty())
+
+        engine.grantKnowledge(BigDecimal(300))
+        val found = await(engine.economy) { MenuTab.GRIMOIRE in it.newTabs }
+        assertTrue(found.menuUnlocks.has(MenuTab.GRIMOIRE))
+
+        engine.onMenuTabSelected(MenuTab.GRIMOIRE)
+        val seen = await(engine.economy) { it.newTabs.isEmpty() }
+        assertTrue(seen.menuUnlocks.has(MenuTab.GRIMOIRE))
+    }
+
+    @Test
+    fun `tabs a returning player already had are not announced as new`() = runBlocking {
+        val saved = StatisticsManager().apply { repeat(3) { trackPrestige(BigDecimal.ONE) } }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1000"), sanity = BigDecimal.ONE, echoes = BigDecimal.ONE,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val economy = await(engine.economy) { it.menuUnlocks.has(MenuTab.TRIALS) }
+        assertTrue(economy.newTabs.isEmpty())
     }
 
     @Test
@@ -520,6 +559,255 @@ class GameEngineTest {
         engine.buyEternal("memory")
         val bought = await(engine.economy) { it.eternalLevels["memory"] == 1 }
         assertEquals(13, bought.ether)
+    }
+
+    @Test
+    fun `transcendence milestones keep the path and the first stars and shorten the cycle`() = runBlocking {
+        // Doce Trascendencias: todos los hitos. Ciclo de 40 Ascensiones (El Atajo)
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 40
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        // La Senda de la Mano a nivel 2, con su constelación recorrida
+        val path = mutableListOf<PrestigeUpgradeSaveModel>()
+        var id: String? = MadnessPaths.HAND
+        while (id != null) {
+            val node = shop.upgrades.first { it.id == id }
+            path += PrestigeUpgradeSaveModel(node.id, if (id == MadnessPaths.HAND) 2 else 1)
+            id = node.parentId
+        }
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = path, timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.transcendences == 12 && it.etherGain > 0 }
+        assertEquals(40, before.transcendRequired)
+        assertTrue(before.milestoneAscensions >= AscensionMilestone.AUTO_RITUAL.ascensions)
+
+        engine.transcend()
+
+        val after = await(engine.economy) { it.transcendences == 13 }
+        assertEquals(0, after.ascensions)
+        // Memoria de la Máquina: los hitos de Ascensión siguen alcanzados al empezar el ciclo
+        assertTrue(after.milestoneAscensions >= AscensionMilestone.AUTO_RITUAL.ascensions)
+        assertTrue(stats.counter(AchievementStat.FEAT_SHORTCUT).signum() > 0)
+        val nodes = await(engine.prestigeUpgrades) { list -> list.any { it.id == MadnessPaths.HAND && it.level == 2 } }
+        // Senda Eterna: la Senda se queda; Cielo Recordado: El Despertar y las primeras estrellas
+        assertEquals(1, nodes.first { it.id == "pu_core" }.level)
+        nodes.filter { it.parentId == "pu_core" && !MadnessPaths.isPath(it.id) }.forEach { assertEquals(it.id, 1, it.level) }
+        assertTrue(nodes.filter { it.parentId != null && it.parentId != "pu_core" && !MadnessPaths.isPath(it.id) }.all { it.level == 0 })
+
+        // Dejar la Senda que vino del ciclo anterior no devuelve Cordura
+        engine.grantKnowledge(BigDecimal("10000000"))
+        await(engine.economy) { it.canPrestige }
+        engine.ascend(abandonPath = true)
+        val ascended = await(engine.economy) { it.sanity.signum() > 0 }
+        assertTrue(ascended.sanity < BigDecimal(100))
+    }
+
+    @Test
+    fun `automatic transcendence happens when the ether gain matches the ether held`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(5))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.transcendences == 5 && it.etherGain > 0 }
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false, autoTranscend = true))
+
+        val after = await(engine.economy) { it.transcendences == 6 }
+        assertTrue(after.ether > 0)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.AUTO_TRANSCENDS)))
+        assertTrue(stats.counter(AchievementStat.autoTranscendWith("none")).signum() > 0)
+    }
+
+    @Test
+    fun `the veil slows a life past the cap until it is broken with every trial`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 20
+            Trial.entries.forEach { count(AchievementStat.trial(it.id)) }
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal.ZERO, sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.ascensions == 20 }
+        engine.grantKnowledge(Veil.THRESHOLD.multiply(BigDecimal.TEN))
+
+        val pressed = await(engine.economy) { it.veilPressing }
+        assertEquals(0, BigDecimal("0.01").compareTo(pressed.veilFactor))
+        await(engine.economy) { stats.counter(AchievementStat.VEIL_TOUCHED).signum() > 0 }
+
+        engine.breakVeil()
+
+        val broken = await(engine.economy) { it.veilBroken }
+        assertFalse(broken.veilPressing)
+        assertEquals(0, BigDecimal.valueOf(Veil.BROKEN_PRODUCTION).compareTo(broken.veilFactor))
+        assertTrue(stats.counter(AchievementStat.veilBrokenWith("none")).signum() > 0)
+    }
+
+    @Test
+    fun `the veil cannot be broken without every trial`() = runBlocking {
+        engine.breakVeil()
+        engine.grantKnowledge(BigDecimal.TEN)
+        val state = await(engine.economy) { it.knowledge.signum() > 0 }
+        assertFalse(state.veilBroken)
+    }
+
+    @Test
+    fun `stars are born after transcending and their dust buys stellar upgrades`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.STARDUST, BigDecimal(15))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendences == 1 }
+        assertTrue(MenuTab.STARS in before.menuUnlocks.tabs)
+        val production = before.productionPerSecond
+
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id)
+
+        val after = await(engine.economy) { it.starLevels[StarUpgrade.STARLIGHT.id] == 1 }
+        assertTrue(after.stardust < 15.0)
+        if (production.signum() > 0) assertTrue(after.productionPerSecond > production)
+        assertTrue(stats.counter(AchievementStat.starBuyWith("none")).signum() > 0)
+        // Cada segundo nacen Estrellas
+        val later = await(engine.economy) { it.stars > 0.0 }
+        assertTrue(later.starsPerHour > 0.0)
+    }
+
+    @Test
+    fun `there are no stars before the first transcendence`() = runBlocking {
+        engine.grantKnowledge(BigDecimal.TEN)
+        val state = await(engine.economy) { it.knowledge.signum() > 0 }
+        assertFalse(MenuTab.STARS in state.menuUnlocks.tabs)
+        assertEquals(0.0, state.stars, 0.0)
+    }
+
+    @Test
+    fun `seals summon creatures and encounters give seals`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 5
+            counters[AchievementStat.BESTIARY_V2] = BigDecimal.ONE
+            counters[AchievementStat.SEALS] = BigDecimal(100)
+            // La ofrenda de hoy ya se recibió: así los Sellos no cambian solos durante la prueba
+            counters[AchievementStat.DAILY_LAST_DAY] = BigDecimal(System.currentTimeMillis() / 86_400_000L)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.ascensions == 5 }
+        assertTrue(MenuTab.BESTIARY in before.menuUnlocks.tabs)
+        val start = before.seals
+
+        engine.summon(10)
+
+        val summoned = await(engine.economy) { it.summons == 10 }
+        assertEquals(start - Bestiary.SUMMON_TEN_COST, summoned.seals)
+        assertEquals(10, summoned.beastLevels.values.sum())
+        assertTrue(stats.counter(AchievementStat.beastCatchWith("none")).signum() > 0)
+
+        // Un encuentro deja Sellos según la rareza de la criatura
+        engine.forceEncounter("deep_dagon")
+        await(engine.economy) { it.encounterId == "deep_dagon" }
+        engine.catchEncounter()
+        val caught = await(engine.economy) { it.encounterId == null && it.seals > summoned.seals }
+        assertTrue(caught.seals >= summoned.seals + BeastRarity.PRIMORDIAL.encounterSeals)
+        assertEquals(1, stats.counter(AchievementStat.ENCOUNTERS).toInt())
+    }
+
+    @Test
+    fun `seals are bought with knowledge at a price that keeps rising`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 1
+            counters[AchievementStat.BESTIARY_V2] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1000000"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.ascensions == 1 }
+        val firstPrice = before.sealPrice
+        engine.buySeals()
+        val after = await(engine.economy) { it.sealPrice > firstPrice }
+        assertTrue(after.seals >= before.seals + Bestiary.SEALS_PER_PURCHASE)
+        assertTrue(after.knowledge < before.knowledge)
+    }
+
+    @Test
+    fun `old saves turn essence into seals once`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 3
+            counters[AchievementStat.ESSENCE] = BigDecimal(42)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val migrated = await(engine.economy) { stats.counter(AchievementStat.BESTIARY_V2).signum() > 0 && it.seals >= 42 }
+        assertEquals(0, stats.counter(AchievementStat.ESSENCE).signum())
+        assertTrue(migrated.seals >= 42)
+    }
+
+    @Test
+    fun `the laboratory spends ether on exponents`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.ETHER, BigDecimal(3))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.transcendences == 1 }
+        assertTrue(MenuTab.LAB in before.menuUnlocks.tabs)
+
+        engine.buyLab(LabExperiment.ARMITAGE.id)
+
+        val after = await(engine.economy) { it.labLevels[LabExperiment.ARMITAGE.id] == 1 }
+        assertEquals(0, after.ether)
+        assertTrue(stats.counter(AchievementStat.FEAT_LAB_EXACT).signum() > 0)
+        assertEquals(0, BigDecimal(3).compareTo(stats.counter(AchievementStat.LAB_ETHER_SPENT)))
+
+        // Sin Éter no se puede subir más
+        engine.buyLab(LabExperiment.ARMITAGE.id)
+        engine.grantKnowledge(BigDecimal.ONE)
+        val still = await(engine.economy) { it.knowledge > after.knowledge }
+        assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
     }
 
     @Test

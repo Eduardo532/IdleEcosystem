@@ -22,8 +22,8 @@ android {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 37
-        versionName = "0.18.4"
+        versionCode = 50
+        versionName = "0.19.12"
 
         // Nombre visible de la app (las builds de prueba lo reemplazan)
         manifestPlaceholders["appLabel"] = "@string/app_name"
@@ -152,4 +152,11 @@ composeCompiler {
 // esquema por variante y lo copia con una tarea propia.
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+// Los fallos de los tests muestran el mensaje completo en el registro de la CI
+tasks.withType<Test>().configureEach {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }

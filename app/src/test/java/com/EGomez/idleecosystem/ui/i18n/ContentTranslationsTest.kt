@@ -34,7 +34,14 @@ class ContentTranslationsTest {
         "Tutoriales" to TutorialStep.entries.flatMap { listOf(it.title, it.message) },
         "Panteón" to Pact.entries.flatMap { listOf(it.godName, it.epithet, it.lore) },
         "Pruebas de Locura" to com.EGomez.idleecosystem.domain.model.Trial.entries.flatMap { listOf(it.title, it.rule) },
-        "Mutaciones" to com.EGomez.idleecosystem.domain.model.Mutation.entries.flatMap { listOf(it.title, it.description) }
+        "Mutaciones" to com.EGomez.idleecosystem.domain.model.Mutation.entries.flatMap { listOf(it.title, it.description) },
+        "Constelaciones" to com.EGomez.idleecosystem.domain.model.Constellation.entries.flatMap { listOf(it.title, it.description) },
+        "Hitos de Trascendencia" to com.EGomez.idleecosystem.domain.logic.TranscendenceMilestone.entries.flatMap { listOf(it.title, it.description) },
+        "Mejoras estelares" to com.EGomez.idleecosystem.domain.logic.StarUpgrade.entries.flatMap { listOf(it.title, it.description) },
+        "Laboratorio" to com.EGomez.idleecosystem.domain.logic.LabExperiment.entries.flatMap { listOf(it.title, it.description) },
+        "Bestiario" to com.EGomez.idleecosystem.domain.logic.Bestiary.beasts.flatMap { listOf(it.name, it.lore) } +
+            com.EGomez.idleecosystem.domain.logic.Bestiary.domains.flatMap { listOf(it.title, it.description) } +
+            com.EGomez.idleecosystem.domain.logic.BeastRarity.entries.map { it.title }
     )
 
     @Test

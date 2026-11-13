@@ -2,6 +2,7 @@
 
 **Jugar**
 - [Primeros pasos](Primeros-pasos)
+- [La interfaz por capas](Interfaz)
 - [Edificios](Edificios)
 - [Grimorio](Grimorio)
 - [Ecos y Rituales](Ecos-y-Rituales)
@@ -12,6 +13,10 @@
 - [Panteón](Panteon)
 - [Atención](Atencion)
 - [Pruebas de Locura](Pruebas-de-Locura)
+- [El Velo](El-Velo)
+- [Estrellas](Estrellas)
+- [Bestiario](Bestiario)
+- [Laboratorio](Laboratorio)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

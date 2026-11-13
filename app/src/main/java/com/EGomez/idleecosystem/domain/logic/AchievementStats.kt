@@ -32,6 +32,75 @@ object AchievementStat {
     const val PACTS_LIVED = "pacts_lived"
     const val PATH_LEVEL = "path_level"
     const val PATHS_WALKED = "paths_walked"
+    /** Constelaciones del Mapa de Locura completas (v0.19.2). */
+    const val CONSTELLATIONS = "constellations"
+    /** Hitos de Trascendencia (v0.19.5): cuántos se alcanzaron y Trascendencias automáticas. */
+    const val TRANSCEND_MILESTONES = "transcend_milestones"
+    const val AUTO_TRANSCENDS = "auto_transcends"
+    const val AUTO_TRANSCEND_WITH_PREFIX = "auto_transcend_with."
+    /** Romper el Velo (v0.19.6): el Velo roto (para siempre), tocado, cuán lejos y con qué pacto. */
+    const val VEIL_BROKEN = "veil_broken"
+    const val VEIL_TOUCHED = "veil_touched"
+    const val VEIL_DEPTH = "veil_depth"
+    const val FEAT_VEIL_IN_TRIAL = "feat.veil_in_trial"
+    const val VEIL_BROKEN_WITH_PREFIX = "veil_broken_with."
+    /**
+     * Cuando las Estrellas Estén en Posición (v0.19.7): Estrellas, Polvo Estelar (actual y
+     * ganado), niveles de las mejoras estelares y compras durante la alineación.
+     */
+    const val STARS = "stars"
+    const val STARDUST = "stardust"
+    const val STARDUST_EARNED = "stardust_earned"
+    const val STAR_LEVELS = "star_levels"
+    const val ALIGNED_PURCHASES = "aligned_purchases"
+    const val STAR_UPGRADE_PREFIX = "star_up."
+    const val STAR_BUY_WITH_PREFIX = "star_buy_with."
+    const val STAR_ALIGNED_PATH_PREFIX = "star_aligned_path."
+    /**
+     * Bestiario (v0.19.8): nivel de cada criatura (0 sin descubrir), Esencia, encuentros
+     * catalogados, criaturas vistas, niveles, familias completas y Primigenias.
+     */
+    const val BEAST_PREFIX = "beast."
+    const val ESSENCE = "essence"
+    const val ESSENCE_EARNED = "essence_earned"
+    const val ENCOUNTERS = "encounters"
+    const val BEASTS_SEEN = "beasts_seen"
+    const val BEAST_LEVELS = "beast_levels"
+    const val DOMAINS_COMPLETE = "beast_domains"
+    const val PRIMORDIALS_SEEN = "beast_primordials"
+    const val BEAST_CATCH_WITH_PREFIX = "beast_with."
+    const val BEAST_CATCH_PATH_PREFIX = "beast_path."
+    const val FEAT_PRIMORDIAL_ALIGNED = "feat.primordial_aligned"
+    /**
+     * Sellos Antiguos (v0.19.10): la moneda del gachapón. Nunca se reinician. Las compras
+     * con Conocimiento, las garantías y la racha diaria tampoco.
+     */
+    const val SEALS = "seals"
+    const val SEALS_EARNED = "seals_earned"
+    const val SEALS_BOUGHT = "seals_bought"
+    const val CLICK_SEALS = "click_seals"
+    const val SUMMONS = "summons"
+    const val SINCE_MYTHIC = "summon_since_mythic"
+    const val SINCE_PRIMORDIAL = "summon_since_primordial"
+    const val SHARDS = "shards"
+    const val SHARDS_EARNED = "shards_earned"
+    const val SHARD_PICKS = "shard_picks"
+    const val DAILY_LAST_DAY = "daily_last_day"
+    const val DAILY_STREAK = "daily_streak"
+    const val DAILY_BEST_STREAK = "daily_best_streak"
+    const val BESTIARY_V2 = "bestiary_v2"
+    /** Laboratorio de Miskatonic (v0.19.9): niveles, experimentos al máximo y Éter invertido. */
+    const val LAB_PREFIX = "lab."
+    const val LAB_LEVELS = "lab_levels"
+    const val LAB_MAXED = "lab_maxed"
+    const val LAB_ETHER_SPENT = "lab_ether_spent"
+    const val LAB_BUY_WITH_PREFIX = "lab_with."
+    const val LAB_BUY_PATH_PREFIX = "lab_path."
+    const val FEAT_LAB_EXACT = "feat.lab_exact"
+    /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
+    const val CYCLE_PATH_KEPT = "cycle_path_kept"
+    /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
+    const val FEAT_SHORTCUT = "feat.shortcut"
     const val CLICKS = "clicks"
     const val RUNES = "runes"
     const val RUNES_T1 = "runes_t1"
@@ -64,12 +133,13 @@ object AchievementStat {
     val LIVE = setOf(
         ASCENSIONS, SANITY, LIFETIME_SANITY, SYNERGIES, GRIMOIRE, SETS, MAP_LEVELS, MAP_NODES,
         MAP_MAX_LEVEL, MAP_STAR, ATTENTION_POINTS, ATTENTION_USED, ATTENTION_DREAM, ATTENTION_VIGIL,
-        ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED,
+        ATTENTION_FOCUS, ATTENTION_TARGETS, PACTS_UNLOCKED, PACTS_LIVED, PATH_LEVEL, PATHS_WALKED, CONSTELLATIONS,
         CLICKS, RUNES, RUNES_T1, RUNES_T2, RUNES_T3, EVENTS, ECHOES_FOUND, ECHOES_HELD, PLAY_TIME,
         OFFLINE_TIME, KPS_MAX, BUILDINGS_TOTAL, BUILDING_TYPES, RUN_KNOWLEDGE, CHAOS, ACTIVE_RITUALS,
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
-        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN
+        MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
     )
 
     // --- Contadores guardados ---
@@ -133,6 +203,10 @@ object AchievementStat {
     const val ACTIVE_MUTATION_PREFIX = "run.mutation."
     /** "mutation_seen.feverish_notes": esa mutación se eligió alguna vez. */
     const val MUTATION_SEEN_PREFIX = "mutation_seen."
+    /** "ui.seen.grimoire": el jugador ya abrió esa pestaña (v0.19.0; no es un logro). */
+    const val SEEN_TAB_PREFIX = "ui.seen."
+    /** Se marcó lo ya visible al pasar a la interfaz por capas: no todo aparece como nuevo. */
+    const val SEEN_TABS_INIT = "ui.seen_init"
     /** "mutation_with.cthulhu.rlyeh_rises": vida terminada con ese pacto y esa mutación. */
     const val MUTATION_WITH_PREFIX = "mutation_with."
     /** "mutation_path.pu_path_hand.burning_synapse": vida terminada con esa Senda y esa mutación. */
@@ -198,6 +272,17 @@ object AchievementStat {
     fun consecratedWith(pactId: String, buildingId: String) = "$CONSECRATED_WITH_PREFIX$pactId.$buildingId"
     fun transcendWith(pactId: String) = TRANSCEND_WITH_PREFIX + pactId
     fun transcendPath(pathId: String) = TRANSCEND_PATH_PREFIX + pathId
+    fun autoTranscendWith(pactId: String) = AUTO_TRANSCEND_WITH_PREFIX + pactId
+    fun veilBrokenWith(pactId: String) = VEIL_BROKEN_WITH_PREFIX + pactId
+    fun starUpgrade(id: String) = STAR_UPGRADE_PREFIX + id
+    fun starBuyWith(pactId: String) = STAR_BUY_WITH_PREFIX + pactId
+    fun starAlignedPath(pathId: String) = STAR_ALIGNED_PATH_PREFIX + pathId
+    fun beast(id: String) = BEAST_PREFIX + id
+    fun beastCatchWith(pactId: String) = BEAST_CATCH_WITH_PREFIX + pactId
+    fun beastCatchPath(pathId: String) = BEAST_CATCH_PATH_PREFIX + pathId
+    fun lab(id: String) = LAB_PREFIX + id
+    fun labBuyWith(pactId: String) = LAB_BUY_WITH_PREFIX + pactId
+    fun labBuyPath(pathId: String) = LAB_BUY_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -210,12 +295,19 @@ object AchievementStat {
         MAX_MADNESS, MAX_MADNESS_STREAK, MADNESS_COLLAPSES, MADNESS_OMENS, RUN_COLLAPSES, FEAT_STEEL_NERVES, FEAT_EDGE,
         TIDES_PASSED, RUN_TIDES, TIDE_HIGH_RUNES, TIDE_DEAD_RITUALS, TIDE_HIGH_CONVERGENCE, FEAT_STILL_LOW_TIDE, FEAT_TSUNAMI,
         ETHER, ETHER_EARNED, TRANSCENDENCES, MAX_ETHER_GAIN, CYCLE_SANITY, CYCLE_START, ASCENSIONS_PAST, FEAT_EXACT_THRESHOLD, MUTATION_LIVES,
+        AUTO_TRANSCENDS, FEAT_SHORTCUT, VEIL_BROKEN, VEIL_TOUCHED, FEAT_VEIL_IN_TRIAL,
+        STARS, STARDUST_EARNED, ALIGNED_PURCHASES, ESSENCE_EARNED, ENCOUNTERS, FEAT_PRIMORDIAL_ALIGNED,
+        SEALS_EARNED, SEALS_BOUGHT, CLICK_SEALS, SUMMONS, SHARDS_EARNED, SHARD_PICKS, DAILY_BEST_STREAK,
+        LAB_ETHER_SPENT, FEAT_LAB_EXACT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
 
     private val PREFIXES = listOf(OWNED_PREFIX, RITUAL_PREFIX, LIFE_PREFIX, PATH_WALKED_PREFIX, TRIAL_PREFIX, TRIAL_WITH_PREFIX,
-        RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX,
+        RUNE_CATCH_PREFIX, ENGRAVE_PREFIX, ENGRAVED_EVER_PREFIX, ETERNAL_PREFIX, TRANSCEND_WITH_PREFIX, TRANSCEND_PATH_PREFIX, AUTO_TRANSCEND_WITH_PREFIX, VEIL_BROKEN_WITH_PREFIX,
+        STAR_BUY_WITH_PREFIX, STAR_ALIGNED_PATH_PREFIX, STAR_UPGRADE_PREFIX,
+        BEAST_PREFIX, BEAST_CATCH_WITH_PREFIX, BEAST_CATCH_PATH_PREFIX,
+        LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

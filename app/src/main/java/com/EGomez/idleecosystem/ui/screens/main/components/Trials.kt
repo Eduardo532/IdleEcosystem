@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
+import com.EGomez.idleecosystem.ui.components.IconLabel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -21,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.core.math.toBeautifulString
+import com.EGomez.idleecosystem.domain.logic.Veil
 import com.EGomez.idleecosystem.domain.model.Trial
+import java.math.BigDecimal
+import java.math.MathContext
 import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.model.TrialReward
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -61,9 +66,13 @@ fun TrialList(
     activeTrial: Trial?,
     progress: Float,
     completed: Set<Trial>,
-    onAbandon: () -> Unit
+    onAbandon: () -> Unit,
+    veilBroken: Boolean = false,
+    onBreakVeil: () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+        VeilCard(completed.size, veilBroken, onBreakVeil)
+        Spacer(modifier = Modifier.height(8.dp))
         Text(stringResource(R.string.trials_intro), color = Color.Gray, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Trial.entries.forEach { trial ->
@@ -161,6 +170,8 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
                 if (trial.rules.delirium) " · x${multiplier(delirium)}" else ""
             // Una sola línea: la Prueba, su avance y la regla
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(GameIcons.Swords, contentDescription = null, tint = TrialRed, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(text, color = TrialRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(tr(trial.rule), color = Color.LightGray, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -177,15 +188,17 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
 }
 
 /** Elegir la Prueba de la próxima vida en la confirmación de Ascender. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TrialPicker(trials: List<Trial>, completed: Set<Trial>, selected: Trial?, onSelect: (Trial?) -> Unit) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.trial_choose_title), color = TrialRed, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
+    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
     ) {
         TrialChip(stringResource(R.string.trial_none), selected == null, TRIAL_CHOICE_TAG + "none") { onSelect(null) }
@@ -227,20 +240,22 @@ private fun TrialChip(label: String, selected: Boolean, tag: String, onClick: ()
 }
 
 /** Elegir la mutación de la próxima vida (v0.18.4): tres al azar o ninguna. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutation?) -> Unit) {
     Spacer(modifier = Modifier.height(12.dp))
     Text(stringResource(R.string.mutation_choose_title), color = MutationGreen, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-    Row(
+    // Todas las opciones a la vista, en varias filas (v0.19.3: antes había que deslizar)
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
     ) {
         TrialChip(stringResource(R.string.mutation_none), selected == null, MUTATION_CHOICE_TAG + "none") { onSelect(null) }
         offer.forEach { mutation ->
-            TrialChip("🧬 " + tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
+            TrialChip(tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
         }
     }
     selected?.let { Text(tr(it.description), color = MutationGreen, fontSize = 12.sp) }
@@ -248,22 +263,77 @@ fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutati
 
 val MutationGreen = Color(0xFF9CCC65)
 const val MUTATION_CHOICE_TAG = "mutation_choice_"
+const val VEIL_CARD_TAG = "veil_card"
+const val VEIL_BREAK_TAG = "veil_break"
+const val VEIL_BANNER_TAG = "veil_banner"
 
-/** Vistas de la pestaña Panteón: los dioses, las Pruebas y el Altar de Runas. */
-enum class PantheonView { GODS, TRIALS, RUNES }
+private val VeilViolet = Color(0xFFB39DDB)
 
+/**
+ * Romper el Velo (v0.19.6), arriba de las Pruebas: el tope, cuántas Pruebas faltan y el
+ * botón para romperlo cuando están las 10. Roto, solo recuerda lo que da.
+ */
 @Composable
-fun PantheonViewChips(view: PantheonView, trialsLabel: String, runesLabel: String, onSelect: (PantheonView) -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+fun VeilCard(completedTrials: Int, broken: Boolean, onBreak: () -> Unit) {
+    val total = Trial.entries.size
+    val ready = Veil.canBreak(completedTrials, broken)
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = if (broken) Color(0xFF17131F) else Color(0xFF15121A),
+        border = BorderStroke(1.dp, VeilViolet.copy(alpha = if (broken || ready) 0.8f else 0.35f)),
+        modifier = Modifier.fillMaxWidth().testTag(VEIL_CARD_TAG)
     ) {
-        TrialChip(stringResource(R.string.pantheon_view_gods), view == PantheonView.GODS, PANTHEON_VIEW_TAG + "gods") { onSelect(PantheonView.GODS) }
-        TrialChip(trialsLabel, view == PantheonView.TRIALS, PANTHEON_VIEW_TAG + "trials") { onSelect(PantheonView.TRIALS) }
-        TrialChip(runesLabel, view == PantheonView.RUNES, PANTHEON_VIEW_TAG + "runes") { onSelect(PantheonView.RUNES) }
+        Column(modifier = Modifier.padding(12.dp)) {
+            IconLabel(
+                GameIcons.Veil,
+                if (broken) stringResource(R.string.veil_broken_title) else stringResource(R.string.veil_title),
+                color = VeilViolet,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (broken) {
+                Text(stringResource(R.string.veil_broken_desc, multiplier(Veil.BROKEN_PRODUCTION)), color = Color.LightGray, fontSize = 11.sp)
+            } else {
+                Text(stringResource(R.string.veil_desc, Veil.THRESHOLD.toBeautifulString()), color = Color.LightGray, fontSize = 11.sp)
+                Text(stringResource(R.string.veil_reward, multiplier(Veil.BROKEN_PRODUCTION)), color = Color.Gray, fontSize = 11.sp)
+                Spacer(modifier = Modifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = { (completedTrials.toFloat() / total).coerceIn(0f, 1f) },
+                    color = VeilViolet,
+                    trackColor = Color(0xFF2A2A2A),
+                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
+                )
+                Text(stringResource(R.string.veil_progress, completedTrials.coerceAtMost(total), total), color = Color.Gray, fontSize = 10.sp)
+                if (ready) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Button(
+                        onClick = onBreak,
+                        colors = ButtonDefaults.buttonColors(containerColor = VeilViolet, contentColor = Color.Black),
+                        modifier = Modifier.fillMaxWidth().testTag(VEIL_BREAK_TAG)
+                    ) { Text(stringResource(R.string.veil_break), fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    }
+}
+
+/** Aviso arriba de Investigación cuando el Velo frena la producción de esta vida. */
+@Composable
+fun VeilBanner(factor: BigDecimal) {
+    val divisor = if (factor.signum() > 0) BigDecimal.ONE.divide(factor, MathContext.DECIMAL64) else BigDecimal.ZERO
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF1A1424),
+        border = BorderStroke(1.dp, VeilViolet.copy(alpha = 0.6f)),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).testTag(VEIL_BANNER_TAG)
+    ) {
+        IconLabel(
+            GameIcons.Veil,
+            stringResource(R.string.veil_pressing, divisor.toBeautifulString()),
+            color = VeilViolet,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(10.dp)
+        )
     }
 }
 
@@ -271,4 +341,3 @@ const val TRIAL_CARD_TAG = "trial_card_"
 const val TRIAL_ABANDON_TAG = "trial_abandon"
 const val TRIAL_BAR_TAG = "trial_bar"
 const val TRIAL_CHOICE_TAG = "trial_choice_"
-const val PANTHEON_VIEW_TAG = "pantheon_view_"

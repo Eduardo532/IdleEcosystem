@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +40,9 @@ fun RuneOverlay(
     runeState: RuneState,
     onSuccess: () -> Unit,
     onFail: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Nivel de maestría de la runa: alarga la duración que se muestra. */
+    masteryLevel: Int = 0
 ) {
     if (activeRune == null || runeState == RuneState.HIDDEN) return
 
@@ -115,34 +118,17 @@ fun RuneOverlay(
                 .then(if (isInteractive) Modifier.background(Color.Transparent) else Modifier),
             contentAlignment = Alignment.Center
         ) {
-            // --- TEXTO TEMÁTICO (NEÓN) ---
-            Column(
+            // --- PLACA DE LA RUNA (v0.19.0) ---
+            // Antes: nombre y descripción en neón del color de la runa, ilegibles con las
+            // runas oscuras. Ahora una placa oscura con el nivel, el nombre y el efecto real.
+            RunePlate(
+                rune = activeRune,
+                masteryLevel = masteryLevel,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .offset(y = (-65).dp) // Ajustado el offset para letras más pequeñas
-                    .width(runeSize + 40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // TÍTULO: Tamaño reducido (16.sp) pero Neón intenso
-                RuneThematicText(
-                    text = tr(activeRune.name).uppercase(),
-                    baseColor = activeRune.color,
-                    fontSize = 16.sp, // REDUCIDO
-                    fontWeight = FontWeight.Black,
-                    glowRadius = 12f // Radio ajustado para letra pequeña
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // DESCRIPCIÓN: Tamaño reducido (12.sp)
-                RuneThematicText(
-                    text = tr(activeRune.description),
-                    baseColor = activeRune.color,
-                    fontSize = 12.sp, // REDUCIDO
-                    fontWeight = FontWeight.Bold,
-                    glowRadius = 8f
-                )
-            }
+                    .offset(y = (-78).dp)
+                    .widthIn(max = runeSize + 40.dp)
+            )
 
             // --- GRÁFICOS ---
             when (activeRune.tier) {
@@ -155,76 +141,81 @@ fun RuneOverlay(
 }
 
 /**
- * Componente de texto "Estilo Neón Arcano Mejorado".
- * Utiliza múltiples capas de sombra para intensificar el color.
+ * La placa de una runa: su nivel y gesto, su nombre y lo que da, más una barra con el
+ * tiempo que queda para atraparla. Fondo oscuro y borde del color de la runa.
  */
 @Composable
-fun RuneThematicText(
-    text: String,
-    baseColor: Color,
-    fontSize: TextUnit,
-    fontWeight: FontWeight,
-    glowRadius: Float
-) {
-    Box(contentAlignment = Alignment.Center) {
-
-        // CAPA 1: Resplandor Ambiente (Ancho y difuso)
-        Text(
-            text = text,
-            color = baseColor,
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            textAlign = TextAlign.Center,
-            style = TextStyle.Default.copy(
-                shadow = Shadow(
-                    color = baseColor,
-                    blurRadius = glowRadius * 1.5f // Blur amplio
-                )
-            ),
-            modifier = Modifier.alpha(0.6f)
-        )
-
-        // CAPA 2: Resplandor Núcleo (Estrecho e intenso)
-        // Esta capa extra hace que el color se note mucho más
-        Text(
-            text = text,
-            color = baseColor,
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            textAlign = TextAlign.Center,
-            style = TextStyle.Default.copy(
-                shadow = Shadow(
-                    color = baseColor.copy(alpha = 1f), // Color sólido
-                    blurRadius = glowRadius * 0.5f // Blur corto
-                )
+fun RunePlate(rune: RuneVariant, masteryLevel: Int, modifier: Modifier = Modifier) {
+    val accent = readableRuneColor(rune.color)
+    val lifetimeMs = ((15 + rune.tier.ordinal * 5) * 1000)
+    val remaining = remember(rune) { Animatable(1f) }
+    LaunchedEffect(rune) { remaining.animateTo(0f, tween(lifetimeMs, easing = LinearEasing)) }
+    androidx.compose.material3.Surface(
+        color = Color(0xF0101014),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, accent.copy(alpha = 0.8f)),
+        modifier = modifier.testTag(RUNE_PLATE_TAG)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 6.dp)
+        ) {
+            Text(runeTierLabel(rune.tier).uppercase(), color = Color.Gray, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(tr(rune.name), color = accent, fontSize = 16.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+            Text(
+                runeEffectText(rune.id, masteryLevel),
+                color = Color(0xFFEDE7F6),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
-        )
-
-        // CAPA 3: Borde Negro (Outline)
-        // Separa el neón del fondo
-        Text(
-            text = text,
-            color = Color.Black,
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            textAlign = TextAlign.Center,
-            style = TextStyle.Default.copy(
-                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
-                    miter = 10f,
-                    width = 3f, // Borde fino
-                    join = StrokeJoin.Round
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(3.dp)
+                    .background(Color.White.copy(alpha = 0.1f), CircleShape)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(remaining.value.coerceIn(0f, 1f))
+                        .background(accent, CircleShape)
                 )
-            )
-        )
+            }
+        }
+    }
+}
 
-        // CAPA 4: Núcleo Blanco (Fuente de luz)
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = fontSize,
-            fontWeight = fontWeight,
-            textAlign = TextAlign.Center
-        )
+const val RUNE_PLATE_TAG = "rune_plate"
+const val RUNE_CAUGHT_TAG = "rune_caught"
+
+/** Aviso al capturar una runa: su nombre y lo que acaba de dar. */
+@Composable
+fun RuneCaughtNotice(rune: RuneVariant, masteryLevel: Int, modifier: Modifier = Modifier) {
+    val accent = readableRuneColor(rune.color)
+    androidx.compose.material3.Surface(
+        color = Color(0xF0101014),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, accent),
+        modifier = modifier.testTag(RUNE_CAUGHT_TAG)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        ) {
+            Box(modifier = Modifier.size(10.dp).background(accent, CircleShape))
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    androidx.compose.ui.res.stringResource(com.EGomez.idleecosystem.R.string.rune_caught_title).uppercase() + " · " + tr(rune.name),
+                    color = accent,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(runeEffectText(rune.id, masteryLevel), color = Color(0xFFEDE7F6), fontSize = 12.sp)
+            }
+        }
     }
 }
 

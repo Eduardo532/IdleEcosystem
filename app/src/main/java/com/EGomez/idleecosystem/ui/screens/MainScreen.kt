@@ -22,6 +22,16 @@ import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.model.RuneVariant
+import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.RuneEngraving
+import com.EGomez.idleecosystem.ui.components.RuneCaughtNotice
+import com.EGomez.idleecosystem.ui.components.readableRuneColor
+import com.EGomez.idleecosystem.ui.components.multiplierLabel
+import com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner
+import com.EGomez.idleecosystem.ui.screens.main.components.EtherColor
+import com.EGomez.idleecosystem.ui.screens.main.components.color
+import com.EGomez.idleecosystem.ui.screens.main.components.title
 import com.EGomez.idleecosystem.ui.screens.main.components.CompactResearchButton
 import androidx.compose.ui.geometry.Offset
 import com.EGomez.idleecosystem.ui.screens.main.components.MadnessInfoDialog
@@ -123,7 +133,6 @@ fun MainScreen(
         var nextMutationId by rememberSaveable { mutableStateOf<String?>(null) }
         var showMadnessInfo by rememberSaveable { mutableStateOf(false) }
         var showTideInfo by rememberSaveable { mutableStateOf(false) }
-        var showTranscend by rememberSaveable { mutableStateOf(false) }
         // Nombres de TODOS los edificios (los pactos nombran también a los que aún no se ven)
         val buildingNames = remember { BuildingCatalog.create().associate { it.id to it.name } }
 
@@ -132,7 +141,33 @@ fun MainScreen(
 
         // Animamos el peso: si está contraído es 0.15f (solo la barrita), si expandido 0.65f
         val menuWeight by androidx.compose.animation.core.animateFloatAsState(targetValue = if (isMenuExpanded) 0.65f else 0.15f, label = "menu")
-        var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+        // Pestaña elegida (por id): si todavía no se ve, se muestra Investigación
+        var selectedTabId by rememberSaveable { mutableStateOf(MenuTab.RESEARCH.id) }
+        val selectedTab = uiState.menuUnlocks.resolve(MenuTab.fromId(selectedTabId))
+        // Runa recién capturada: un aviso con su nombre y lo que dio
+        var caughtRune by remember { mutableStateOf<RuneVariant?>(null) }
+        // Sistema recién descubierto: un aviso breve con su nombre
+        var unlockNotice by remember { mutableStateOf<MenuTab?>(null) }
+        var knownNewTabs by remember { mutableStateOf<Set<MenuTab>?>(null) }
+        LaunchedEffect(uiState.newTabs) {
+            val previous = knownNewTabs
+            if (previous != null) {
+                (uiState.newTabs - previous).firstOrNull()?.let { unlockNotice = it }
+            }
+            knownNewTabs = uiState.newTabs
+        }
+        LaunchedEffect(unlockNotice) {
+            if (unlockNotice != null) {
+                delay(NOTICE_MS)
+                unlockNotice = null
+            }
+        }
+        LaunchedEffect(caughtRune) {
+            if (caughtRune != null) {
+                delay(NOTICE_MS)
+                caughtRune = null
+            }
+        }
 
         val floatingTexts = remember { mutableStateListOf<FloatingText>() }
         val particleSystem = remember { ParticleSystem() }
@@ -169,6 +204,9 @@ fun MainScreen(
                         nextGoalProgress = uiState.nextGoal?.progress,
                         knowledgeFormatted = uiState.knowledgeFormatted,
                         knowledgePerSecond = uiState.knowledgePerSecond,
+                        // Las estadísticas aparecen con el Grimorio; los logros, con el primero
+                        showStats = uiState.menuUnlocks.has(MenuTab.GRIMOIRE),
+                        showAchievements = achievements.any { it.isUnlocked },
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -253,9 +291,9 @@ fun MainScreen(
 
                         MenuSection(
                             isMenuExpanded = isMenuExpanded, onToggleMenu = { isMenuExpanded = !isMenuExpanded },
-                            menuWeight = menuWeight, selectedTabIndex = selectedTabIndex,
+                            menuWeight = menuWeight, selectedTab = selectedTab,
                             onTabSelected = {
-                                selectedTabIndex = it
+                                selectedTabId = it.id
                                 viewModel.onMenuTabSelected(it)
                             },
                             buyMultiplier = uiState.buyMultiplier, onBuyMultiplierChanged = { viewModel.setBuyMultiplier(it) },
@@ -271,8 +309,10 @@ fun MainScreen(
                             prestigeCurrencyFormatted = uiState.prestigeCurrencyFormatted, canPrestige = uiState.canPrestige,
                             potentialPrestigeFormatted = uiState.potentialPrestigeFormatted,
                             doubleSanityAtFormatted = uiState.doubleSanityAtFormatted,
-                            revealed = uiState.revealed,
+                            unlocks = uiState.menuUnlocks,
+                            newTabs = uiState.newTabs,
                             ascensions = uiState.ascensions,
+                            milestoneAscensions = uiState.milestoneAscensions,
                             automation = uiState.automation,
                             onToggleAutoBuildings = { viewModel.toggleAutoBuildings() },
                             onToggleAutoGrimoire = { viewModel.toggleAutoGrimoire() },
@@ -290,6 +330,18 @@ fun MainScreen(
                             deliriumMultiplier = uiState.deliriumMultiplier,
                             earlyPacts = uiState.earlyPacts,
                             onAbandonTrial = { viewModel.onAbandonTrial() },
+                            veilBroken = uiState.veilBroken,
+                            veilPressing = uiState.veilPressing,
+                            veilFactor = uiState.veilFactor,
+                            onBreakVeil = { viewModel.breakVeil() },
+                            starsUi = uiState.starsUi,
+                            bestiaryUi = uiState.bestiaryUi,
+                            labLevels = uiState.labLevels,
+                            onBuyLab = { viewModel.buyLab(it) },
+                            onSummon = { viewModel.summon(it) },
+                            onBuySeals = { viewModel.buySeals() },
+                            onPickWithShards = { viewModel.pickWithShards(it) },
+                            onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
                             runeCatches = uiState.runeCatches,
@@ -297,9 +349,15 @@ fun MainScreen(
                             onRemoveEngraving = { viewModel.onRemoveEngraving(it) },
                             runeMastery = uiState.runeMastery,
                             activeMutation = uiState.activeMutation,
-                            transcendRevealed = uiState.transcendRevealed,
+                            seenMutations = uiState.seenMutations,
+                            cycleAscensions = uiState.cycleAscensions,
+                            etherGain = uiState.etherGain,
                             ether = uiState.ether,
-                            onOpenTranscend = { showTranscend = true },
+                            eternalLevels = uiState.eternalLevels,
+                            transcendences = uiState.transcendences,
+                            transcendRequired = uiState.transcendRequired,
+                            onBuyEternal = { viewModel.onBuyEternal(it) },
+                            onTranscend = { viewModel.onTranscend() },
                             consecrationRevealed = uiState.consecrationRevealed,
                             consecrations = uiState.consecrations,
                             onConsecrate = { viewModel.onConsecrate(it) },
@@ -308,12 +366,22 @@ fun MainScreen(
                                 showAscendConfirmation = true
                                 viewModel.onAscensionDialogOpened()
                             },
-                            onShowPrestigeShop = {
+                            onOpenMadnessMap = {
                                 showPrestigeShopDialog = true
                                 viewModel.onPrestigeShopOpened()
                             },
                             // Con el menú abierto, la lista ocupa todo lo que deja la cabecera compacta
                             modifier = if (isMenuExpanded) Modifier.weight(1f) else Modifier.weight(menuWeight)
+                        )
+                    }
+
+                    // Bestiario (v0.19.8): la criatura del encuentro flota arriba de todo
+                    uiState.bestiaryUi.encounterId?.let { id ->
+                        EncounterBanner(
+                            beastId = id,
+                            secondsLeft = uiState.bestiaryUi.encounterSecondsLeft,
+                            onCatch = { viewModel.catchEncounter() },
+                            modifier = Modifier.align(Alignment.TopCenter).padding(paddingValues).padding(top = 4.dp).zIndex(150f)
                         )
                     }
 
@@ -336,12 +404,17 @@ fun MainScreen(
 
             // --- CAPA 2: RUNAS (OPTIMIZADA) ---
             if (uiState.activeRune != null) {
+                val rune = uiState.activeRune
                 RuneOverlay(
-                    activeRune = uiState.activeRune,
+                    activeRune = rune,
                     runeState = uiState.runeState,
-                    onSuccess = { viewModel.onRuneInteractionSuccess() },
+                    onSuccess = {
+                        caughtRune = rune
+                        viewModel.onRuneInteractionSuccess()
+                    },
                     onFail = { },
-                    modifier = Modifier.zIndex(50f)
+                    modifier = Modifier.zIndex(50f),
+                    masteryLevel = runeMasteryLevel(rune, uiState.runeMastery)
                 )
             }
 
@@ -456,7 +529,7 @@ fun MainScreen(
             if (showAutomationDialog) {
                 AutomationDialog(
                     settings = uiState.automation,
-                    ascensions = uiState.ascensions,
+                    ascensions = uiState.milestoneAscensions,
                     buildings = buildings,
                     rituals = rituals,
                     onBudgetSelected = { viewModel.setAutomationBudget(it) },
@@ -465,27 +538,42 @@ fun MainScreen(
                     onToggleGrimoire = { viewModel.toggleAutoGrimoire() },
                     onToggleAutoAscend = { viewModel.toggleAutoAscend() },
                     onRitualSelected = { viewModel.selectAutoRitual(it) },
-                    onDismiss = { showAutomationDialog = false }
-                )
-            }
-
-            // Aviso breve de la Ascensión automática
-            if (showTranscend) {
-                TranscendDialog(
-                    cycleAscensions = uiState.cycleAscensions,
-                    etherGain = uiState.etherGain,
-                    ether = uiState.ether,
-                    eternalLevels = uiState.eternalLevels,
-                    onBuyEternal = { viewModel.onBuyEternal(it) },
-                    onTranscend = {
-                        viewModel.onTranscend()
-                        showTranscend = false
-                    },
-                    onDismiss = { showTranscend = false }
+                    onDismiss = { showAutomationDialog = false },
+                    transcendences = uiState.transcendences,
+                    onToggleAutoTranscend = { viewModel.toggleAutoTranscend() }
                 )
             }
 
             // Aviso al Trascender
+            // Bestiario: lo que salió al invocar y los Sellos encontrados
+            uiState.summonResults?.let { results ->
+                com.EGomez.idleecosystem.ui.screens.main.components.SummonResultsDialog(results, onDismiss = { viewModel.dismissSummonResults() })
+            }
+            uiState.sealNotice?.let { notice ->
+                Surface(
+                    color = Color(0xFF101A19),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, com.EGomez.idleecosystem.ui.screens.main.components.SealTeal),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 190.dp)
+                        .zIndex(5f)
+                ) {
+                    com.EGomez.idleecosystem.ui.components.IconLabel(
+                        com.EGomez.idleecosystem.ui.components.GameIcons.ElderSeal,
+                        when (notice.source) {
+                            com.EGomez.idleecosystem.domain.engine.SealSource.CLICK -> stringResource(R.string.seals_found_click)
+                            com.EGomez.idleecosystem.domain.engine.SealSource.DAILY -> stringResource(R.string.seals_found_daily, notice.amount)
+                            com.EGomez.idleecosystem.domain.engine.SealSource.ENCOUNTER -> stringResource(R.string.seals_found_encounter, notice.amount)
+                        },
+                        com.EGomez.idleecosystem.ui.screens.main.components.SealTeal,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
             uiState.transcendNotice?.let { gain ->
                 Surface(
                     color = Color(0xFF12161C),
@@ -499,6 +587,37 @@ fun MainScreen(
                     Text(
                         stringResource(R.string.transcend_notice, gain),
                         color = EtherColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
+            // Runa capturada: su nombre y lo que dio
+            caughtRune?.let { rune ->
+                RuneCaughtNotice(
+                    rune = rune,
+                    masteryLevel = runeMasteryLevel(rune, uiState.runeMastery),
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 60.dp).zIndex(60f)
+                )
+            }
+
+            // Un sistema nuevo: su nombre, en el color de su capa
+            unlockNotice?.let { tab ->
+                Surface(
+                    color = Color(0xFF15121C),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, tab.layer.color()),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 110.dp)
+                        .zIndex(61f)
+                        .testTag(UNLOCK_NOTICE_TAG)
+                ) {
+                    Text(
+                        stringResource(R.string.unlock_notice, tab.title()),
+                        color = tab.layer.color(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
@@ -610,10 +729,14 @@ fun MainScreen(
     }
 }
 
+/** Nivel de maestría de una runa (0 si la maestría todavía no se ve). */
+fun runeMasteryLevel(rune: RuneVariant?, mastery: Map<String, Int>): Int =
+    rune?.let { r -> mastery[r.id]?.let { RuneEngraving.masteryLevel(r.tier, it) } } ?: 0
+
 /**
- * Las runas activas con su cuenta regresiva. La lista solo se publica cuando cambia
- * (al empezar o terminar un efecto), así que el reloj vive aquí: antes el tiempo se
- * calculaba al dibujar y se quedaba fijo en la duración inicial.
+ * Los potenciadores activos (v0.19.0): cada chip lleva el color y el nombre de su runa,
+ * lo que da, el tiempo que queda y una barra que se vacía. La lista solo se publica
+ * cuando cambia (al empezar o terminar un efecto), así que el reloj vive aquí.
  */
 @Composable
 fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::currentTimeMillis) {
@@ -624,43 +747,59 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
         }
     }
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().height(30.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         items(buffs) { buff ->
             // Redondeo hacia arriba: muestra "20s" al empezar y "1s" en el último segundo
-            val remainingSeconds = ((buff.expirationTime - now + 999) / 1000).coerceAtLeast(0)
-
-            val labelText = when {
-                buff.costReduction > 0 -> stringResource(R.string.buff_costs, (buff.costReduction * 100).toInt())
-                buff.isAutoClick -> when {
-                    buff.multiplier > 1.0 -> stringResource(R.string.buff_prod_auto, buff.multiplier.toInt())
-                    buff.clickMultiplier > 1.0 -> stringResource(R.string.buff_click_auto, buff.clickMultiplier.toInt())
-                    else -> stringResource(R.string.buff_autoclick)
-                }
-                buff.echoChanceBonus > 0 -> stringResource(R.string.buff_echo_luck)
-                buff.multiplier > 1.0 -> stringResource(R.string.buff_prod, buff.multiplier.toInt())
-                else -> stringResource(R.string.buff_active)
-            }
-
-            val borderColor = when {
+            val remainingMs = (buff.expirationTime - now).coerceAtLeast(0)
+            val remainingSeconds = (remainingMs + 999) / 1000
+            val rune = RuneEngraving.variant(buff.id.removeSuffix("_auto"))
+            val accent = rune?.let { readableRuneColor(it.color) } ?: when {
                 buff.costReduction > 0 -> Color(0xFF90CAF9)
                 buff.isAutoClick -> Color(0xFFFFEB3B)
                 else -> Color(0xFF00E5FF)
             }
-
-            Box(
-                modifier = Modifier
-                    .background(Color(0xFF333333), RoundedCornerShape(4.dp))
-                    .border(1.dp, borderColor, RoundedCornerShape(4.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            val effect = when {
+                buff.freezesBuffs -> stringResource(R.string.buff_short_freeze)
+                buff.costReduction > 0 -> stringResource(R.string.buff_short_costs, (buff.costReduction * 100).toInt())
+                buff.echoChanceBonus > 0 -> stringResource(R.string.buff_short_echo, (buff.echoChanceBonus * 100).toInt())
+                buff.multiplier > 1.0 -> stringResource(R.string.buff_short_production, multiplierLabel(buff.multiplier))
+                buff.clickMultiplier > 1.0 -> stringResource(R.string.buff_short_click, multiplierLabel(buff.clickMultiplier))
+                buff.isAutoClick -> stringResource(R.string.buff_short_auto)
+                else -> stringResource(R.string.buff_active)
+            }
+            val fraction = if (buff.durationMs > 0) (remainingMs.toFloat() / buff.durationMs).coerceIn(0f, 1f) else null
+            Surface(
+                color = Color(0xFF1C1A22),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.7f)),
+                modifier = Modifier.testTag(BUFF_CHIP_TAG + buff.id)
             ) {
-                Text(
-                    text = "$labelText: ${remainingSeconds}s",
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 3.dp, bottom = 2.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(6.dp).background(accent, androidx.compose.foundation.shape.CircleShape))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            rune?.let { tr(it.name) } ?: stringResource(R.string.buff_active),
+                            color = Color.LightGray,
+                            fontSize = 9.sp,
+                            maxLines = 1
+                        )
+                    }
+                    Text(
+                        "$effect · ${remainingSeconds}s",
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    if (fraction != null) {
+                        Box(modifier = Modifier.padding(top = 1.dp).width(60.dp).height(2.dp).background(Color.White.copy(alpha = 0.1f))) {
+                            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(fraction).background(accent))
+                        }
+                    }
+                }
             }
         }
     }
@@ -670,4 +809,8 @@ fun ActiveBuffsDisplay(buffs: List<RuneBuff>, clock: () -> Long = System::curren
 private const val BUFF_TICK_MS = 250L
 
 const val TRIAL_NOTICE_TAG = "trial_notice"
+const val UNLOCK_NOTICE_TAG = "unlock_notice"
+const val BUFF_CHIP_TAG = "buff_chip_"
+/** Cuánto duran los avisos de runa capturada y de sistema nuevo. */
+private const val NOTICE_MS = 2_800L
 const val MADNESS_NOTICE_TAG = "madness_notice"

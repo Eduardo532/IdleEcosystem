@@ -24,6 +24,7 @@ import com.EGomez.idleecosystem.domain.model.Building
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.model.GameStatistics
 import com.EGomez.idleecosystem.domain.model.Ritual
 import com.EGomez.idleecosystem.domain.model.RuneTier
@@ -182,6 +183,9 @@ class MainViewModel @Inject constructor(
         echoes = economy.echoes,
         echoesFormatted = economy.echoes.toBeautifulString(),
         revealed = economy.revealed,
+        menuUnlocks = economy.menuUnlocks,
+        newTabs = economy.newTabs,
+        seenMutations = economy.seenMutations,
         ascensions = economy.ascensions,
         activePact = economy.activePact,
         chaosMultiplier = economy.chaosMultiplier,
@@ -201,6 +205,34 @@ class MainViewModel @Inject constructor(
         etherGain = economy.etherGain,
         ether = economy.ether,
         transcendences = economy.transcendences,
+        milestoneAscensions = economy.milestoneAscensions,
+        veilBroken = economy.veilBroken,
+        starsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(
+            stars = economy.stars,
+            stardust = economy.stardust,
+            starsPerHour = economy.starsPerHour,
+            dustPerSecond = economy.dustPerSecond,
+            levels = economy.starLevels,
+            aligned = economy.starsAligned,
+            secondsLeft = economy.alignmentSecondsLeft
+        ),
+        labLevels = economy.labLevels,
+        bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
+            levels = economy.beastLevels,
+            seals = economy.seals,
+            shards = economy.shards,
+            sealPrice = economy.sealPrice,
+            canBuySeals = economy.knowledge >= economy.sealPrice,
+            sinceMythic = economy.sinceMythic,
+            sincePrimordial = economy.sincePrimordial,
+            dailyStreak = economy.dailyStreak,
+            bonuses = economy.beastBonuses,
+            encounterId = economy.encounterId,
+            encounterSecondsLeft = economy.encounterSecondsLeft
+        ),
+        veilPressing = economy.veilPressing,
+        veilFactor = economy.veilFactor,
+        transcendRequired = economy.transcendRequired,
         eternalLevels = economy.eternalLevels,
         consecrationRevealed = economy.consecrationRevealed,
         consecrations = economy.consecrations,
@@ -260,6 +292,15 @@ class MainViewModel @Inject constructor(
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.trialNotice == trial) it.copy(trialNotice = null) else it }
+                }
+            }
+            is EngineEffect.Summoned -> _uiState.update { it.copy(summonResults = effect.results) }
+            is EngineEffect.SealsFound -> {
+                val notice = SealNotice(effect.amount, effect.source)
+                _uiState.update { it.copy(sealNotice = notice) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.sealNotice === notice) it.copy(sealNotice = null) else it }
                 }
             }
             is EngineEffect.AchievementUnlocked -> {
@@ -358,7 +399,7 @@ class MainViewModel @Inject constructor(
 
     fun toggleTutorial(enabled: Boolean) = engine.setTutorialEnabled(enabled)
 
-    fun onMenuTabSelected(index: Int) = engine.onMenuTabSelected(index)
+    fun onMenuTabSelected(tab: MenuTab) = engine.onMenuTabSelected(tab)
 
     fun onPrestigeShopOpened() = engine.onPrestigeShopOpened()
 
@@ -414,6 +455,24 @@ class MainViewModel @Inject constructor(
     fun setAutomationBudget(percent: Int) = updateAutomation { it.copy(budgetPercent = percent) }
 
     fun toggleAutoAscend() = updateAutomation { it.copy(autoAscend = !it.autoAscend) }
+
+    fun toggleAutoTranscend() = updateAutomation { it.copy(autoTranscend = !it.autoTranscend) }
+
+    fun breakVeil() = engine.breakVeil()
+
+    fun buyStarUpgrade(id: String) = engine.buyStarUpgrade(id)
+
+    fun catchEncounter() = engine.catchEncounter()
+
+    fun summon(count: Int) = engine.summon(count)
+
+    fun buySeals() = engine.buySeals()
+
+    fun pickWithShards(id: String) = engine.pickWithShards(id)
+
+    fun dismissSummonResults() = _uiState.update { it.copy(summonResults = null) }
+
+    fun buyLab(id: String) = engine.buyLab(id)
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

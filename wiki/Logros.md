@@ -1,6 +1,6 @@
 # Logros
 
-Hay **385 logros**: 113 originales y **272 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **489 logros**: 113 originales y **376 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -88,7 +88,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Cartógrafo de la Locura | Suma 10 niveles en el Mapa de Locura | +1 % |
 | Constelación Propia | Suma 50 niveles en el Mapa de Locura | +1 % |
 | Firmamento Dominado | Suma 150 niveles en el Mapa de Locura | +2 % |
-| El Mapa Completo | Ten al menos 1 nivel en los 18 nodos del Mapa | +2 % |
+| El Mapa Completo | Ten al menos 1 nivel en las 54 estrellas del Mapa (sin contar las Sendas) | +2 % |
 | Obsesión Estelar | Sube un nodo del Mapa a nivel 10 | +1 % |
 | La Estrella Final | Compra Ascensión Cósmica | +1 % |
 | Piloto Automático | Asciende 1 vez de forma automática | +1 % |
@@ -117,7 +117,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Vidas de la Mano | Termina 3 vidas recorriendo la Senda de la Mano | +1 % |
 | Vidas del Engranaje | Termina 3 vidas recorriendo la Senda del Engranaje | +1 % |
 | Vidas del Sueño | Termina 3 vidas recorriendo la Senda del Sueño | +1 % |
-| Las Tres Sendas | Recorre las tres Sendas (en distintas vidas) | +2 % |
+| Las Tres Sendas | Recorre tres Sendas distintas (en distintas vidas) | +1 % |
 | Peregrino | Abandona una Senda al Ascender | +1 % |
 | Errante Eterno | Abandona Sendas 5 veces | +1 % |
 | Más Allá del Velo | Trasciende 1 vez | +1 % |
@@ -133,6 +133,16 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | La Puerta Final | Trasciende durante una vida con Yog-Sothoth | +1 % |
 | Sin Dioses | Trasciende durante una vida Sin Pacto | +1 % |
 | Despertar del Sueño | Trasciende recorriendo la Senda del Sueño | +1 % |
+| La Máquina Recuerda | Alcanza 1 Hito de Trascendencia | +1 % |
+| Memoria Estelar | Alcanza 3 Hitos de Trascendencia | +1 % |
+| Seis Sellos Rotos | Alcanza los 6 Hitos de Trascendencia | +2 % |
+| Ciclo sin Manos | Trasciende 1 vez de forma automática | +1 % |
+| La Rueda Gira Sola | Trasciende 10 veces de forma automática | +2 % |
+| El Rey sin Trono | Trasciende de forma automática durante una vida con Hastur | +1 % |
+| Sueño sin Fin | Trasciende de forma automática durante una vida con Cthulhu | +1 % |
+| El Titiritero | Trasciende de forma automática durante una vida con Nyarlathotep | +1 % |
+| Vacío Perpetuo | Alcanza la Senda Eterna recorriendo la Senda del Vacío | +1 % |
+| Arcano Inmortal | Alcanza la Senda Eterna recorriendo la Senda Arcana | +1 % |
 | Primera Consagración | Consagra un edificio | +1 % |
 | Templos Sagrados | Suma 10 niveles de consagración | +1 % |
 | Arquitecto Divino | Suma 40 niveles de consagración | +1 % |
@@ -142,6 +152,84 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Altar del Durmiente | Consagra el Templo de R'lyeh durante una vida con Cthulhu | +1 % |
 | Sacerdocio del Primogénito | Consagra los Sacerdotes Dementes durante una vida con Nug | +1 % |
 | Garabatos Sagrados | Consagra las Notas Desordenadas durante una vida con Ubbo-Sathla | +1 % |
+| Primera Constelación | Completa una constelación del Mapa de Locura | +1 % |
+| Astrónomo del Abismo | Completa 4 constelaciones | +1 % |
+| Cielo Completo | Completa las 7 constelaciones | +2 % |
+| Primer Pensamiento de la Senda | Recorre la Senda de la Mente | +1 % |
+| Mente Consagrada | Sube la Senda de la Mente a nivel 3 | +1 % |
+| La Mente Absoluta | Sube la Senda de la Mente a nivel 5 | +2 % |
+| Primer Paso en el Vacío | Recorre la Senda del Vacío | +1 % |
+| Vacío Consagrado | Sube la Senda del Vacío a nivel 3 | +1 % |
+| El Vacío Absoluto | Sube la Senda del Vacío a nivel 5 | +2 % |
+| Primer Rito de la Senda | Recorre la Senda del Culto | +1 % |
+| Culto Consagrado | Sube la Senda del Culto a nivel 3 | +1 % |
+| El Culto Absoluto | Sube la Senda del Culto a nivel 5 | +2 % |
+| Primer Signo de la Senda | Recorre la Senda Arcana | +1 % |
+| Arcano Consagrado | Sube la Senda Arcana a nivel 3 | +1 % |
+| Lo Arcano Absoluto | Sube la Senda Arcana a nivel 5 | +2 % |
+| Vidas de la Mente | Termina 3 vidas recorriendo la Senda de la Mente | +1 % |
+| Vidas del Vacío | Termina 3 vidas recorriendo la Senda del Vacío | +1 % |
+| Vidas del Culto | Termina 3 vidas recorriendo la Senda del Culto | +1 % |
+| Vidas Arcanas | Termina 3 vidas recorriendo la Senda Arcana | +1 % |
+| Las Siete Sendas | Recorre las siete Sendas (en distintas vidas) | +2 % |
+| El Sultán del Vacío | Termina una vida con Azathoth recorriendo la Senda del Vacío | +1 % |
+| El Mensajero Arcano | Termina una vida con Nyarlathotep recorriendo la Senda Arcana | +1 % |
+| Las Crías del Culto | Termina una vida con Shub-Niggurath recorriendo la Senda del Culto | +1 % |
+| La Llave y la Mente | Termina una vida con Yog-Sothoth recorriendo la Senda de la Mente | +1 % |
+| Primera Luz | Reúne 1 Estrella | +1 % |
+| Cúmulo Abierto | Reúne 25 Estrellas | +1 % |
+| Vía Láctea | Reúne 100 Estrellas | +2 % |
+| Polvo de Estrellas | Gana 1.000 de Polvo Estelar | +1 % |
+| Nube de Oort | Gana 1 millón de Polvo Estelar | +2 % |
+| Cartógrafo Celeste | Suma 10 niveles de mejoras estelares | +1 % |
+| Arquitecto del Firmamento | Suma 40 niveles de mejoras estelares | +2 % |
+| Las Estrellas Están en Posición | Compra una mejora estelar durante la alineación | +1 % |
+| Conjunción Perfecta | Compra 10 mejoras estelares durante la alineación | +1 % |
+| El Durmiente Despierta | Compra una mejora estelar durante una vida con Cthulhu | +1 % |
+| Sultán de las Estrellas | Compra una mejora estelar durante una vida con Azathoth | +1 % |
+| Vacío Alineado | Compra durante la alineación recorriendo la Senda del Vacío | +1 % |
+| Sueño de Estrellas | Compra durante la alineación recorriendo la Senda del Sueño | +1 % |
+| Primera Página | Consigue 1 criatura del Bestiario | +1 % |
+| Naturalista de lo Prohibido | Consigue 50 criaturas del Bestiario | +1 % |
+| Zoólogo de lo Imposible | Consigue 150 criaturas del Bestiario | +1 % |
+| El Bestiario Completo | Consigue las 312 criaturas del Bestiario | +2 % |
+| Ojo Atento | Toca 10 encuentros | +1 % |
+| Cazador de Sombras | Toca 100 encuentros | +1 % |
+| Nada se Escapa | Toca 500 encuentros | +2 % |
+| Domador | Suma 100 niveles de criaturas | +1 % |
+| Pastor de Horrores | Suma 600 niveles de criaturas | +1 % |
+| Señor de las Bestias | Lleva las 312 criaturas a nivel 10 | +2 % |
+| Familia Reunida | Completa 1 Dominio del Bestiario | +1 % |
+| Árbol Genealógico | Completa 4 Dominios del Bestiario | +1 % |
+| Todas las Estirpes | Completa los 8 Dominios del Bestiario | +2 % |
+| Visión Primigenia | Consigue 1 criatura Primigenia | +1 % |
+| Dieciséis Rostros del Abismo | Consigue las 16 criaturas Primigenias | +2 % |
+| Guardián de Sellos | Gana 500 Sellos Antiguos | +1 % |
+| Archivo de los Antiguos | Gana 20.000 Sellos Antiguos | +2 % |
+| Primera Invocación | Invoca 10 criaturas | +1 % |
+| Círculo de Tiza | Invoca 100 criaturas | +1 % |
+| Invocador Incansable | Invoca 1.000 criaturas | +2 % |
+| Comercio Prohibido | Compra Sellos con Conocimiento 10 veces | +1 % |
+| El Precio del Saber | Compra Sellos con Conocimiento 40 veces | +1 % |
+| Ofrenda Semanal | Recibe la ofrenda diaria 7 días seguidos | +1 % |
+| Fiel al Altar | Recibe la ofrenda diaria 30 días seguidos | +2 % |
+| Elección del Coleccionista | Elige una criatura con Fragmentos | +1 % |
+| Coleccionista Amarillo | Invoca durante una vida con Hastur | +1 % |
+| Rebaño Negro | Invoca durante una vida con Shub-Niggurath | +1 % |
+| Jaula de Máscaras | Invoca durante una vida con Nyarlathotep | +1 % |
+| Rebaño del Culto | Invoca recorriendo la Senda del Culto | +1 % |
+| La Mano que Atrapa | Invoca recorriendo la Senda de la Mano | +1 % |
+| Primer Experimento | Sube 1 nivel en el Laboratorio | +1 % |
+| Catedrático | Suma 15 niveles en el Laboratorio | +1 % |
+| Decano de Miskatonic | Lleva los 6 experimentos a su nivel máximo | +2 % |
+| Tesis Doctoral | Lleva un experimento a su nivel máximo | +1 % |
+| Cátedra Completa | Lleva 3 experimentos a su nivel máximo | +1 % |
+| Presupuesto de Investigación | Invierte 100 de Éter en el Laboratorio | +1 % |
+| Fondos Ilimitados | Invierte 1.000 de Éter en el Laboratorio | +2 % |
+| Ecuación de Yog-Sothoth | Sube un experimento durante una vida con Yog-Sothoth | +1 % |
+| El Profesor Negro | Sube un experimento durante una vida con Nyarlathotep | +1 % |
+| Mente de Laboratorio | Sube un experimento recorriendo la Senda de la Mente | +1 % |
+| Alquimia Arcana | Sube un experimento recorriendo la Senda Arcana | +1 % |
 
 ### Panteón
 
@@ -212,6 +300,15 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Prueba Relámpago | Supera una Prueba en menos de 20 minutos | +1 % |
 | Penitente | Empieza 25 Pruebas de Locura | +1 % |
 | Escritura Febril | Supera Manos Atadas con la mutación Notas Febriles | +1 % |
+| Rozar el Velo | Choca con el Velo en una vida | +1 % |
+| El Velo Rasgado | Rompe el Velo | +2 % |
+| Un Paso al Otro Lado | Supera el Velo por 10 veces en una vida | +1 % |
+| Donde No Llega la Luz | Supera el Velo por 100.000 veces en una vida | +1 % |
+| El Abismo sin Fondo | Supera el Velo por mil billones de veces en una vida | +2 % |
+| El Velo Amarillo | Supera el Velo por 1.000 veces en una vida con Hastur | +1 % |
+| Todas las Puertas Abiertas | Supera el Velo por 1.000 veces en una vida con Yog-Sothoth | +1 % |
+| Mente sin Velo | Supera el Velo por 10 veces recorriendo la Senda de la Mente | +1 % |
+| Sueño sin Velo | Supera el Velo por 10 veces recorriendo la Senda del Sueño | +1 % |
 
 ### Arcanos
 
@@ -306,7 +403,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **24 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **31 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

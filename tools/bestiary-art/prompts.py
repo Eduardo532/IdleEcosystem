@@ -401,7 +401,7 @@ S.update({
 "out_bloodytongue": "The Bloody Tongue, a faceless giant with a long blood-red tentacle for a face, one of Nyarlathotep's forms, howling atop a mountain.",
 "out_tallman": "The Tall Man, an impossibly tall thin man in a black suit and hat ducking under a doorframe, always taller than the door.",
 "bro_darkyoung": "A Dark Young of Shub-Niggurath, a massive tree-like creature of ropy tentacles, puckered mouths dripping slime, standing on black goat hooves in a dark forest.",
-"bro_wilbur": "Wilbur Whateley, a towering goat-faced youth with coarse hair and a tentacled torso hidden under his clothes, in a Dunwich farmhouse.",
+"bro_wilbur": "Wilbur Whateley, a towering goat-faced young man with coarse hair and a tentacled torso hidden under his clothes, in a Dunwich farmhouse.",
 "bro_servitor": "A servitor of the Outer Gods, an amorphous frog-like mass playing a flute for Azathoth in the cosmic void.",
 "out_pharaoh": "The Black Pharaoh, a tall dark-skinned Egyptian pharaoh with glowing eyes and a golden headdress, one of Nyarlathotep's forms.",
 "out_haunter": "The Haunter of the Dark, a winged black creature with a three-lobed burning eye, fearing light in a church steeple.",
@@ -447,12 +447,12 @@ S.update({
 "bro_tentacle": "A wandering tentacle, a severed giant tentacle crawling on its own across a wet cobblestone street at night, suckers glistening.",
 "bro_goatling": "A black goatling, a small black goat kid with too many eyes and unnatural slit pupils, bleating in a dark forest clearing of standing stones.",
 "bro_spawnling": "A shoot of Abhoth, a misshapen slimy grey creature crawling out of a filthy pool, half-formed limbs, being born and dissolving at once.",
-"bro_whisper": "A whisper of the Pharaoh, a bodiless ghostly shape of smoke with a faint mouth whispering into a sleeping man's ear, Egyptian hieroglyphs fading in the air.",
+"bro_whisper": "A whisper of the Pharaoh, a bodiless ghostly shape of smoke with a faint mouth whispering into a sleeping man's ear, Egyptian hieroglyph shapes fading in the air.",
 "out_mask": "The Empty Mask, an ornate theatrical mask floating in the dark with no one wearing it, eyes inside the holes watching.",
 "out_herald": "A lesser herald, a gaunt robed figure blowing a long brass trumpet on a hill, ominous clouds gathering for something not yet arrived.",
 "out_piper": "A blind piper, a gaunt eyeless figure in rags playing a long flute toward a distant swirling cosmic void.",
 "out_shadow": "The Long Shadow, an old room with a single chair and a lamp, and a tall menacing shadow on the wall that matches nothing in the room.",
-"out_stranger": "The Stranger in Black, an old sepia family photograph of smiling people with a tall dark figure in black standing in the background.",
+"out_stranger": "The Stranger in Black, an old sepia group photograph of smiling adults on a porch with a tall dark figure in black standing in the background behind them.",
 "out_jester": "The Yellow Jester, a grinning jester in yellow motley with bells laughing on a theatre stage under a spotlight.",
 "out_drummer": "The Mad Drummer, a wild-eyed figure beating a drum in the center of a swirling cosmic chaos.",
 "out_chaosmoth": "A chaos moth, a moth with fractal shifting wings flying erratically in zigzag trails of light.",
@@ -556,4 +556,14 @@ S.update({
 "sky_towerbat": "A tower bat hanging upside down from a bronze bell in the bell tower of the ruined Starry Wisdom church, moonlight through the louvers.",
 "arc_pentacle": "The Wandering Pentacle, a glowing pentagram inscribing itself in fire across an old wooden floor of an abandoned house, candles lighting by themselves.",
 "arc_owl": "A familiar owl with spectacles perched on the shoulder of a robed wizard, reading over his shoulder from an open spellbook by candlelight.",
+})
+
+# Ajustes hechos al generar (la versión que de verdad se usó).
+S.update({
+"out_yibb": "Yibb-Tstll, the Patient One, a colossal hooded figure with a blurred dark green face and constantly shifting eyes, small black winged creatures clinging to its vast cloak, the wheel of time slowly rotating around it.",
+"bro_twin": "The Dunwich twin, an invisible colossal creature larger than a barn, visible only as crushed trees, giant footprints and a faint shimmering outline of ropy tentacles in the air over a New England hillside.",
+"bro_yellow": "A servant of the Yellow Sign, a figure in tattered yellow robes wearing a pallid mask, holding a banner with an eerie twisted spiral symbol, the twin-sunned skyline of Carcosa behind.",
+"out_bloated": "The Bloated Woman, a monstrously huge avatar in ornate silks holding a black folding fan that only half hides a face full of countless small mouths and tentacles, in a dim temple with red lanterns.",
+"out_bloodytongue": "The Bloody Tongue, a faceless giant cloaked figure with a single long blood-red tentacle in place of a face, howling on a mountain peak under a full moon.",
+"out_sandman": "The Black Sandman, a hooded gaunt figure sprinkling glittering black sand from his fingers into the eyes of a sleeping dreamer in a dark bedroom.",
 })

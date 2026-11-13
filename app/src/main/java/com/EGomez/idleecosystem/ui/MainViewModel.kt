@@ -217,6 +217,16 @@ class MainViewModel @Inject constructor(
             secondsLeft = economy.alignmentSecondsLeft
         ),
         labLevels = economy.labLevels,
+        dreamUi = com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(
+            next = economy.dreamNext,
+            active = economy.dreamActive,
+            exponent = economy.dreamExponent,
+            points = economy.dreamPoints,
+            earned = economy.dreamPointsEarned,
+            cycleBest = economy.dreamCycleBest,
+            pending = economy.dreamPendingPoints,
+            levels = economy.dreamLevels
+        ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
             seals = economy.seals,
@@ -280,10 +290,11 @@ class MainViewModel @Inject constructor(
             EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
             is EngineEffect.Transcended -> {
                 val gain = effect.ether
-                _uiState.update { it.copy(transcendNotice = gain) }
+                val dream = effect.dreamPoints
+                _uiState.update { it.copy(transcendNotice = gain, dreamNotice = dream) }
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
-                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null) else it }
+                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null, dreamNotice = null) else it }
                 }
             }
             is EngineEffect.TrialCompleted -> {
@@ -473,6 +484,14 @@ class MainViewModel @Inject constructor(
     fun dismissSummonResults() = _uiState.update { it.copy(summonResults = null) }
 
     fun buyLab(id: String) = engine.buyLab(id)
+
+    fun setDreamNext(enabled: Boolean) = engine.setDreamNext(enabled)
+
+    fun wakeUp() = engine.wakeUp()
+
+    fun buyDreamNode(id: String) = engine.buyDreamNode(id)
+
+    fun respecDream() = engine.respecDream()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

@@ -121,6 +121,11 @@ fun MenuSection(
     bestiaryUi: BestiaryUi = BestiaryUi(),
     labLevels: Map<String, Int> = emptyMap(),
     onBuyLab: (String) -> Unit = {},
+    dreamUi: DreamUi = DreamUi(),
+    onSetDreamNext: (Boolean) -> Unit = {},
+    onWakeUp: () -> Unit = {},
+    onBuyDreamNode: (String) -> Unit = {},
+    onRespecDream: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
@@ -246,6 +251,7 @@ fun MenuSection(
                     item { LockedSystem(lockedTabText) }
                 } else when (tab) {
                     MenuTab.RESEARCH -> {
+                        if (dreamUi.active) item(key = "dream_banner") { DreamBanner(dreamUi.exponent) }
                         if (veilPressing) item(key = "veil_banner") { VeilBanner(veilFactor) }
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
@@ -407,6 +413,7 @@ fun MenuSection(
                     MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
                     MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards) }
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
+                    MenuTab.DREAM -> item { DreamPanel(dreamUi, onSetDreamNext, onWakeUp, onBuyDreamNode, onRespecDream) }
                 }
             }
 

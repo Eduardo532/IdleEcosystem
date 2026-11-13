@@ -35,6 +35,7 @@ import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -808,6 +809,65 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `the deep sleep is entered by transcending and pays dream points`() = runBlocking {
+        // Tercera Trascendencia hecha y un ciclo listo para Trascender
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(3))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.transcendences == 3 && it.etherGain > 0 }
+        assertTrue(MenuTab.DREAM in before.menuUnlocks.tabs)
+        assertFalse(before.dreamActive)
+
+        engine.setDreamNext(true)
+        await(engine.economy) { it.dreamNext }
+        engine.transcend()
+        val dreaming = await(engine.economy) { it.transcendences == 4 && it.dreamActive }
+        assertEquals(0.75, dreaming.dreamExponent, 1e-9)
+
+        // La mejor vida del Sueño: 1e14 de Conocimiento vale 8 Puntos
+        stats.runKnowledge = BigDecimal("1e14")
+        stats.totalPrestiges = 50
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        val ready = await(engine.economy) { it.dreamPendingPoints == 8 && it.etherGain > 0 }
+        assertEquals(0, ready.dreamPoints)
+
+        engine.transcend()
+        val awake = await(engine.economy) { it.transcendences == 5 && it.dreamPoints == 8 }
+        // El interruptor sigue encendido: el ciclo nuevo también es un Sueño
+        assertTrue(awake.dreamActive)
+        assertEquals(8, awake.dreamPointsEarned)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.DREAMS_COMPLETED)))
+
+        // El árbol: Los Setenta Peldaños primero, después la Llama
+        engine.buyDreamNode(DreamNode.FLAME.id) // sin el nodo padre no se puede
+        engine.buyDreamNode(DreamNode.STEPS.id)
+        val bought = await(engine.economy) { it.dreamLevels[DreamNode.STEPS.id] == 1 }
+        assertEquals(0, bought.dreamLevels[DreamNode.FLAME.id])
+        assertEquals(7, bought.dreamPoints)
+        assertEquals(0.77, bought.dreamExponent, 1e-9)
+
+        engine.respecDream()
+        val refunded = await(engine.economy) { it.dreamLevels[DreamNode.STEPS.id] == 0 }
+        assertEquals(8, refunded.dreamPoints)
+
+        // Despertar antes de tiempo: el ciclo sigue normal y no paga nada
+        engine.wakeUp()
+        val woken = await(engine.economy) { !it.dreamActive }
+        assertEquals(8, woken.dreamPoints)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.DREAM_WAKES)))
     }
 
     @Test

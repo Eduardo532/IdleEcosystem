@@ -20,6 +20,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Mutaciones | Trascender por primera vez |
 | | | Estrellas | Trascender por primera vez |
 | | | Laboratorio | Trascender por primera vez |
+| | | Sueño | Trascender por tercera vez |
 
 Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 
@@ -41,6 +42,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Mutaciones:** el catálogo de las 20 mutaciones. Las que todavía no elegiste se ven como **???**; la activa lleva la marca **ACTIVA**.
 - **Estrellas:** las Estrellas, el Polvo Estelar, la alineación (con su cuenta atrás) y las seis mejoras estelares. Ver [Estrellas](Estrellas).
 - **Laboratorio:** los seis experimentos de Miskatonic, con su exponente actual y su costo en Éter. Ver [Laboratorio](Laboratorio).
+- **Sueño:** elegir si el próximo ciclo será un Sueño Profundo, despertar antes de tiempo, los Puntos de Sueño y el Árbol del Sueño. Mientras se sueña, un aviso lunar en Investigación lo recuerda. Ver [El Sueño Profundo](El-Sueno-Profundo).
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.20.x *(en pruebas)*
+
+- **v0.20.0:** El Sueño Profundo: desde la tercera Trascendencia se puede elegir que el próximo ciclo sea un Sueño, donde la producción, el clic y la Cordura se elevan a ^0,75. Trascender desde el Sueño paga Puntos de Sueño según la mejor vida, y estos compran el Árbol del Sueño (8 nodos, reinicio gratis), que vale en todos los ciclos. 16 logros nuevos.
+
 ## v0.19.x *(en pruebas)*
 
 - **v0.19.0:** interfaz por capas: el menú empieza con una sola pestaña y cada sistema aparece al llegar a él, agrupado en las capas Vida, Ascensión y Trascendencia, con aviso de lo nuevo, punto dorado y una pista del próximo descubrimiento. El Mapa de Locura, la Atención y la automatización pasan a la pestaña Cordura; el Éter y las mejoras eternas, a su pestaña; catálogo de mutaciones. Runas más claras: placa con nombre y efecto real, aviso al capturarlas y chips con el nombre de la runa.

@@ -103,6 +103,9 @@ data class GameUiState(
     val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
     /** Laboratorio de Miskatonic (v0.19.9). */
     val labLevels: Map<String, Int> = emptyMap(),
+    /** El Sueño Profundo (v0.20.0). */
+    val dreamUi: com.EGomez.idleecosystem.ui.screens.main.components.DreamUi = com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(),
+    val dreamNotice: Int? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

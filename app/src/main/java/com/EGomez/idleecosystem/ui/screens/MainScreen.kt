@@ -338,6 +338,11 @@ fun MainScreen(
                             bestiaryUi = uiState.bestiaryUi,
                             labLevels = uiState.labLevels,
                             onBuyLab = { viewModel.buyLab(it) },
+                            dreamUi = uiState.dreamUi,
+                            onSetDreamNext = { viewModel.setDreamNext(it) },
+                            onWakeUp = { viewModel.wakeUp() },
+                            onBuyDreamNode = { viewModel.buyDreamNode(it) },
+                            onRespecDream = { viewModel.respecDream() },
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
@@ -584,13 +589,22 @@ fun MainScreen(
                         .padding(top = 140.dp)
                         .zIndex(5f)
                 ) {
-                    Text(
-                        stringResource(R.string.transcend_notice, gain),
-                        color = EtherColor,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                    )
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            stringResource(R.string.transcend_notice, gain),
+                            color = EtherColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        uiState.dreamNotice?.let { points ->
+                            Text(
+                                stringResource(R.string.dream_notice, points),
+                                color = com.EGomez.idleecosystem.ui.screens.main.components.DreamBlue,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
             }
 

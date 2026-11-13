@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,6 +48,8 @@ fun TideIndicator(
             .padding(horizontal = 4.dp, vertical = 2.dp)
             .testTag(TIDE_INDICATOR_TAG)
     ) {
+        Icon(GameIcons.Wave, contentDescription = null, tint = tideColor(tide), modifier = Modifier.size(13.dp))
+        Spacer(modifier = Modifier.width(4.dp))
         Text(
             stringResource(R.string.tide_bar, tr(tide.title), mmss(secondsLeft)),
             color = tideColor(tide),
@@ -71,7 +74,7 @@ fun TideInfoDialog(current: TidePhase, onDismiss: () -> Unit) {
                 TidePhase.entries.forEach { tide ->
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        (if (tide == current) "▶ " else "") + tr(tide.title),
+                        (if (tide == current) "› " else "") + tr(tide.title),
                         color = tideColor(tide),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp

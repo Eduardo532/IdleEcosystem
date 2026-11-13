@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
+import com.EGomez.idleecosystem.ui.components.IconLabel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,11 +74,12 @@ private fun LabRow(experiment: LabExperiment, level: Int, ether: Int, onBuy: (St
     ) {
         Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "⚗ " + tr(experiment.title) + " · " + stringResource(R.string.lab_level, level, experiment.maxLevel),
+                IconLabel(
+                    GameIcons.Flask,
+                    tr(experiment.title) + " · " + stringResource(R.string.lab_level, level, experiment.maxLevel),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(tr(experiment.description), color = Color.LightGray, fontSize = 11.sp)
                 Text(now, color = LabGreen, fontSize = 11.sp)

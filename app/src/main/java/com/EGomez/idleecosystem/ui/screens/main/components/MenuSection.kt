@@ -121,7 +121,9 @@ fun MenuSection(
     bestiaryUi: BestiaryUi = BestiaryUi(),
     labLevels: Map<String, Int> = emptyMap(),
     onBuyLab: (String) -> Unit = {},
-    onUpgradeBeast: (String) -> Unit = {},
+    onSummon: (Int) -> Unit = {},
+    onBuySeals: () -> Unit = {},
+    onPickWithShards: (String) -> Unit = {},
     onBuyStar: (String) -> Unit = {},
     runeSlots: Int = 0,
     engravedRunes: List<String> = emptyList(),
@@ -403,7 +405,7 @@ fun MenuSection(
                     MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
                     MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
-                    MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onUpgradeBeast) }
+                    MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards) }
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
                 }
             }
@@ -445,7 +447,7 @@ fun MenuSection(
                             // La mutación de esta vida (v0.18.4)
                             activeMutation?.let {
                                 Text(
-                                    "🧬 " + tr(it.title),
+                                    tr(it.title),
                                     color = MutationGreen,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,

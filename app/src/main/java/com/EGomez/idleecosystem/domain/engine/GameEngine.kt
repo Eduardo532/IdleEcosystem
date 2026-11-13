@@ -27,6 +27,7 @@ import com.EGomez.idleecosystem.domain.logic.Beast
 import com.EGomez.idleecosystem.domain.logic.BeastKind
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.SummonResult
 import com.EGomez.idleecosystem.domain.logic.Lab
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
@@ -153,9 +154,15 @@ data class EconomyState(
     val alignmentSecondsLeft: Long = 0,
     /** Bestiario (v0.19.8). */
     val beastLevels: Map<String, Int> = emptyMap(),
-    val essence: Int = 0,
     val encounterId: String? = null,
     val encounterSecondsLeft: Int = 0,
+    val seals: Int = 0,
+    val shards: Int = 0,
+    val sealPrice: BigDecimal = BigDecimal.ZERO,
+    val summons: Int = 0,
+    val sinceMythic: Int = 0,
+    val sincePrimordial: Int = 0,
+    val dailyStreak: Int = 0,
     val beastBonuses: Map<BeastKind, Double> = emptyMap(),
     val eternalLevels: Map<String, Int> = emptyMap(),
     /** Consagración: si ya se ve y el nivel de cada edificio consagrado. */
@@ -197,10 +204,16 @@ data class AchievementProgress(
 )
 
 /** Avisos de una sola vez (diálogos y popups), que no forman parte del estado. */
+/** De dónde vino un Sello Antiguo que merece aviso. */
+enum class SealSource { CLICK, DAILY, ENCOUNTER }
+
 sealed interface EngineEffect {
     data class OfflineGains(val gains: BigDecimal, val seconds: Long) : EngineEffect
     data class LegacyRefund(val amount: BigDecimal) : EngineEffect
     data class AchievementUnlocked(val achievement: Achievement) : EngineEffect
+    /** Bestiario (v0.19.10): lo que salió al invocar y los Sellos encontrados. */
+    data class Summoned(val results: List<SummonResult>) : EngineEffect
+    data class SealsFound(val amount: Int, val source: SealSource) : EngineEffect
     /** La automatización ascendió sola y ganó [sanity] de Cordura. */
     data class AutoAscended(val sanity: BigDecimal) : EngineEffect
     /** Se superó una Prueba de Locura. */
@@ -616,6 +629,8 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.CYCLE_SANITY, finalPotential)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        // Sellos Antiguos: cada Ascensión da uno, y cinco más cada diez
+        addSeals(Bestiary.ascensionSeals(totalAscensionsEver()))
         if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
         statsManager.resetRunCounters()
         madness.reset()
@@ -714,7 +729,7 @@ class GameEngine @Inject constructor(
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
         put(AchievementStat.BEAST_LEVELS, beasts.values.sum())
-        put(AchievementStat.FAMILIES_COMPLETE, Bestiary.families.count { Bestiary.isFamilyComplete(it.id, beasts) })
+        put(AchievementStat.DOMAINS_COMPLETE, Bestiary.domains.count { Bestiary.isDomainComplete(it.id, beasts) })
         put(AchievementStat.PRIMORDIALS_SEEN, Bestiary.beasts.count { it.rarity == BeastRarity.PRIMORDIAL && (beasts[it.id] ?: 0) > 0 })
         put(AchievementStat.MUTATIONS_SEEN, Mutation.entries.count { statsManager.counter(AchievementStat.MUTATION_SEEN_PREFIX + it.id).signum() > 0 })
         put(AchievementStat.SANITY, prestigeManager.residualSanity)
@@ -1114,6 +1129,8 @@ class GameEngine @Inject constructor(
         buildingManager.checkUnlocks(knowledge)
         val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings, achievementContext())
         if (newUnlocks.isNotEmpty()) {
+            // Cada logro paga Sellos Antiguos (los secretos, más)
+            addSeals(newUnlocks.sumOf { if (it.isSecret) Bestiary.SEALS_PER_SECRET else Bestiary.SEALS_PER_ACHIEVEMENT }, multiplied = false)
             soundManager.playSound(SoundType.ACHIEVEMENT)
             requestSave()
             _effects.trySend(EngineEffect.AchievementUnlocked(newUnlocks.last().copy()))
@@ -1187,6 +1204,12 @@ class GameEngine @Inject constructor(
         if (!rules.noClickKnowledge) addKnowledge(currentClickPower(), isManual = true)
         addMadness(madness.clickGain())
         clicksThisTide++
+
+        // Sellos Antiguos: muy de vez en cuando, un clic encuentra uno (menos que un Eco)
+        if (bestiaryRevealed() && kotlin.random.Random.nextDouble() < Bestiary.CLICK_SEAL_CHANCE) {
+            statsManager.count(AchievementStat.CLICK_SEALS)
+            _effects.trySend(EngineEffect.SealsFound(addSeals(1), SealSource.CLICK))
+        }
 
         // Silencio: no hay Ecos
         if (echoFound && !rules.noRituals) {
@@ -1348,7 +1371,7 @@ class GameEngine @Inject constructor(
     }
 
     // =====================================================================
-    // BESTIARIO (v0.19.8)
+    // BESTIARIO Y SELLOS ANTIGUOS (v0.19.10)
     // =====================================================================
 
     private var encounter: Beast? = null
@@ -1366,22 +1389,66 @@ class GameEngine @Inject constructor(
 
     private fun beastBonus(kind: BeastKind): Double = beastBonuses().getValue(kind)
 
-    /** El Bestiario se abre al superar la primera Prueba (o si ya hay criaturas o Esencia). */
+    private fun seals(): Int = statsManager.counter(AchievementStat.SEALS).toInt()
+
+    /** El Bestiario se abre con la primera Ascensión (o si ya hay Sellos o criaturas). */
     private fun bestiaryRevealed(): Boolean =
-        completedTrials().isNotEmpty() || statsManager.counter(AchievementStat.ESSENCE_EARNED).signum() > 0 ||
+        totalAscensionsEver() >= 1 || statsManager.counter(AchievementStat.SEALS_EARNED).signum() > 0 ||
             Bestiary.beasts.any { statsManager.counter(AchievementStat.beast(it.id)).signum() > 0 }
 
-    private fun addEssence(amount: Double) {
-        val gained = BigDecimal.valueOf(kotlin.math.floor(amount * beastBonus(BeastKind.ESSENCE)))
-        if (gained.signum() <= 0) return
-        statsManager.counters[AchievementStat.ESSENCE] = statsManager.counter(AchievementStat.ESSENCE).add(gained)
-        statsManager.count(AchievementStat.ESSENCE_EARNED, gained)
+    /** Suma Sellos (multiplicados por Lo Arcano). Nunca se pierden en ningún reinicio. */
+    private fun addSeals(amount: Int, multiplied: Boolean = true): Int {
+        if (amount <= 0) return 0
+        val gained = if (multiplied) kotlin.math.floor(amount * beastBonus(BeastKind.SEALS)).toInt().coerceAtLeast(amount) else amount
+        statsManager.counters[AchievementStat.SEALS] = statsManager.counter(AchievementStat.SEALS).add(BigDecimal(gained))
+        statsManager.count(AchievementStat.SEALS_EARNED, BigDecimal(gained))
+        return gained
     }
 
-    /** Cada segundo: el encuentro activo se escapa o llega uno nuevo. */
+    private fun spendSeals(amount: Int): Boolean {
+        val have = statsManager.counter(AchievementStat.SEALS)
+        if (have < BigDecimal(amount)) return false
+        val left = have.subtract(BigDecimal(amount))
+        if (left.signum() == 0) statsManager.counters.remove(AchievementStat.SEALS) else statsManager.counters[AchievementStat.SEALS] = left
+        return true
+    }
+
+    /**
+     * Partidas de la v0.19.8/9: la Esencia pasa a Sellos y los logros ya conseguidos pagan
+     * sus Sellos una sola vez.
+     */
+    private fun migrateBestiary() {
+        if (statsManager.counter(AchievementStat.BESTIARY_V2).signum() > 0) return
+        statsManager.counters[AchievementStat.BESTIARY_V2] = BigDecimal.ONE
+        val essence = statsManager.counter(AchievementStat.ESSENCE).toInt()
+        statsManager.counters.remove(AchievementStat.ESSENCE)
+        val fromAchievements = achievementManager.availableAchievements.filter { it.isUnlocked }
+            .sumOf { if (it.isSecret) Bestiary.SEALS_PER_SECRET else Bestiary.SEALS_PER_ACHIEVEMENT }
+        addSeals(essence + fromAchievements, multiplied = false)
+    }
+
+    /** Ofrenda diaria: el primer segundo de juego de cada día da Sellos, más con la racha. */
+    private fun dailyOfferingTick() {
+        val today = System.currentTimeMillis() / 86_400_000L
+        val last = statsManager.counter(AchievementStat.DAILY_LAST_DAY).toLong()
+        if (last == today) return
+        val streak = if (last == today - 1) statsManager.counter(AchievementStat.DAILY_STREAK).toInt() + 1 else 1
+        statsManager.counters[AchievementStat.DAILY_LAST_DAY] = BigDecimal(today)
+        statsManager.counters[AchievementStat.DAILY_STREAK] = BigDecimal(streak)
+        if (streak > statsManager.counter(AchievementStat.DAILY_BEST_STREAK).toInt()) {
+            statsManager.counters[AchievementStat.DAILY_BEST_STREAK] = BigDecimal(streak)
+        }
+        val gained = addSeals(Bestiary.dailySeals(streak))
+        _effects.trySend(EngineEffect.SealsFound(gained, SealSource.DAILY))
+        requestSave()
+    }
+
+    /** Cada segundo: la ofrenda diaria y los encuentros (que ahora dan Sellos). */
     private fun encounterTick() {
+        migrateBestiary()
         if (!bestiaryRevealed()) return
         tutorialManager.triggerStep(TutorialStep.BESTIARY)
+        dailyOfferingTick()
         if (encounter != null) {
             encounterSecondsLeft--
             if (encounterSecondsLeft <= 0) encounter = null
@@ -1389,30 +1456,21 @@ class GameEngine @Inject constructor(
         }
         nextEncounterIn--
         if (nextEncounterIn > 0) return
-        encounter = Bestiary.rollEncounter(beastLevels())
+        encounter = Bestiary.rollEncounter()
         encounterSecondsLeft = Bestiary.ENCOUNTER_SECONDS
         nextEncounterIn = Bestiary.nextInterval(beastBonus(BeastKind.ENCOUNTER))
         soundManager.playSound(SoundType.EVENT_APPEAR)
     }
 
-    /**
-     * Cataloga la criatura del encuentro: la primera vez se descubre (nivel 1); repetida
-     * da Esencia según su rareza.
-     */
+    /** Toca el encuentro: la criatura se esfuma y deja Sellos según su rareza. */
     fun catchEncounter() = post {
         val beast = encounter ?: return@post
         encounter = null
-        val key = AchievementStat.beast(beast.id)
-        val level = statsManager.counter(key).toInt()
-        if (level == 0) statsManager.counters[key] = BigDecimal.ONE
-        else addEssence(beast.rarity.duplicateEssence.toDouble())
         statsManager.count(AchievementStat.ENCOUNTERS)
-        statsManager.flag(AchievementStat.beastCatchWith(activePact.id))
-        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.beastCatchPath(it.id)) }
-        if (beast.rarity == BeastRarity.PRIMORDIAL && starsAligned()) statsManager.flag(AchievementStat.FEAT_PRIMORDIAL_ALIGNED)
+        val gained = addSeals(beast.rarity.encounterSeals)
         soundManager.playSound(SoundType.ACHIEVEMENT)
-        refreshEngravings()
-        recalculate()
+        _effects.trySend(EngineEffect.SealsFound(gained, SealSource.ENCOUNTER))
+        publishEconomy()
         requestSave()
     }
 
@@ -1422,18 +1480,76 @@ class GameEngine @Inject constructor(
         encounterSecondsLeft = Bestiary.ENCOUNTER_SECONDS
     }
 
-    /** Sube de nivel una criatura descubierta con Esencia. */
-    fun upgradeBeast(id: String) = post {
-        val beast = Bestiary.beast(id) ?: return@post
-        val key = AchievementStat.beast(beast.id)
-        val level = statsManager.counter(key).toInt()
-        if (level <= 0 || level >= Bestiary.MAX_LEVEL) return@post
-        val cost = BigDecimal(Bestiary.upgradeCost(beast, level))
-        val essence = statsManager.counter(AchievementStat.ESSENCE)
-        if (essence < cost) return@post
-        statsManager.counters[AchievementStat.ESSENCE] = essence.subtract(cost)
-        statsManager.counters[key] = BigDecimal(level + 1)
+    /** Compra 5 Sellos con Conocimiento. El precio sube con cada compra y nunca baja. */
+    fun buySeals() = post {
+        if (!bestiaryRevealed()) return@post
+        val bought = statsManager.counter(AchievementStat.SEALS_BOUGHT).toInt()
+        val price = BigDecimal(Bestiary.sealPrice(bought))
+        if (knowledge < price) return@post
+        knowledge = knowledge.subtract(price)
+        statsManager.count(AchievementStat.SEALS_BOUGHT)
+        addSeals(Bestiary.SEALS_PER_PURCHASE, multiplied = false)
         soundManager.playSound(SoundType.BUY)
+        publishEconomy()
+        requestSave()
+    }
+
+    /**
+     * Invoca [count] criaturas (1 o 10) con Sellos. Nuevas llegan a nivel 1, repetidas suben
+     * de nivel y, ya al máximo, dan Fragmentos. Las garantías nunca se reinician.
+     */
+    fun summon(count: Int) = post {
+        if (!bestiaryRevealed()) return@post
+        val cost = if (count >= 10) Bestiary.SUMMON_TEN_COST else Bestiary.SUMMON_COST * count
+        val pulls = if (count >= 10) 10 else count.coerceAtLeast(1)
+        if (!spendSeals(cost)) return@post
+        val results = mutableListOf<SummonResult>()
+        repeat(pulls) {
+            var sinceMythic = statsManager.counter(AchievementStat.SINCE_MYTHIC).toInt()
+            var sincePrimordial = statsManager.counter(AchievementStat.SINCE_PRIMORDIAL).toInt()
+            val rarity = Bestiary.rollRarity(sinceMythic, sincePrimordial)
+            sinceMythic = if (rarity >= BeastRarity.MYTHIC) 0 else sinceMythic + 1
+            sincePrimordial = if (rarity == BeastRarity.PRIMORDIAL) 0 else sincePrimordial + 1
+            statsManager.counters[AchievementStat.SINCE_MYTHIC] = BigDecimal(sinceMythic)
+            statsManager.counters[AchievementStat.SINCE_PRIMORDIAL] = BigDecimal(sincePrimordial)
+            results += receiveBeast(Bestiary.pick(rarity))
+        }
+        statsManager.count(AchievementStat.SUMMONS, BigDecimal(pulls))
+        statsManager.flag(AchievementStat.beastCatchWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.beastCatchPath(it.id)) }
+        if (starsAligned() && results.any { Bestiary.beast(it.beastId)?.rarity == BeastRarity.PRIMORDIAL }) {
+            statsManager.flag(AchievementStat.FEAT_PRIMORDIAL_ALIGNED)
+        }
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Summoned(results))
+        refreshEngravings()
+        recalculate()
+        requestSave()
+    }
+
+    private fun receiveBeast(beast: Beast): SummonResult {
+        val key = AchievementStat.beast(beast.id)
+        val result = Bestiary.receive(beast, statsManager.counter(key).toInt())
+        statsManager.counters[key] = BigDecimal(result.level)
+        if (result.shards > 0) {
+            statsManager.counters[AchievementStat.SHARDS] = statsManager.counter(AchievementStat.SHARDS).add(BigDecimal(result.shards))
+            statsManager.count(AchievementStat.SHARDS_EARNED, BigDecimal(result.shards))
+        }
+        return result
+    }
+
+    /** Elige con Fragmentos una criatura que todavía no se tiene. */
+    fun pickWithShards(id: String) = post {
+        val beast = Bestiary.beast(id) ?: return@post
+        if (statsManager.counter(AchievementStat.beast(beast.id)).signum() > 0) return@post
+        val cost = BigDecimal(Bestiary.shardCost(beast))
+        val shards = statsManager.counter(AchievementStat.SHARDS)
+        if (shards < cost) return@post
+        statsManager.counters[AchievementStat.SHARDS] = shards.subtract(cost)
+        statsManager.counters[AchievementStat.beast(beast.id)] = BigDecimal.ONE
+        statsManager.count(AchievementStat.SHARD_PICKS)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Summoned(listOf(SummonResult(beast.id, isNew = true, level = 1, shards = 0))))
         refreshEngravings()
         recalculate()
         requestSave()
@@ -1534,7 +1650,7 @@ class GameEngine @Inject constructor(
         if (trial.rules.delirium) rollDelirium()
         if (knowledgeThisRun() < trial.goal) return
         // Bestiario: la Prueba da Esencia (x3 la primera vez)
-        addEssence(Bestiary.trialEssence(trial, statsManager.counter(AchievementStat.trial(trial.id)).signum() == 0).toDouble())
+        addSeals(Bestiary.trialSeals(trial, statsManager.counter(AchievementStat.trial(trial.id)).signum() == 0))
         statsManager.counters.remove(AchievementStat.ACTIVE_TRIAL_PREFIX + trial.id)
         statsManager.flag(AchievementStat.trial(trial.id))
         statsManager.flag(AchievementStat.trialWith(trial.id, activePact.id))
@@ -2190,7 +2306,13 @@ class GameEngine @Inject constructor(
             starsAligned = starsAligned(),
             alignmentSecondsLeft = Stars.secondsLeft(nowSeconds(), starLevel(StarUpgrade.CONJUNCTION)),
             beastLevels = beastLevels(),
-            essence = statsManager.counter(AchievementStat.ESSENCE).toInt(),
+            seals = seals(),
+            shards = statsManager.counter(AchievementStat.SHARDS).toInt(),
+            sealPrice = BigDecimal(Bestiary.sealPrice(statsManager.counter(AchievementStat.SEALS_BOUGHT).toInt())),
+            summons = statsManager.counter(AchievementStat.SUMMONS).toInt(),
+            sinceMythic = statsManager.counter(AchievementStat.SINCE_MYTHIC).toInt(),
+            sincePrimordial = statsManager.counter(AchievementStat.SINCE_PRIMORDIAL).toInt(),
+            dailyStreak = statsManager.counter(AchievementStat.DAILY_STREAK).toInt(),
             encounterId = encounter?.id,
             encounterSecondsLeft = encounterSecondsLeft,
             beastBonuses = beastBonuses(),

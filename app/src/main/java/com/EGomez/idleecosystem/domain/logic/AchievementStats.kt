@@ -66,11 +66,29 @@ object AchievementStat {
     const val ENCOUNTERS = "encounters"
     const val BEASTS_SEEN = "beasts_seen"
     const val BEAST_LEVELS = "beast_levels"
-    const val FAMILIES_COMPLETE = "beast_families"
+    const val DOMAINS_COMPLETE = "beast_domains"
     const val PRIMORDIALS_SEEN = "beast_primordials"
     const val BEAST_CATCH_WITH_PREFIX = "beast_with."
     const val BEAST_CATCH_PATH_PREFIX = "beast_path."
     const val FEAT_PRIMORDIAL_ALIGNED = "feat.primordial_aligned"
+    /**
+     * Sellos Antiguos (v0.19.10): la moneda del gachapón. Nunca se reinician. Las compras
+     * con Conocimiento, las garantías y la racha diaria tampoco.
+     */
+    const val SEALS = "seals"
+    const val SEALS_EARNED = "seals_earned"
+    const val SEALS_BOUGHT = "seals_bought"
+    const val CLICK_SEALS = "click_seals"
+    const val SUMMONS = "summons"
+    const val SINCE_MYTHIC = "summon_since_mythic"
+    const val SINCE_PRIMORDIAL = "summon_since_primordial"
+    const val SHARDS = "shards"
+    const val SHARDS_EARNED = "shards_earned"
+    const val SHARD_PICKS = "shard_picks"
+    const val DAILY_LAST_DAY = "daily_last_day"
+    const val DAILY_STREAK = "daily_streak"
+    const val DAILY_BEST_STREAK = "daily_best_streak"
+    const val BESTIARY_V2 = "bestiary_v2"
     /** Laboratorio de Miskatonic (v0.19.9): niveles, experimentos al máximo y Éter invertido. */
     const val LAB_PREFIX = "lab."
     const val LAB_LEVELS = "lab_levels"
@@ -121,7 +139,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, FAMILIES_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
     )
 
     // --- Contadores guardados ---
@@ -279,6 +297,7 @@ object AchievementStat {
         ETHER, ETHER_EARNED, TRANSCENDENCES, MAX_ETHER_GAIN, CYCLE_SANITY, CYCLE_START, ASCENSIONS_PAST, FEAT_EXACT_THRESHOLD, MUTATION_LIVES,
         AUTO_TRANSCENDS, FEAT_SHORTCUT, VEIL_BROKEN, VEIL_TOUCHED, FEAT_VEIL_IN_TRIAL,
         STARS, STARDUST_EARNED, ALIGNED_PURCHASES, ESSENCE_EARNED, ENCOUNTERS, FEAT_PRIMORDIAL_ALIGNED,
+        SEALS_EARNED, SEALS_BOUGHT, CLICK_SEALS, SUMMONS, SHARDS_EARNED, SHARD_PICKS, DAILY_BEST_STREAK,
         LAB_ETHER_SPENT, FEAT_LAB_EXACT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS

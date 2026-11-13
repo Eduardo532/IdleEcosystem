@@ -271,8 +271,8 @@ enum class TutorialStep(
     BESTIARY(
         "bestiary",
         "El Bestiario",
-        "Superaste una Prueba y ganaste Esencia. Desde ahora aparecen criaturas de los Mitos en encuentros al azar: tócalas antes de que se vayan para catalogarlas en el Bestiario. Cada una da un pequeño bono y la Esencia las sube de nivel.",
-        "Al superar la primera Prueba"
+        "Ascendiste y recibiste tu primer Sello Antiguo. En el Bestiario puedes gastar Sellos para invocar a 312 criaturas de los Mitos: cada una da un bono y las repetidas suben de nivel. Los Sellos llegan con las Ascensiones, las Pruebas, los logros, los encuentros, la ofrenda diaria, muy de vez en cuando al hacer clic, y comprándolos con Conocimiento.",
+        "Tras la primera Ascensión"
     ),
 
     LAB(

@@ -338,7 +338,9 @@ fun MainScreen(
                             bestiaryUi = uiState.bestiaryUi,
                             labLevels = uiState.labLevels,
                             onBuyLab = { viewModel.buyLab(it) },
-                            onUpgradeBeast = { viewModel.upgradeBeast(it) },
+                            onSummon = { viewModel.summon(it) },
+                            onBuySeals = { viewModel.buySeals() },
+                            onPickWithShards = { viewModel.pickWithShards(it) },
                             onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
@@ -378,7 +380,6 @@ fun MainScreen(
                         EncounterBanner(
                             beastId = id,
                             secondsLeft = uiState.bestiaryUi.encounterSecondsLeft,
-                            known = (uiState.bestiaryUi.levels[id] ?: 0) > 0,
                             onCatch = { viewModel.catchEncounter() },
                             modifier = Modifier.align(Alignment.TopCenter).padding(paddingValues).padding(top = 4.dp).zIndex(150f)
                         )
@@ -544,6 +545,35 @@ fun MainScreen(
             }
 
             // Aviso al Trascender
+            // Bestiario: lo que salió al invocar y los Sellos encontrados
+            uiState.summonResults?.let { results ->
+                com.EGomez.idleecosystem.ui.screens.main.components.SummonResultsDialog(results, onDismiss = { viewModel.dismissSummonResults() })
+            }
+            uiState.sealNotice?.let { notice ->
+                Surface(
+                    color = Color(0xFF101A19),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, com.EGomez.idleecosystem.ui.screens.main.components.SealTeal),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 190.dp)
+                        .zIndex(5f)
+                ) {
+                    com.EGomez.idleecosystem.ui.components.IconLabel(
+                        com.EGomez.idleecosystem.ui.components.GameIcons.ElderSeal,
+                        when (notice.source) {
+                            com.EGomez.idleecosystem.domain.engine.SealSource.CLICK -> stringResource(R.string.seals_found_click)
+                            com.EGomez.idleecosystem.domain.engine.SealSource.DAILY -> stringResource(R.string.seals_found_daily, notice.amount)
+                            com.EGomez.idleecosystem.domain.engine.SealSource.ENCOUNTER -> stringResource(R.string.seals_found_encounter, notice.amount)
+                        },
+                        com.EGomez.idleecosystem.ui.screens.main.components.SealTeal,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
             uiState.transcendNotice?.let { gain ->
                 Surface(
                     color = Color(0xFF12161C),

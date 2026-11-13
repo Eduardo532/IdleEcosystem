@@ -1,5 +1,7 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
+import com.EGomez.idleecosystem.ui.components.IconLabel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -168,6 +170,8 @@ fun TrialBar(trial: Trial, progress: Float, delirium: Double, onClick: () -> Uni
                 if (trial.rules.delirium) " · x${multiplier(delirium)}" else ""
             // Una sola línea: la Prueba, su avance y la regla
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(GameIcons.Swords, contentDescription = null, tint = TrialRed, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(text, color = TrialRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(tr(trial.rule), color = Color.LightGray, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -251,7 +255,7 @@ fun MutationPicker(offer: List<Mutation>, selected: Mutation?, onSelect: (Mutati
     ) {
         TrialChip(stringResource(R.string.mutation_none), selected == null, MUTATION_CHOICE_TAG + "none") { onSelect(null) }
         offer.forEach { mutation ->
-            TrialChip("🧬 " + tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
+            TrialChip(tr(mutation.title), selected == mutation, MUTATION_CHOICE_TAG + mutation.id) { onSelect(mutation) }
         }
     }
     selected?.let { Text(tr(it.description), color = MutationGreen, fontSize = 12.sp) }
@@ -280,11 +284,12 @@ fun VeilCard(completedTrials: Int, broken: Boolean, onBreak: () -> Unit) {
         modifier = Modifier.fillMaxWidth().testTag(VEIL_CARD_TAG)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                if (broken) "✧ " + stringResource(R.string.veil_broken_title) else "🜏 " + stringResource(R.string.veil_title),
+            IconLabel(
+                GameIcons.Veil,
+                if (broken) stringResource(R.string.veil_broken_title) else stringResource(R.string.veil_title),
                 color = VeilViolet,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
             )
             if (broken) {
                 Text(stringResource(R.string.veil_broken_desc, multiplier(Veil.BROKEN_PRODUCTION)), color = Color.LightGray, fontSize = 11.sp)
@@ -322,8 +327,9 @@ fun VeilBanner(factor: BigDecimal) {
         border = BorderStroke(1.dp, VeilViolet.copy(alpha = 0.6f)),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).testTag(VEIL_BANNER_TAG)
     ) {
-        Text(
-            "🜏 " + stringResource(R.string.veil_pressing, divisor.toBeautifulString()),
+        IconLabel(
+            GameIcons.Veil,
+            stringResource(R.string.veil_pressing, divisor.toBeautifulString()),
             color = VeilViolet,
             fontSize = 12.sp,
             modifier = Modifier.padding(10.dp)

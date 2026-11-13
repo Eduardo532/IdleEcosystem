@@ -203,7 +203,7 @@ fun MutationCatalog(seen: Set<String>, active: Mutation?) {
                 Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            if (known) "🧬 " + tr(mutation.title) else "???",
+                            if (known) tr(mutation.title) else "???",
                             color = if (known) Color.White else Color.Gray,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp

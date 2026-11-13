@@ -440,7 +440,7 @@ class CriticalUiTest {
             if (showInfo) TideInfoDialog(TidePhase.HIGH) { showInfo = false }
         }
 
-        compose.onNodeWithText("🌊 Marea Alta · 4:32").assertExists()
+        compose.onNodeWithText("Marea Alta · 4:32").assertExists()
         compose.onNodeWithText("Luego: Marea Baja").assertExists()
         compose.onNodeWithTag(TIDE_INDICATOR_TAG).performClick()
         compose.onNodeWithText("Marea Muerta").assertExists()
@@ -536,37 +536,74 @@ class CriticalUiTest {
     }
 
     @Test
-    fun `the bestiary opens a creature file and levels it up`() {
-        val upgraded = mutableListOf<String>()
+    fun `the bestiary card shows the lore and bonus of a creature`() {
         compose.setContent {
             androidx.compose.foundation.layout.Column(
                 androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
             ) {
                 com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
-                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 1), essence = 30),
-                    onUpgrade = { upgraded += it }
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(levels = mapOf("deep_dagon" to 2), seals = 30),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}
                 )
             }
         }
 
-        compose.onNodeWithText("1 / 156").assertExists()
+        compose.onNodeWithText("1 / 312").assertExists()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
+        compose.onNodeWithText("Padre Dagón").assertExists()
         compose.onNodeWithText("“El que se alza del fondo cuando la marea muere.”").assertExists()
-        compose.onNodeWithText("Subir · ❖ 16").performClick()
-        assertEquals(listOf("deep_dagon"), upgraded)
+        compose.onNodeWithText("+30 % producción").assertExists()
     }
 
     @Test
-    fun `an unknown encounter hides its name until it is catalogued`() {
+    fun `summoning buttons spend seals and a missing creature can be chosen with shards`() {
+        val summons = mutableListOf<Int>()
+        val picked = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(seals = 50, shards = 40),
+                    onSummon = { summons += it }, onBuySeals = {}, onPickWithShards = { picked += it }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SUMMON_ONE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SUMMON_TEN_TAG).performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf(1), summons)
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_spawnling").performScrollTo().performClick()
+        compose.onNodeWithText("???").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.PICK_WITH_SHARDS_TAG).performClick()
+        assertEquals(listOf("deep_spawnling"), picked)
+    }
+
+    @Test
+    fun `an encounter shows a silhouette and gives seals`() {
         var caught = 0
         compose.setContent {
-            com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner("deep_dagon", 30, known = false, onCatch = { caught++ })
+            com.EGomez.idleecosystem.ui.screens.main.components.EncounterBanner("deep_dagon", 30, onCatch = { caught++ })
         }
 
         compose.onNodeWithText("Algo acecha…").assertExists()
         compose.onNodeWithText("Padre Dagón").assertDoesNotExist()
-        compose.onNodeWithText("Catalogar").performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ENCOUNTER_CATCH_TAG).performClick()
         assertEquals(1, caught)
+    }
+
+    @Test
+    fun `summon results show what came out`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.SummonResultsDialog(
+                listOf(com.EGomez.idleecosystem.domain.logic.SummonResult("deep_dagon", isNew = true, level = 1, shards = 0)),
+                onDismiss = {}
+            )
+        }
+        compose.mainClock.advanceTimeBy(1000)
+        compose.onNodeWithText("Padre Dagón").assertExists()
+        compose.onNodeWithText("NUEVA").assertExists()
     }
 
     @Test
@@ -820,10 +857,10 @@ class CriticalUiTest {
         }
 
         compose.onNodeWithText("Mutaciones descubiertas: 1 de 20").assertExists()
-        compose.onNodeWithText("🧬 Notas Febriles").assertExists()
+        compose.onNodeWithText("Notas Febriles").assertExists()
         compose.onNodeWithText("ACTIVA").assertExists()
         compose.onNodeWithTag(MUTATION_ROW_TAG + "hungry_void").assertExists()
-        compose.onNodeWithText("🧬 Vacío Hambriento").assertDoesNotExist()
+        compose.onNodeWithText("Vacío Hambriento").assertDoesNotExist()
     }
 
     @Test

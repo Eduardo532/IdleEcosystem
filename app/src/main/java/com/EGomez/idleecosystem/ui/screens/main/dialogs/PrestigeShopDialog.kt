@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
 import com.EGomez.idleecosystem.ui.i18n.tr
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.remember
@@ -231,16 +232,16 @@ private fun MapRow(node: PrestigeUpgrade, upgrades: List<PrestigeUpgrade>, curre
                 )
                 Text(mapNodeEffect(node, maxOf(node.level, 1)), color = Color(0xFFB0BEC5), fontSize = 11.sp, maxLines = 2)
             }
-            Text(
-                when {
-                    node.isMaxed -> stringResource(R.string.map_max_short)
-                    state.sealed || !state.reachable -> "🔒"
-                    else -> node.currentCost.toBeautifulString()
-                },
-                color = if (state.affordable) AncientGold else Color.Gray,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
+            if (!node.isMaxed && (state.sealed || !state.reachable)) {
+                Icon(GameIcons.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+            } else {
+                Text(
+                    if (node.isMaxed) stringResource(R.string.map_max_short) else node.currentCost.toBeautifulString(),
+                    color = if (state.affordable) AncientGold else Color.Gray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

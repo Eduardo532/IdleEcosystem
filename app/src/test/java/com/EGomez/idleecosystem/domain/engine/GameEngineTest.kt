@@ -34,6 +34,7 @@ import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
+import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -705,11 +706,13 @@ class GameEngineTest {
     }
 
     @Test
-    fun `encounters catalogue creatures and essence levels them up`() = runBlocking {
+    fun `seals summon creatures and encounters give seals`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 5
-            count(AchievementStat.trial(Trial.entries.first().id))
-            count(AchievementStat.ESSENCE, BigDecimal(20))
+            counters[AchievementStat.BESTIARY_V2] = BigDecimal.ONE
+            counters[AchievementStat.SEALS] = BigDecimal(100)
+            // La ofrenda de hoy ya se recibió: así los Sellos no cambian solos durante la prueba
+            counters[AchievementStat.DAILY_LAST_DAY] = BigDecimal(System.currentTimeMillis() / 86_400_000L)
         }.getEntityForSave()
         engine.importSave(
             FullSaveData(
@@ -720,27 +723,61 @@ class GameEngineTest {
         )
         val before = await(engine.economy) { it.ascensions == 5 }
         assertTrue(MenuTab.BESTIARY in before.menuUnlocks.tabs)
+        val start = before.seals
 
+        engine.summon(10)
+
+        val summoned = await(engine.economy) { it.summons == 10 }
+        assertEquals(start - Bestiary.SUMMON_TEN_COST, summoned.seals)
+        assertEquals(10, summoned.beastLevels.values.sum())
+        assertTrue(stats.counter(AchievementStat.beastCatchWith("none")).signum() > 0)
+
+        // Un encuentro deja Sellos según la rareza de la criatura
         engine.forceEncounter("deep_dagon")
         await(engine.economy) { it.encounterId == "deep_dagon" }
         engine.catchEncounter()
+        val caught = await(engine.economy) { it.encounterId == null && it.seals > summoned.seals }
+        assertTrue(caught.seals >= summoned.seals + BeastRarity.PRIMORDIAL.encounterSeals)
+        assertEquals(1, stats.counter(AchievementStat.ENCOUNTERS).toInt())
+    }
 
-        val caught = await(engine.economy) { it.beastLevels["deep_dagon"] == 1 }
-        assertEquals(null, caught.encounterId)
-        assertEquals(1.15, caught.beastBonuses.getValue(BeastKind.PRODUCTION), 1e-9)
-        assertTrue(stats.counter(AchievementStat.beastCatchWith("none")).signum() > 0)
+    @Test
+    fun `seals are bought with knowledge at a price that keeps rising`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 1
+            counters[AchievementStat.BESTIARY_V2] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1000000"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.ascensions == 1 }
+        val firstPrice = before.sealPrice
+        engine.buySeals()
+        val after = await(engine.economy) { it.sealPrice > firstPrice }
+        assertTrue(after.seals >= before.seals + Bestiary.SEALS_PER_PURCHASE)
+        assertTrue(after.knowledge < before.knowledge)
+    }
 
-        // Subir de nivel cuesta 8 x 1 x 2 = 16 de Esencia
-        engine.upgradeBeast("deep_dagon")
-        val upgraded = await(engine.economy) { it.beastLevels["deep_dagon"] == 2 }
-        assertEquals(4, upgraded.essence)
-
-        // Repetida, la criatura da Esencia según su rareza
-        engine.forceEncounter("deep_dagon")
-        engine.catchEncounter()
-        val repeated = await(engine.economy) { it.essence > 4 }
-        assertEquals(4 + BeastRarity.PRIMORDIAL.duplicateEssence, repeated.essence)
-        assertEquals(2, repeated.beastLevels["deep_dagon"])
+    @Test
+    fun `old saves turn essence into seals once`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 3
+            counters[AchievementStat.ESSENCE] = BigDecimal(42)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val migrated = await(engine.economy) { stats.counter(AchievementStat.BESTIARY_V2).signum() > 0 && it.seals >= 42 }
+        assertEquals(0, stats.counter(AchievementStat.ESSENCE).signum())
+        assertTrue(migrated.seals >= 42)
     }
 
     @Test

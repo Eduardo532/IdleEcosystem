@@ -1,5 +1,6 @@
 package com.EGomez.idleecosystem.ui.screens.main.components
 
+import com.EGomez.idleecosystem.ui.components.GameIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -52,12 +53,14 @@ fun MadnessMeterBar(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val text = if (compact) {
-                if (collapseSeconds > 0) "☠ ${collapseSeconds}s" else "☠ ${madness.toInt()}%"
+                if (collapseSeconds > 0) "${collapseSeconds}s" else "${madness.toInt()}%"
             } else if (collapseSeconds > 0) {
                 stringResource(R.string.madness_collapse_bar, collapseSeconds)
             } else {
                 stringResource(R.string.madness_bar, madness.toInt(), multiplier(1.0 + madness * MadnessMeter.BONUS_PER_POINT))
             }
+            Icon(GameIcons.Skull, contentDescription = null, tint = color, modifier = Modifier.size(13.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(text, color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             if (!compact) possessedBuilding?.let {
                 Text(

@@ -1,0 +1,20 @@
+<!-- El Color que Cayó del Cielo: un pozo de piedra y un color sin nombre que sube de él -->
+<defs>
+  <linearGradient id="col" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#C6FF8A" stop-opacity="0.95"/>
+    <stop offset="0.35" stop-color="#9AF2FF" stop-opacity="0.8"/>
+    <stop offset="0.7" stop-color="#E59CFF" stop-opacity="0.55"/>
+    <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+<path d="M70 132 C60 100 76 70 66 40 C80 58 96 50 92 20 C108 44 124 40 118 14 C138 46 128 80 140 104 L134 132 Z" fill="url(#col)" style="filter:url(#glow)"/>
+<path d="M84 132 C80 110 92 90 86 64 C98 80 106 72 104 46 C116 74 112 100 118 132 Z" fill="#FFFFFF" opacity="0.35"/>
+<circle class="ac" cx="74" cy="60" r="2" style="fill:#E59CFF"/><circle class="ac" cx="130" cy="44" r="1.6" style="fill:#9AF2FF"/><circle class="ac" cx="112" cy="26" r="1.4" style="fill:#C6FF8A"/>
+<ellipse class="dk" cx="100" cy="134" rx="46" ry="10"/>
+<ellipse cx="100" cy="134" rx="40" ry="7" fill="url(#col)" opacity="0.8"/>
+<path class="b" d="M54 134 L58 180 C72 190 128 190 142 180 L146 134 C140 142 60 142 54 134 Z" style="fill:#6d675e"/>
+<path class="sh" d="M118 140 C132 139 142 137 146 134 L142 180 C136 184 128 186 120 188 Z"/>
+<path class="ln" d="M56 150 C70 156 130 156 144 150 M57 166 C72 172 128 172 143 166 M74 142 L74 156 M98 144 L98 158 M122 142 L122 156 M86 157 L86 172 M110 158 L110 172 M70 172 L70 184 M130 171 L130 184"/>
+<path class="ink" d="M40 190 C60 184 76 186 90 192 M112 192 C126 186 144 184 162 190"/>
+<path class="lnt" d="M44 186 L40 176 L46 170 M156 186 L162 176 L156 168 M48 180 L52 172"/>
+<path class="hl" d="M60 140 C80 146 120 146 140 140"/>

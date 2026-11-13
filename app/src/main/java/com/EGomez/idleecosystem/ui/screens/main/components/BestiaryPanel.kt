@@ -95,6 +95,17 @@ fun BeastKind.nameText(): String = stringResource(
 /** El dibujo de una criatura: a color si se conoce, como silueta si no. */
 @Composable
 fun BeastPortrait(beast: Beast, known: Boolean, modifier: Modifier = Modifier) {
+    // v0.19.11: cada criatura tiene su ilustración propia; las que no se conocen se ven en sombra
+    com.EGomez.idleecosystem.ui.components.BeastArt.drawables[beast.id]?.let { res ->
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(res),
+            contentDescription = if (known) tr(beast.name) else null,
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            colorFilter = if (known) null else UNKNOWN_FILTER,
+            modifier = modifier.clip(RoundedCornerShape(8.dp))
+        )
+        return
+    }
     val domain = Bestiary.domainOf(beast)
     CreatureArt(
         recipe = beast.art,
@@ -104,6 +115,18 @@ fun BeastPortrait(beast: Beast, known: Boolean, modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
+
+/** Una criatura sin descubrir: su ilustración casi a oscuras y sin color, como una sombra. */
+private val UNKNOWN_FILTER = androidx.compose.ui.graphics.ColorFilter.colorMatrix(
+    androidx.compose.ui.graphics.ColorMatrix(
+        floatArrayOf(
+            0.05f, 0.05f, 0.05f, 0f, 4f,
+            0.05f, 0.05f, 0.05f, 0f, 4f,
+            0.06f, 0.06f, 0.06f, 0f, 8f,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+)
 
 /** Los ojos brillan con el color de la rareza, un poco aclarado. */
 private fun lerpRarity(rarity: BeastRarity): Color = androidx.compose.ui.graphics.lerp(rarity.uiColor(), Color(0xFFFFF59D), 0.35f)

@@ -1,0 +1,32 @@
+<!-- Rata con Rostro: rata parda de cola pelada con una carita de viejo arrugada; el familiar más leal de las brujas -->
+<path class="ink" d="M52 152 C30 162 16 156 14 140 C12 126 24 118 36 124 C44 128 42 138 34 138" style="stroke:#9C6F66;stroke-width:4"/>
+<path class="ink" d="M52 152 C30 162 16 156 14 140 C12 126 24 118 36 124 C44 128 42 138 34 138" style="stroke-width:1"/>
+<path class="lnt" d="M44 155 L46 159 M36 157 L37 161 M27 156 L27 160 M20 151 L18 154 M16 143 L13 144"/>
+<!-- cuerpo alargado y encorvado -->
+<path class="b" d="M50 150 C42 130 54 106 82 98 C108 90 132 94 146 108 C154 116 154 132 144 144 C130 158 92 162 70 160 C60 158 54 156 50 150 Z"/>
+<path class="sh" d="M52 150 C58 138 84 134 114 140 C130 143 142 142 148 134 C146 146 132 156 110 159 C88 162 64 160 52 150 Z"/>
+<path class="sx" d="M60 154 C76 150 100 152 124 154 C110 160 84 162 66 160 Z"/>
+<!-- pelaje -->
+<path class="lnt" d="M64 116 l4 6 M72 110 l3 6 M80 105 l3 6 M90 101 l2 6 M100 99 l2 6 M110 98 l1 6 M120 99 l0 6 M130 102 l-1 6 M58 128 l5 4 M66 124 l4 5 M76 118 l3 6 M88 114 l2 6 M100 112 l2 6 M112 112 l1 6 M124 114 l0 6 M136 116 l-1 6 M70 136 l3 5 M84 130 l2 6 M98 128 l2 6 M112 128 l1 6 M126 128 l0 6"/>
+<!-- patas -->
+<path class="b" d="M70 152 C66 160 64 168 58 174 L66 176 C70 170 74 164 78 156 Z"/>
+<path class="b" d="M122 150 C126 160 128 168 134 174 L126 176 C122 170 118 164 114 156 Z"/>
+<path class="bn" d="M58 174 L52 179 M60 175 L57 181 M64 176 L64 182 M134 174 L140 179 M132 175 L135 181 M128 176 L128 182" style="fill:none;stroke:#C9A79A;stroke-width:1.4"/>
+<path class="b" d="M146 132 C150 140 152 146 150 152 L144 152 C144 146 142 140 140 136 Z"/>
+<path class="bn" d="M150 152 L156 156 M148 152 L151 158 M145 152 L145 158" style="fill:none;stroke:#C9A79A;stroke-width:1.4"/>
+<!-- orejas -->
+<path class="b" d="M140 84 C132 70 136 58 146 58 C154 60 156 70 152 80 Z"/>
+<path d="M142 80 C138 70 140 64 146 64 C150 66 150 72 148 78 Z" fill="#B88A84" stroke="#120E0B" stroke-width="0.8"/>
+<path class="b" d="M170 82 C174 68 168 58 160 60 C154 62 154 70 158 78 Z"/>
+<path d="M166 78 C168 70 166 66 162 66 C158 68 158 72 160 76 Z" fill="#B88A84" stroke="#120E0B" stroke-width="0.8"/>
+<!-- la cabeza con rostro humano viejo -->
+<path class="b" d="M136 98 C134 82 144 72 158 72 C172 72 182 84 180 100 C182 112 176 124 162 128 C148 130 138 118 136 98 Z" style="fill:#C9A88E"/>
+<path class="sh" d="M170 76 C180 86 182 104 176 116 C172 124 166 127 160 128 C170 116 174 96 170 76 Z"/>
+<path class="lnt" d="M144 86 C150 82 156 82 160 84 M164 84 C168 82 174 83 177 86 M146 92 C150 90 154 90 156 91 M166 91 C170 90 174 90 176 92"/>
+<path class="ln" d="M158 96 C156 102 156 106 160 108 C162 108 164 107 164 105"/>
+<path class="ln" d="M148 114 C154 118 164 118 170 113"/>
+<path class="lnt" d="M146 110 C146 114 148 118 150 120 M174 108 C174 112 172 116 170 118 M152 122 C156 124 162 124 166 122 M140 100 C140 104 142 108 144 110"/>
+<eye cx="151" cy="96" r="2.8"/>
+<eye cx="169" cy="96" r="2.8"/>
+<path class="lnt" d="M178 104 L196 100 M178 108 L196 110 M178 112 L194 118 M140 108 L126 104 M140 112 L126 114"/>
+<path class="hl" d="M90 102 C108 96 128 98 140 104 M142 80 C146 76 152 74 158 74"/>

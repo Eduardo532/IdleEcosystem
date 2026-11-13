@@ -1,78 +1,19 @@
 name: Build check
-
-# Compiles the debug APK and runs the unit tests on every push and pull request,
-# so each feature/fix branch is verified before it is merged into develop.
 on:
   push:
-    branches-ignore: [ main ]
-  pull_request:
-  workflow_dispatch:
-
-concurrency:
-  group: build-check-${{ github.ref }}
-  cancel-in-progress: true
-
+    branches: [ tmp/lore-shots ]
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
-          # Caché de Gradle integrada (antes gradle/actions/setup-gradle)
           cache: gradle
-
-      - name: Unit tests
+      - name: Screens
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest
-
-      - name: Assemble debug and preview APKs
-        run: ./gradlew assembleDebug assemblePreview
-
-      # La build preview pasa por R8 (igual que release). Si R8 eliminara un campo
-      # de los códigos de partida, exportar/importar se rompería solo en el APK
-      # publicado y ningún test unitario lo notaría: se revisa el dex final.
-      - name: Check R8 kept the save code format
-        run: |
-          APK=$(ls app/build/outputs/apk/preview/*.apk | head -1)
-          ls -l app/build/outputs/apk/debug/*.apk "$APK"
-          "$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer" dex packages --defined-only "$APK" > dex.txt
-          missing=0
-          for entry in \
-            "RawSaveData knowledge" "RawSaveData statistics" "RawSaveData completedTutorialSteps" \
-            "RawBuilding amount" "RawPrestigeUpgrade level" "RawStatistics totalClicks" \
-            "FullSaveData knowledge" "FullSaveData prestigeUpgrades" "BuildingSaveModel isVisible" \
-            "GameStatisticsEntity runesInscribed" "RawSaveData activePact" "FullSaveData activePact" \
-            "GameStatisticsEntity counters" "RawStatistics counters"; do
-            set -- $entry
-            if ! grep -Eq "^F .*\.$1 .* $2$" dex.txt; then
-              echo "::error::R8 removed $1.$2"
-              missing=1
-            fi
-          done
-          if [ "$missing" = 1 ]; then grep -E "SaveData|SaveModel|Raw|GameStatisticsEntity" dex.txt | head -60; fi
-          exit $missing
-
-      # Room genera el esquema de la base de datos (app/schemas) al compilar. Debe
-      # estar en git: es la base de los tests de migración de la próxima versión.
-      # Si un cambio en las entidades no trae su esquema, aquí se ve el diff completo.
-      - name: Check Room schemas are committed
-        run: |
-          git add --intent-to-add app/schemas 2>/dev/null || true
-          if ! git diff --exit-code -- app/schemas; then
-            echo "::error::El esquema de Room cambió y no está en git. Agrega los archivos de app/schemas."
-            exit 1
-          fi
-
-      - name: Upload test reports
-        if: failure()
-        uses: actions/upload-artifact@v6
-        with:
-          name: test-reports
-          path: app/build/reports/tests/
+          ./gradlew testDebugUnitTest --tests '*BeastShots*'

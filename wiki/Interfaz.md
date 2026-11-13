@@ -15,7 +15,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Panteón | Ascender por primera vez |
 | | | Pruebas | llegar a la Ascensión 3 |
 | | | Runas | ganar tu primer Espacio de Runa o tu primera Trascendencia |
-| | | Bestiario | superar tu primera Prueba de Locura |
+| | | Bestiario | Ascender por primera vez |
 | **Trascendencia** | celeste (Éter) | Éter | tener 50 Ascensiones en el ciclo |
 | | | Mutaciones | Trascender por primera vez |
 | | | Estrellas | Trascender por primera vez |
@@ -36,7 +36,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Panteón:** los dioses y sus pactos.
 - **Pruebas:** las Pruebas de Locura, su avance y el botón para abandonar la actual.
 - **Runas:** el Altar de Runas, con los espacios, las runas grabadas y la maestría.
-- **Bestiario:** las 156 criaturas por familia, la Esencia y la ficha de cada criatura. Los encuentros flotan arriba de la pantalla, en cualquier pestaña. Ver [Bestiario](Bestiario).
+- **Bestiario:** los Sellos Antiguos y los Fragmentos, el Altar de Invocación (x1 y x10, con garantías), la compra de Sellos con Conocimiento y la colección por Dominio, con el dibujo de cada criatura. Tocar una abre su tarjeta. Los encuentros flotan arriba de la pantalla, en cualquier pestaña. Ver [Bestiario](Bestiario).
 - **Éter:** el Éter, el avance del ciclo, qué se pierde y qué se conserva, las mejoras eternas y el botón **TRASCENDER** (pide tocar dos veces).
 - **Mutaciones:** el catálogo de las 20 mutaciones. Las que todavía no elegiste se ven como **???**; la activa lleva la marca **ACTIVA**.
 - **Estrellas:** las Estrellas, el Polvo Estelar, la alineación (con su cuenta atrás) y las seis mejoras estelares. Ver [Estrellas](Estrellas).
@@ -55,3 +55,7 @@ Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de 
 - Al aparecer, cada runa muestra una **placa** con su nivel y el gesto que pide (Común · desliza, Rara · mantén pulsado, Mítica · traza el sigilo), su **nombre** y **lo que da**, calculado de sus valores reales y de su maestría. Una barra muestra el tiempo que queda para atraparla.
 - Al capturarla, un aviso dice **"RUNA CAPTURADA · nombre"** y lo que acaba de dar.
 - Cada potenciador activo es un chip con el **color y el nombre de su runa**, lo que da, los segundos que quedan y una barra que se vacía.
+
+## Sin emojis *(v0.19.10)*
+
+El juego no usa emojis: cambian de aspecto según el teléfono. La Locura, la Marea, las Pruebas, el Velo, el Laboratorio y los candados del Mapa usan iconos dibujados con la estética del juego. Un test lo comprueba.

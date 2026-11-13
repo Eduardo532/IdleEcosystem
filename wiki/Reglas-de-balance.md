@@ -125,9 +125,10 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 ## Bestiario
 
-- Bono por nivel según rareza: 1 / 2 / 4 / 8 / 15 %. Tipo según la familia; familia completa x2. Suma aditiva dentro de cada tipo. Producción, clic, sin conexión y Cordura entran como efectos de pacto.
-- Encuentros: cada 90–240 s, divididos por el bono de los Alados (máximo ÷2, mínimo 30 s). Duran 45 s. Peso por rareza 50/28/14/6/2, x2 si aún no se descubrió.
-- Esencia: Prueba `3 + 2·índice` (x3 la primera vez); repetida 1/2/4/8/16; subir del nivel n cuesta `costo de rareza · n · 2`. *(Código: `Bestiary`, `BeastCatalog`; test: `BestiaryTest`.)*
+- Bono por nivel según rareza: 1 / 2 / 4 / 8 / 15 %. Tipo según el Dominio; Dominio completo x2. Suma aditiva dentro de cada tipo; Sellos como mucho x3 y encuentros como mucho x2.
+- Invocar: 10 Sellos (x10: 90). Pesos 5500/2700/1200/450/150. Garantías: Mítica+ a las 40 sin una y Primigenia a las 120 sin una (contadores permanentes).
+- Repetidas: +1 nivel (máximo 10). Al máximo, Fragmentos 1/2/4/10/25. Elegir una que falte: 30/60/120/300/750.
+- Sellos: clic 0,05 %; compra con Conocimiento `1e5 · 2,2^compras` por 5 Sellos (sin reinicio); logro 2 (secreto 10); Prueba `5 + 2·índice` (x3 la primera vez); Ascensión 1 (+5 cada 10); encuentro 1/1/2/3/5; ofrenda diaria `5 + (racha − 1)` hasta 15. *(Código: `Bestiary`, `BeastCatalog`, `CreatureArt`; test: `BestiaryTest`.)*
 
 ## Laboratorio
 

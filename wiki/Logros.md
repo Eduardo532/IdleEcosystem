@@ -1,6 +1,6 @@
 # Logros
 
-Hay **480 logros**: 113 originales y **367 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **489 logros**: 113 originales y **376 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -189,28 +189,36 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Sultán de las Estrellas | Compra una mejora estelar durante una vida con Azathoth | +1 % |
 | Vacío Alineado | Compra durante la alineación recorriendo la Senda del Vacío | +1 % |
 | Sueño de Estrellas | Compra durante la alineación recorriendo la Senda del Sueño | +1 % |
-| Primera Página | Cataloga 1 criatura | +1 % |
-| Naturalista de lo Prohibido | Cataloga 25 criaturas | +1 % |
-| Zoólogo de lo Imposible | Cataloga 75 criaturas | +1 % |
-| El Bestiario Completo | Cataloga las 156 criaturas | +2 % |
-| Ojo Atento | Cataloga 10 encuentros | +1 % |
-| Cazador de Sombras | Cataloga 100 encuentros | +1 % |
-| Nada se Escapa | Cataloga 500 encuentros | +2 % |
-| Domador | Suma 50 niveles de criaturas | +1 % |
-| Pastor de Horrores | Suma 300 niveles de criaturas | +1 % |
-| Señor de las Bestias | Lleva las 156 criaturas a nivel 10 | +2 % |
-| Familia Reunida | Completa 1 familia del Bestiario | +1 % |
-| Árbol Genealógico | Completa 6 familias del Bestiario | +1 % |
-| Todas las Estirpes | Completa las 13 familias del Bestiario | +2 % |
-| Visión Primigenia | Cataloga 1 criatura Primigenia | +1 % |
-| Trece Rostros del Abismo | Cataloga las 13 criaturas Primigenias | +2 % |
-| Destilador | Gana 100 de Esencia | +1 % |
-| Alambique Infinito | Gana 5.000 de Esencia | +2 % |
-| Coleccionista Amarillo | Cataloga una criatura durante una vida con Hastur | +1 % |
-| Rebaño Negro | Cataloga una criatura durante una vida con Shub-Niggurath | +1 % |
-| Jaula de Máscaras | Cataloga una criatura durante una vida con Nyarlathotep | +1 % |
-| Rebaño del Culto | Cataloga una criatura recorriendo la Senda del Culto | +1 % |
-| La Mano que Atrapa | Cataloga una criatura recorriendo la Senda de la Mano | +1 % |
+| Primera Página | Consigue 1 criatura del Bestiario | +1 % |
+| Naturalista de lo Prohibido | Consigue 50 criaturas del Bestiario | +1 % |
+| Zoólogo de lo Imposible | Consigue 150 criaturas del Bestiario | +1 % |
+| El Bestiario Completo | Consigue las 312 criaturas del Bestiario | +2 % |
+| Ojo Atento | Toca 10 encuentros | +1 % |
+| Cazador de Sombras | Toca 100 encuentros | +1 % |
+| Nada se Escapa | Toca 500 encuentros | +2 % |
+| Domador | Suma 100 niveles de criaturas | +1 % |
+| Pastor de Horrores | Suma 600 niveles de criaturas | +1 % |
+| Señor de las Bestias | Lleva las 312 criaturas a nivel 10 | +2 % |
+| Familia Reunida | Completa 1 Dominio del Bestiario | +1 % |
+| Árbol Genealógico | Completa 4 Dominios del Bestiario | +1 % |
+| Todas las Estirpes | Completa los 8 Dominios del Bestiario | +2 % |
+| Visión Primigenia | Consigue 1 criatura Primigenia | +1 % |
+| Dieciséis Rostros del Abismo | Consigue las 16 criaturas Primigenias | +2 % |
+| Guardián de Sellos | Gana 500 Sellos Antiguos | +1 % |
+| Archivo de los Antiguos | Gana 20.000 Sellos Antiguos | +2 % |
+| Primera Invocación | Invoca 10 criaturas | +1 % |
+| Círculo de Tiza | Invoca 100 criaturas | +1 % |
+| Invocador Incansable | Invoca 1.000 criaturas | +2 % |
+| Comercio Prohibido | Compra Sellos con Conocimiento 10 veces | +1 % |
+| El Precio del Saber | Compra Sellos con Conocimiento 40 veces | +1 % |
+| Ofrenda Semanal | Recibe la ofrenda diaria 7 días seguidos | +1 % |
+| Fiel al Altar | Recibe la ofrenda diaria 30 días seguidos | +2 % |
+| Elección del Coleccionista | Elige una criatura con Fragmentos | +1 % |
+| Coleccionista Amarillo | Invoca durante una vida con Hastur | +1 % |
+| Rebaño Negro | Invoca durante una vida con Shub-Niggurath | +1 % |
+| Jaula de Máscaras | Invoca durante una vida con Nyarlathotep | +1 % |
+| Rebaño del Culto | Invoca recorriendo la Senda del Culto | +1 % |
+| La Mano que Atrapa | Invoca recorriendo la Senda de la Mano | +1 % |
 | Primer Experimento | Sube 1 nivel en el Laboratorio | +1 % |
 | Catedrático | Suma 15 niveles en el Laboratorio | +1 % |
 | Decano de Miskatonic | Lleva los 6 experimentos a su nivel máximo | +2 % |
@@ -395,7 +403,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **30 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **31 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

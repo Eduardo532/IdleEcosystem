@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -207,12 +208,12 @@ fun BestiaryPanel(
             Bestiary.domains.forEach { domain ->
                 val count = Bestiary.beastsOf(domain.id).count { (state.levels[it.id] ?: 0) > 0 }
                 val chosen = domain.id == domainId
+                // Sin el alto mínimo táctil de 48 dp: los ocho Dominios caben en pocas filas
                 Surface(
-                    onClick = { domainId = domain.id },
                     shape = RoundedCornerShape(8.dp),
                     color = if (chosen) Color(domain.color).copy(alpha = 0.22f) else Color(0xFF151515),
                     border = BorderStroke(1.dp, Color(domain.color).copy(alpha = if (chosen) 0.9f else 0.3f)),
-                    modifier = Modifier.testTag(DOMAIN_CHIP_TAG + domain.id)
+                    modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { domainId = domain.id }.testTag(DOMAIN_CHIP_TAG + domain.id)
                 ) {
                     Text(
                         tr(domain.title) + " $count/${Bestiary.beastsOf(domain.id).size}",

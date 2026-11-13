@@ -38,7 +38,6 @@ import com.EGomez.idleecosystem.domain.logic.BeastKind
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.SummonResult
-import com.EGomez.idleecosystem.ui.components.CreatureArt
 import com.EGomez.idleecosystem.ui.components.GameIcons
 import com.EGomez.idleecosystem.ui.components.IconLabel
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -115,14 +114,8 @@ fun BeastPortrait(beast: Beast, known: Boolean, modifier: Modifier = Modifier, l
         )
         return
     }
-    val domain = Bestiary.domainOf(beast)
-    CreatureArt(
-        recipe = beast.art,
-        seedKey = beast.id,
-        color = if (known) Color(domain.color) else Color(0xFF2A2A30),
-        eyeColor = if (known) lerpRarity(beast.rarity) else Color(0xFF3A3A40),
-        modifier = modifier
-    )
+    // Sin ilustración (no debería pasar: BeastArtTest lo comprueba), un hueco oscuro
+    Box(modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF16161C)))
 }
 
 /** Una criatura sin descubrir: su ilustración casi a oscuras y sin color, como una sombra. */
@@ -136,9 +129,6 @@ private val UNKNOWN_FILTER = androidx.compose.ui.graphics.ColorFilter.colorMatri
         )
     )
 )
-
-/** Los ojos brillan con el color de la rareza, un poco aclarado. */
-private fun lerpRarity(rarity: BeastRarity): Color = androidx.compose.ui.graphics.lerp(rarity.uiColor(), Color(0xFFFFF59D), 0.35f)
 
 /**
  * La pestaña Bestiario (capa Ascensión): los Sellos Antiguos y los Fragmentos, el altar de

@@ -1,7 +1,6 @@
 package com.EGomez.idleecosystem.domain.logic
 
 import com.EGomez.idleecosystem.domain.model.Trial
-import com.EGomez.idleecosystem.ui.components.ArtSpec
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -9,12 +8,6 @@ import org.junit.Test
 import kotlin.random.Random
 
 class BestiaryTest {
-
-    private val archetypes = setOf(
-        "humanoid", "figure", "fishman", "ghoul", "blob", "worm", "bat", "bird", "hound", "goat", "cat", "rat", "serpent", "insect",
-        "squid", "jelly", "tree", "eye", "flame", "crystal", "star", "cone", "barrel", "mask", "book", "swarm", "golem",
-        "colossus", "planet", "vortex", "wraith", "toad", "spider", "mouth", "crab", "fish"
-    )
 
     @Test
     fun `there are 312 creatures in 8 domains of 39 with the same rarities`() {
@@ -28,16 +21,6 @@ class BestiaryTest {
         assertEquals(Bestiary.beasts.size, Bestiary.beasts.map { it.id }.toSet().size)
         assertEquals(Bestiary.beasts.size, Bestiary.beasts.map { it.name }.toSet().size)
         assertEquals(BeastKind.entries.toSet(), Bestiary.domains.map { it.kind }.toSet())
-    }
-
-    @Test
-    fun `every creature has a drawing recipe with a known archetype`() {
-        Bestiary.beasts.forEach { beast ->
-            val spec = ArtSpec.parse(beast.art)
-            assertTrue(beast.id + ": " + beast.art, spec.archetype in archetypes)
-        }
-        // Las recetas no se repiten demasiado: cada dibujo varía además con el id
-        assertTrue(Bestiary.beasts.map { it.art }.toSet().size > 200)
     }
 
     @Test

@@ -1,0 +1,20 @@
+<!-- Gota de Protoplasma: un shoggoth muy, muy pequeño en un frasco de laboratorio, pegado al cristal y mirando -->
+<path class="b2" d="M60 196 C46 196 40 186 44 174 L72 100 L72 60 L128 60 L128 100 L156 174 C160 186 154 196 140 196 Z" style="fill:#d8e6ea;fill-opacity:0.12"/>
+<path class="ln" d="M60 196 C46 196 40 186 44 174 L72 100 L72 60 M128 60 L128 100 L156 174 C160 186 154 196 140 196 Z" style="stroke:#a9c3c9;stroke-width:2"/>
+<path class="b2" d="M66 60 L134 60 L134 50 L66 50 Z" style="fill:#7a5b3a"/>
+<path class="ln" d="M70 52 L130 52 M70 56 L130 56"/>
+<!-- el pequeño shoggoth -->
+<path class="b" d="M56 190 C48 176 56 156 70 150 C72 136 86 128 98 134 C110 124 128 130 130 146 C146 148 154 168 146 184 C140 194 64 196 56 190 Z"/>
+<path class="sx" d="M56 190 C48 176 56 156 70 150 C68 166 70 182 76 194 Z"/>
+<path class="dt" d="M110 132 C124 132 132 140 130 148 C144 152 152 168 146 184 L120 190 C128 168 124 146 110 132 Z"/>
+<path class="ac" d="M84 140 C82 132 88 128 92 132 M120 136 C122 130 128 130 128 136" style="fill:none"/>
+<g class="hl" style="stroke-width:1.2"><circle cx="70" cy="170" r="3"/><circle cx="132" cy="176" r="2.4"/><circle cx="100" cy="182" r="2"/></g>
+<eye cx="84" cy="160" r="5"/>
+<eye cx="108" cy="150" r="3.4"/>
+<eye cx="124" cy="166" r="4.2"/>
+<eye cx="98" cy="172" r="2.4"/>
+<!-- un seudópodo pegado al cristal -->
+<path class="b" d="M138 150 C146 140 150 128 148 118 L154 120 C156 132 152 146 144 156 Z"/>
+<!-- reflejo del cristal -->
+<path d="M80 70 L80 104 L58 168" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+<path class="lnt" d="M136 110 L144 110 M138 124 L148 124 M141 138 L151 138" style="stroke:#a9c3c9"/>

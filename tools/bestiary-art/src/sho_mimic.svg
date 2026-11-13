@@ -1,0 +1,21 @@
+<!-- Imitador Viscoso: copia la forma de lo que toca; aquí, a medio volverse un sillón de terciopelo con un ojo en el respaldo -->
+<!-- el sillón original -->
+<path class="b2" d="M110 196 L112 120 C112 100 124 88 144 88 C164 88 176 100 176 120 L178 196 Z" style="fill:#6b2a2e"/>
+<path class="sh" d="M150 90 C166 92 176 104 176 120 L178 196 L156 196 Z"/>
+<path class="b2" d="M104 150 L184 150 L182 172 L106 172 Z" style="fill:#7d3338"/>
+<path class="ln" d="M124 110 L124 148 M144 104 L144 148 M164 110 L164 148" style="stroke:#3a1215"/>
+<path class="mt" d="M112 196 L116 186 M176 196 L172 186" style="fill:none;stroke-width:3"/>
+<!-- la masa que lo copia -->
+<path class="b" d="M20 192 C14 170 26 146 46 140 C46 120 58 100 76 94 C92 88 106 96 110 110 L112 150 L106 172 L108 194 C80 198 40 198 20 192 Z"/>
+<path class="sx" d="M20 192 C14 170 26 146 46 140 C40 160 40 178 46 196 Z"/>
+<path class="b2" d="M72 96 C80 90 96 90 104 98 L106 120 C96 114 82 114 74 120 Z" style="fill:#7d4a50"/>
+<path class="ln" d="M84 118 L84 144 M98 116 L98 142" style="stroke:#3a1215"/>
+<path class="b" d="M106 150 C96 144 82 144 70 150 L72 170 C84 166 96 166 106 172 Z" style="fill:#9a5a58"/>
+<!-- goteo entre los dos -->
+<path class="b" d="M106 172 C108 180 106 188 108 194 L112 194 C110 186 112 178 110 170 Z"/>
+<eye cx="56" cy="160" r="5"/>
+<eye cx="86" cy="104" r="3.4"/>
+<eye cx="144" cy="104" r="6"/>
+<eye cx="36" cy="176" r="2.6"/>
+<path class="dk" d="M40 182 C48 188 60 188 66 182 C60 184 48 184 40 182 Z"/>
+<path class="hl" d="M30 168 C34 154 42 146 52 142 M120 96 C128 90 138 88 146 89"/>

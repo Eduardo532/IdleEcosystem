@@ -1,0 +1,21 @@
+<!-- Lamprea de Y'ha-nthlei: enroscada entre dos columnas de la ciudad sumergida, con su boca de embudo llena de dientes -->
+<path class="b2" d="M18 200 L22 40 L46 40 L50 200 Z" style="fill:#54504a"/>
+<path class="b2" d="M150 200 L154 40 L178 40 L182 200 Z" style="fill:#54504a"/>
+<path class="sx" d="M18 200 L22 40 L30 40 L28 200 Z M150 200 L154 40 L162 40 L160 200 Z"/>
+<path class="b2" d="M14 40 L54 40 L50 30 L18 30 Z M146 40 L186 40 L182 30 L150 30 Z" style="fill:#6a655c"/>
+<path class="ln" d="M24 70 L46 70 M24 110 L48 110 M156 80 L178 80 M156 130 L180 130 M34 40 L34 200 M166 40 L166 200" style="stroke:#2a2622"/>
+<path class="ac" d="M30 90 l4 -6 l4 6 l-4 6 Z M162 104 l4 -6 l4 6 l-4 6 Z" style="filter:none"/>
+<!-- el cuerpo serpenteante -->
+<path d="M26 170 C60 190 90 160 100 130 C110 100 140 92 166 110 C180 120 176 150 150 152 C130 154 120 130 130 110" fill="none" stroke="#120E0B" stroke-width="24" stroke-linecap="round"/>
+<path d="M26 170 C60 190 90 160 100 130 C110 100 140 92 166 110 C180 120 176 150 150 152 C130 154 120 130 130 110" fill="none" stroke="url(#wash)" stroke-width="19" stroke-linecap="round"/>
+<path d="M28 178 C60 196 92 168 104 138 C114 108 138 104 160 116" fill="none" stroke="url(#hatch)" stroke-width="8" opacity="0.8"/>
+<path class="lnt" d="M40 172 l2 6 M54 174 l1 6 M68 168 l1 6 M82 158 l2 6 M94 144 l3 5 M102 126 l4 4 M114 110 l3 5 M128 104 l2 6 M142 104 l1 6 M156 108 l0 6"/>
+<!-- la cabeza: boca redonda de embudo -->
+<path class="b" d="M114 92 C108 74 116 58 132 54 C150 50 164 62 164 78 C164 94 150 104 134 104 C124 104 116 100 114 92 Z"/>
+<circle class="dk" cx="140" cy="80" r="17"/>
+<g class="bn"><path d="M140 64 l-2 6 l4 0 Z M154 70 l-6 3 l3 3 Z M156 84 l-6 -1 l1 4 Z M148 94 l-4 -5 l-3 3 Z M134 96 l0 -6 l-4 2 Z M124 86 l6 -2 l-2 -4 Z M124 72 l6 3 l1 -4 Z M132 64 l2 6 l3 -3 Z"/>
+<path d="M140 72 l-1 4 l3 0 Z M147 78 l-4 1 l2 2 Z M144 86 l-3 -3 l-2 2 Z M135 86 l2 -3 l-3 -1 Z M133 77 l4 1 l0 -3 Z"/></g>
+<circle cx="140" cy="80" r="4" fill="#3a0f14"/>
+<eye cx="122" cy="64" r="2.6"/>
+<path class="ink" d="M112 96 L104 100 M110 90 L102 92 M110 84 L102 84" style="stroke-width:1.2"/>
+<path class="hl" d="M120 60 C128 54 138 52 146 54"/>

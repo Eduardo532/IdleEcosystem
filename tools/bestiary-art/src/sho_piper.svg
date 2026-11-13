@@ -1,0 +1,20 @@
+<!-- Flautista Tekeli-li: un shoggoth que estira una boca larga como una flauta y silba la palabra de sus amos -->
+<path class="b" d="M30 186 C20 160 30 128 56 116 C70 108 84 110 96 114 C112 106 132 106 148 116 C172 130 182 160 170 186 C150 196 50 196 30 186 Z"/>
+<path class="sx" d="M30 186 C20 160 30 128 56 116 C46 140 44 166 52 190 Z"/>
+<path class="dt" d="M120 112 C140 112 160 122 170 140 C176 160 174 176 170 186 L132 190 Z"/>
+<path class="ln" d="M48 160 C56 166 66 166 72 160 M118 170 C126 176 136 176 142 170 M84 180 C90 184 98 184 104 180"/>
+<!-- la boca-flauta -->
+<path class="b2" d="M100 118 C104 96 108 76 104 50 L112 48 C118 74 116 100 110 120 Z"/>
+<path class="ln" d="M106 108 L112 108 M106 96 L114 96 M106 84 L114 84 M105 72 L113 72"/>
+<circle class="dk" cx="108" cy="48" r="5"/>
+<path class="ac" d="M116 40 C126 32 136 32 144 36 M120 30 C132 20 146 20 156 26 M114 22 C122 10 136 6 148 8" style="fill:none;stroke-width:1.6"/>
+<text x="130" y="60" font-family="serif" font-style="italic" font-size="11" fill="#E7F7EF" opacity="0.8">tekeli-li</text>
+<!-- ojos repartidos -->
+<eye cx="58" cy="140" r="4.6"/>
+<eye cx="76" cy="128" r="3"/>
+<eye cx="140" cy="138" r="5"/>
+<eye cx="158" cy="160" r="3.2"/>
+<eye cx="46" cy="170" r="2.6"/>
+<eye cx="124" cy="150" r="2.4"/>
+<eye cx="96" cy="160" r="3.6"/>
+<path class="hl" d="M40 140 C46 128 56 120 68 116 M132 112 C144 114 156 120 164 130"/>

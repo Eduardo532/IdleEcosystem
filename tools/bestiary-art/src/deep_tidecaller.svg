@@ -1,0 +1,25 @@
+<!-- Llamador de Mareas: de pie sobre una roca, con los brazos alzados y una campana; el agua sube en espiral a su alrededor -->
+<path d="M0 150 C40 140 80 160 120 150 C150 142 180 156 200 150 L200 200 L0 200 Z" fill="#0f1c1d"/>
+<path class="b2" d="M60 200 L68 160 L132 158 L142 200 Z" style="fill:#3a3530"/>
+<path class="sh" d="M60 200 L68 160 L90 159 L84 200 Z"/>
+<!-- remolino de agua -->
+<path d="M30 150 C20 110 50 70 100 64 C150 70 180 110 170 150" fill="none" stroke="#7fd3c8" stroke-width="3" stroke-opacity="0.55"/>
+<path d="M44 150 C38 120 62 92 100 88 C138 92 162 120 156 150" fill="none" stroke="#7fd3c8" stroke-width="2" stroke-opacity="0.4"/>
+<path class="ac" d="M22 120 l6 -4 M178 120 l-6 -4 M40 84 l6 -2 M160 84 l-6 -2" style="fill:none"/>
+<!-- cuerpo -->
+<path class="b2" d="M76 160 C72 132 76 110 88 98 L112 98 C124 110 128 132 124 160 Z" style="fill:#2d4d4a"/>
+<path class="sx" d="M76 160 C72 132 76 110 88 98 L96 98 C88 118 86 140 88 160 Z"/>
+<!-- brazos alzados -->
+<path class="b" d="M88 104 C76 92 68 76 66 58 L74 56 C76 72 84 86 94 96 Z"/>
+<path class="b" d="M112 104 C124 92 132 76 134 58 L126 56 C124 72 116 86 106 96 Z"/>
+<path class="b" d="M66 58 L60 48 M70 56 L68 44 M74 56 L78 46" style="fill:none;stroke:#120E0B;stroke-width:2"/>
+<path class="mt" d="M124 54 C124 42 136 42 136 54 L138 60 L122 60 Z"/>
+<circle class="mt" cx="130" cy="62" r="2"/>
+<path class="ac" d="M140 44 C146 40 152 40 156 44 M142 36 C150 30 158 30 164 36" style="fill:none;stroke-width:1.4"/>
+<!-- cabeza alzada cantando -->
+<path class="b" d="M84 84 C82 64 90 52 100 52 C110 52 118 64 116 84 C114 94 108 100 100 100 C92 100 86 94 84 84 Z"/>
+<ellipse class="dk" cx="100" cy="88" rx="6" ry="7"/>
+<eye cx="91" cy="72" r="3.8"/>
+<eye cx="109" cy="72" r="3.8"/>
+<path class="b2" d="M86 76 L76 70 L80 82 Z M114 76 L124 70 L120 82 Z"/>
+<path class="hl" d="M88 58 C92 54 96 53 100 53"/>

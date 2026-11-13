@@ -1,0 +1,26 @@
+<!-- Andarín del Arrecife: camina de noche por las rocas hacia el Arrecife del Diablo, con un farol que gotea agua -->
+<path d="M0 0 L200 0 L200 90 L0 90 Z" fill="#141a26" opacity="0.6"/>
+<circle cx="160" cy="34" r="12" fill="#e8e1c8" opacity="0.85"/>
+<circle cx="164" cy="31" r="12" fill="#151a24" opacity="0.9"/>
+<path class="dk" d="M140 120 L150 104 L160 112 L172 100 L184 116 L196 110 L200 124 L136 124 Z" style="fill:#151414"/>
+<path d="M0 160 C30 150 70 166 110 156 C140 150 170 160 200 154 L200 200 L0 200 Z" fill="#0f1c1d"/>
+<!-- la figura caminando -->
+<path class="b" d="M74 180 L80 150 L72 150 L66 182 Z M96 182 L96 150 L104 150 L106 182 Z"/>
+<path class="b" d="M60 186 L82 186 L80 180 L64 180 Z M94 186 L114 186 L110 180 L96 180 Z"/>
+<path class="b2" d="M64 154 C60 128 64 104 76 92 L106 92 C116 104 118 128 112 154 Z" style="fill:#3c3a34"/>
+<path class="sx" d="M64 154 C60 128 64 104 76 92 L84 92 C78 110 76 132 78 154 Z"/>
+<path class="ln" d="M90 94 L90 154 M70 120 L110 120" style="stroke:#58544a"/>
+<!-- brazo con farol -->
+<path class="b2" d="M108 100 C120 110 126 120 128 132 L120 134 C118 124 112 116 104 110 Z" style="fill:#3c3a34"/>
+<path class="ink" d="M126 132 L126 140" style="stroke-width:1.2"/>
+<path class="mt" d="M120 140 L132 140 L134 156 L118 156 Z" style="fill:#5d4a2a"/>
+<rect x="121" y="143" width="10" height="10" fill="#FFD27A" style="filter:url(#glow)"/>
+<path class="ac" d="M124 160 l0 6 M130 162 l0 5" style="fill:none;stroke-width:1.2"/>
+<!-- cabeza de pez bajo un sombrero de ala ancha -->
+<path class="b" d="M76 86 C74 66 82 54 94 54 C108 54 116 66 114 84 C112 94 104 100 94 100 C84 100 78 94 76 86 Z"/>
+<path class="dk" d="M80 88 C88 94 102 94 110 88 C102 90 88 90 80 88 Z"/>
+<eye cx="86" cy="74" r="4.2"/>
+<eye cx="104" cy="74" r="4.2"/>
+<path class="b2" d="M62 60 C70 56 120 56 128 60 C122 64 68 64 62 60 Z" style="fill:#2a2622"/>
+<path class="b2" d="M76 60 C76 46 82 40 94 40 C106 40 112 46 112 60 Z" style="fill:#2a2622"/>
+<path class="hl" d="M68 120 C68 134 70 146 72 152"/>

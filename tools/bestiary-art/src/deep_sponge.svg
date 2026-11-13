@@ -1,0 +1,17 @@
+<!-- Esponja Pensante: una esponja de mar enorme y porosa; en sus poros flotan recuerdos ajenos y un único ojo la mira todo -->
+<path class="b2" d="M40 190 C30 170 34 150 46 140 C40 120 50 100 66 96 C68 74 86 60 104 64 C120 52 144 60 150 80 C168 86 176 108 168 124 C178 140 174 168 160 190 Z" style="fill:#b59b5c"/>
+<path class="sx" d="M40 190 C30 170 34 150 46 140 C40 120 50 100 66 96 C60 130 62 168 70 190 Z"/>
+<path class="dt" d="M104 64 C120 52 144 60 150 80 C168 86 176 108 168 124 C178 140 174 168 160 190 L120 190 C130 150 120 100 104 64 Z"/>
+<g class="dk" style="fill:#2a2218">
+<ellipse cx="62" cy="160" rx="6" ry="9"/><ellipse cx="84" cy="176" rx="5" ry="7"/><ellipse cx="78" cy="128" rx="5" ry="8"/><ellipse cx="96" cy="100" rx="5" ry="7"/>
+<ellipse cx="124" cy="92" rx="4" ry="6"/><ellipse cx="146" cy="110" rx="5" ry="8"/><ellipse cx="150" cy="150" rx="6" ry="9"/><ellipse cx="128" cy="176" rx="5" ry="8"/><ellipse cx="104" cy="160" rx="4" ry="6"/>
+</g>
+<!-- recuerdos dentro de los poros: pequeñas luces con formas -->
+<path class="ac" d="M60 158 l2 -4 l2 4 Z M146 148 l3 -5 l3 5 Z M128 174 h4 v4 h-4 Z M78 126 l2 -3 l2 3 Z" style="stroke-width:.6"/>
+<circle class="ac" cx="96" cy="99" r="1.8"/><circle class="ac" cx="84" cy="175" r="1.6"/><circle class="ac" cx="146" cy="108" r="1.8"/>
+<!-- el ojo -->
+<eye cx="110" cy="130" r="9"/>
+<path class="ln" d="M96 124 C102 116 118 116 124 124 M98 138 C104 144 116 144 122 138"/>
+<path class="hl" d="M50 140 C54 120 62 106 74 98 M108 66 C120 60 134 62 144 72"/>
+<!-- base de roca -->
+<path class="b2" d="M30 190 L170 190 L176 200 L24 200 Z" style="fill:#3a3530"/>

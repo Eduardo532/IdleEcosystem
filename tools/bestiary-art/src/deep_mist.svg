@@ -1,0 +1,22 @@
+<!-- Nadador de Bruma: una silueta alargada que sale del mar con la niebla de Innsmouth, con farol de puerto al fondo -->
+<defs><linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6e2" stop-opacity="0"/><stop offset="1" stop-color="#cfe6e2" stop-opacity="0.35"/></linearGradient></defs>
+<path class="ink" d="M160 200 L160 70" style="stroke:#2a2622;stroke-width:4"/>
+<path class="b2" d="M150 70 L170 70 L166 50 L154 50 Z" style="fill:#2a2622"/>
+<circle cx="160" cy="62" r="6" fill="#FFD27A" style="filter:url(#glow)"/>
+<path d="M0 150 C40 140 80 160 120 150 C150 142 180 156 200 150 L200 200 L0 200 Z" fill="#0f1c1d"/>
+<!-- la figura -->
+<path class="b" d="M70 196 C64 160 60 120 66 90 C70 70 80 58 94 56 C110 54 120 66 122 84 C124 110 118 150 116 196 Z"/>
+<path class="sx" d="M70 196 C64 160 60 120 66 90 C70 74 78 64 88 60 C80 90 80 150 84 196 Z"/>
+<path class="ln" d="M80 100 C90 104 104 104 112 100 M78 130 C90 134 104 134 114 130 M78 160 C90 164 104 164 114 160"/>
+<path class="b" d="M66 96 C52 110 48 128 52 146 L60 144 C58 130 62 116 70 106 Z"/>
+<path class="b" d="M120 96 C134 108 140 124 138 142 L130 142 C130 128 126 114 118 106 Z"/>
+<path class="bn" d="M52 146 L46 154 M55 146 L52 156 M58 145 L60 154 M138 142 L144 150 M135 142 L138 152 M132 142 L130 150"/>
+<path class="b" d="M78 64 C76 44 84 30 96 30 C108 30 116 44 114 62 C112 74 104 80 96 80 C88 80 80 74 78 64 Z"/>
+<path class="dk" d="M84 66 C90 72 102 72 108 66 C102 68 90 68 84 66 Z"/>
+<eye cx="88" cy="52" r="4.6"/>
+<eye cx="106" cy="52" r="4.6"/>
+<!-- la niebla lo envuelve -->
+<rect x="0" y="0" width="200" height="200" fill="url(#fog)"/>
+<path d="M0 170 C30 160 60 176 90 168 C120 160 150 176 200 166 L200 200 L0 200 Z" fill="#cfe6e2" opacity="0.18"/>
+<path d="M0 120 C40 112 70 126 100 120 C140 112 170 128 200 120" fill="none" stroke="#cfe6e2" stroke-opacity="0.25" stroke-width="8"/>
+<path class="hl" d="M72 92 C70 120 72 160 76 190"/>

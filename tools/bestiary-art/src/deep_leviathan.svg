@@ -1,0 +1,22 @@
+<!-- Leviatán Menor: una serpiente marina que sale del agua formando arcos; pequeño solo comparado con su madre -->
+<path d="M0 140 L200 140 L200 200 L0 200 Z" fill="#0f1c1d"/>
+<path class="ln" d="M0 140 C20 136 40 144 60 140 C80 136 100 144 120 140 C140 136 160 144 180 140 C190 138 196 140 200 140" style="stroke:#7fd3c8;opacity:.6"/>
+<!-- arcos del cuerpo -->
+<path class="b" d="M20 148 C20 120 52 120 52 148 L44 148 C44 128 28 128 28 148 Z"/>
+<path class="b" d="M64 148 C64 104 108 104 108 148 L98 148 C98 116 74 116 74 148 Z"/>
+<path class="sh" d="M86 112 C100 118 108 130 108 148 L98 148 C98 132 94 120 86 112 Z"/>
+<path class="lnt" d="M70 124 l6 4 M80 112 l4 6 M92 112 l2 6"/>
+<path class="b2" d="M78 110 L82 98 L88 108 L94 98 L98 112 Z"/>
+<!-- cola -->
+<path class="b" d="M14 146 C10 136 4 132 0 130 L0 146 Z"/>
+<!-- cuello y cabeza -->
+<path class="b" d="M120 148 C118 100 136 68 158 58 L168 66 C150 80 136 106 134 148 Z"/>
+<path class="sh" d="M158 58 L168 66 C150 80 136 106 134 148 L126 148 C128 110 140 80 158 58 Z" style="opacity:.5"/>
+<path class="b2" d="M124 120 L114 112 L126 108 L118 96 L132 96 L128 84 L142 86" style="fill:none;stroke:#120E0B;stroke-width:1.6"/>
+<path class="b" d="M146 62 C140 46 150 30 168 28 C186 26 196 40 192 54 C188 66 172 72 158 70 C152 68 148 66 146 62 Z"/>
+<path class="sh" d="M176 30 C188 34 194 44 190 56 C186 64 178 68 170 70 C180 60 182 44 176 30 Z"/>
+<path class="dk" d="M150 64 C164 70 182 66 190 56 C178 62 162 64 150 64 Z"/>
+<path class="bn" d="M158 64 l2 5 l2 -4 M168 64 l2 5 l2 -5 M178 62 l2 4 l2 -5"/>
+<path class="b2" d="M162 30 L156 14 L168 26 L172 8 L178 28 Z"/>
+<eye cx="170" cy="44" r="4" slit="1"/>
+<path class="hl" d="M150 40 C156 32 164 28 172 28 M66 130 C70 116 80 108 90 106"/>

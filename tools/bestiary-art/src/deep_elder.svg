@@ -1,0 +1,29 @@
+<!-- Profundo Anciano: un Profundo enorme y viejo, cubierto de percebes, con barba de zarcillos y corona de coral -->
+<path class="b2" d="M30 200 C30 160 50 128 78 116 L122 116 C150 128 170 160 170 200 Z"/>
+<path class="sx" d="M30 200 C30 160 50 128 78 116 C70 140 66 170 70 200 Z"/>
+<path class="sh" d="M150 140 C162 158 168 178 170 200 L146 200 C150 180 152 160 150 140 Z"/>
+<path class="dt" d="M60 150 C80 140 120 140 140 150 L144 200 L56 200 Z"/>
+<g class="bn"><circle cx="62" cy="160" r="3.5"/><circle cx="70" cy="174" r="2.6"/><circle cx="138" cy="152" r="3"/><circle cx="146" cy="170" r="2.4"/><circle cx="56" cy="186" r="2.2"/></g>
+<path class="lnt" d="M60 158 L64 162 M134 150 L140 154"/>
+<!-- brazos enormes con manos palmeadas -->
+<path class="b" d="M44 150 C30 160 24 176 26 196 L40 196 C40 182 46 170 56 160 Z"/>
+<path class="b" d="M156 150 C170 160 176 176 174 196 L160 196 C160 182 154 170 144 160 Z"/>
+<!-- cabeza ancha de pez viejo, cejas pesadas -->
+<path class="b" d="M58 92 C54 58 76 36 100 36 C124 36 146 58 142 92 C140 112 124 126 100 128 C76 126 60 112 58 92 Z"/>
+<path class="sx" d="M128 46 C142 58 146 80 140 100 C134 116 122 124 108 127 C124 110 130 84 128 46 Z"/>
+<path class="dt" d="M66 60 C76 46 90 40 100 40 C92 52 82 62 70 70 Z"/>
+<!-- barba de zarcillos -->
+<path class="ink" d="M78 116 C76 132 70 146 64 158 M88 120 C88 138 84 152 80 166 M100 122 C100 140 100 156 98 172 M112 120 C114 138 118 152 122 166 M122 116 C126 132 132 146 138 158" style="stroke-width:3;stroke:#2f4c48"/>
+<path class="ink" d="M78 116 C76 132 70 146 64 158 M88 120 C88 138 84 152 80 166 M100 122 C100 140 100 156 98 172 M112 120 C114 138 118 152 122 166 M122 116 C126 132 132 146 138 158" style="stroke-width:1"/>
+<!-- boca ancha y caída -->
+<path class="dk" d="M70 104 C84 114 116 114 130 104 C118 110 82 110 70 104 Z"/>
+<path class="ln" d="M66 100 C82 112 118 112 134 100"/>
+<path class="ln" d="M66 84 C70 74 82 70 90 74 M110 74 C118 70 130 74 134 84" style="stroke-width:2.6"/>
+<eye cx="81" cy="82" r="5"/>
+<eye cx="119" cy="82" r="5"/>
+<path class="lnt" d="M64 92 C68 96 70 100 70 104 M136 92 C132 96 130 100 130 104 M90 94 C94 96 96 98 96 100 M110 94 C106 96 104 98 104 100"/>
+<ellipse class="dk" cx="96" cy="96" rx="1.6" ry="2.4"/><ellipse class="dk" cx="104" cy="96" rx="1.6" ry="2.4"/>
+<!-- corona de coral -->
+<path class="mt" d="M70 50 C66 38 70 26 76 22 C76 32 80 38 84 42 C84 30 90 20 98 18 C96 28 100 36 104 40 C106 28 114 20 122 22 C118 30 120 40 124 46 C128 38 134 34 138 36 C134 42 132 48 130 54 C110 46 90 46 70 50 Z" style="fill:#C46B5E"/>
+<path class="lnt" d="M76 22 L74 30 M98 18 L100 26 M122 22 L118 30 M138 36 L132 42"/>
+<path class="hl" d="M66 70 C70 56 80 46 92 42"/>

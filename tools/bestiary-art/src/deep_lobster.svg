@@ -1,0 +1,23 @@
+<!-- Langosta Abisal: una langosta pálida del fondo, enorme, con pinzas aserradas y antenas que tantean el silencio -->
+<path class="ink" d="M86 46 C70 26 50 16 24 14 M114 46 C130 26 150 16 176 14" style="stroke-width:1.6"/>
+<!-- patas -->
+<path class="ink" d="M84 116 L62 126 L54 144 M86 128 L66 142 L62 160 M88 140 L72 158 L72 176 M116 116 L138 126 L146 144 M114 128 L134 142 L138 160 M112 140 L128 158 L128 176" style="stroke-width:2"/>
+<!-- pinzas -->
+<path class="b" d="M80 86 C66 82 52 74 44 62 L50 58 C58 68 70 74 82 76 Z"/>
+<path class="b" d="M44 62 C26 60 18 44 26 32 C32 40 40 44 48 42 C48 50 46 56 44 62 Z"/>
+<path class="b" d="M26 32 C30 22 42 20 50 26 C46 30 46 36 48 42 C40 44 32 40 26 32 Z"/>
+<path class="bn" d="M30 36 l3 2 M34 38 l3 1 M38 40 l3 0" style="fill:none;stroke:#120E0B;stroke-width:1"/>
+<path class="b" d="M120 86 C134 82 148 74 156 62 L150 58 C142 68 130 74 118 76 Z"/>
+<path class="b" d="M156 62 C174 60 182 44 174 32 C168 40 160 44 152 42 C152 50 154 56 156 62 Z"/>
+<path class="b" d="M174 32 C170 22 158 20 150 26 C154 30 154 36 152 42 C160 44 168 40 174 32 Z"/>
+<path class="sh" d="M44 62 C26 60 18 44 26 32 C26 44 32 52 42 56 Z M156 62 C174 60 182 44 174 32 C174 44 168 52 158 56 Z"/>
+<!-- cuerpo segmentado -->
+<path class="b" d="M80 54 C80 40 90 34 100 34 C110 34 120 40 120 54 L118 104 C116 112 84 112 82 104 Z" style="fill:url(#bone)"/>
+<path class="sh" d="M106 36 C116 40 120 46 120 54 L118 104 C116 108 110 110 104 111 C110 90 110 60 106 36 Z"/>
+<path class="b" d="M84 108 L116 108 L114 124 L86 124 Z M86 124 L114 124 L112 140 L88 140 Z M88 140 L112 140 L110 156 L90 156 Z M90 156 L110 156 L108 170 L92 170 Z" style="fill:url(#bone)"/>
+<path class="b" d="M92 170 L108 170 L120 188 L100 182 L80 188 Z" style="fill:url(#bone)"/>
+<path class="dt" d="M84 108 L116 108 L108 170 L92 170 Z"/>
+<path class="ln" d="M100 42 L100 104"/>
+<eye cx="91" cy="48" r="3.2"/>
+<eye cx="109" cy="48" r="3.2"/>
+<path class="hl" d="M86 60 C86 50 90 42 96 38"/>

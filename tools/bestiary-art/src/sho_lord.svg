@@ -1,0 +1,27 @@
+<!-- Shoggoth Señor: un caballero de levita que aprendió a parecer humano; la cara se le deshace y le asoman ojos de más -->
+<path class="b2" d="M28 200 C32 160 58 140 100 138 C142 140 168 160 172 200 Z" style="fill:#2c2a33"/>
+<path class="sx" d="M28 200 C32 160 58 140 90 139 L70 200 Z"/>
+<path class="bn" d="M84 140 L100 172 L116 140 Z"/>
+<path class="dk" d="M92 150 L100 160 L108 150 L104 182 L96 182 Z" style="fill:#4a1e2a"/>
+<path class="ln" d="M76 142 L88 176 L84 200 M124 142 L112 176 L116 200 M64 150 L60 200 M136 150 L140 200" style="stroke:#55505e"/>
+<!-- la carne se escurre por el cuello de la camisa -->
+<path class="b" d="M78 120 C78 134 86 142 100 142 C114 142 122 134 122 120 Z"/>
+<path class="b" d="M66 82 C64 54 80 38 100 38 C120 38 136 54 134 82 C134 104 122 124 100 126 C78 124 66 104 66 82 Z"/>
+<path class="sh" d="M124 48 C134 60 136 80 132 96 C128 112 118 122 106 125 C120 110 126 86 124 48 Z"/>
+<!-- la mitad derecha de la cara pierde la forma -->
+<path class="b2" d="M112 70 C130 72 140 90 136 108 C134 120 140 132 146 142 C138 146 130 138 126 128 C122 138 124 150 118 156 C112 150 114 138 112 130 C106 120 102 100 112 70 Z"/>
+<path class="sx" d="M124 84 C134 92 136 106 134 116 C130 124 128 128 126 128 C124 116 122 100 124 84 Z"/>
+<eye cx="128" cy="96" r="2.6"/>
+<eye cx="122" cy="112" r="2"/>
+<eye cx="132" cy="118" r="1.6"/>
+<!-- pelo peinado con raya -->
+<path class="dk" d="M66 72 C64 46 82 34 100 34 C120 34 136 48 134 70 C126 56 114 50 100 50 C86 50 76 56 66 72 Z" style="fill:#1d1a20"/>
+<path class="hl" d="M80 44 C88 40 96 38 104 39"/>
+<!-- rostro casi humano -->
+<eye cx="86" cy="82" r="4"/>
+<eye cx="112" cy="82" r="4"/>
+<path class="ln" d="M80 74 C84 72 90 72 93 74 M106 74 C110 72 116 72 119 74"/>
+<path class="ln" d="M99 86 C97 94 96 98 100 100"/>
+<path class="ln" d="M88 110 C94 113 104 113 112 109"/>
+<path class="ln" d="M108 110 C110 116 108 122 104 128" style="stroke-width:1"/>
+<path class="hl" d="M72 70 C70 84 72 100 80 112"/>

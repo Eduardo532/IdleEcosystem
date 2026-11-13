@@ -1,0 +1,25 @@
+<!-- Morador del Valle de Pnath: un necrófago enorme y encorvado que camina sobre una montaña de huesos en la oscuridad -->
+<!-- montaña de huesos -->
+<path class="b2" d="M0 200 L0 168 C30 150 60 146 100 150 C140 146 170 152 200 166 L200 200 Z" style="fill:#3a352e"/>
+<g class="bn"><path d="M10 176 L40 170 M14 172 c-4 -2 -4 4 0 4 M38 168 c4 -2 4 4 0 4"/>
+<path d="M60 160 C56 154 66 150 70 156 C76 154 78 162 72 164 C70 170 62 168 60 160 Z"/>
+<path d="M150 158 C146 152 156 148 160 154 C166 152 168 160 162 162 C160 168 152 166 150 158 Z"/>
+<path d="M120 168 L170 176 M118 164 c-4 0 -2 6 2 6 M168 172 c4 0 2 6 -2 6"/>
+<path d="M30 190 L80 184 M90 180 L140 188"/></g>
+<circle class="dk" cx="64" cy="158" r="1.6"/><circle class="dk" cx="68" cy="158" r="1.6"/><circle class="dk" cx="154" cy="156" r="1.6"/><circle class="dk" cx="158" cy="156" r="1.6"/>
+<!-- el morador: espalda en arco, brazos largos apoyados -->
+<path class="b" d="M44 154 C40 130 52 104 76 92 C98 80 126 84 140 100 C150 112 148 132 140 150 L132 152 C134 136 130 120 120 114 C112 128 100 136 86 138 C78 146 70 152 60 156 Z"/>
+<path class="sx" d="M44 154 C40 130 52 104 76 92 C70 112 66 134 64 154 Z"/>
+<path class="ln" d="M78 100 C82 110 82 122 80 132 M96 92 C100 104 100 116 98 126 M114 92 C118 102 118 112 116 120" style="stroke-width:1"/>
+<path class="b" d="M60 140 C50 150 44 160 42 172 L50 172 C52 162 58 154 66 148 Z"/>
+<path class="b" d="M136 140 C146 150 150 160 150 172 L142 172 C142 162 138 154 132 148 Z"/>
+<path class="bn" d="M42 172 l-4 6 M46 172 l-1 7 M50 172 l2 6 M150 172 l4 6 M146 172 l1 7 M142 172 l-2 6"/>
+<!-- cabeza baja y adelantada -->
+<path class="b" d="M120 96 C122 80 134 70 148 72 C162 74 170 86 166 100 C164 108 158 114 150 116 L148 124 C140 126 130 120 126 112 C122 108 120 102 120 96 Z"/>
+<path class="b" d="M162 100 C172 102 180 108 184 116 C174 120 162 118 154 114 Z"/>
+<path class="dk" d="M182 116 C172 120 160 118 152 114 C160 122 172 124 184 118 Z"/>
+<path class="bn" d="M166 116 l1 4 l2 -4 M174 117 l1 4 l2 -4"/>
+<eye cx="144" cy="90" r="3.6"/>
+<eye cx="158" cy="88" r="3.6"/>
+<path class="b2" d="M130 80 L124 66 L136 74 Z M150 74 L152 58 L158 74 Z"/>
+<path class="hl" d="M58 120 C66 104 80 94 96 90"/>

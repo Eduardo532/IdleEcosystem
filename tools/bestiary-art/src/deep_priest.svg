@@ -1,0 +1,29 @@
+<!-- Sacerdote de Dagón: un Profundo con la tiara de oro de Innsmouth y túnica bordada; recita la Orden Esotérica -->
+<path class="b2" d="M30 200 C32 156 56 128 100 124 C144 128 168 156 170 200 Z" style="fill:#3b2a4a"/>
+<path class="sx" d="M30 200 C32 156 56 128 92 125 C76 150 70 176 72 200 Z"/>
+<path class="mt" d="M84 126 L100 200 L116 126 C110 130 90 130 84 126 Z"/>
+<path class="ln" d="M100 140 L94 150 L100 160 L106 150 Z M100 168 L96 176 L100 184 L104 176 Z"/>
+<path class="ac" d="M100 146 L102 150 L100 154 L98 150 Z"/>
+<!-- manos palmeadas juntas con un cetro -->
+<path class="mt" d="M140 66 L136 196" style="stroke:#120E0B;stroke-width:1.4;fill:none"/>
+<path class="ink" d="M140 70 L136 196" style="stroke:#d3a32a;stroke-width:3"/>
+<path class="mt" d="M132 70 C132 58 148 58 148 70 C148 78 140 80 140 80 C140 80 132 78 132 70 Z"/>
+<path class="ac" d="M136 68 L140 62 L144 68 L140 74 Z"/>
+<path class="b" d="M122 150 C128 142 138 140 146 146 C148 156 140 162 132 162 C126 160 122 156 122 150 Z"/>
+<path class="ln" d="M130 146 L128 158 M136 145 L134 160 M142 147 L140 160"/>
+<!-- cabeza -->
+<path class="b" d="M66 84 C64 56 80 40 100 40 C120 40 136 56 134 84 C132 106 120 122 100 124 C80 122 68 106 66 84 Z"/>
+<path class="sh" d="M124 50 C134 62 136 82 132 98 C126 114 116 121 106 123 C120 108 126 86 124 50 Z"/>
+<path class="b2" d="M66 82 L52 72 L56 88 L50 100 L68 96 Z"/>
+<path class="b2" d="M134 82 L148 72 L144 88 L150 100 L132 96 Z"/>
+<path class="dk" d="M76 104 C88 114 112 114 124 104 C112 108 88 108 76 104 Z"/>
+<path class="ln" d="M72 100 C88 110 112 110 128 100"/>
+<eye cx="84" cy="78" r="5.4"/>
+<eye cx="116" cy="78" r="5.4"/>
+<path class="ln" d="M76 70 C82 66 90 66 94 70 M106 70 C110 66 118 66 124 70"/>
+<!-- la tiara de Innsmouth -->
+<path class="mt" d="M66 58 C70 36 84 26 100 24 C116 26 130 36 134 58 C126 52 114 48 100 48 C86 48 74 52 66 58 Z"/>
+<path class="ln" d="M76 46 C82 40 90 36 100 36 C110 36 118 40 124 46 M84 40 L86 50 M100 36 L100 48 M116 40 L114 50"/>
+<path class="ac" d="M96 30 L100 24 L104 30 L100 34 Z"/>
+<circle class="ac" cx="80" cy="44" r="2"/><circle class="ac" cx="120" cy="44" r="2"/>
+<path class="hl" d="M72 70 C70 84 72 98 80 110"/>

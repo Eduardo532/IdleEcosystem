@@ -498,4 +498,15 @@
     <string name="chain_multiplier">Producción x%1$s</string>
     <string name="chain_buy_max">Comprar todo lo posible</string>
     <string name="chain_row_info">%1$s unidades · %2$d compradas · x%3$s</string>
+    <string name="tab_lethargy">Letargo</string>
+    <string name="lethargy_title">EL LETARGO</string>
+    <string name="lethargy_hint">Producción a una décima parte; a cambio, cada minuto suma Sopor para la próxima Ascensión.</string>
+    <string name="lethargy_active">Sopor de esta vida: %1$s</string>
+    <string name="lethargy_sanity">Al Ascender: Cordura %1$s</string>
+    <string name="lethargy_extra">Ascensiones extra: %1$d de %2$d</string>
+    <string name="lethargy_next">Próxima Ascensión extra en %1$s</string>
+    <string name="lethargy_warning">Salir del Letargo antes de Ascender pierde el Sopor.</string>
+    <string name="lethargy_off">Estás despierto: la producción es normal y no se suma Sopor.</string>
+    <string name="lethargy_rules">Cordura x(1 + log2(1 + minutos/10)). Una Ascensión extra por hora, hasta 4. El Sopor también se suma sin conexión y vuelve a cero en cada vida.</string>
+    <string name="lethargy_banner">Letargo: producción x0.1 · Sopor %1$s · Cordura %2$s</string>
 </resources>

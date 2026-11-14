@@ -234,6 +234,10 @@ class MainViewModel @Inject constructor(
             amounts = economy.chainAmounts,
             bought = economy.chainBought
         ),
+        lethargyUi = com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(
+            active = economy.lethargyActive,
+            seconds = economy.lethargySeconds
+        ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
             seals = economy.seals,
@@ -503,6 +507,8 @@ class MainViewModel @Inject constructor(
     fun buyInvocation(tier: Int) = engine.buyInvocation(tier)
 
     fun buyMaxInvocations() = engine.buyMaxInvocations()
+
+    fun setLethargy(enabled: Boolean) = engine.setLethargy(enabled)
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

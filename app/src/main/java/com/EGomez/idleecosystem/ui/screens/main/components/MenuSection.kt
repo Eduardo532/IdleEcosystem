@@ -129,6 +129,8 @@ fun MenuSection(
     chainUi: ChainUi = ChainUi(),
     onBuyInvocation: (Int) -> Unit = {},
     onBuyMaxInvocations: () -> Unit = {},
+    lethargyUi: LethargyUi = LethargyUi(),
+    onSetLethargy: (Boolean) -> Unit = {},
     onSummon: (Int) -> Unit = {},
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
@@ -255,6 +257,7 @@ fun MenuSection(
                 } else when (tab) {
                     MenuTab.RESEARCH -> {
                         if (dreamUi.active) item(key = "dream_banner") { DreamBanner(dreamUi.exponent) }
+                        if (lethargyUi.active) item(key = "lethargy_banner") { LethargyBanner(lethargyUi.seconds) }
                         if (veilPressing) item(key = "veil_banner") { VeilBanner(veilFactor) }
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
@@ -418,6 +421,7 @@ fun MenuSection(
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
                     MenuTab.DREAM -> item { DreamPanel(dreamUi, onSetDreamNext, onWakeUp, onBuyDreamNode, onRespecDream) }
                     MenuTab.CHAIN -> item { ChainPanel(chainUi, onBuyInvocation, onBuyMaxInvocations) }
+                    MenuTab.LETHARGY -> item { LethargyPanel(lethargyUi, onSetLethargy) }
                 }
             }
 

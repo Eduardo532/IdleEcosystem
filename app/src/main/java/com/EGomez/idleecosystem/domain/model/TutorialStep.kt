@@ -294,5 +294,12 @@ enum class TutorialStep(
         "La Cadena de Invocación",
         "Cuatro veces trascendiste, y ya sabes trazar círculos que llaman a otros círculos. En la pestaña Cadena compras ocho eslabones con Conocimiento: el Círculo de Sal produce Poder de Invocación, que multiplica tu producción, y cada eslabón produce al de abajo. Cada 10 compras de un eslabón, produce el doble. La Cadena sobrevive a las Ascensiones y se deshace al Trascender.",
         "Tras la cuarta Trascendencia"
+    ),
+
+    LETHARGY(
+        "lethargy",
+        "El Letargo",
+        "Cinco veces trascendiste, y ya no tienes prisa. En la pestaña Letargo puedes caer en un sopor: la producción baja a una décima parte, pero cada minuto suma Sopor. Al Ascender, el Sopor multiplica la Cordura ganada y, cada hora, la Ascensión cuenta una vez más (hasta 4 de más). Si sales del Letargo antes de Ascender, pierdes el Sopor de esa vida.",
+        "Tras la quinta Trascendencia"
     )
 }

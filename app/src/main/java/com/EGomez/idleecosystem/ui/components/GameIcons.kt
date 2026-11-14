@@ -166,6 +166,20 @@ object GameIcons {
         }
     }
 
+    /** Reloj de arena: el Letargo. */
+    val Hourglass: ImageVector by lazy {
+        icon("Hourglass") {
+            moveTo(6f, 3f); lineTo(18f, 3f)
+            moveTo(6f, 21f); lineTo(18f, 21f)
+            moveTo(7f, 3f)
+            curveTo(7f, 8f, 12f, 9f, 12f, 12f)
+            curveTo(12f, 15f, 7f, 16f, 7f, 21f)
+            moveTo(17f, 3f)
+            curveTo(17f, 8f, 12f, 9f, 12f, 12f)
+            curveTo(12f, 15f, 17f, 16f, 17f, 21f)
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

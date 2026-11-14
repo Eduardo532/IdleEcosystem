@@ -145,6 +145,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Se abre con 4 Trascendencias. Precio del eslabón k: `10^(3 + 3k) · (1,5 + 0,5k)^compras`. Cada eslabón produce por segundo `unidades · 2^⌊compras/10⌋` del de abajo; el primero produce Poder.
 - Multiplicador de producción `(1 + log10(1 + Poder))²`. Se reinicia al Trascender. Sin conexión avanza en hasta 120 pasos. *(Código: `SummoningChain`, `Invocation`; test: `SummoningChainTest`.)*
 
+## Letargo
+
+- Se abre con 5 Trascendencias. Producción x0,1 mientras dura (también sin conexión). Sopor = segundos en Letargo en la vida.
+- Al Ascender: Cordura `x(1 + log2(1 + minutos/10))`; Ascensiones extra `min(4; ⌊minutos/60⌋)`, sumadas al total de Ascensiones. Salir del Letargo borra el Sopor. *(Código: `Lethargy`; test: `LethargyTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

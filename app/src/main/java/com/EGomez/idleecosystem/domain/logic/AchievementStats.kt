@@ -132,6 +132,19 @@ object AchievementStat {
     const val CHAIN_DREAM = "chain_dream"
     const val CHAIN_BUY_WITH_PREFIX = "chain_with."
     const val CHAIN_BUY_PATH_PREFIX = "chain_path."
+    /**
+     * El Letargo (v0.20.2): si está activo, el Sopor (segundos) de la vida, Ascensiones en
+     * Letargo, Ascensiones extra, el mejor Sopor, cuántas veces se perdió y con qué pacto o
+     * Senda se Ascendió en Letargo.
+     */
+    const val LETHARGY_ACTIVE = "lethargy_active"
+    const val LETHARGY_SECONDS = "lethargy_seconds"
+    const val LETHARGY_ASCENSIONS = "lethargy_ascensions"
+    const val LETHARGY_EXTRA = "lethargy_extra"
+    const val LETHARGY_BEST_MINUTES = "lethargy_best_minutes"
+    const val LETHARGY_LOST = "lethargy_lost"
+    const val LETHARGY_WITH_PREFIX = "lethargy_with."
+    const val LETHARGY_PATH_PREFIX = "lethargy_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -325,6 +338,8 @@ object AchievementStat {
     fun chainBought(tier: Int) = CHAIN_BOUGHT_PREFIX + tier
     fun chainBuyWith(pactId: String) = CHAIN_BUY_WITH_PREFIX + pactId
     fun chainBuyPath(pathId: String) = CHAIN_BUY_PATH_PREFIX + pathId
+    fun lethargyWith(pactId: String) = LETHARGY_WITH_PREFIX + pactId
+    fun lethargyPath(pathId: String) = LETHARGY_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -343,6 +358,7 @@ object AchievementStat {
         LAB_ETHER_SPENT, FEAT_LAB_EXACT,
         DREAM_NEXT, DREAM_ACTIVE, DREAM_CYCLE_BEST, DREAM_BEST, DREAM_POINTS, DREAM_POINTS_EARNED, DREAMS_COMPLETED, DREAM_WAKES, DREAM_RESPECS,
         CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
+        LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -354,6 +370,7 @@ object AchievementStat {
         LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
         DREAM_NODE_PREFIX, DREAM_END_WITH_PREFIX, DREAM_END_PATH_PREFIX,
         CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
+        LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

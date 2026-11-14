@@ -696,6 +696,37 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the chain panel buys links it can afford and buys everything at once`() {
+        val bought = mutableListOf<Int>()
+        var max = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.ChainPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(
+                        knowledge = java.math.BigDecimal("5e6"),
+                        power = java.math.BigDecimal("1e10"),
+                        multiplier = 121.0,
+                        amounts = List(8) { java.math.BigDecimal.ZERO },
+                        bought = List(8) { 0 }
+                    ),
+                    onBuy = { bought += it },
+                    onBuyMax = { max++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Producción x121.00").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_TAG + 1).performScrollTo().performClick()
+        // El Cirio Negro cuesta 1e9: no alcanza
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_TAG + 2).performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_MAX_TAG).performScrollTo().performClick()
+        assertEquals(listOf(1), bought)
+        assertEquals(1, max)
+    }
+
+    @Test
     fun `while dreaming the panel shows the pending points and lets you wake up`() {
         var woken = 0
         compose.setContent {

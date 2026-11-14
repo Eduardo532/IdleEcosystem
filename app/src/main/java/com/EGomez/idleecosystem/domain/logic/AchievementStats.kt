@@ -116,6 +116,22 @@ object AchievementStat {
     const val DREAM_NODES = "dream_nodes"
     const val DREAM_END_WITH_PREFIX = "dream_with."
     const val DREAM_END_PATH_PREFIX = "dream_path."
+    /**
+     * La Cadena de Invocación (v0.20.1): unidades y compras de cada eslabón en el ciclo,
+     * el Poder del ciclo, el mejor Poder de siempre, compras totales, el eslabón más alto
+     * comprado y con qué pacto o Senda se compró.
+     */
+    const val CHAIN_AMOUNT_PREFIX = "chain.a."
+    const val CHAIN_BOUGHT_PREFIX = "chain.b."
+    const val CHAIN_CYCLE_PREFIX = "chain."
+    const val CHAIN_POWER = "chain_power"
+    const val CHAIN_POWER_BEST = "chain_power_best"
+    const val CHAIN_BOUGHT = "chain_bought"
+    const val CHAIN_TOP_TIER = "chain_top_tier"
+    const val CHAIN_FULL = "chain_full"
+    const val CHAIN_DREAM = "chain_dream"
+    const val CHAIN_BUY_WITH_PREFIX = "chain_with."
+    const val CHAIN_BUY_PATH_PREFIX = "chain_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -305,6 +321,10 @@ object AchievementStat {
     fun dreamNode(id: String) = DREAM_NODE_PREFIX + id
     fun dreamEndWith(pactId: String) = DREAM_END_WITH_PREFIX + pactId
     fun dreamEndPath(pathId: String) = DREAM_END_PATH_PREFIX + pathId
+    fun chainAmount(tier: Int) = CHAIN_AMOUNT_PREFIX + tier
+    fun chainBought(tier: Int) = CHAIN_BOUGHT_PREFIX + tier
+    fun chainBuyWith(pactId: String) = CHAIN_BUY_WITH_PREFIX + pactId
+    fun chainBuyPath(pathId: String) = CHAIN_BUY_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -322,6 +342,7 @@ object AchievementStat {
         SEALS_EARNED, SEALS_BOUGHT, CLICK_SEALS, SUMMONS, SHARDS_EARNED, SHARD_PICKS, DAILY_BEST_STREAK,
         LAB_ETHER_SPENT, FEAT_LAB_EXACT,
         DREAM_NEXT, DREAM_ACTIVE, DREAM_CYCLE_BEST, DREAM_BEST, DREAM_POINTS, DREAM_POINTS_EARNED, DREAMS_COMPLETED, DREAM_WAKES, DREAM_RESPECS,
+        CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -332,6 +353,7 @@ object AchievementStat {
         BEAST_PREFIX, BEAST_CATCH_WITH_PREFIX, BEAST_CATCH_PATH_PREFIX,
         LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
         DREAM_NODE_PREFIX, DREAM_END_WITH_PREFIX, DREAM_END_PATH_PREFIX,
+        CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

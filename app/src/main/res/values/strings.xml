@@ -491,4 +491,11 @@
     <string name="dream_respec">Reiniciar el árbol (devuelve %1$d PS)</string>
     <string name="dream_banner">Sueño Profundo: producción, clic y Cordura a %1$s</string>
     <string name="dream_notice">☾ Despertaste: +%1$d Puntos de Sueño</string>
+    <string name="tab_chain">Cadena</string>
+    <string name="chain_title">LA CADENA DE INVOCACIÓN</string>
+    <string name="chain_hint">Cada eslabón produce al de abajo; el primero produce Poder, que multiplica tu producción. Se deshace al Trascender.</string>
+    <string name="chain_power_label">PODER</string>
+    <string name="chain_multiplier">Producción x%1$s</string>
+    <string name="chain_buy_max">Comprar todo lo posible</string>
+    <string name="chain_row_info">%1$s unidades · %2$d compradas · x%3$s</string>
 </resources>

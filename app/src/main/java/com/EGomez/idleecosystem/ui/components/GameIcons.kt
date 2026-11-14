@@ -150,6 +150,22 @@ object GameIcons {
         }
     }
 
+    /** Dos eslabones: la Cadena de Invocación. */
+    val Chain: ImageVector by lazy {
+        icon("Chain") {
+            // Eslabón de arriba a la izquierda
+            moveTo(10f, 14f); lineTo(6.5f, 17.5f)
+            curveTo(5.1f, 18.9f, 2.9f, 16.9f, 4.3f, 15.5f)
+            lineTo(8.5f, 11.3f)
+            curveTo(9.9f, 9.9f, 11.9f, 10.1f, 12.7f, 11.3f)
+            // Eslabón de abajo a la derecha
+            moveTo(14f, 10f); lineTo(17.5f, 6.5f)
+            curveTo(18.9f, 5.1f, 20.9f, 7.1f, 19.7f, 8.5f)
+            lineTo(15.5f, 12.7f)
+            curveTo(14.1f, 14.1f, 12.1f, 13.9f, 11.3f, 12.7f)
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

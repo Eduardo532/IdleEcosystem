@@ -287,5 +287,12 @@ enum class TutorialStep(
         "El Sueño Profundo",
         "Tres veces trascendiste, y ahora puedes bajar los setenta peldaños. En la pestaña Sueño elige que el próximo ciclo sea un Sueño Profundo: mientras dura, la producción, el clic y la Cordura se elevan a ^0,75. Al Trascender desde el Sueño ganas Puntos de Sueño según tu mejor vida, y con ellos compras el Árbol del Sueño, que vale en todos los ciclos.",
         "Tras la tercera Trascendencia"
+    ),
+
+    SUMMONING_CHAIN(
+        "summoning_chain",
+        "La Cadena de Invocación",
+        "Cuatro veces trascendiste, y ya sabes trazar círculos que llaman a otros círculos. En la pestaña Cadena compras ocho eslabones con Conocimiento: el Círculo de Sal produce Poder de Invocación, que multiplica tu producción, y cada eslabón produce al de abajo. Cada 10 compras de un eslabón, produce el doble. La Cadena sobrevive a las Ascensiones y se deshace al Trascender.",
+        "Tras la cuarta Trascendencia"
     )
 }

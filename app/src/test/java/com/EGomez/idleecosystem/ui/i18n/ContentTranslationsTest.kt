@@ -40,6 +40,7 @@ class ContentTranslationsTest {
         "Mejoras estelares" to com.EGomez.idleecosystem.domain.logic.StarUpgrade.entries.flatMap { listOf(it.title, it.description) },
         "Laboratorio" to com.EGomez.idleecosystem.domain.logic.LabExperiment.entries.flatMap { listOf(it.title, it.description) },
         "Árbol del Sueño" to com.EGomez.idleecosystem.domain.logic.DreamNode.entries.flatMap { listOf(it.title, it.description) },
+        "Cadena de Invocación" to com.EGomez.idleecosystem.domain.logic.Invocation.entries.flatMap { listOf(it.title, it.description) },
         "Bestiario" to com.EGomez.idleecosystem.domain.logic.Bestiary.beasts.flatMap { listOf(it.name, it.lore) } +
             com.EGomez.idleecosystem.domain.logic.Bestiary.domains.flatMap { listOf(it.title, it.description) } +
             com.EGomez.idleecosystem.domain.logic.BeastRarity.entries.map { it.title }

@@ -64,6 +64,7 @@ fun MenuTab.title(): String = stringResource(
         MenuTab.BESTIARY -> R.string.tab_bestiary
         MenuTab.LAB -> R.string.tab_lab
         MenuTab.DREAM -> R.string.tab_dream
+        MenuTab.CHAIN -> R.string.tab_chain
     }
 )
 

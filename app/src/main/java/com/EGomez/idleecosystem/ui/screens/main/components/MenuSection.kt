@@ -126,6 +126,9 @@ fun MenuSection(
     onWakeUp: () -> Unit = {},
     onBuyDreamNode: (String) -> Unit = {},
     onRespecDream: () -> Unit = {},
+    chainUi: ChainUi = ChainUi(),
+    onBuyInvocation: (Int) -> Unit = {},
+    onBuyMaxInvocations: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
@@ -414,6 +417,7 @@ fun MenuSection(
                     MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards) }
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
                     MenuTab.DREAM -> item { DreamPanel(dreamUi, onSetDreamNext, onWakeUp, onBuyDreamNode, onRespecDream) }
+                    MenuTab.CHAIN -> item { ChainPanel(chainUi, onBuyInvocation, onBuyMaxInvocations) }
                 }
             }
 

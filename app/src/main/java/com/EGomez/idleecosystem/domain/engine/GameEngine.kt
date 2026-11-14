@@ -30,7 +30,9 @@ import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.SummonResult
 import com.EGomez.idleecosystem.domain.logic.DeepSleep
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.Lab
+import com.EGomez.idleecosystem.domain.logic.SummoningChain
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
@@ -156,6 +158,12 @@ data class EconomyState(
     val dreamCycleBest: BigDecimal = BigDecimal.ZERO,
     val dreamPendingPoints: Int = 0,
     val dreamLevels: Map<String, Int> = emptyMap(),
+    /** La Cadena de Invocación (v0.20.1): eslabones del 1 al 8. */
+    val chainRevealed: Boolean = false,
+    val chainPower: BigDecimal = BigDecimal.ZERO,
+    val chainMultiplier: Double = 1.0,
+    val chainAmounts: List<BigDecimal> = emptyList(),
+    val chainBought: List<Int> = emptyList(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -741,6 +749,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.LAB_MAXED, LabExperiment.entries.count { it.isMaxed(labLevel(it)) })
         put(AchievementStat.DREAM_LEVELS, DreamNode.entries.sumOf { dreamLevel(it) })
         put(AchievementStat.DREAM_NODES, DreamNode.entries.count { dreamLevel(it) > 0 })
+        put(AchievementStat.CHAIN_FULL, Invocation.entries.count { chainBought(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -959,7 +968,8 @@ class GameEngine @Inject constructor(
         starsRevealed = starsRevealed(),
         bestiaryRevealed = bestiaryRevealed(),
         labRevealed = labRevealed(),
-        dreamRevealed = dreamRevealed()
+        dreamRevealed = dreamRevealed(),
+        chainRevealed = chainRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1068,6 +1078,11 @@ class GameEngine @Inject constructor(
             statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
             addStardust(dust)
         }
+        // La Cadena de Invocación sigue produciendo
+        if (diffSeconds > 0 && chainRevealed()) {
+            val (amounts, power) = SummoningChain.advance(chainAmounts(), chainBoughtList(), diffSeconds)
+            storeChain(amounts, power)
+        }
         // La Locura también baja mientras no juegas
         if (diffSeconds > 0) {
             madness.decay(diffSeconds)
@@ -1130,6 +1145,7 @@ class GameEngine @Inject constructor(
         veilTick()
         starsTick()
         encounterTick()
+        chainTick()
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1267,6 +1283,7 @@ class GameEngine @Inject constructor(
         if (transcendences() >= 1) tutorialManager.triggerStep(TutorialStep.TRANSCEND_MILESTONES)
         if (labRevealed()) tutorialManager.triggerStep(TutorialStep.LAB)
         if (dreamRevealed()) tutorialManager.triggerStep(TutorialStep.DEEP_SLEEP)
+        if (chainRevealed()) tutorialManager.triggerStep(TutorialStep.SUMMONING_CHAIN)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1719,6 +1736,84 @@ class GameEngine @Inject constructor(
         requestSave()
     }
 
+    // =====================================================================
+    // LA CADENA DE INVOCACIÓN (v0.20.1)
+    // =====================================================================
+
+    private fun chainRevealed(): Boolean = SummoningChain.isUnlocked(transcendences())
+
+    private fun chainPower(): BigDecimal = statsManager.counter(AchievementStat.CHAIN_POWER)
+
+    private fun chainBought(invocation: Invocation): Int = statsManager.counter(AchievementStat.chainBought(invocation.tier)).toInt()
+
+    private fun chainBoughtList(): List<Int> = Invocation.entries.map { chainBought(it) }
+
+    private fun chainAmounts(): List<BigDecimal> = Invocation.entries.map { statsManager.counter(AchievementStat.chainAmount(it.tier)) }
+
+    /** Guarda las unidades de cada eslabón y suma el Poder ganado. */
+    private fun storeChain(amounts: List<BigDecimal>, powerGained: BigDecimal) {
+        Invocation.entries.forEachIndexed { i, invocation ->
+            val key = AchievementStat.chainAmount(invocation.tier)
+            if (amounts[i].signum() > 0) statsManager.counters[key] = amounts[i] else statsManager.counters.remove(key)
+        }
+        if (powerGained.signum() > 0) {
+            val power = chainPower().add(powerGained, java.math.MathContext.DECIMAL64)
+            statsManager.counters[AchievementStat.CHAIN_POWER] = power
+            statsManager.record(AchievementStat.CHAIN_POWER_BEST, power)
+            if (dreamActive() && power >= CHAIN_DREAM_POWER) statsManager.flag(AchievementStat.CHAIN_DREAM)
+        }
+    }
+
+    /** Un segundo de Cadena: cada eslabón produce al de abajo y el primero, Poder. */
+    private fun chainTick() {
+        if (!chainRevealed()) return
+        val amounts = chainAmounts()
+        if (amounts.all { it.signum() == 0 }) return
+        val (next, power) = SummoningChain.step(amounts, chainBoughtList(), 1.0)
+        storeChain(next, power)
+    }
+
+    /** Compra una unidad del eslabón [tier] con Conocimiento. */
+    fun buyInvocation(tier: Int) = post {
+        if (buyInvocationNow(tier)) {
+            soundManager.playSound(SoundType.BUY)
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /** Compra todo lo que alcance, del eslabón más alto al primero. */
+    fun buyMaxInvocations() = post {
+        if (!chainRevealed()) return@post
+        var any = false
+        var guard = 0
+        Invocation.entries.reversed().forEach { invocation ->
+            while (guard < MAX_CHAIN_BUYS && buyInvocationNow(invocation.tier)) { any = true; guard++ }
+        }
+        if (any) {
+            soundManager.playSound(SoundType.BUY)
+            recalculate()
+            requestSave()
+        }
+    }
+
+    private fun buyInvocationNow(tier: Int): Boolean {
+        val invocation = Invocation.fromTier(tier) ?: return false
+        if (!chainRevealed()) return false
+        val bought = chainBought(invocation)
+        val cost = invocation.cost(bought)
+        if (knowledge < cost) return false
+        knowledge = knowledge.subtract(cost)
+        statsManager.counters[AchievementStat.chainBought(tier)] = BigDecimal(bought + 1)
+        val key = AchievementStat.chainAmount(tier)
+        statsManager.counters[key] = statsManager.counter(key).add(BigDecimal.ONE)
+        statsManager.count(AchievementStat.CHAIN_BOUGHT)
+        statsManager.record(AchievementStat.CHAIN_TOP_TIER, BigDecimal(tier))
+        statsManager.flag(AchievementStat.chainBuyWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.chainBuyPath(it.id)) }
+        return true
+    }
+
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
 
     /** El Velo frena esta vida: se anota para el logro y se explica una vez. */
@@ -2016,6 +2111,9 @@ class GameEngine @Inject constructor(
         statsManager.record(AchievementStat.MAX_ETHER_GAIN, BigDecimal(gain))
         statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
         val dreamGain = if (dreamActive()) completeDream() else null
+        // La Cadena de Invocación se deshace
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CHAIN_CYCLE_PREFIX) }
+        statsManager.counters.remove(AchievementStat.CHAIN_POWER)
 
         // El ciclo nuevo
         val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY
@@ -2282,6 +2380,7 @@ class GameEngine @Inject constructor(
         ).multiply(Veil.productionFactor(knowledgeThisRun(), veilBroken(), veilThreshold()))
             .multiply(BigDecimal.valueOf(Stars.productionMultiplier(starLevel(StarUpgrade.STARLIGHT), starLevel(StarUpgrade.DARK_STARS), starCount())))
             .multiply(BigDecimal.valueOf(DeepSleep.productionMultiplier(dreamLevel(DreamNode.FLAME))))
+            .multiply(BigDecimal.valueOf(SummoningChain.productionMultiplier(chainPower())))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -2438,6 +2537,11 @@ class GameEngine @Inject constructor(
             dreamCycleBest = dreamCycleBest(),
             dreamPendingPoints = if (dreamActive()) dreamGainNow() else 0,
             dreamLevels = DreamNode.entries.associate { it.id to dreamLevel(it) },
+            chainRevealed = chainRevealed(),
+            chainPower = chainPower(),
+            chainMultiplier = SummoningChain.productionMultiplier(chainPower()),
+            chainAmounts = chainAmounts(),
+            chainBought = chainBoughtList(),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,
@@ -2540,6 +2644,10 @@ class GameEngine @Inject constructor(
         /** Clics manuales tras los que se enseña a mantener pulsado. */
         private const val HOLD_TUTORIAL_CLICKS = 25L
         private const val TICK_MS = 100L
+        /** Tope de compras de un "Comprar todo" de la Cadena. */
+        private const val MAX_CHAIN_BUYS = 2000
+        /** Poder que da el logro secreto de la Cadena si se alcanza soñando. */
+        private val CHAIN_DREAM_POWER = BigDecimal("1e10")
         private const val AUTOSAVE_INTERVAL_MS = 5_000L
         private const val OFFLINE_THRESHOLD_MS = 10_000L
         private const val RUNE_SUCCESS_DISPLAY_MS = 2_000L

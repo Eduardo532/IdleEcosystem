@@ -509,4 +509,20 @@
     <string name="lethargy_off">Estás despierto: la producción es normal y no se suma Sopor.</string>
     <string name="lethargy_rules">Cordura x(1 + log2(1 + minutos/10)). Una Ascensión extra por hora, hasta 4. El Sopor también se suma sin conexión y vuelve a cero en cada vida.</string>
     <string name="lethargy_banner">Letargo: producción x0.1 · Sopor %1$s · Cordura %2$s</string>
+    <string name="tab_ttrials">Desafíos</string>
+    <string name="ttrials_title">PRUEBAS DE TRASCENDENCIA</string>
+    <string name="ttrials_hint">Elige una Prueba para el próximo ciclo; empieza al Trascender. Se supera Trascendiendo después de una vida con el Conocimiento que pide su nivel.</string>
+    <string name="ttrials_active">En curso: %1$s %2$s</string>
+    <string name="ttrials_progress">Mejor vida: %1$s de %2$s</string>
+    <string name="ttrials_met">Meta alcanzada: Trasciende para superarla.</string>
+    <string name="ttrials_not_met">Aún no llegas a la meta.</string>
+    <string name="ttrials_abandon">Abandonar la Prueba</string>
+    <string name="ttrials_levels">%1$d / %2$d</string>
+    <string name="ttrials_restriction">Restricción: %1$s</string>
+    <string name="ttrials_reward">Recompensa: %1$s</string>
+    <string name="ttrials_goal">Nivel %1$s: una vida con %2$s de Conocimiento</string>
+    <string name="ttrials_choose">Elegir para el próximo ciclo</string>
+    <string name="ttrials_chosen">Elegida (tocar para quitar)</string>
+    <string name="ttrials_mastered">Superada en los cinco niveles.</string>
+    <string name="ttrials_notice">Superaste %1$s</string>
 </resources>

@@ -1,6 +1,6 @@
 # Logros
 
-Hay **532 logros**: 113 originales y **419 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **545 logros**: 113 originales y **432 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -270,6 +270,18 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Estanque de Abhoth | Asciende en Letargo con el pacto de Abhoth | +1 % |
 | Engranajes Detenidos | Asciende en Letargo recorriendo la Senda del Engranaje | +1 % |
 | Mente en Reposo | Asciende en Letargo recorriendo la Senda de la Mente | +1 % |
+| El Primer Juicio | Supera un nivel de una Prueba de Trascendencia | +1 % |
+| Juez de Ciclos | Supera 5 niveles de Pruebas de Trascendencia | +1 % |
+| Diez Veredictos | Supera 10 niveles de Pruebas de Trascendencia | +1 % |
+| Trascendencia Probada | Supera los 20 niveles de Pruebas de Trascendencia | +2 % |
+| Ayuno Eterno | Supera la Prueba del Hambre V | +1 % |
+| Mente de Cristal | Supera la Prueba de la Cordura Quebrada V | +1 % |
+| Huérfano de Dioses | Supera la Prueba de la Soledad V | +1 % |
+| El Silencio Absoluto | Supera la Prueba del Silencio V | +1 % |
+| El Heraldo te Vio Pasar | Supera una Prueba de Trascendencia con el pacto de Ghroth | +1 % |
+| Las Formas Ocultas | Supera una Prueba de Trascendencia con el pacto de Daoloth | +1 % |
+| La Mano Firme | Supera una Prueba de Trascendencia recorriendo la Senda de la Mano | +1 % |
+| Prueba Soñada | Supera una Prueba de Trascendencia recorriendo la Senda del Sueño | +1 % |
 
 ### Panteón
 
@@ -443,7 +455,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **34 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **35 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

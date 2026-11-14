@@ -150,6 +150,12 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Se abre con 5 Trascendencias. Producción x0,1 mientras dura (también sin conexión). Sopor = segundos en Letargo en la vida.
 - Al Ascender: Cordura `x(1 + log2(1 + minutos/10))`; Ascensiones extra `min(4; ⌊minutos/60⌋)`, sumadas al total de Ascensiones. Salir del Letargo borra el Sopor. *(Código: `Lethargy`; test: `LethargyTest`.)*
 
+## Pruebas de Trascendencia
+
+- Se abren con 6 Trascendencias. Meta del nivel n (1..5): `10^(9 + 3n)` de Conocimiento en una vida del ciclo. Se elige antes de Trascender y se supera al volver a Trascender.
+- Restricciones: Hambre, exponente de producción x0,85; Cordura Quebrada, exponente de Cordura x0,6; Soledad, pacto forzado a ninguno; Silencio, clic 0.
+- Recompensas: producción `3^n`, Cordura `1,5^n`, Éter `1 + 0,2n` y Ascensiones para Trascender `−2n` (mínimo 10). *(Código: `TranscendenceTrials`, `TranscendenceTrial`; test: `TranscendenceTrialsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

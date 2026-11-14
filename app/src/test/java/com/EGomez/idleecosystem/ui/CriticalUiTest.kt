@@ -749,6 +749,40 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the trials panel shows the active trial goal and chooses the next one`() {
+        val chosen = mutableListOf<String?>()
+        var abandoned = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
+                        next = "broken",
+                        active = "hunger",
+                        cycleBest = java.math.BigDecimal("2e12"),
+                        levels = mapOf("silence" to 5)
+                    ),
+                    onChoose = { chosen += it },
+                    onAbandon = { abandoned++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("En curso: La Prueba del Hambre I").assertExists()
+        compose.onNodeWithText("Meta alcanzada: Trasciende para superarla.").assertExists()
+        // La activa no se puede elegir; el Silencio ya está superado entero
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "hunger").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "silence").assertDoesNotExist()
+        // Tocar la elegida la quita; tocar otra la elige
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "broken").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "solitude").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_ABANDON_TAG).performScrollTo().performClick()
+        assertEquals(listOf(null, "solitude"), chosen)
+        assertEquals(1, abandoned)
+    }
+
+    @Test
     fun `while dreaming the panel shows the pending points and lets you wake up`() {
         var woken = 0
         compose.setContent {

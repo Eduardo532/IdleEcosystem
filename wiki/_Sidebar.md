@@ -20,6 +20,7 @@
 - [El Sueño Profundo](El-Sueno-Profundo)
 - [Cadena de Invocación](Cadena-de-Invocacion)
 - [Letargo](Letargo)
+- [Pruebas de Trascendencia](Pruebas-de-Trascendencia)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

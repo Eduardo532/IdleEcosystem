@@ -238,6 +238,12 @@ class MainViewModel @Inject constructor(
             active = economy.lethargyActive,
             seconds = economy.lethargySeconds
         ),
+        ttrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
+            next = economy.ttrialNext,
+            active = economy.ttrialActive,
+            cycleBest = economy.ttrialCycleBest,
+            levels = economy.ttrialLevels
+        ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
             seals = economy.seals,
@@ -302,10 +308,13 @@ class MainViewModel @Inject constructor(
             is EngineEffect.Transcended -> {
                 val gain = effect.ether
                 val dream = effect.dreamPoints
-                _uiState.update { it.copy(transcendNotice = gain, dreamNotice = dream) }
+                val passed = effect.trialPassed
+                _uiState.update { it.copy(transcendNotice = gain, dreamNotice = dream, trialPassedNotice = passed) }
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
-                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null, dreamNotice = null) else it }
+                    _uiState.update {
+                        if (it.transcendNotice == gain) it.copy(transcendNotice = null, dreamNotice = null, trialPassedNotice = null) else it
+                    }
                 }
             }
             is EngineEffect.TrialCompleted -> {
@@ -509,6 +518,10 @@ class MainViewModel @Inject constructor(
     fun buyMaxInvocations() = engine.buyMaxInvocations()
 
     fun setLethargy(enabled: Boolean) = engine.setLethargy(enabled)
+
+    fun chooseTranscendenceTrial(id: String?) = engine.chooseTranscendenceTrial(id)
+
+    fun abandonTranscendenceTrial() = engine.abandonTranscendenceTrial()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

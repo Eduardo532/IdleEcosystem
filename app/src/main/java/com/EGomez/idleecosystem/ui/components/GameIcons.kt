@@ -180,6 +180,21 @@ object GameIcons {
         }
     }
 
+    /** Copa: las Pruebas de Trascendencia. */
+    val Trophy: ImageVector by lazy {
+        icon("Trophy") {
+            moveTo(7f, 4f); lineTo(17f, 4f)
+            lineTo(17f, 9f)
+            curveTo(17f, 12f, 14.8f, 14f, 12f, 14f)
+            curveTo(9.2f, 14f, 7f, 12f, 7f, 9f)
+            close()
+            moveTo(7f, 6f); curveTo(4f, 6f, 4f, 10f, 7.4f, 10.5f)
+            moveTo(17f, 6f); curveTo(20f, 6f, 20f, 10f, 16.6f, 10.5f)
+            moveTo(12f, 14f); lineTo(12f, 18f)
+            moveTo(8f, 20f); lineTo(16f, 20f)
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

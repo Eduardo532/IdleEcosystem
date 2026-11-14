@@ -12,7 +12,7 @@ Cada etapa termina en una **puerta**: una condición que debería cumplirse ante
 | 4 | v0.17 | Desafíos y riesgo | 162 logros de las mecánicas ✅, Pruebas de Locura ✅, espacios de runa ✅, medidor de Locura ✅, fases de la Marea ✅ | Las pruebas desbloquean pactos y espacios de runa |
 | 5 | v0.18 – v0.19 | Segunda capa | Trascender (nueva capa de prestigio) ✅, mutaciones ✅, maestría de runas ✅, consagrar edificios ✅ | Trascender abre sistemas, no solo multiplica |
 | 6 | v0.19 | Completar la segunda capa | Romper el Velo ✅, Hitos de Trascendencia ✅, Cuando las Estrellas Estén en Posición ✅, Bestiario ✅, Laboratorio de Miskatonic ✅ | Las 10 Pruebas tienen un objetivo final y Trascender se automatiza |
-| 7 | v0.20 | Profundidad de Trascender | Las Tierras del Sueño, Cadena de Invocación, Letargo, Pruebas de Trascendencia (I–V) | Un ciclo de Trascender tiene un desafío largo propio |
+| 7 | v0.20 | Profundidad de Trascender | El Sueño Profundo ✅, Cadena de Invocación ✅, Letargo ✅, Pruebas de Trascendencia (I–V) ✅ | Un ciclo de Trascender tiene un desafío largo propio |
 | 8 | v0.21 – v0.23 | Tercera capa: el Despertar | Despertar (Pruebas combinadas), Signos Antiguos y planetas, Expediciones y Reliquias, Cristales de Yuggoth, los Cuatro Elementales | El Despertar abre minijuegos distintos que alimentan a las capas anteriores |
 | 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo, Artefactos, El Sueño de Azathoth; actos con un final visible, interfaz narrativa, eventos con memoria, contenido oculto | El juego tiene un final visible |
 
@@ -46,7 +46,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **El Sueño Profundo** ✅ *v0.20.0* | Dilatación | Desde la 3ª Trascendencia, un ciclo soñado donde producción, clic y Cordura se elevan a ^0,75. Al Trascender paga Puntos de Sueño para un árbol de 8 nodos con reinicio libre. Ver [El Sueño Profundo](El-Sueno-Profundo). |
 | **Cadena de Invocación** ✅ *v0.20.1* | Generadores | Desde la 4ª Trascendencia, ocho eslabones comprados con Conocimiento: cada uno produce al de abajo y el primero, Poder de Invocación, que multiplica la producción. Se deshace al Trascender. Ver [Cadena de Invocación](Cadena-de-Invocacion). |
 | **Letargo** ✅ *v0.20.2* | Ralentización | Desde la 5ª Trascendencia: producción x0,1 a cambio de Sopor, que multiplica la Cordura al Ascender y hace que cada hora la Ascensión cuente una vez más (hasta 4). Ver [Letargo](Letargo). |
-| **Pruebas de Trascendencia** | Desafíos de Eternidad | Las Pruebas con niveles de dificultad I a V, cada uno con más restricciones y mejor recompensa. |
+| **Pruebas de Trascendencia** ✅ *v0.20.3* | Desafíos de Eternidad | Desde la 6ª Trascendencia, cuatro Pruebas de ciclo entero (Hambre, Cordura Quebrada, Soledad y Silencio), cada una con niveles I a V: más meta y mejor recompensa permanente. Ver [Pruebas de Trascendencia](Pruebas-de-Trascendencia). |
 
 ### Etapa 8: el Despertar
 

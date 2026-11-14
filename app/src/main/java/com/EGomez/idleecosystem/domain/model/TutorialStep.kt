@@ -301,5 +301,12 @@ enum class TutorialStep(
         "El Letargo",
         "Cinco veces trascendiste, y ya no tienes prisa. En la pestaña Letargo puedes caer en un sopor: la producción baja a una décima parte, pero cada minuto suma Sopor. Al Ascender, el Sopor multiplica la Cordura ganada y, cada hora, la Ascensión cuenta una vez más (hasta 4 de más). Si sales del Letargo antes de Ascender, pierdes el Sopor de esa vida.",
         "Tras la quinta Trascendencia"
+    ),
+
+    TRANSCENDENCE_TRIALS(
+        "transcendence_trials",
+        "Las Pruebas de Trascendencia",
+        "Seis veces trascendiste: ahora el ciclo entero puede ser una prueba. En la pestaña Desafíos elige una Prueba de Trascendencia para el próximo ciclo; empieza al Trascender. Supérala con una vida que llegue al Conocimiento que pide su nivel y vuelve a Trascender. Cada Prueba tiene cinco niveles, de la I a la V, y su recompensa vale siempre.",
+        "Tras la sexta Trascendencia"
     )
 }

@@ -184,6 +184,7 @@ class MainViewModel @Inject constructor(
         echoesFormatted = economy.echoes.toBeautifulString(),
         revealed = economy.revealed,
         menuUnlocks = economy.menuUnlocks,
+        buyMultiplier = economy.buyMultiplier,
         newTabs = economy.newTabs,
         seenMutations = economy.seenMutations,
         ascensions = economy.ascensions,
@@ -246,6 +247,7 @@ class MainViewModel @Inject constructor(
         ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
+            newBeasts = economy.newBeasts,
             seals = economy.seals,
             shards = economy.shards,
             sealPrice = economy.sealPrice,
@@ -370,7 +372,11 @@ class MainViewModel @Inject constructor(
         return ManualClickResult(economy.clickPower, echoFound)
     }
 
-    fun setBuyMultiplier(value: Int) = _uiState.update { it.copy(buyMultiplier = value) }
+    fun setBuyMultiplier(value: Int) {
+        _uiState.update { it.copy(buyMultiplier = value) }
+        // Se guarda en la partida: el autocomprador de edificios lo sigue
+        engine.setBuyMultiplier(value)
+    }
 
     fun toggleShowPurchased() = _showPurchasedState.update { !it }
 
@@ -500,6 +506,8 @@ class MainViewModel @Inject constructor(
     fun buySeals() = engine.buySeals()
 
     fun pickWithShards(id: String) = engine.pickWithShards(id)
+
+    fun onBeastViewed(id: String) = engine.onBeastViewed(id)
 
     fun dismissSummonResults() = _uiState.update { it.copy(summonResults = null) }
 

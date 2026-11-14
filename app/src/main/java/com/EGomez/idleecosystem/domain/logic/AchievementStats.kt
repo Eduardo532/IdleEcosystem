@@ -266,6 +266,12 @@ object AchievementStat {
     const val MUTATION_SEEN_PREFIX = "mutation_seen."
     /** "ui.seen.grimoire": el jugador ya abrió esa pestaña (v0.19.0; no es un logro). */
     const val SEEN_TAB_PREFIX = "ui.seen."
+    /** "ui.beast.shoggoth": el jugador ya abrió la tarjeta de esa criatura (v0.20.4). */
+    const val SEEN_BEAST_PREFIX = "ui.beast."
+    /** Marca única: las criaturas que ya se tenían al llegar a la v0.20.4 no se anuncian. */
+    const val SEEN_BEASTS_INIT = "ui.beasts_init"
+    /** El multiplicador de compra elegido (1, 5, 10, 100, -2 hito, -1 máximo; v0.20.4). */
+    const val BUY_MULTIPLIER = "ui.buy_multiplier"
     /** Se marcó lo ya visible al pasar a la interfaz por capas: no todo aparece como nuevo. */
     const val SEEN_TABS_INIT = "ui.seen_init"
     /** "mutation_with.cthulhu.rlyeh_rises": vida terminada con ese pacto y esa mutación. */

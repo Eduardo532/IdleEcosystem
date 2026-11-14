@@ -23,10 +23,27 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     MUTATIONS("mutations", MenuLayer.TRANSCENDENCE),
     STARS("stars", MenuLayer.TRANSCENDENCE),
     LAB("lab", MenuLayer.TRANSCENDENCE),
+    /** Grupo (v0.20.4): no tiene contenido propio; reúne los cuatro desafíos de ciclo. */
+    CYCLES("cycles", MenuLayer.TRANSCENDENCE),
     DREAM("dream", MenuLayer.TRANSCENDENCE),
     CHAIN("chain", MenuLayer.TRANSCENDENCE),
     LETHARGY("lethargy", MenuLayer.TRANSCENDENCE),
     TTRIALS("ttrials", MenuLayer.TRANSCENDENCE);
+
+    /**
+     * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
+     * desafíos de ciclo dentro de Ciclos, para que la capa Trascendencia tenga solo cuatro
+     * pestañas arriba.
+     */
+    val group: MenuTab?
+        get() = when (this) {
+            MUTATIONS -> ETHER
+            DREAM, CHAIN, LETHARGY, TTRIALS -> CYCLES
+            else -> null
+        }
+
+    /** Un grupo sin contenido propio: abrirlo abre su primera pestaña. */
+    val isGroupOnly: Boolean get() = this == CYCLES
 
     companion object {
         fun fromId(id: String?): MenuTab? = entries.firstOrNull { it.id == id }
@@ -45,8 +62,38 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
 
     fun tabsOf(layer: MenuLayer): List<MenuTab> = MenuTab.entries.filter { it.layer == layer && it in tabs }
 
+    /** Las pestañas visibles agrupadas bajo [top], en orden. */
+    fun membersOf(top: MenuTab): List<MenuTab> = MenuTab.entries.filter { it.group == top && it in tabs }
+
+    /**
+     * Las pestañas de arriba de una capa: las que no van dentro de un grupo, y cada grupo
+     * si tiene algo visible (v0.20.4).
+     */
+    fun topTabsOf(layer: MenuLayer): List<MenuTab> = MenuTab.entries.filter { tab ->
+        tab.layer == layer && tab.group == null &&
+            ((tab in tabs && !tab.isGroupOnly) || membersOf(tab).isNotEmpty())
+    }
+
+    /** Las pestañas que se eligen dentro del grupo de [top]: él mismo (si tiene contenido) y sus miembros. */
+    fun choicesOf(top: MenuTab): List<MenuTab> {
+        val members = membersOf(top)
+        if (members.isEmpty()) return emptyList()
+        return (if (top in tabs && !top.isGroupOnly) listOf(top) else emptyList()) + members
+    }
+
+    /** La pestaña que abre [top]: la primera con algo nuevo, o la primera del grupo. */
+    fun entryOf(top: MenuTab, newTabs: Set<MenuTab> = emptySet()): MenuTab {
+        val choices = choicesOf(top)
+        if (choices.isEmpty()) return top
+        return choices.firstOrNull { it in newTabs } ?: choices.first()
+    }
+
     /** La pestaña a mostrar: la pedida si se ve; si no, Investigación. */
-    fun resolve(tab: MenuTab?): MenuTab = tab?.takeIf { it in tabs } ?: MenuTab.RESEARCH
+    fun resolve(tab: MenuTab?): MenuTab {
+        val visible = tab?.takeIf { it in tabs } ?: return MenuTab.RESEARCH
+        // Un grupo sin contenido propio muestra su primera pestaña
+        return if (visible.isGroupOnly) choicesOf(visible).firstOrNull() ?: MenuTab.RESEARCH else visible
+    }
 
     /** Lo siguiente por descubrir, en el orden en que suele llegar. */
     val next: NextUnlock?
@@ -64,8 +111,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
         /** Todo visible: para vistas previas y pruebas de pantallas sueltas. */
         val ALL = MenuUnlocks(MenuTab.entries.toSet())
 
-        /** Investigación nunca se anuncia como nueva: es la pestaña de siempre. */
-        val NEVER_NEW = setOf(MenuTab.RESEARCH)
+        /** Investigación nunca se anuncia como nueva (es la de siempre), ni Ciclos (es un grupo). */
+        val NEVER_NEW = setOf(MenuTab.RESEARCH, MenuTab.CYCLES)
 
         fun compute(
             reveal: SystemReveal,
@@ -98,6 +145,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (chainRevealed) tabs += MenuTab.CHAIN
             if (lethargyRevealed) tabs += MenuTab.LETHARGY
             if (ttrialRevealed) tabs += MenuTab.TTRIALS
+            if (dreamRevealed || chainRevealed || lethargyRevealed || ttrialRevealed) tabs += MenuTab.CYCLES
             return MenuUnlocks(tabs)
         }
     }

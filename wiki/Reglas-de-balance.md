@@ -72,7 +72,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 ## Hitos y automatización
 
 - Hitos en 1, 3, 5, 10, 25 y 50 Ascensiones totales. *(Código: `AscensionMilestone`.)*
-- Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
+- Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): por segundo, cada edificio con el **multiplicador de compra elegido** (x1, x5, x10, x100, hasta el hito o el máximo que permita el presupuesto; con una cantidad fija, solo si alcanza para todo el lote; v0.20.4) y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
 

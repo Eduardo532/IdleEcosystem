@@ -46,7 +46,7 @@
     <string name="automation_budget">Los autocompradores gastan hasta el %1$d%% de tu Conocimiento.</string>
     <string name="automation_budget_title">Presupuesto</string>
     <string name="automation_buildings">Autocomprador de edificios</string>
-    <string name="automation_buildings_hint">Compra una unidad de cada edificio marcado por segundo, del más caro al más barato.</string>
+    <string name="automation_buildings_hint">Compra cada segundo los edificios marcados, del más caro al más barato, con el multiplicador que elegiste (x1, x5, x10, x100, hasta el hito o el máximo).</string>
     <string name="automation_grimoire">Autocomprador del Grimorio</string>
     <string name="automation_grimoire_hint">Compra las mejoras que entran en el presupuesto, de la más barata a la más cara.</string>
     <string name="automation_locked">Se desbloquea con %1$d Ascensiones.</string>
@@ -525,4 +525,7 @@
     <string name="ttrials_chosen">Elegida (tocar para quitar)</string>
     <string name="ttrials_mastered">Superada en los cinco niveles.</string>
     <string name="ttrials_notice">Superaste %1$s</string>
+    <string name="tab_cycles">Ciclos</string>
+    <string name="beast_new">NUEVA</string>
+    <string name="bestiary_new_count">%1$d nuevas</string>
 </resources>

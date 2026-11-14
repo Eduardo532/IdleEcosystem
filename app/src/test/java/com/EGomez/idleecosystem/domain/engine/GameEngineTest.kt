@@ -333,6 +333,36 @@ class GameEngineTest {
     }
 
     @Test
+    fun `the autobuyer follows the buy multiplier the player chose`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.setBuyMultiplier(10)
+        await(engine.economy) { it.buyMultiplier == 10 }
+        engine.grantKnowledge(BigDecimal(1_000_000))
+
+        val list = await(engine.buildings) { list -> list.any { it.amountOwned >= 10 } }
+        // Todo lo comprado va de 10 en 10
+        assertTrue(list.all { it.amountOwned % 10 == 0 })
+        assertTrue(stats.counter(AchievementStat.AUTO_UNITS).toInt() % 10 == 0)
+    }
+
+    @Test
+    fun `new creatures are marked until their card is opened`() = runBlocking {
+        stats.counters[AchievementStat.beast("deep_dagon")] = BigDecimal.ONE
+        engine.grantKnowledge(BigDecimal.ONE)
+        val marked = await(engine.economy) { "deep_dagon" in it.newBeasts }
+        assertTrue(MenuTab.BESTIARY in marked.newTabs)
+
+        engine.onMenuTabSelected(MenuTab.BESTIARY)
+        // Abrir la pestaña no basta: sigue marcada mientras haya criaturas sin mirar
+        val stillNew = await(engine.economy) { it.newBeasts.isNotEmpty() }
+        assertTrue(MenuTab.BESTIARY in stillNew.newTabs)
+
+        engine.onBeastViewed("deep_dagon")
+        val seen = await(engine.economy) { it.newBeasts.isEmpty() }
+        assertFalse(MenuTab.BESTIARY in seen.newTabs)
+    }
+
+    @Test
     fun `the autobuyer stays off when the player turns it off`() = runBlocking {
         stats.totalPrestiges = 5
         engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))

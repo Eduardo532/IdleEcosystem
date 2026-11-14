@@ -187,6 +187,10 @@ data class EconomyState(
     val alignmentSecondsLeft: Long = 0,
     /** Bestiario (v0.19.8). */
     val beastLevels: Map<String, Int> = emptyMap(),
+    /** Criaturas conseguidas cuya tarjeta todavía no se abrió (v0.20.4). */
+    val newBeasts: Set<String> = emptySet(),
+    /** El multiplicador de compra del jugador; el autocomprador lo sigue (v0.20.4). */
+    val buyMultiplier: Int = 1,
     val encounterId: String? = null,
     val encounterSecondsLeft: Int = 0,
     val seals: Int = 0,
@@ -521,7 +525,7 @@ class GameEngine @Inject constructor(
     /**
      * Las automatizaciones de los hitos de Ascensión, una vez por segundo. Los
      * autocompradores gastan como máximo la mitad del Conocimiento, para dejar margen
-     * a las decisiones del jugador, y compran de a una unidad: empiezan lentos.
+     * a las decisiones del jugador, y compran con el multiplicador que eligió el jugador (v0.20.4).
      */
     private fun runAutomation() {
         val ascensions = milestoneAscensions()
@@ -577,23 +581,37 @@ class GameEngine @Inject constructor(
         TranscendenceMilestone.requiredAscensions(transcendences()), ttrialLevel(TranscendenceTrial.SILENCE)
     )
 
-    /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
+    /**
+     * Compra cada edificio que entre en el presupuesto, del más caro al más barato, con el
+     * multiplicador elegido por el jugador (v0.20.4): x1, x5, x10, x100, hasta el próximo
+     * hito o el máximo que permita el presupuesto. Con una cantidad fija solo compra si
+     * alcanza para todo el lote.
+     */
     private fun autoBuyBuildings(): Boolean {
         var budget = knowledge.multiply(BigDecimal.valueOf(automation.budgetFraction))
         val discount = BigDecimal.valueOf(buildingCostFactor())
+        val requested = buyMultiplier()
         var bought = false
         val candidates = buildingManager.availableBuildings
             .filter { it.isVisible && it.id !in automation.excludedBuildings }
             .reversed()
         for (building in candidates) {
             if (!canOwnBuilding(building.id)) continue
-            val cost = buildingManager.getCost(building.id, 1, knowledge, discount)
+            val amount = when (requested) {
+                BuildingMilestones.BUY_TO_MILESTONE -> BuildingMilestones.amountToNext(buildingMilestones[building.id].orEmpty(), building.amountOwned)
+                else -> requested
+            }
+            if (amount == 0 || amount < -1) continue
+            // El máximo se calcula con el presupuesto, no con todo el Conocimiento
+            val funds = if (amount == -1) budget else knowledge
+            val cost = buildingManager.getCost(building.id, amount, funds, discount)
             if (cost.signum() <= 0 || cost > budget) continue
-            if (buildingManager.tryBuyBuilding(building.id, knowledge, 1, discount) > 0) {
+            val units = buildingManager.tryBuyBuilding(building.id, funds, amount, discount)
+            if (units > 0) {
                 knowledge = knowledge.subtract(cost)
                 budget = budget.subtract(cost)
                 bought = true
-                statsManager.count(AchievementStat.AUTO_UNITS)
+                statsManager.count(AchievementStat.AUTO_UNITS, BigDecimal(units))
             }
         }
         return bought
@@ -883,6 +901,7 @@ class GameEngine @Inject constructor(
         // Los tutoriales que la partida importada ya vio no se vuelven a mostrar
         tutorialManager.markStepsAsCompleted(TutorialProgress.stepsSeenIn(data))
         markVisibleTabsSeenOnce()
+        markKnownBeastsSeenOnce()
 
         recalculate()
         requestSave(replace = true)
@@ -994,8 +1013,51 @@ class GameEngine @Inject constructor(
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
     private fun newTabs(): Set<MenuTab> = menuUnlocks().tabs
-        .filter { it !in MenuUnlocks.NEVER_NEW && statsManager.counter(AchievementStat.SEEN_TAB_PREFIX + it.id).signum() == 0 }
+        .filter {
+            it !in MenuUnlocks.NEVER_NEW && (
+                statsManager.counter(AchievementStat.SEEN_TAB_PREFIX + it.id).signum() == 0 ||
+                    // El Bestiario vuelve a marcarse mientras haya criaturas sin mirar
+                    (it == MenuTab.BESTIARY && newBeasts().isNotEmpty())
+                )
+        }
         .toSet()
+
+    /** Criaturas conseguidas cuya tarjeta todavía no se abrió. */
+    private fun newBeasts(): Set<String> = Bestiary.beasts
+        .filter { statsManager.counter(AchievementStat.beast(it.id)).signum() > 0 && statsManager.counter(AchievementStat.SEEN_BEAST_PREFIX + it.id).signum() == 0 }
+        .map { it.id }
+        .toSet()
+
+    /** Las criaturas que ya se tenían antes de la v0.20.4 no se anuncian como nuevas. */
+    private fun markKnownBeastsSeenOnce() {
+        if (statsManager.counter(AchievementStat.SEEN_BEASTS_INIT).signum() > 0) return
+        Bestiary.beasts
+            .filter { statsManager.counter(AchievementStat.beast(it.id)).signum() > 0 }
+            .forEach { statsManager.flag(AchievementStat.SEEN_BEAST_PREFIX + it.id) }
+        statsManager.flag(AchievementStat.SEEN_BEASTS_INIT)
+    }
+
+    /** El jugador abrió la tarjeta de una criatura: deja de ser nueva. */
+    fun onBeastViewed(id: String) = post {
+        if (statsManager.counter(AchievementStat.beast(id)).signum() == 0) return@post
+        val key = AchievementStat.SEEN_BEAST_PREFIX + id
+        if (statsManager.counter(key).signum() > 0) return@post
+        statsManager.flag(key)
+        publishEconomy()
+        requestSave()
+    }
+
+    /** El multiplicador de compra guardado (1 si nunca se eligió). */
+    private fun buyMultiplier(): Int = statsManager.counter(AchievementStat.BUY_MULTIPLIER).toInt().takeIf { it != 0 } ?: 1
+
+    /** Guarda el multiplicador de compra del jugador: el autocomprador lo sigue. */
+    fun setBuyMultiplier(value: Int) = post {
+        if (value == 0 || value == buyMultiplier()) return@post
+        if (value == 1) statsManager.counters.remove(AchievementStat.BUY_MULTIPLIER)
+        else statsManager.counters[AchievementStat.BUY_MULTIPLIER] = BigDecimal(value)
+        publishEconomy()
+        requestSave()
+    }
 
     /**
      * Al pasar a la interfaz por capas, lo que el jugador ya tenía no se anuncia como nuevo:
@@ -1079,6 +1141,7 @@ class GameEngine @Inject constructor(
         // El pacto de esta vida (las partidas anteriores a la v0.16 no tienen: Sin pacto)
         setPact(Pact.fromId(entity?.activePact))
         markVisibleTabsSeenOnce()
+        markKnownBeastsSeenOnce()
 
         isLoaded = true
         recalculate()
@@ -2707,6 +2770,8 @@ class GameEngine @Inject constructor(
             starsAligned = starsAligned(),
             alignmentSecondsLeft = Stars.secondsLeft(nowSeconds(), starLevel(StarUpgrade.CONJUNCTION)),
             beastLevels = beastLevels(),
+            newBeasts = newBeasts(),
+            buyMultiplier = buyMultiplier(),
             seals = seals(),
             shards = statsManager.counter(AchievementStat.SHARDS).toInt(),
             sealPrice = BigDecimal(Bestiary.sealPrice(statsManager.counter(AchievementStat.SEALS_BOUGHT).toInt())),

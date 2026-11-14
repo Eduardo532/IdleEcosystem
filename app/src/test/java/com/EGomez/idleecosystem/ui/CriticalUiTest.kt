@@ -985,6 +985,59 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the transcendence layer groups its challenges under cycles`() {
+        val chosen = mutableListOf<MenuTab>()
+        compose.setContent {
+            MenuSection(
+                isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+                selectedTab = MenuTab.CHAIN, onTabSelected = { chosen += it },
+                buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+                buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+                currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+                buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+                onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+                prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+                unlocks = MenuUnlocks.ALL, newTabs = setOf(MenuTab.LETHARGY),
+                onAscendClicked = {}, onOpenMadnessMap = {}
+            )
+        }
+
+        // Arriba solo cuatro pestañas; los desafíos de ciclo van en chips
+        compose.onNodeWithTag(MENU_TAB_TAG + "cycles").assertExists()
+        compose.onNodeWithTag(MENU_TAB_TAG + "chain").assertDoesNotExist()
+        compose.onNodeWithTag(MENU_TAB_TAG + "mutations").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.MENU_CHIP_TAG + "dream").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.MENU_CHIP_TAG + "lethargy").performClick()
+        // Éter abre Éter (con Mutaciones como chip dentro)
+        compose.onNodeWithTag(MENU_TAB_TAG + "ether").performClick()
+        assertEquals(listOf(MenuTab.LETHARGY, MenuTab.ETHER), chosen)
+    }
+
+    @Test
+    fun `new creatures carry a badge until their card is opened`() {
+        val viewed = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
+                        levels = mapOf("deep_dagon" to 1, "deep_hydra" to 1),
+                        newBeasts = setOf("deep_dagon")
+                    ),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}, onViewed = { viewed += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("1 nuevas").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_NEW_TAG + "deep_dagon", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_NEW_TAG + "deep_hydra", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
+        assertEquals(listOf("deep_dagon"), viewed)
+    }
+
+    @Test
     fun `discovered systems look as before`() {
         compose.setContent { Menu(selectedTab = MenuTab.GRIMOIRE) }
 

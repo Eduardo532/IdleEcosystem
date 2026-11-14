@@ -1,6 +1,6 @@
 # Bestiario *(v0.19.8, gachapón desde v0.19.10)*
 
-El **Bestiario** reúne **312 criaturas de los Mitos** en **8 Dominios** de 39. Cada criatura tiene **su propia ilustración** (v0.19.11), en un estilo común de grabado antiguo en tinta con un brillo del color de su Dominio, como una carta coleccionable oscura. Las Míticas y Primigenias tienen escenas más grandiosas, con toques dorados. Las criaturas que aún no tienes se ven como una sombra. Desde la v0.19.12, la colección muestra cada criatura en una fila compacta, con una miniatura, su nombre, su rareza y su nivel. Se abre en la capa Ascensión con la **primera Ascensión**.
+El **Bestiario** reúne **312 criaturas de los Mitos** en **8 Dominios** de 39. Cada criatura tiene **su propia ilustración** (v0.19.11), en un estilo común de grabado antiguo en tinta con un brillo del color de su Dominio, como una carta coleccionable oscura. Las Míticas y Primigenias tienen escenas más grandiosas, con toques dorados. Las criaturas que aún no tienes se ven como una sombra. Desde la v0.19.12, la colección muestra cada criatura en una fila compacta, con una miniatura, su nombre, su rareza y su nivel. Se abre en la capa Ascensión con la **primera Ascensión**. Desde la v0.20.4, las criaturas recién conseguidas llevan la etiqueta **NUEVA** con borde dorado hasta que abres su tarjeta; su Dominio lleva un punto dorado y la pestaña sigue marcada mientras quede alguna sin mirar.
 
 ## Sellos Antiguos
 

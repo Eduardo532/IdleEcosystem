@@ -45,7 +45,7 @@
     <string name="automation_budget">Autobuyers spend up to %1$d%% of your Knowledge.</string>
     <string name="automation_budget_title">Budget</string>
     <string name="automation_buildings">Building autobuyer</string>
-    <string name="automation_buildings_hint">Buys one unit of each checked building per second, from the most expensive to the cheapest.</string>
+    <string name="automation_buildings_hint">Buys the checked buildings every second, from the most expensive to the cheapest, with the multiplier you chose (x1, x5, x10, x100, to the milestone or max).</string>
     <string name="automation_grimoire">Grimoire autobuyer</string>
     <string name="automation_grimoire_hint">Buys the upgrades that fit the budget, from the cheapest to the most expensive.</string>
     <string name="automation_locked">Unlocks at %1$d ascensions.</string>
@@ -524,4 +524,7 @@
     <string name="ttrials_chosen">Chosen (tap to remove)</string>
     <string name="ttrials_mastered">Passed on all five levels.</string>
     <string name="ttrials_notice">You passed %1$s</string>
+    <string name="tab_cycles">Cycles</string>
+    <string name="beast_new">NEW</string>
+    <string name="bestiary_new_count">%1$d new</string>
 </resources>

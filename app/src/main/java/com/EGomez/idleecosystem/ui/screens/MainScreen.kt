@@ -354,6 +354,7 @@ fun MainScreen(
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
+                            onBeastViewed = { viewModel.onBeastViewed(it) },
                             onBuyStar = { viewModel.buyStarUpgrade(it) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,

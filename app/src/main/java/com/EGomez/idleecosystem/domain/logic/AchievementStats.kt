@@ -145,6 +145,19 @@ object AchievementStat {
     const val LETHARGY_LOST = "lethargy_lost"
     const val LETHARGY_WITH_PREFIX = "lethargy_with."
     const val LETHARGY_PATH_PREFIX = "lethargy_path."
+    /**
+     * Las Pruebas de Trascendencia (v0.20.3): la elegida para el próximo ciclo y la activa
+     * (índice + 1), la mejor vida del ciclo, niveles superados de cada una (ttrial.<id>),
+     * el total, cuántas se abandonaron y con qué pacto o Senda se superaron.
+     */
+    const val TTRIAL_NEXT = "ttrial_next"
+    const val TTRIAL_ACTIVE = "ttrial_active"
+    const val TTRIAL_CYCLE_BEST = "ttrial_cycle_best"
+    const val TTRIAL_PREFIX = "ttrial."
+    const val TTRIAL_COMPLETIONS = "ttrial_completions"
+    const val TTRIAL_ABANDONED = "ttrial_abandoned"
+    const val TTRIAL_WITH_PREFIX = "ttrial_with."
+    const val TTRIAL_PATH_PREFIX = "ttrial_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -187,7 +200,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS
     )
 
     // --- Contadores guardados ---
@@ -340,6 +353,9 @@ object AchievementStat {
     fun chainBuyPath(pathId: String) = CHAIN_BUY_PATH_PREFIX + pathId
     fun lethargyWith(pactId: String) = LETHARGY_WITH_PREFIX + pactId
     fun lethargyPath(pathId: String) = LETHARGY_PATH_PREFIX + pathId
+    fun ttrial(id: String) = TTRIAL_PREFIX + id
+    fun ttrialWith(pactId: String) = TTRIAL_WITH_PREFIX + pactId
+    fun ttrialPath(pathId: String) = TTRIAL_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -359,6 +375,7 @@ object AchievementStat {
         DREAM_NEXT, DREAM_ACTIVE, DREAM_CYCLE_BEST, DREAM_BEST, DREAM_POINTS, DREAM_POINTS_EARNED, DREAMS_COMPLETED, DREAM_WAKES, DREAM_RESPECS,
         CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
         LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
+        TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -371,6 +388,7 @@ object AchievementStat {
         DREAM_NODE_PREFIX, DREAM_END_WITH_PREFIX, DREAM_END_PATH_PREFIX,
         CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
         LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
+        TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

@@ -37,6 +37,7 @@ import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.Invocation
+import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -810,6 +811,54 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `a transcendence trial is chosen, restricts the cycle and is passed by transcending`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(6))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.ttrialRevealed && it.etherGain > 0 }
+        assertTrue(MenuTab.TTRIALS in before.menuUnlocks.tabs)
+
+        engine.chooseTranscendenceTrial(TranscendenceTrial.SILENCE.id)
+        await(engine.economy) { it.ttrialNext == TranscendenceTrial.SILENCE.id }
+        engine.transcend()
+        val inTrial = await(engine.economy) { it.transcendences == 7 && it.ttrialActive == TranscendenceTrial.SILENCE.id }
+        // La elección se consume al empezar
+        assertEquals(null, inTrial.ttrialNext)
+
+        // Una vida de 1e12 supera el nivel I
+        stats.runKnowledge = BigDecimal("1e12")
+        stats.totalPrestiges = 50
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        await(engine.economy) { it.ttrialCycleBest >= BigDecimal("1e12") && it.etherGain > 0 }
+        engine.transcend()
+        val passed = await(engine.economy) { it.transcendences == 8 && it.ttrialLevels[TranscendenceTrial.SILENCE.id] == 1 }
+        assertEquals(null, passed.ttrialActive)
+
+        // Abandonar: sin superar nada
+        engine.chooseTranscendenceTrial(TranscendenceTrial.HUNGER.id)
+        await(engine.economy) { it.ttrialNext == TranscendenceTrial.HUNGER.id }
+        stats.totalPrestiges = 100
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        await(engine.economy) { it.etherGain > 0 }
+        engine.transcend()
+        await(engine.economy) { it.ttrialActive == TranscendenceTrial.HUNGER.id }
+        engine.abandonTranscendenceTrial()
+        val abandoned = await(engine.economy) { it.ttrialActive == null }
+        assertEquals(0, abandoned.ttrialLevels[TranscendenceTrial.HUNGER.id])
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.TTRIAL_ABANDONED)))
     }
 
     @Test

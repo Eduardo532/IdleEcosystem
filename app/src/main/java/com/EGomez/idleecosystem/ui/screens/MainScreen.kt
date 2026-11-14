@@ -348,6 +348,9 @@ fun MainScreen(
                             onBuyMaxInvocations = { viewModel.buyMaxInvocations() },
                             lethargyUi = uiState.lethargyUi,
                             onSetLethargy = { viewModel.setLethargy(it) },
+                            ttrialsUi = uiState.ttrialsUi,
+                            onChooseTranscendenceTrial = { viewModel.chooseTranscendenceTrial(it) },
+                            onAbandonTranscendenceTrial = { viewModel.abandonTranscendenceTrial() },
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
@@ -601,6 +604,14 @@ fun MainScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
                         )
+                        uiState.trialPassedNotice?.let { title ->
+                            Text(
+                                stringResource(R.string.ttrials_notice, com.EGomez.idleecosystem.ui.i18n.tr(title.substringBeforeLast(' ')) + " " + title.substringAfterLast(' ')),
+                                color = com.EGomez.idleecosystem.ui.screens.main.components.TrialGold,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
                         uiState.dreamNotice?.let { points ->
                             Text(
                                 stringResource(R.string.dream_notice, points),

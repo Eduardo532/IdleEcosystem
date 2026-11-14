@@ -34,6 +34,8 @@ import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.Lab
 import com.EGomez.idleecosystem.domain.logic.Lethargy
 import com.EGomez.idleecosystem.domain.logic.SummoningChain
+import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
+import com.EGomez.idleecosystem.domain.logic.TranscendenceTrials
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
 import com.EGomez.idleecosystem.domain.logic.RuneEngraving
@@ -169,6 +171,12 @@ data class EconomyState(
     val lethargyRevealed: Boolean = false,
     val lethargyActive: Boolean = false,
     val lethargySeconds: Long = 0,
+    /** Las Pruebas de Trascendencia (v0.20.3). */
+    val ttrialRevealed: Boolean = false,
+    val ttrialNext: String? = null,
+    val ttrialActive: String? = null,
+    val ttrialCycleBest: BigDecimal = BigDecimal.ZERO,
+    val ttrialLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -246,7 +254,7 @@ sealed interface EngineEffect {
     /** Presagio de la Locura: un edificio poseído (su nombre) o Ecos dispersos (cuántos). */
     data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
     /** Se Trascendió y se ganó [ether] de Éter. */
-    data class Transcended(val ether: Int, val auto: Boolean = false, val dreamPoints: Int? = null) : EngineEffect
+    data class Transcended(val ether: Int, val auto: Boolean = false, val dreamPoints: Int? = null, val trialPassed: String? = null) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -565,7 +573,9 @@ class GameEngine @Inject constructor(
     }
 
     /** Ascensiones del ciclo que pide Trascender (El Atajo las baja). */
-    private fun transcendRequired(): Int = TranscendenceMilestone.requiredAscensions(transcendences())
+    private fun transcendRequired(): Int = TranscendenceTrials.requiredAscensions(
+        TranscendenceMilestone.requiredAscensions(transcendences()), ttrialLevel(TranscendenceTrial.SILENCE)
+    )
 
     /** Una unidad de cada edificio que entre en el presupuesto, del más caro al más barato. */
     private fun autoBuyBuildings(): Boolean {
@@ -717,6 +727,7 @@ class GameEngine @Inject constructor(
         statsManager.record(AchievementStat.MAX_SANITY_GAIN, sanityGained)
         // El Sueño Profundo paga por la mejor vida del ciclo
         if (dreamActive()) statsManager.record(AchievementStat.DREAM_CYCLE_BEST, knowledgeThisRun())
+        if (ttrialActive() != null) statsManager.record(AchievementStat.TTRIAL_CYCLE_BEST, knowledgeThisRun())
 
         val runSeconds = statsManager.runTimeSeconds
         if (runSeconds < FAST_LIFE_SECONDS) statsManager.flag(AchievementStat.FEAT_FAST_15)
@@ -756,6 +767,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.DREAM_LEVELS, DreamNode.entries.sumOf { dreamLevel(it) })
         put(AchievementStat.DREAM_NODES, DreamNode.entries.count { dreamLevel(it) > 0 })
         put(AchievementStat.CHAIN_FULL, Invocation.entries.count { chainBought(it) > 0 })
+        put(AchievementStat.TTRIAL_COMPLETIONS, TranscendenceTrial.entries.sumOf { ttrialLevel(it) })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -976,7 +988,8 @@ class GameEngine @Inject constructor(
         labRevealed = labRevealed(),
         dreamRevealed = dreamRevealed(),
         chainRevealed = chainRevealed(),
-        lethargyRevealed = lethargyRevealed()
+        lethargyRevealed = lethargyRevealed(),
+        ttrialRevealed = ttrialRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1272,7 +1285,7 @@ class GameEngine @Inject constructor(
         buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
             .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR)))),
         LabExperiment.IBN_GHAZI.exponent(labLevel(LabExperiment.IBN_GHAZI)) * dreamExponent()
-    )
+    ).let { if (ttrialActive() == TranscendenceTrial.SILENCE) BigDecimal.ZERO else it }
 
     /** Tutoriales de las mecánicas de la v0.14, cada uno cuando su sistema entra en juego. */
     private fun triggerDepthTutorials() {
@@ -1295,6 +1308,7 @@ class GameEngine @Inject constructor(
         if (dreamRevealed()) tutorialManager.triggerStep(TutorialStep.DEEP_SLEEP)
         if (chainRevealed()) tutorialManager.triggerStep(TutorialStep.SUMMONING_CHAIN)
         if (lethargyRevealed()) tutorialManager.triggerStep(TutorialStep.LETHARGY)
+        if (ttrialRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCENDENCE_TRIALS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1623,7 +1637,8 @@ class GameEngine @Inject constructor(
      * redondeada hacia abajo.
      */
     private fun labSanity(gain: BigDecimal): BigDecimal {
-        val exponent = LabExperiment.CURWEN.exponent(labLevel(LabExperiment.CURWEN)) * dreamExponent()
+        val exponent = LabExperiment.CURWEN.exponent(labLevel(LabExperiment.CURWEN)) * dreamExponent() *
+            (if (ttrialActive() == TranscendenceTrial.BROKEN) TranscendenceTrials.BROKEN_EXPONENT else 1.0)
         return if (exponent == 1.0) gain else Lab.pow(gain, exponent).setScale(0, java.math.RoundingMode.FLOOR)
     }
 
@@ -1672,7 +1687,8 @@ class GameEngine @Inject constructor(
 
     /** Armitage siempre; Kadath solo despierto; el Sueño, mientras dura. */
     private fun productionExponent(): Double {
-        val armitage = LabExperiment.ARMITAGE.exponent(labLevel(LabExperiment.ARMITAGE))
+        val armitage = LabExperiment.ARMITAGE.exponent(labLevel(LabExperiment.ARMITAGE)) *
+            (if (ttrialActive() == TranscendenceTrial.HUNGER) TranscendenceTrials.HUNGER_EXPONENT else 1.0)
         return if (dreamActive()) armitage * dreamExponent()
         else armitage * DeepSleep.kadathExponent(dreamLevel(DreamNode.KADATH))
     }
@@ -1866,6 +1882,74 @@ class GameEngine @Inject constructor(
             statsManager.counters.remove(AchievementStat.LETHARGY_ACTIVE)
             statsManager.counters.remove(AchievementStat.LETHARGY_SECONDS)
         }
+        recalculate()
+        requestSave()
+    }
+
+    // =====================================================================
+    // LAS PRUEBAS DE TRASCENDENCIA (v0.20.3)
+    // =====================================================================
+
+    private fun ttrialRevealed(): Boolean = TranscendenceTrials.isUnlocked(transcendences())
+
+    private fun ttrialNext(): TranscendenceTrial? =
+        TranscendenceTrial.fromIndex(statsManager.counter(AchievementStat.TTRIAL_NEXT).toInt())
+
+    private fun ttrialActive(): TranscendenceTrial? =
+        TranscendenceTrial.fromIndex(statsManager.counter(AchievementStat.TTRIAL_ACTIVE).toInt())
+
+    private fun ttrialLevel(trial: TranscendenceTrial): Int = statsManager.counter(AchievementStat.ttrial(trial.id)).toInt()
+
+    /** La mejor vida de la Prueba, contando la actual. */
+    private fun ttrialCycleBest(): BigDecimal =
+        if (ttrialActive() != null) statsManager.counter(AchievementStat.TTRIAL_CYCLE_BEST).max(knowledgeThisRun()) else BigDecimal.ZERO
+
+    /**
+     * Al Trascender: si la Prueba activa llegó a su meta, sube su nivel. Devuelve el título
+     * con el nivel superado ("La Prueba del Hambre III") o null.
+     */
+    private fun finishTranscendenceTrial(): String? {
+        val trial = ttrialActive() ?: return null
+        val best = ttrialCycleBest()
+        statsManager.counters.remove(AchievementStat.TTRIAL_ACTIVE)
+        statsManager.counters.remove(AchievementStat.TTRIAL_CYCLE_BEST)
+        val level = TranscendenceTrials.nextLevel(ttrialLevel(trial)) ?: return null
+        if (!TranscendenceTrials.isMet(level, best)) return null
+        statsManager.counters[AchievementStat.ttrial(trial.id)] = BigDecimal(level)
+        statsManager.flag(AchievementStat.ttrialWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.ttrialPath(it.id)) }
+        return trial.title + " " + TranscendenceTrials.roman(level)
+    }
+
+    /** Empieza la Prueba elegida para este ciclo (si aún le quedan niveles). */
+    private fun startNextTranscendenceTrial() {
+        val trial = ttrialNext() ?: return
+        statsManager.counters.remove(AchievementStat.TTRIAL_NEXT)
+        if (!ttrialRevealed() || TranscendenceTrials.nextLevel(ttrialLevel(trial)) == null) return
+        statsManager.counters[AchievementStat.TTRIAL_ACTIVE] = BigDecimal(trial.ordinal + 1)
+        // La Soledad empieza sin pacto
+        if (trial == TranscendenceTrial.SOLITUDE) setPact(Pact.NONE)
+    }
+
+    /** Elige la Prueba del próximo ciclo (null para ninguna). */
+    fun chooseTranscendenceTrial(id: String?) = post {
+        if (!ttrialRevealed()) return@post
+        val trial = id?.let { TranscendenceTrial.fromId(it) }
+        if (trial == null || TranscendenceTrials.nextLevel(ttrialLevel(trial)) == null) {
+            statsManager.counters.remove(AchievementStat.TTRIAL_NEXT)
+        } else {
+            statsManager.counters[AchievementStat.TTRIAL_NEXT] = BigDecimal(trial.ordinal + 1)
+        }
+        publishEconomy()
+        requestSave()
+    }
+
+    /** Abandona la Prueba en curso: el ciclo sigue normal, sin superar nada. */
+    fun abandonTranscendenceTrial() = post {
+        if (ttrialActive() == null) return@post
+        statsManager.counters.remove(AchievementStat.TTRIAL_ACTIVE)
+        statsManager.counters.remove(AchievementStat.TTRIAL_CYCLE_BEST)
+        statsManager.count(AchievementStat.TTRIAL_ABANDONED)
         recalculate()
         requestSave()
     }
@@ -2087,7 +2171,8 @@ class GameEngine @Inject constructor(
             cycleAscensions(),
             cycleSanity(),
             Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
-                beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)),
+                beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)) *
+                    TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -2167,6 +2252,7 @@ class GameEngine @Inject constructor(
         statsManager.record(AchievementStat.MAX_ETHER_GAIN, BigDecimal(gain))
         statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
         val dreamGain = if (dreamActive()) completeDream() else null
+        val trialPassed = finishTranscendenceTrial()
         // La Cadena de Invocación se deshace
         statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CHAIN_CYCLE_PREFIX) }
         statsManager.counters.remove(AchievementStat.CHAIN_POWER)
@@ -2218,15 +2304,17 @@ class GameEngine @Inject constructor(
         applyStartingBuildings()
         // El ciclo nuevo es un Sueño si así se eligió (ya con la Trascendencia contada)
         if (dreamNext() && dreamRevealed()) statsManager.flag(AchievementStat.DREAM_ACTIVE)
+        startNextTranscendenceTrial()
 
         soundManager.playSound(SoundType.ACHIEVEMENT)
-        _effects.trySend(EngineEffect.Transcended(gain, auto, dreamGain))
+        _effects.trySend(EngineEffect.Transcended(gain, auto, dreamGain, trialPassed))
         recalculate()
         requestSave(replace = true)
     }
 
     private fun setPact(newPact: Pact) {
-        activePact = newPact
+        // La Prueba de la Soledad: ningún dios acepta pactos
+        activePact = if (ttrialActive() == TranscendenceTrial.SOLITUDE) Pact.NONE else newPact
         chaosMultiplier = 1
         refreshEngravings()
     }
@@ -2394,7 +2482,8 @@ class GameEngine @Inject constructor(
         prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(
             pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY)) *
                 Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY)) * DeepSleep.sanityMultiplier(dreamLevel(DreamNode.CELEPHAIS)) *
-                Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0)
+                Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0) *
+                TranscendenceTrials.sanityReward(ttrialLevel(TranscendenceTrial.BROKEN))
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -2440,6 +2529,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(DeepSleep.productionMultiplier(dreamLevel(DreamNode.FLAME))))
             .multiply(BigDecimal.valueOf(SummoningChain.productionMultiplier(chainPower())))
             .multiply(BigDecimal.valueOf(if (lethargyActive()) Lethargy.PRODUCTION_FACTOR else 1.0))
+            .multiply(BigDecimal.valueOf(TranscendenceTrials.productionReward(ttrialLevel(TranscendenceTrial.HUNGER))))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -2604,6 +2694,11 @@ class GameEngine @Inject constructor(
             lethargyRevealed = lethargyRevealed(),
             lethargyActive = lethargyActive(),
             lethargySeconds = lethargySeconds(),
+            ttrialRevealed = ttrialRevealed(),
+            ttrialNext = ttrialNext()?.id,
+            ttrialActive = ttrialActive()?.id,
+            ttrialCycleBest = ttrialCycleBest(),
+            ttrialLevels = TranscendenceTrial.entries.associate { it.id to ttrialLevel(it) },
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,

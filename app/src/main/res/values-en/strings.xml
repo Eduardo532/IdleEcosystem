@@ -508,4 +508,20 @@
     <string name="lethargy_off">You are awake: production is normal and no Torpor builds up.</string>
     <string name="lethargy_rules">Sanity x(1 + log2(1 + minutes/10)). One extra Ascension per hour, up to 4. Torpor also builds up offline and resets every life.</string>
     <string name="lethargy_banner">Lethargy: production x0.1 · Torpor %1$s · Sanity %2$s</string>
+    <string name="tab_ttrials">Challenges</string>
+    <string name="ttrials_title">TRIALS OF TRANSCENDENCE</string>
+    <string name="ttrials_hint">Choose a Trial for the next cycle; it starts when you Transcend. Pass it by Transcending after a life with the Knowledge its level asks for.</string>
+    <string name="ttrials_active">In progress: %1$s %2$s</string>
+    <string name="ttrials_progress">Best life: %1$s of %2$s</string>
+    <string name="ttrials_met">Goal reached: Transcend to pass it.</string>
+    <string name="ttrials_not_met">You have not reached the goal yet.</string>
+    <string name="ttrials_abandon">Abandon the Trial</string>
+    <string name="ttrials_levels">%1$d / %2$d</string>
+    <string name="ttrials_restriction">Restriction: %1$s</string>
+    <string name="ttrials_reward">Reward: %1$s</string>
+    <string name="ttrials_goal">Level %1$s: a life with %2$s Knowledge</string>
+    <string name="ttrials_choose">Choose for the next cycle</string>
+    <string name="ttrials_chosen">Chosen (tap to remove)</string>
+    <string name="ttrials_mastered">Passed on all five levels.</string>
+    <string name="ttrials_notice">You passed %1$s</string>
 </resources>

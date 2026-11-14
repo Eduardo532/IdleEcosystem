@@ -497,4 +497,15 @@
     <string name="chain_multiplier">Production x%1$s</string>
     <string name="chain_buy_max">Buy as much as possible</string>
     <string name="chain_row_info">%1$s units · %2$d bought · x%3$s</string>
+    <string name="tab_lethargy">Lethargy</string>
+    <string name="lethargy_title">THE LETHARGY</string>
+    <string name="lethargy_hint">Production drops to a tenth; in exchange, every minute adds Torpor for your next Ascension.</string>
+    <string name="lethargy_active">Torpor this life: %1$s</string>
+    <string name="lethargy_sanity">On Ascending: Sanity %1$s</string>
+    <string name="lethargy_extra">Extra Ascensions: %1$d of %2$d</string>
+    <string name="lethargy_next">Next extra Ascension in %1$s</string>
+    <string name="lethargy_warning">Leaving the Lethargy before Ascending loses the Torpor.</string>
+    <string name="lethargy_off">You are awake: production is normal and no Torpor builds up.</string>
+    <string name="lethargy_rules">Sanity x(1 + log2(1 + minutes/10)). One extra Ascension per hour, up to 4. Torpor also builds up offline and resets every life.</string>
+    <string name="lethargy_banner">Lethargy: production x0.1 · Torpor %1$s · Sanity %2$s</string>
 </resources>

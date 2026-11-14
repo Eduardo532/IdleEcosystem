@@ -1,6 +1,6 @@
 # Logros
 
-Hay **519 logros**: 113 originales y **406 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **532 logros**: 113 originales y **419 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -258,6 +258,18 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Leche de la Cabra Negra | Compra un eslabón con el pacto de Shub-Niggurath | +1 % |
 | Liturgia del Culto | Compra un eslabón recorriendo la Senda del Culto | +1 % |
 | Geometría Arcana | Compra un eslabón recorriendo la Senda Arcana | +1 % |
+| Primer Sopor | Asciende con al menos 10 minutos de Sopor | +1 % |
+| Durmiente Habitual | Asciende 10 veces con al menos 10 minutos de Sopor | +1 % |
+| Los Siete Durmientes | Asciende 50 veces con al menos 10 minutos de Sopor | +2 % |
+| Una Hora Quieta | Asciende con 1 hora de Sopor | +1 % |
+| Sueño de Piedra | Asciende con 6 horas de Sopor | +1 % |
+| Rip van Winkle | Asciende con 24 horas de Sopor | +2 % |
+| Vidas que Cuentan Doble | Gana 10 Ascensiones extra con el Letargo | +1 % |
+| El Tiempo Rinde | Gana 100 Ascensiones extra con el Letargo | +2 % |
+| La Fuente Inmóvil | Asciende en Letargo con el pacto de Ubbo-Sathla | +1 % |
+| El Estanque de Abhoth | Asciende en Letargo con el pacto de Abhoth | +1 % |
+| Engranajes Detenidos | Asciende en Letargo recorriendo la Senda del Engranaje | +1 % |
+| Mente en Reposo | Asciende en Letargo recorriendo la Senda de la Mente | +1 % |
 
 ### Panteón
 
@@ -431,7 +443,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **33 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **34 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

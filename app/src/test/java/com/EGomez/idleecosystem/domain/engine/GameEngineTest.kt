@@ -813,6 +813,43 @@ class GameEngineTest {
     }
 
     @Test
+    fun `the lethargy slows production and pays sanity and extra ascensions`() = runBlocking {
+        val saved = StatisticsManager().apply { count(AchievementStat.TRANSCENDENCES, BigDecimal(5)) }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1e7"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val awake = await(engine.economy) { it.lethargyRevealed && it.canPrestige }
+        assertTrue(MenuTab.LETHARGY in awake.menuUnlocks.tabs)
+        assertFalse(awake.lethargyActive)
+        val before = stats.totalPrestiges
+
+        engine.setLethargy(true)
+        await(engine.economy) { it.lethargyActive }
+        // Dos horas de Sopor: Cordura x(1 + log2(13)) y dos Ascensiones extra
+        stats.counters[AchievementStat.LETHARGY_SECONDS] = BigDecimal(7200)
+        await(engine.economy) { it.potentialPrestige > awake.potentialPrestige.multiply(BigDecimal(3)) }
+
+        engine.ascend()
+        val after = await(engine.economy) { it.lethargySeconds < 60 && stats.totalPrestiges > before }
+        assertEquals(before + 3, stats.totalPrestiges)
+        assertTrue(after.lethargyActive)
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.LETHARGY_EXTRA)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.LETHARGY_ASCENSIONS)))
+
+        // Salir con una hora de Sopor la pierde (y da el logro secreto)
+        stats.counters[AchievementStat.LETHARGY_SECONDS] = BigDecimal(3600)
+        engine.setLethargy(false)
+        val off = await(engine.economy) { !it.lethargyActive }
+        assertEquals(0L, off.lethargySeconds)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.LETHARGY_LOST)))
+    }
+
+    @Test
     fun `the summoning chain is bought with knowledge and breaks on transcending`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

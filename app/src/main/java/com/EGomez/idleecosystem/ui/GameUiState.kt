@@ -108,6 +108,8 @@ data class GameUiState(
     val dreamNotice: Int? = null,
     /** La Cadena de Invocación (v0.20.1). */
     val chainUi: com.EGomez.idleecosystem.ui.screens.main.components.ChainUi = com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(),
+    /** El Letargo (v0.20.2). */
+    val lethargyUi: com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi = com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

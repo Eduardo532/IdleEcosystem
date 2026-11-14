@@ -6,6 +6,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 
 - **v0.20.0:** El Sueño Profundo: desde la tercera Trascendencia se puede elegir que el próximo ciclo sea un Sueño, donde la producción, el clic y la Cordura se elevan a ^0,75. Trascender desde el Sueño paga Puntos de Sueño según la mejor vida, y estos compran el Árbol del Sueño (8 nodos, reinicio gratis), que vale en todos los ciclos. 16 logros nuevos.
 - **v0.20.1:** La Cadena de Invocación: desde la cuarta Trascendencia se compran con Conocimiento ocho eslabones, del Círculo de Sal a la Conjunción Estelar. Cada uno produce al de abajo y el primero produce Poder de Invocación, que multiplica la producción. Sobrevive a las Ascensiones, sigue sin conexión y se deshace al Trascender. 14 logros nuevos.
+- **v0.20.2:** El Letargo: desde la quinta Trascendencia se puede caer en un sopor que baja la producción a x0,1. Cada minuto suma Sopor (también sin conexión), que al Ascender multiplica la Cordura y hace que cada hora la Ascensión cuente una vez más, hasta 4 de más. Salir antes de Ascender pierde el Sopor. 13 logros nuevos.
 
 ## v0.19.x *(en pruebas)*
 

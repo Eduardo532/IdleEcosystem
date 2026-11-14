@@ -22,6 +22,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Laboratorio | Trascender por primera vez |
 | | | Sueño | Trascender por tercera vez |
 | | | Cadena | Trascender por cuarta vez |
+| | | Letargo | Trascender por quinta vez |
 
 Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 
@@ -45,6 +46,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Laboratorio:** los seis experimentos de Miskatonic, con su exponente actual y su costo en Éter. Ver [Laboratorio](Laboratorio).
 - **Sueño:** elegir si el próximo ciclo será un Sueño Profundo, despertar antes de tiempo, los Puntos de Sueño y el Árbol del Sueño. Mientras se sueña, un aviso lunar en Investigación lo recuerda. Ver [El Sueño Profundo](El-Sueno-Profundo).
 - **Cadena:** el Poder de Invocación y su multiplicador, el botón para comprar todo lo posible y los ocho eslabones, cada uno con sus unidades, sus compras, su multiplicador y su precio en Conocimiento. Ver [Cadena de Invocación](Cadena-de-Invocacion).
+- **Letargo:** el interruptor para caer en Letargo o salir, el Sopor de la vida, la Cordura que multiplicará, las Ascensiones extra (y cuánto falta para la próxima) y el aviso de que salir lo pierde. Mientras dura, un aviso con reloj de arena aparece en Investigación. Ver [Letargo](Letargo).
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

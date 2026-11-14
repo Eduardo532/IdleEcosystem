@@ -346,6 +346,8 @@ fun MainScreen(
                             chainUi = uiState.chainUi,
                             onBuyInvocation = { viewModel.buyInvocation(it) },
                             onBuyMaxInvocations = { viewModel.buyMaxInvocations() },
+                            lethargyUi = uiState.lethargyUi,
+                            onSetLethargy = { viewModel.setLethargy(it) },
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },

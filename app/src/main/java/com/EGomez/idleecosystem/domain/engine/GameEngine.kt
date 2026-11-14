@@ -32,6 +32,7 @@ import com.EGomez.idleecosystem.domain.logic.DeepSleep
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.Lab
+import com.EGomez.idleecosystem.domain.logic.Lethargy
 import com.EGomez.idleecosystem.domain.logic.SummoningChain
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.MadnessMeter
@@ -164,6 +165,10 @@ data class EconomyState(
     val chainMultiplier: Double = 1.0,
     val chainAmounts: List<BigDecimal> = emptyList(),
     val chainBought: List<Int> = emptyList(),
+    /** El Letargo (v0.20.2). */
+    val lethargyRevealed: Boolean = false,
+    val lethargyActive: Boolean = false,
+    val lethargySeconds: Long = 0,
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -649,6 +654,7 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.CYCLE_SANITY, finalPotential)
         prestigeManager.addPrestige(finalPotential)
         statsManager.trackPrestige(finalPotential)
+        finishLethargyLife()
         // Sellos Antiguos: cada Ascensión da uno, y cinco más cada diez
         addSeals(Bestiary.ascensionSeals(totalAscensionsEver()))
         if (madness.value >= HIGH_MADNESS) statsManager.flag(AchievementStat.FEAT_STEEL_NERVES)
@@ -969,7 +975,8 @@ class GameEngine @Inject constructor(
         bestiaryRevealed = bestiaryRevealed(),
         labRevealed = labRevealed(),
         dreamRevealed = dreamRevealed(),
-        chainRevealed = chainRevealed()
+        chainRevealed = chainRevealed(),
+        lethargyRevealed = lethargyRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1078,6 +1085,8 @@ class GameEngine @Inject constructor(
             statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
             addStardust(dust)
         }
+        // El Letargo sigue sumando Sopor mientras no juegas
+        if (diffSeconds > 0 && lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS, BigDecimal(diffSeconds))
         // La Cadena de Invocación sigue produciendo
         if (diffSeconds > 0 && chainRevealed()) {
             val (amounts, power) = SummoningChain.advance(chainAmounts(), chainBoughtList(), diffSeconds)
@@ -1146,6 +1155,7 @@ class GameEngine @Inject constructor(
         starsTick()
         encounterTick()
         chainTick()
+        if (lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS)
 
         // Tutoriales basados en recursos
         if (knowledge >= BigDecimal.TEN) tutorialManager.triggerStep(TutorialStep.MENU_INTRO)
@@ -1284,6 +1294,7 @@ class GameEngine @Inject constructor(
         if (labRevealed()) tutorialManager.triggerStep(TutorialStep.LAB)
         if (dreamRevealed()) tutorialManager.triggerStep(TutorialStep.DEEP_SLEEP)
         if (chainRevealed()) tutorialManager.triggerStep(TutorialStep.SUMMONING_CHAIN)
+        if (lethargyRevealed()) tutorialManager.triggerStep(TutorialStep.LETHARGY)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1814,6 +1825,51 @@ class GameEngine @Inject constructor(
         return true
     }
 
+    // =====================================================================
+    // EL LETARGO (v0.20.2)
+    // =====================================================================
+
+    private fun lethargyRevealed(): Boolean = Lethargy.isUnlocked(transcendences())
+
+    private fun lethargyActive(): Boolean = statsManager.counter(AchievementStat.LETHARGY_ACTIVE).signum() > 0
+
+    private fun lethargySeconds(): Long = statsManager.counter(AchievementStat.LETHARGY_SECONDS).toLong()
+
+    /**
+     * Al Ascender en Letargo: la Ascensión cuenta de más según el Sopor y se anotan los
+     * logros. El Sopor vuelve a cero en la vida nueva (el Letargo sigue activo).
+     */
+    private fun finishLethargyLife() {
+        val seconds = lethargySeconds()
+        statsManager.counters.remove(AchievementStat.LETHARGY_SECONDS)
+        if (!lethargyActive() || seconds <= 0) return
+        statsManager.record(AchievementStat.LETHARGY_BEST_MINUTES, BigDecimal(seconds / 60))
+        if (seconds >= LETHARGY_COUNTED_SECONDS) {
+            statsManager.count(AchievementStat.LETHARGY_ASCENSIONS)
+            statsManager.flag(AchievementStat.lethargyWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.lethargyPath(it.id)) }
+        }
+        val extra = Lethargy.extraAscensions(seconds)
+        if (extra > 0) {
+            statsManager.totalPrestiges += extra
+            statsManager.count(AchievementStat.LETHARGY_EXTRA, BigDecimal(extra))
+        }
+    }
+
+    /** Cae en Letargo o sale de él. Salir pierde el Sopor de esta vida. */
+    fun setLethargy(enabled: Boolean) = post {
+        if (!lethargyRevealed() || enabled == lethargyActive()) return@post
+        if (enabled) {
+            statsManager.flag(AchievementStat.LETHARGY_ACTIVE)
+        } else {
+            if (lethargySeconds() >= LETHARGY_LOST_SECONDS) statsManager.count(AchievementStat.LETHARGY_LOST)
+            statsManager.counters.remove(AchievementStat.LETHARGY_ACTIVE)
+            statsManager.counters.remove(AchievementStat.LETHARGY_SECONDS)
+        }
+        recalculate()
+        requestSave()
+    }
+
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
 
     /** El Velo frena esta vida: se anota para el logro y se explica una vez. */
@@ -2118,6 +2174,7 @@ class GameEngine @Inject constructor(
         // El ciclo nuevo
         val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY
         statsManager.trackPrestige(BigDecimal.ZERO)
+        statsManager.counters.remove(AchievementStat.LETHARGY_SECONDS)
         statsManager.totalPrestiges = start
         statsManager.resetRunCounters()
         statsManager.counters.remove(AchievementStat.CYCLE_SANITY)
@@ -2336,7 +2393,8 @@ class GameEngine @Inject constructor(
     private fun sanityGainMultiplier(): BigDecimal =
         prestigeShopManager.getPrestigeGainMultiplier().multiply(BigDecimal.valueOf(
             pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY)) *
-                Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY)) * DeepSleep.sanityMultiplier(dreamLevel(DreamNode.CELEPHAIS))
+                Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY)) * DeepSleep.sanityMultiplier(dreamLevel(DreamNode.CELEPHAIS)) *
+                Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0)
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -2381,6 +2439,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(Stars.productionMultiplier(starLevel(StarUpgrade.STARLIGHT), starLevel(StarUpgrade.DARK_STARS), starCount())))
             .multiply(BigDecimal.valueOf(DeepSleep.productionMultiplier(dreamLevel(DreamNode.FLAME))))
             .multiply(BigDecimal.valueOf(SummoningChain.productionMultiplier(chainPower())))
+            .multiply(BigDecimal.valueOf(if (lethargyActive()) Lethargy.PRODUCTION_FACTOR else 1.0))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -2542,6 +2601,9 @@ class GameEngine @Inject constructor(
             chainMultiplier = SummoningChain.productionMultiplier(chainPower()),
             chainAmounts = chainAmounts(),
             chainBought = chainBoughtList(),
+            lethargyRevealed = lethargyRevealed(),
+            lethargyActive = lethargyActive(),
+            lethargySeconds = lethargySeconds(),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,
@@ -2646,6 +2708,10 @@ class GameEngine @Inject constructor(
         private const val TICK_MS = 100L
         /** Tope de compras de un "Comprar todo" de la Cadena. */
         private const val MAX_CHAIN_BUYS = 2000
+        /** Sopor mínimo para que una Ascensión cuente como "en Letargo" (10 min). */
+        private const val LETHARGY_COUNTED_SECONDS = 600L
+        /** Sopor que, perdido al salir, da el logro secreto (1 h). */
+        private const val LETHARGY_LOST_SECONDS = 3600L
         /** Poder que da el logro secreto de la Cadena si se alcanza soñando. */
         private val CHAIN_DREAM_POWER = BigDecimal("1e10")
         private const val AUTOSAVE_INTERVAL_MS = 5_000L

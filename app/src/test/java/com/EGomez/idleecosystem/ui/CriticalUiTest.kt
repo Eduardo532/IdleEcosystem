@@ -727,6 +727,28 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the lethargy panel shows the torpor rewards and toggles`() {
+        val toggles = mutableListOf<Boolean>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.EGomez.idleecosystem.ui.screens.main.components.LethargyBanner(1800)
+                com.EGomez.idleecosystem.ui.screens.main.components.LethargyPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(active = true, seconds = 4200),
+                    onSet = { toggles += it }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LETHARGY_BANNER_TAG).assertExists()
+        compose.onNodeWithText("Sopor de esta vida: 1 h 10 min").assertExists()
+        compose.onNodeWithText("Al Ascender: Cordura x4.00").assertExists()
+        compose.onNodeWithText("Ascensiones extra: 1 de 4").assertExists()
+        compose.onNodeWithText("Próxima Ascensión extra en 50 min").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LETHARGY_SWITCH_TAG).performClick()
+        assertEquals(listOf(false), toggles)
+    }
+
+    @Test
     fun `while dreaming the panel shows the pending points and lets you wake up`() {
         var woken = 0
         compose.setContent {

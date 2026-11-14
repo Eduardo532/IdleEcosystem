@@ -45,7 +45,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 |---|---|---|
 | **El Sueño Profundo** ✅ *v0.20.0* | Dilatación | Desde la 3ª Trascendencia, un ciclo soñado donde producción, clic y Cordura se elevan a ^0,75. Al Trascender paga Puntos de Sueño para un árbol de 8 nodos con reinicio libre. Ver [El Sueño Profundo](El-Sueno-Profundo). |
 | **Cadena de Invocación** ✅ *v0.20.1* | Generadores | Desde la 4ª Trascendencia, ocho eslabones comprados con Conocimiento: cada uno produce al de abajo y el primero, Poder de Invocación, que multiplica la producción. Se deshace al Trascender. Ver [Cadena de Invocación](Cadena-de-Invocacion). |
-| **Letargo** | Ralentización | Frenar la producción a cambio de Ascensiones o Cordura extra, para vidas largas. |
+| **Letargo** ✅ *v0.20.2* | Ralentización | Desde la 5ª Trascendencia: producción x0,1 a cambio de Sopor, que multiplica la Cordura al Ascender y hace que cada hora la Ascensión cuente una vez más (hasta 4). Ver [Letargo](Letargo). |
 | **Pruebas de Trascendencia** | Desafíos de Eternidad | Las Pruebas con niveles de dificultad I a V, cada uno con más restricciones y mejor recompensa. |
 
 ### Etapa 8: el Despertar

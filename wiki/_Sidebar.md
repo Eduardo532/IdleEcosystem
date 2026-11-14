@@ -19,6 +19,7 @@
 - [Laboratorio](Laboratorio)
 - [El Sueño Profundo](El-Sueno-Profundo)
 - [Cadena de Invocación](Cadena-de-Invocacion)
+- [Letargo](Letargo)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

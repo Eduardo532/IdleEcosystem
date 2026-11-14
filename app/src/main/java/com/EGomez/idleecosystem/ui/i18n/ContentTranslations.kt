@@ -419,7 +419,7 @@ object ContentTranslations {
         "Dirige los rituales." to "Leads the rituals.",
         "Santuario Subterráneo" to "Underground Sanctuary",
         "Un lugar seguro." to "A safe place.",
-        "Osario" to "Ossuary",
+        "Altar de Hueso" to "Bone Altar",
         "Sacrificios necesarios." to "Necessary sacrifices.",
         "Monolito de Obsidiana" to "Obsidian Monolith",
         "Canaliza el vacío." to "Channels the void.",

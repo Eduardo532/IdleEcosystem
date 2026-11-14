@@ -227,6 +227,13 @@ class MainViewModel @Inject constructor(
             pending = economy.dreamPendingPoints,
             levels = economy.dreamLevels
         ),
+        chainUi = com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(
+            knowledge = economy.knowledge,
+            power = economy.chainPower,
+            multiplier = economy.chainMultiplier,
+            amounts = economy.chainAmounts,
+            bought = economy.chainBought
+        ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
             seals = economy.seals,
@@ -492,6 +499,10 @@ class MainViewModel @Inject constructor(
     fun buyDreamNode(id: String) = engine.buyDreamNode(id)
 
     fun respecDream() = engine.respecDream()
+
+    fun buyInvocation(tier: Int) = engine.buyInvocation(tier)
+
+    fun buyMaxInvocations() = engine.buyMaxInvocations()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

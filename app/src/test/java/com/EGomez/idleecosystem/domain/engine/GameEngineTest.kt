@@ -36,6 +36,7 @@ import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -809,6 +810,46 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `the summoning chain is bought with knowledge and breaks on transcending`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(4))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.CHAIN_POWER] = BigDecimal("1e10")
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1e10"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.chainRevealed && it.chainBought.size == 8 && it.etherGain > 0 }
+        assertTrue(MenuTab.CHAIN in before.menuUnlocks.tabs)
+        // 1e10 de Poder: (1 + 10)² = x121
+        assertEquals(121.0, before.chainMultiplier, 1e-3)
+
+        engine.buyInvocation(Invocation.CHALK.tier)
+        val one = await(engine.economy) { it.chainBought[0] == 1 }
+        assertEquals(0, BigDecimal.ONE.compareTo(one.chainAmounts[0]))
+        assertTrue(one.knowledge <= BigDecimal("9.999e9"))
+
+        // Comprar todo: del eslabón más alto al primero (3 Cirios: 1e9 + 2,5e9 + 6,25e9)
+        engine.buyMaxInvocations()
+        val max = await(engine.economy) { it.chainBought[1] == 3 }
+        assertTrue(max.chainBought[0] > 1)
+        assertEquals(0, max.chainBought[2])
+        assertTrue(stats.counter(AchievementStat.CHAIN_TOP_TIER).toInt() == 2)
+
+        engine.transcend()
+        val after = await(engine.economy) { it.transcendences == 5 }
+        assertTrue(after.chainBought.all { it == 0 })
+        assertEquals(0, after.chainPower.signum())
+        assertEquals(1.0, after.chainMultiplier, 1e-12)
     }
 
     @Test

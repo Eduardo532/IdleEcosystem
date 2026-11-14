@@ -106,6 +106,8 @@ data class GameUiState(
     /** El Sueño Profundo (v0.20.0). */
     val dreamUi: com.EGomez.idleecosystem.ui.screens.main.components.DreamUi = com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(),
     val dreamNotice: Int? = null,
+    /** La Cadena de Invocación (v0.20.1). */
+    val chainUi: com.EGomez.idleecosystem.ui.screens.main.components.ChainUi = com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

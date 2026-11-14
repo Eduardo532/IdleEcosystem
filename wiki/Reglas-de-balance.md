@@ -140,6 +140,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Se abre con 3 Trascendencias y se entra al Trascender. Exponente del Sueño `min(1; 0,75 + 0,02·Peldaños)`. Se aplica a la producción total (junto con Armitage), al clic (junto con Ibn Ghazi) y a la Cordura ganada (junto con las Sales).
 - Puntos totales `⌊(log10(mejor vida) − 10)^1,5 · (1 + 0,25·Descarnados)⌋`; se cobra lo que supere lo ya ganado. Kadath: exponente de producción `1 + 0,01·n` solo despierto. Reinicio del árbol gratis. *(Código: `DeepSleep`, `DreamNode`; test: `DeepSleepTest`.)*
 
+## Cadena de Invocación
+
+- Se abre con 4 Trascendencias. Precio del eslabón k: `10^(3 + 3k) · (1,5 + 0,5k)^compras`. Cada eslabón produce por segundo `unidades · 2^⌊compras/10⌋` del de abajo; el primero produce Poder.
+- Multiplicador de producción `(1 + log10(1 + Poder))²`. Se reinicia al Trascender. Sin conexión avanza en hasta 120 pasos. *(Código: `SummoningChain`, `Invocation`; test: `SummoningChainTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

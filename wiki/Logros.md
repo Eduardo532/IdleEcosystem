@@ -1,6 +1,6 @@
 # Logros
 
-Hay **505 logros**: 113 originales y **392 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **519 logros**: 113 originales y **406 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -245,6 +245,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Audiencia en el Castillo de Ónix | Trasciende desde un Sueño con el pacto de Nyarlathotep | +1 % |
 | Soñador Nato | Trasciende desde un Sueño recorriendo la Senda del Sueño | +1 % |
 | Sueño sin Sueños | Trasciende desde un Sueño recorriendo la Senda del Vacío | +1 % |
+| Primer Trazo | Compra un Círculo de Sal | +1 % |
+| Media Cadena | Compra un Osario | +1 % |
+| Los Ocho Eslabones | Ten los 8 eslabones de la Cadena a la vez | +2 % |
+| Eslabón tras Eslabón | Compra 50 eslabones en total | +1 % |
+| Cadena Perpetua | Compra 250 eslabones en total | +1 % |
+| Mil Invocaciones | Compra 1.000 eslabones en total | +2 % |
+| Poder Naciente | Reúne 1M de Poder de Invocación en un ciclo | +1 % |
+| Poder Desbordado | Reúne 1Qa de Poder de Invocación en un ciclo | +1 % |
+| Invocación Absoluta | Reúne 1No de Poder de Invocación en un ciclo | +2 % |
+| El Guía de la Puerta | Compra un eslabón con el pacto de Yog-Sothoth | +1 % |
+| Leche de la Cabra Negra | Compra un eslabón con el pacto de Shub-Niggurath | +1 % |
+| Liturgia del Culto | Compra un eslabón recorriendo la Senda del Culto | +1 % |
+| Geometría Arcana | Compra un eslabón recorriendo la Senda Arcana | +1 % |
 
 ### Panteón
 
@@ -418,7 +431,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **32 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **33 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

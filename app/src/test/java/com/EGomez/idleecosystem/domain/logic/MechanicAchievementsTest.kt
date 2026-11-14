@@ -46,6 +46,7 @@ class MechanicAchievementsTest {
         "Mutaciones" to { it.stat?.contains("mutation") == true },
         "Laboratorio" to { it.stat?.startsWith("lab") == true || it.stat == AchievementStat.FEAT_LAB_EXACT },
         "El Sueño Profundo" to { it.stat?.startsWith("dream") == true },
+        "Cadena de Invocación" to { it.stat?.startsWith("chain") == true },
         "Bestiario" to {
             it.stat?.startsWith("beast") == true || it.stat in setOf(
                 AchievementStat.SEALS_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED, AchievementStat.SUMMONS,

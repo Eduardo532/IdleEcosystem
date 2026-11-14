@@ -490,4 +490,11 @@
     <string name="dream_respec">Reset the tree (refunds %1$d DP)</string>
     <string name="dream_banner">Deep Sleep: production, click and Sanity at %1$s</string>
     <string name="dream_notice">☾ You woke up: +%1$d Dream Points</string>
+    <string name="tab_chain">Chain</string>
+    <string name="chain_title">THE SUMMONING CHAIN</string>
+    <string name="chain_hint">Each link produces the one below; the first produces Power, which multiplies your production. It breaks when you Transcend.</string>
+    <string name="chain_power_label">POWER</string>
+    <string name="chain_multiplier">Production x%1$s</string>
+    <string name="chain_buy_max">Buy as much as possible</string>
+    <string name="chain_row_info">%1$s units · %2$d bought · x%3$s</string>
 </resources>

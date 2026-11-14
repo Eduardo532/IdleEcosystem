@@ -18,6 +18,7 @@
 - [Bestiario](Bestiario)
 - [Laboratorio](Laboratorio)
 - [El Sueño Profundo](El-Sueno-Profundo)
+- [Cadena de Invocación](Cadena-de-Invocacion)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

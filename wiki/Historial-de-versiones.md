@@ -12,6 +12,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
   - la capa Trascendencia queda con cuatro pestañas (Éter, Estrellas, Laboratorio y Ciclos) y las demás se agrupan en chips;
   - las criaturas nuevas del Bestiario se marcan hasta abrir su tarjeta;
   - el autocomprador de edificios sigue el multiplicador de compra elegido, que ahora se guarda con la partida.
+- **v0.20.5:** compra de varios niveles a la vez (x1, x10, x100 o MAX) en el Mapa de Locura y en las Estrellas.
 
 ## v0.19.x *(en pruebas)*
 

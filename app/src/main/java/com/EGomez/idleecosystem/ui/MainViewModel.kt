@@ -386,7 +386,7 @@ class MainViewModel @Inject constructor(
 
     fun onBuyAllUpgrades() = engine.buyAllAffordableUpgrades()
 
-    fun onBuyPrestigeUpgrade(id: String) = engine.buyPrestigeUpgrade(id)
+    fun onBuyPrestigeUpgrade(id: String, amount: Int = 1) = engine.buyPrestigeUpgrade(id, amount)
 
     fun onActivateRitual(ritualId: String) = engine.activateRitual(ritualId)
 
@@ -497,7 +497,7 @@ class MainViewModel @Inject constructor(
 
     fun breakVeil() = engine.breakVeil()
 
-    fun buyStarUpgrade(id: String) = engine.buyStarUpgrade(id)
+    fun buyStarUpgrade(id: String, amount: Int = 1) = engine.buyStarUpgrade(id, amount)
 
     fun catchEncounter() = engine.catchEncounter()
 

@@ -35,6 +35,7 @@ import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
@@ -728,6 +729,37 @@ class GameEngineTest {
         // Cada segundo nacen Estrellas
         val later = await(engine.economy) { it.stars > 0.0 }
         assertTrue(later.starsPerHour > 0.0)
+    }
+
+    @Test
+    fun `stellar upgrades and map nodes can be bought several levels at once`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.STARDUST, BigDecimal(1000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal(1000), echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.transcendences == 1 }
+
+        // Estrellas: x10 de Luz Estelar cuesta 295.240 de Polvo, no alcanza; MAX compra 4
+        // niveles (10 + 30 + 90 + 270)
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id, 10)
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id, BulkBuy.MAX)
+        val stars = await(engine.economy) { (it.starLevels[StarUpgrade.STARLIGHT.id] ?: 0) > 0 }
+        assertEquals(4, stars.starLevels[StarUpgrade.STARLIGHT.id])
+        assertEquals(600.0, stars.stardust, 1.0)
+
+        // Mapa de Locura: El Despertar x10 y después todo lo que alcance
+        engine.buyPrestigeUpgrade("pu_core", 10)
+        await(engine.prestigeUpgrades) { list -> list.find { it.id == "pu_core" }?.level == 10 }
+        engine.buyPrestigeUpgrade("pu_core", BulkBuy.MAX)
+        val map = await(engine.prestigeUpgrades) { list -> (list.find { it.id == "pu_core" }?.level ?: 0) > 10 }
+        assertEquals(15, map.find { it.id == "pu_core" }?.level)
     }
 
     @Test

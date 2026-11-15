@@ -156,6 +156,10 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Restricciones: Hambre, exponente de producción x0,85; Cordura Quebrada, exponente de Cordura x0,6; Soledad, pacto forzado a ninguno; Silencio, clic 0.
 - Recompensas: producción `3^n`, Cordura `1,5^n`, Éter `1 + 0,2n` y Ascensiones para Trascender `−2n` (mínimo 10). *(Código: `TranscendenceTrials`, `TranscendenceTrial`; test: `TranscendenceTrialsTest`.)*
 
+## Compra de varios niveles *(v0.20.5)*
+
+- En el Mapa de Locura y en las Estrellas se eligen x1, x10, x100 o MAX. Con cantidad fija se compra el lote entero o nada (recortado al tope del nodo); MAX compra todo lo que alcance, hasta 1.000 niveles por compra. Las Sendas, de a uno. *(Código: `BulkBuy`; test: `BulkBuyTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

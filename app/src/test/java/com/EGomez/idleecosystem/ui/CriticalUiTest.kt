@@ -537,6 +537,45 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `stellar upgrades can be bought ten at a time or to the max`() {
+        val bought = mutableListOf<Pair<String, Int>>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.StarsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(stardust = 1000.0),
+                    onBuy = {},
+                    onBuyMany = { id, amount -> bought += id to amount }
+                )
+            }
+        }
+
+        // x10 de Luz Estelar no alcanza con 1.000 de Polvo
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "x10").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().assertIsNotEnabled()
+        // MAX compra 4 niveles
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "MAX").performScrollTo().performClick()
+        compose.onNodeWithText("x4 · ✦ 400", substring = true).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().performClick()
+        assertEquals(listOf("light" to com.EGomez.idleecosystem.domain.logic.BulkBuy.MAX), bought)
+    }
+
+    @Test
+    fun `a map node can be bought several levels at once`() {
+        val node = PrestigeUpgrade("pu_core", "El Despertar", "Aumenta la Producción Global.", BigDecimal("1"), BigDecimal("1.5"), BigDecimal("0.10"), UpgradeType.GLOBAL_MULTIPLIER)
+        val bought = mutableListOf<Pair<String, Int>>()
+        compose.setContent {
+            PrestigeShopDialog(listOf(node), "200", BigDecimal(200), onBuy = {}, onDismiss = {}, onBuyMany = { id, amount -> bought += id to amount })
+        }
+        compose.onNodeWithTag(MAP_VIEW_TOGGLE_TAG + "list").performClick()
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + "pu_core").performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "x10").performClick()
+        compose.onNodeWithText("MEJORAR x10", substring = true).assertExists().performClick()
+        assertEquals(listOf("pu_core" to 10), bought)
+    }
+
+    @Test
     fun `the bestiary card shows the lore and bonus of a creature`() {
         compose.setContent {
             androidx.compose.foundation.layout.Column(

@@ -528,4 +528,5 @@
     <string name="tab_cycles">Ciclos</string>
     <string name="beast_new">NUEVA</string>
     <string name="bestiary_new_count">%1$d nuevas</string>
+    <string name="bulk_buy_label">Comprar:</string>
 </resources>

@@ -138,7 +138,7 @@ fun MenuSection(
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
     onBeastViewed: (String) -> Unit = {},
-    onBuyStar: (String) -> Unit = {},
+    onBuyStar: (String, Int) -> Unit = { _, _ -> },
     runeSlots: Int = 0,
     engravedRunes: List<String> = emptyList(),
     runeCatches: Map<String, Int> = emptyMap(),
@@ -429,7 +429,7 @@ fun MenuSection(
                     MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                     MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
-                    MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
+                    MenuTab.STARS -> item { StarsPanel(starsUi, onBuy = { onBuyStar(it, 1) }, onBuyMany = onBuyStar) }
                     MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards, onBeastViewed) }
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
                     MenuTab.DREAM -> item { DreamPanel(dreamUi, onSetDreamNext, onWakeUp, onBuyDreamNode, onRespecDream) }

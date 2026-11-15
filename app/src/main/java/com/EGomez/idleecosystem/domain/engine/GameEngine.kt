@@ -44,6 +44,7 @@ import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
 import com.EGomez.idleecosystem.domain.logic.NextGoal
@@ -464,18 +465,31 @@ class GameEngine @Inject constructor(
         }
     }
 
-    fun buyPrestigeUpgrade(id: String) = post {
-        val cost = prestigeShopManager.getCost(id) ?: return@post
-        if (prestigeManager.residualSanity < cost) return@post
-        if (prestigeShopManager.tryBuy(id, prestigeManager.residualSanity)) {
-            soundManager.playSound(SoundType.BUY)
+    /**
+     * Compra niveles de un nodo del Mapa de Locura: uno, un lote (x10, x100) o todos los
+     * que alcancen ([BulkBuy.MAX]; v0.20.5). Las Sendas siempre de a uno.
+     */
+    fun buyPrestigeUpgrade(id: String, amount: Int = 1) = post {
+        val node = prestigeShopManager.upgrades.find { it.id == id } ?: return@post
+        val wanted = if (MadnessPaths.isPath(id)) 1 else amount
+        val plan = BulkBuy.plan(node.level, node.maxLevel, prestigeManager.residualSanity, wanted) {
+            node.baseCost.multiply(node.costMultiplier.pow(it))
+        }
+        var bought = 0
+        repeat(plan.levels) {
+            val cost = prestigeShopManager.getCost(id) ?: return@repeat
+            if (prestigeManager.residualSanity < cost) return@repeat
+            if (!prestigeShopManager.tryBuy(id, prestigeManager.residualSanity)) return@repeat
             prestigeManager.residualSanity = prestigeManager.residualSanity.subtract(cost)
             statsManager.trackSanitySpent(cost)
-            if (MadnessPaths.isPath(id)) statsManager.flag(AchievementStat.walked(id))
-            refreshEngravings()
-            recalculate()
-            requestSave()
+            bought++
         }
+        if (bought == 0) return@post
+        soundManager.playSound(SoundType.BUY)
+        if (MadnessPaths.isPath(id)) statsManager.flag(AchievementStat.walked(id))
+        refreshEngravings()
+        recalculate()
+        requestSave()
     }
 
     fun activateRitual(ritualId: String) = post {
@@ -1479,20 +1493,21 @@ class GameEngine @Inject constructor(
     }
 
     /** Compra un nivel de una mejora estelar con Polvo Estelar. */
-    fun buyStarUpgrade(id: String) = post {
+    /** Compra niveles de una mejora de las Estrellas: uno, un lote o todos los que alcancen (v0.20.5). */
+    fun buyStarUpgrade(id: String, amount: Int = 1) = post {
         val upgrade = StarUpgrade.fromId(id) ?: return@post
         if (!starsRevealed()) return@post
         val level = starLevel(upgrade)
         if (upgrade.isMaxed(level)) return@post
-        val cost = BigDecimal.valueOf(upgrade.cost(level))
         val dust = statsManager.counter(AchievementStat.STARDUST)
-        if (dust < cost) return@post
-        statsManager.counters[AchievementStat.STARDUST] = dust.subtract(cost)
-        statsManager.counters[AchievementStat.starUpgrade(upgrade.id)] = BigDecimal(level + 1)
+        val plan = BulkBuy.plan(level, upgrade.maxLevel, dust, amount) { BigDecimal.valueOf(upgrade.cost(it)) }
+        if (plan.isEmpty) return@post
+        statsManager.counters[AchievementStat.STARDUST] = dust.subtract(plan.cost)
+        statsManager.counters[AchievementStat.starUpgrade(upgrade.id)] = BigDecimal(level + plan.levels)
         // Logros: con qué pacto, y durante la alineación (con qué Senda)
         statsManager.flag(AchievementStat.starBuyWith(activePact.id))
         if (starsAligned()) {
-            statsManager.count(AchievementStat.ALIGNED_PURCHASES)
+            statsManager.count(AchievementStat.ALIGNED_PURCHASES, BigDecimal(plan.levels))
             MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.starAlignedPath(it.id)) }
         }
         soundManager.playSound(SoundType.BUY)

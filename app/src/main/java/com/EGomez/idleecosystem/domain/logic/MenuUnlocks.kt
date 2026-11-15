@@ -8,7 +8,8 @@ import com.EGomez.idleecosystem.domain.model.Trial
  * se agrupan en capas (Vida, Ascensión, Trascendencia) y la fila de capas solo se ve
  * cuando hay más de una.
  */
-enum class MenuLayer { LIFE, ASCENSION, TRANSCENDENCE }
+/** Despertar: la tercera capa (v0.21.0). */
+enum class MenuLayer { LIFE, ASCENSION, TRANSCENDENCE, AWAKENING }
 
 enum class MenuTab(val id: String, val layer: MenuLayer) {
     RESEARCH("research", MenuLayer.LIFE),
@@ -28,7 +29,9 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     DREAM("dream", MenuLayer.TRANSCENDENCE),
     CHAIN("chain", MenuLayer.TRANSCENDENCE),
     LETHARGY("lethargy", MenuLayer.TRANSCENDENCE),
-    TTRIALS("ttrials", MenuLayer.TRANSCENDENCE);
+    TTRIALS("ttrials", MenuLayer.TRANSCENDENCE),
+    AWAKEN("awaken", MenuLayer.AWAKENING),
+    VISIONS("visions", MenuLayer.AWAKENING);
 
     /**
      * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
@@ -127,7 +130,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             dreamRevealed: Boolean = false,
             chainRevealed: Boolean = false,
             lethargyRevealed: Boolean = false,
-            ttrialRevealed: Boolean = false
+            ttrialRevealed: Boolean = false,
+            awakeningRevealed: Boolean = false
         ): MenuUnlocks {
             val tabs = mutableSetOf(MenuTab.RESEARCH)
             if (reveal.grimoire) tabs += MenuTab.GRIMOIRE
@@ -146,6 +150,10 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (lethargyRevealed) tabs += MenuTab.LETHARGY
             if (ttrialRevealed) tabs += MenuTab.TTRIALS
             if (dreamRevealed || chainRevealed || lethargyRevealed || ttrialRevealed) tabs += MenuTab.CYCLES
+            if (awakeningRevealed) {
+                tabs += MenuTab.AWAKEN
+                tabs += MenuTab.VISIONS
+            }
             return MenuUnlocks(tabs)
         }
     }

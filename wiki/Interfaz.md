@@ -25,6 +25,8 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | ↳ Ciclos › Cadena | Trascender por cuarta vez |
 | | | ↳ Ciclos › Letargo | Trascender por quinta vez |
 | | | ↳ Ciclos › Desafíos | Trascender por sexta vez |
+| **Despertar** | amarillo pálido (Visiones) | Despertar | llegar a 10 Trascendencias en total *(v0.21.0)* |
+| | | Visiones | ídem |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 
@@ -53,6 +55,8 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Cadena:** el Poder de Invocación y su multiplicador, el botón para comprar todo lo posible y los ocho eslabones, cada uno con sus unidades, sus compras, su multiplicador y su precio en Conocimiento. Ver [Cadena de Invocación](Cadena-de-Invocacion).
 - **Letargo:** el interruptor para caer en Letargo o salir, el Sopor de la vida, la Cordura que multiplicará, las Ascensiones extra (y cuánto falta para la próxima) y el aviso de que salir lo pierde. Mientras dura, un aviso con reloj de arena aparece en Investigación. Ver [Letargo](Letargo).
 - **Desafíos:** la Prueba de Trascendencia en curso (meta, mejor vida y si ya se alcanzó; botón para abandonarla) y las cuatro Pruebas con sus niveles superados, su restricción, su recompensa, la meta siguiente y el botón para elegirla para el próximo ciclo. Al superar una, el aviso de Trascender lo dice. Ver [Pruebas de Trascendencia](Pruebas-de-Trascendencia).
+- **Despertar:** los dos requisitos con su progreso, las Visiones que darías, el botón DESPERTAR (pide confirmación y lista lo que se pierde y lo que se conserva) y los cinco Hitos del Despertar. Al Despertar, un aviso dice cuántas Visiones ganaste. Ver [Despertar](Despertar).
+- **Visiones:** el Árbol de Visiones, de nueve nodos, con su reinicio gratis.
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

@@ -21,6 +21,7 @@
 - [Cadena de Invocación](Cadena-de-Invocacion)
 - [Letargo](Letargo)
 - [Pruebas de Trascendencia](Pruebas-de-Trascendencia)
+- [Despertar](Despertar)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

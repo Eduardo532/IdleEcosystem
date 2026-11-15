@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.21.x *(en pruebas)*
+
+- **v0.21.0:** El Despertar, la tercera capa de prestigio. Con 10 Trascendencias y 5 niveles de Pruebas de Trascendencia, reinicia la capa Trascendencia (Éter, mejoras eternas, Laboratorio, Estrellas y la cuenta de Trascendencias) a cambio de Visiones. Las Visiones compran un Árbol de 9 nodos, y hay cinco Hitos del Despertar que devuelven parte de lo perdido. 14 logros nuevos.
+
 ## v0.20.5 · "Profundidad de Trascender" *(oficial, 15 nov 2026)*
 
 Séptima etapa del Roadmap: cada ciclo de Trascender tiene un desafío largo propio.

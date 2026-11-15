@@ -528,4 +528,27 @@
     <string name="beast_new">NEW</string>
     <string name="bestiary_new_count">%1$d new</string>
     <string name="bulk_buy_label">Buy:</string>
+    <string name="layer_awakening">Awakening</string>
+    <string name="tab_awaken">Awaken</string>
+    <string name="tab_visions">Visions</string>
+    <string name="awaken_title">THE AWAKENING</string>
+    <string name="awaken_hint">Resets the whole Transcendence layer in exchange for Visions, which buy a tree that lasts forever.</string>
+    <string name="awaken_count">Awakenings: %1$d</string>
+    <string name="visions_label">VISIONS</string>
+    <string name="awaken_req_transcend">Transcendences since the last Awakening: %1$d / %2$d</string>
+    <string name="awaken_req_trials">Trial of Transcendence levels passed: %1$d / %2$d</string>
+    <string name="awaken_button">AWAKEN (+%1$d Visions)</string>
+    <string name="awaken_locked">You cannot Awaken yet</string>
+    <string name="awaken_milestones">AWAKENING MILESTONES</string>
+    <string name="awaken_milestone_at">%1$d Awakenings</string>
+    <string name="awaken_confirm_title">Awaken?</string>
+    <string name="awaken_confirm_gain">You will gain %1$d Visions.</string>
+    <string name="awaken_loses">You lose: Ether, eternal upgrades, Laboratory, Stars and their Dust, consecrations, the Transcendence count and everything Transcending loses (except what the Awakening Milestones keep).</string>
+    <string name="awaken_keeps">You keep: achievements, Bestiary, Dream Tree and its Points, Trial of Transcendence levels, Visions and their tree.</string>
+    <string name="awaken_confirm">AWAKEN</string>
+    <string name="awaken_notice">◉ You awoke: +%1$d Visions</string>
+    <string name="visions_tree_title">VISION TREE</string>
+    <string name="visions_tree_hint">Its effects last forever, even after Awakening. Resetting it is free.</string>
+    <string name="visions_cost">%1$d V</string>
+    <string name="visions_respec">Reset the tree (refunds %1$d V)</string>
 </resources>

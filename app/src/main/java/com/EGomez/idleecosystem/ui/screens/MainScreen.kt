@@ -351,6 +351,10 @@ fun MainScreen(
                             ttrialsUi = uiState.ttrialsUi,
                             onChooseTranscendenceTrial = { viewModel.chooseTranscendenceTrial(it) },
                             onAbandonTranscendenceTrial = { viewModel.abandonTranscendenceTrial() },
+                            awakeningUi = uiState.awakeningUi,
+                            onAwaken = { viewModel.awaken() },
+                            onBuyVisionNode = { viewModel.buyVisionNode(it) },
+                            onRespecVisions = { viewModel.respecVisions() },
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
@@ -584,6 +588,26 @@ fun MainScreen(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
+            uiState.awakenNotice?.let { visions ->
+                Surface(
+                    color = Color(0xFF1C1B10),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, com.EGomez.idleecosystem.ui.screens.main.components.VisionColor),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(6f)
+                ) {
+                    Text(
+                        stringResource(R.string.awaken_notice, visions),
+                        color = com.EGomez.idleecosystem.ui.screens.main.components.VisionColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )
                 }
             }

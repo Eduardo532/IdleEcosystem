@@ -822,6 +822,54 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the awakening tab shows the requirements and asks before awakening`() {
+        var awakened = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.AwakeningPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(
+                        canAwaken = true, visionGain = 6, transcendences = 12, trialLevels = 5, awakenings = 1
+                    ),
+                    onAwaken = { awakened++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Trascendencias desde el último Despertar: 12 / 10").assertExists()
+        compose.onNodeWithText("DESPERTAR (+6 Visiones)").performClick()
+        // Primero la confirmación, con lo que se pierde y lo que se conserva
+        compose.onNodeWithText("Ganarás 6 Visiones.").assertExists()
+        assertEquals(0, awakened)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.AWAKEN_CONFIRM_TAG).performClick()
+        assertEquals(1, awakened)
+    }
+
+    @Test
+    fun `the vision tree buys from the root and refunds`() {
+        val bought = mutableListOf<String>()
+        var respecs = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.VisionsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(visions = 3, levels = mapOf("first" to 1)),
+                    onBuy = { bought += it },
+                    onRespec = { respecs++ }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISION_BUY_TAG + "sanity").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISION_BUY_TAG + "abyss").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISIONS_RESPEC_TAG).performScrollTo().performClick()
+        assertEquals(listOf("sanity"), bought)
+        assertEquals(1, respecs)
+    }
+
+    @Test
     fun `while dreaming the panel shows the pending points and lets you wake up`() {
         var woken = 0
         compose.setContent {

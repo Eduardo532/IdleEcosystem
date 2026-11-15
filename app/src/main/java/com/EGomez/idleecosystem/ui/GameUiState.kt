@@ -113,6 +113,9 @@ data class GameUiState(
     /** Las Pruebas de Trascendencia (v0.20.3). */
     val ttrialsUi: com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(),
     val trialPassedNotice: String? = null,
+    /** El Despertar (v0.21.0). */
+    val awakeningUi: com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi = com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(),
+    val awakenNotice: Int? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

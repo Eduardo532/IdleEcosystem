@@ -529,4 +529,27 @@
     <string name="beast_new">NUEVA</string>
     <string name="bestiary_new_count">%1$d nuevas</string>
     <string name="bulk_buy_label">Comprar:</string>
+    <string name="layer_awakening">Despertar</string>
+    <string name="tab_awaken">Despertar</string>
+    <string name="tab_visions">Visiones</string>
+    <string name="awaken_title">EL DESPERTAR</string>
+    <string name="awaken_hint">Reinicia la Trascendencia entera a cambio de Visiones, que compran un árbol para siempre.</string>
+    <string name="awaken_count">Despertares: %1$d</string>
+    <string name="visions_label">VISIONES</string>
+    <string name="awaken_req_transcend">Trascendencias desde el último Despertar: %1$d / %2$d</string>
+    <string name="awaken_req_trials">Niveles de Pruebas de Trascendencia superados: %1$d / %2$d</string>
+    <string name="awaken_button">DESPERTAR (+%1$d Visiones)</string>
+    <string name="awaken_locked">Aún no puedes Despertar</string>
+    <string name="awaken_milestones">HITOS DEL DESPERTAR</string>
+    <string name="awaken_milestone_at">%1$d Despertares</string>
+    <string name="awaken_confirm_title">¿Despertar?</string>
+    <string name="awaken_confirm_gain">Ganarás %1$d Visiones.</string>
+    <string name="awaken_loses">Se pierde: Éter, mejoras eternas, Laboratorio, Estrellas y su Polvo, consagraciones, la cuenta de Trascendencias y todo lo que pierde Trascender (salvo lo que guarden los Hitos del Despertar).</string>
+    <string name="awaken_keeps">Se conserva: logros, Bestiario, Árbol del Sueño y sus Puntos, niveles de Pruebas de Trascendencia, Visiones y su árbol.</string>
+    <string name="awaken_confirm">DESPERTAR</string>
+    <string name="awaken_notice">◉ Despertaste: +%1$d Visiones</string>
+    <string name="visions_tree_title">ÁRBOL DE VISIONES</string>
+    <string name="visions_tree_hint">Sus efectos valen para siempre, también después de Despertar. Reiniciarlo es gratis.</string>
+    <string name="visions_cost">%1$d V</string>
+    <string name="visions_respec">Reiniciar el árbol (devuelve %1$d V)</string>
 </resources>

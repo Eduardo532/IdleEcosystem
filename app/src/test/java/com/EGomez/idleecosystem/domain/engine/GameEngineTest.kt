@@ -39,6 +39,7 @@ import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
+import com.EGomez.idleecosystem.domain.logic.VisionNode
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -873,6 +874,63 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `awakening resets the transcendence layer and pays visions`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER, BigDecimal(500))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+            counters[AchievementStat.eternal("fire")] = BigDecimal(3)
+            counters[AchievementStat.lab("armitage")] = BigDecimal(2)
+            counters[AchievementStat.starUpgrade("light")] = BigDecimal(2)
+            counters[AchievementStat.STARDUST] = BigDecimal(100)
+            counters[AchievementStat.dreamNode("steps")] = BigDecimal(2)
+            counters[AchievementStat.beast("deep_dagon")] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.awakeningRevealed && it.canAwaken }
+        assertTrue(MenuTab.AWAKEN in before.menuUnlocks.tabs)
+        assertEquals(6, before.visionGain)
+
+        engine.awaken()
+        val after = await(engine.economy) { it.awakenings == 1 }
+        assertEquals(6, after.visions)
+        // La capa Trascendencia se reinicia...
+        assertEquals(0, after.transcendences)
+        assertEquals(0, stats.counter(AchievementStat.ETHER).signum())
+        assertEquals(0, stats.counter(AchievementStat.eternal("fire")).signum())
+        assertEquals(0, stats.counter(AchievementStat.lab("armitage")).signum())
+        assertEquals(0, stats.counter(AchievementStat.starUpgrade("light")).signum())
+        assertFalse(after.canAwaken)
+        // ...pero los totales, el Bestiario, el Árbol del Sueño y las Pruebas T. quedan
+        assertEquals(0, BigDecimal(12).compareTo(stats.counter(AchievementStat.TRANSCENDENCES)))
+        assertEquals(2, after.dreamLevels["steps"])
+        assertEquals(5, after.ttrialLevels["silence"])
+        assertEquals(1, after.beastLevels["deep_dagon"])
+        // Lo descubierto no se esconde
+        assertTrue(MenuTab.DREAM in after.menuUnlocks.tabs)
+        assertTrue(MenuTab.AWAKEN in after.menuUnlocks.tabs)
+
+        // El Árbol de Visiones
+        engine.buyVisionNode(VisionNode.SANITY.id) // sin la Primera Visión no se puede
+        engine.buyVisionNode(VisionNode.FIRST.id)
+        val bought = await(engine.economy) { it.visionLevels["first"] == 1 }
+        assertEquals(5, bought.visions)
+        assertEquals(0, bought.visionLevels["sanity"])
+        engine.respecVisions()
+        val refunded = await(engine.economy) { it.visionLevels["first"] == 0 }
+        assertEquals(6, refunded.visions)
     }
 
     @Test

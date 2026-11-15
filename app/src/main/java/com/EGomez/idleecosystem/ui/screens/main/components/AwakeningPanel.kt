@@ -171,14 +171,14 @@ private fun OathsSection(ui: AwakeningUi, onSetOath: (String, Boolean) -> Unit) 
     Text(stringResource(R.string.oaths_hint), color = Color.LightGray, fontSize = 11.sp)
     Text(
         if (active.isEmpty()) stringResource(R.string.oaths_active_none)
-        else stringResource(R.string.oaths_active, active.size, multiplier(Oaths.visionMultiplier(active))),
+        else stringResource(R.string.oaths_active, active.size, oathTimes(Oaths.visionMultiplier(active))),
         color = if (active.isEmpty()) Color.Gray else VisionColor,
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 4.dp).testTag(OATHS_ACTIVE_TAG)
     )
     Text(
-        stringResource(R.string.oaths_next, next.size, multiplier(Oaths.visionMultiplier(next))),
+        stringResource(R.string.oaths_next, next.size, oathTimes(Oaths.visionMultiplier(next))),
         color = Color.White,
         fontSize = 12.sp,
         modifier = Modifier.testTag(OATHS_NEXT_TAG)
@@ -220,7 +220,7 @@ private fun OathsSection(ui: AwakeningUi, onSetOath: (String, Boolean) -> Unit) 
 }
 
 /** "x1.70". */
-private fun multiplier(value: Double): String = "x" + "%.2f".format(java.util.Locale.US, value)
+private fun oathTimes(value: Double): String = "x" + "%.2f".format(java.util.Locale.US, value)
 
 @Composable
 private fun Requirement(text: String, met: Boolean) {

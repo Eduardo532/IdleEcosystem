@@ -37,6 +37,10 @@ import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.ElderSign
+import com.EGomez.idleecosystem.domain.logic.Planet
+import com.EGomez.idleecosystem.domain.logic.SignKind
+import com.EGomez.idleecosystem.domain.logic.SignRarity
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
 import com.EGomez.idleecosystem.domain.logic.VisionNode
@@ -931,6 +935,49 @@ class GameEngineTest {
         engine.respecVisions()
         val refunded = await(engine.economy) { it.visionLevels["first"] == 0 }
         assertEquals(6, refunded.visions)
+    }
+
+    @Test
+    fun `awakening grants elder signs that are equipped, upgraded and sold`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canAwaken }
+        assertFalse(before.signsRevealed)
+
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 && it.signs.size == 3 }
+        assertTrue(awake.signsRevealed)
+        assertTrue(MenuTab.SIGNS in awake.menuUnlocks.tabs)
+        assertEquals(0, BigDecimal(3).compareTo(stats.counter(AchievementStat.SIGNS_FOUND)))
+
+        // Un Signo de la Llama conocido, equipado en Yuggoth (su afinidad): producción x5
+        stats.counters[AchievementStat.sign(99)] = BigDecimal(ElderSign(SignKind.FLAME, SignRarity.COMMON, 50).pack())
+        engine.equipSign(99, Planet.YUGGOTH.id)
+        // Saturno todavía no se abre con un solo Despertar
+        engine.equipSign(99, Planet.SATURN.id)
+        val equipped = await(engine.economy) { it.signsEquipped[Planet.YUGGOTH.id] == 99 }
+        assertEquals(null, equipped.signsEquipped[Planet.SATURN.id])
+
+        // Subir de nivel cuesta Polvo Astral; vender lo devuelve
+        stats.counters[AchievementStat.ASTRAL_DUST] = BigDecimal(10)
+        engine.upgradeSign(99)
+        val up = await(engine.economy) { ElderSign.unpack(it.signs.getValue(99)).level == 2 }
+        assertEquals(0, up.astralDust)
+        engine.sellSign(99)
+        val sold = await(engine.economy) { 99 !in it.signs }
+        assertEquals(ElderSign(SignKind.FLAME, SignRarity.COMMON, 50, 2).dust(), sold.astralDust)
+        assertTrue(sold.signsEquipped.isEmpty())
     }
 
     @Test

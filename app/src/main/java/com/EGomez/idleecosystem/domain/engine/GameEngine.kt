@@ -30,6 +30,11 @@ import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.SummonResult
 import com.EGomez.idleecosystem.domain.logic.DeepSleep
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.ElderSign
+import com.EGomez.idleecosystem.domain.logic.ElderSigns
+import com.EGomez.idleecosystem.domain.logic.Planet
+import com.EGomez.idleecosystem.domain.logic.SignKind
+import com.EGomez.idleecosystem.domain.logic.SignRarity
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.Lab
 import com.EGomez.idleecosystem.domain.logic.Oath
@@ -195,6 +200,11 @@ data class EconomyState(
     /** Juramentos (v0.21.1): los que rigen este Despertar y los jurados para el próximo. */
     val oathsActive: Set<String> = emptySet(),
     val oathsNext: Set<String> = emptySet(),
+    /** Signos Antiguos (v0.21.2): número -> Signo empaquetado, y planeta -> número. */
+    val signsRevealed: Boolean = false,
+    val astralDust: Int = 0,
+    val signs: Map<Int, Long> = emptyMap(),
+    val signsEquipped: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -832,6 +842,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.TTRIAL_COMPLETIONS, TranscendenceTrial.entries.sumOf { ttrialLevel(it) })
         put(AchievementStat.VISION_LEVELS, VisionNode.entries.sumOf { visionLevel(it) })
         put(AchievementStat.VISION_NODES, VisionNode.entries.count { visionLevel(it) > 0 })
+        put(AchievementStat.SIGN_PLANETS, equippedSigns().size)
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1055,7 +1066,8 @@ class GameEngine @Inject constructor(
         chainRevealed = chainRevealed(),
         lethargyRevealed = lethargyRevealed(),
         ttrialRevealed = ttrialRevealed(),
-        awakeningRevealed = awakeningRevealed()
+        awakeningRevealed = awakeningRevealed(),
+        signsRevealed = signsRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1394,7 +1406,8 @@ class GameEngine @Inject constructor(
      */
     private fun currentClickPower(): BigDecimal = Lab.pow(
         buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
-            .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR)))),
+            .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR))))
+            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.HAND))),
         LabExperiment.IBN_GHAZI.exponent(labLevel(LabExperiment.IBN_GHAZI)) * dreamExponent()
     ).let { if (ttrialRestricts(TranscendenceTrial.SILENCE)) BigDecimal.ZERO else it }
 
@@ -1421,6 +1434,7 @@ class GameEngine @Inject constructor(
         if (lethargyRevealed()) tutorialManager.triggerStep(TutorialStep.LETHARGY)
         if (ttrialRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCENDENCE_TRIALS)
         if (awakeningRevealed()) tutorialManager.triggerStep(TutorialStep.AWAKENING)
+        if (signsRevealed()) tutorialManager.triggerStep(TutorialStep.ELDER_SIGNS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -2099,7 +2113,8 @@ class GameEngine @Inject constructor(
 
     private fun visionGainNow(): Int = if (!canAwaken()) 0 else Awakening.visionGain(
         transcendences(), etherSinceAwakening(),
-        Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths())
+        Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
+            signMultiplier(SignKind.EYE)
     )
 
     // ---- Juramentos (v0.21.1) ----
@@ -2187,6 +2202,8 @@ class GameEngine @Inject constructor(
 
         // Sin Pruebas Recordadas ni Runas Eternas, resetCycle borra también Pruebas y runas
         resetCycle()
+        // Cada Despertar trae tres Signos Antiguos
+        grantSigns(ElderSigns.SIGNS_PER_AWAKEN)
 
         soundManager.playSound(SoundType.ACHIEVEMENT)
         _effects.trySend(EngineEffect.Awakened(gain))
@@ -2219,6 +2236,117 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.VISION_RESPECS)
         recalculate()
         requestSave()
+    }
+
+    // =====================================================================
+    // LOS SIGNOS ANTIGUOS (v0.21.2)
+    // =====================================================================
+
+    private fun signsRevealed(): Boolean = awakenings() >= 1
+
+    /** Los Signos del inventario: número -> Signo. */
+    private fun signs(): Map<Int, ElderSign> = statsManager.counters
+        .filterKeys { it.startsWith(AchievementStat.SIGN_PREFIX) }
+        .mapNotNull { (key, value) -> key.removePrefix(AchievementStat.SIGN_PREFIX).toIntOrNull()?.let { it to ElderSign.unpack(value.toLong()) } }
+        .toMap()
+
+    /** Planeta abierto -> número del Signo equipado en él. */
+    private fun equippedNumbers(): Map<Planet, Int> = Planet.entries
+        .filter { it.isOpen(awakenings()) }
+        .mapNotNull { planet ->
+            statsManager.counter(AchievementStat.signEquip(planet.id)).toInt().takeIf { it > 0 }?.let { planet to it }
+        }
+        .toMap()
+
+    private fun equippedSigns(): Map<Planet, ElderSign> {
+        val all = signs()
+        return equippedNumbers().mapNotNull { (planet, n) -> all[n]?.let { planet to it } }.toMap()
+    }
+
+    private fun signMultiplier(kind: SignKind): Double = ElderSigns.multiplier(kind, equippedSigns())
+
+    private fun dust(): Int = statsManager.counter(AchievementStat.ASTRAL_DUST).toInt()
+
+    private fun addDust(amount: Int) {
+        if (amount > 0) statsManager.count(AchievementStat.ASTRAL_DUST, BigDecimal(amount))
+    }
+
+    /** Da [count] Signos al azar; con el inventario lleno, se venden solos. */
+    private fun grantSigns(count: Int) {
+        repeat(count) {
+            val sign = ElderSigns.roll(Random)
+            statsManager.count(AchievementStat.SIGNS_FOUND)
+            statsManager.record(AchievementStat.SIGN_BEST_RARITY, BigDecimal(sign.rarity.ordinal + 1))
+            statsManager.flag(AchievementStat.signWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.signPath(it.id)) }
+            if (signs().size >= ElderSigns.INVENTORY) {
+                addDust(sign.dust())
+                statsManager.count(AchievementStat.SIGNS_SOLD)
+                return@repeat
+            }
+            val n = statsManager.counter(AchievementStat.SIGN_SEQ).toInt() + 1
+            statsManager.counters[AchievementStat.SIGN_SEQ] = BigDecimal(n)
+            statsManager.counters[AchievementStat.sign(n)] = BigDecimal(sign.pack())
+        }
+    }
+
+    /** Equipa el Signo [n] en un planeta abierto (si estaba en otro, se mueve). */
+    fun equipSign(n: Int, planetId: String) = post {
+        val planet = Planet.fromId(planetId) ?: return@post
+        val sign = signs()[n] ?: return@post
+        if (!planet.isOpen(awakenings())) return@post
+        Planet.entries.forEach { if (statsManager.counter(AchievementStat.signEquip(it.id)).toInt() == n) statsManager.counters.remove(AchievementStat.signEquip(it.id)) }
+        statsManager.counters[AchievementStat.signEquip(planet.id)] = BigDecimal(n)
+        if (sign.quality == 100 && planet.affinity == sign.kind) statsManager.flag(AchievementStat.FEAT_SIGN_PERFECT)
+        recalculate()
+        requestSave()
+    }
+
+    /** Quita el Signo de un planeta. */
+    fun unequipSign(planetId: String) = post {
+        statsManager.counters.remove(AchievementStat.signEquip(planetId))
+        recalculate()
+        requestSave()
+    }
+
+    /** Sube un nivel el Signo [n] con Polvo Astral. */
+    fun upgradeSign(n: Int) = post {
+        val sign = signs()[n] ?: return@post
+        if (sign.isMaxed || dust() < sign.upgradeCost()) return@post
+        statsManager.counters[AchievementStat.ASTRAL_DUST] = BigDecimal(dust() - sign.upgradeCost())
+        val up = sign.copy(level = sign.level + 1)
+        statsManager.counters[AchievementStat.sign(n)] = BigDecimal(up.pack())
+        statsManager.record(AchievementStat.SIGN_MAX_LEVEL, BigDecimal(up.level))
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /** Vende el Signo [n] (si está equipado, se quita). */
+    fun sellSign(n: Int) = post {
+        if (sellSignNow(n)) {
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /** Vende todos los Signos comunes que no estén equipados. */
+    fun sellCommonSigns() = post {
+        val equipped = equippedNumbers().values.toSet()
+        val sold = signs().filter { it.value.rarity == SignRarity.COMMON && it.key !in equipped }.keys.count { sellSignNow(it) }
+        if (sold > 0) {
+            recalculate()
+            requestSave()
+        }
+    }
+
+    private fun sellSignNow(n: Int): Boolean {
+        val sign = signs()[n] ?: return false
+        Planet.entries.forEach { if (statsManager.counter(AchievementStat.signEquip(it.id)).toInt() == n) statsManager.counters.remove(AchievementStat.signEquip(it.id)) }
+        statsManager.counters.remove(AchievementStat.sign(n))
+        addDust(sign.dust())
+        statsManager.count(AchievementStat.SIGNS_SOLD)
+        return true
     }
 
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
@@ -2440,7 +2568,7 @@ class GameEngine @Inject constructor(
             Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
                 beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)) *
                     TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)) *
-                    Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)),
+                    Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -2521,6 +2649,7 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
         val dreamGain = if (dreamActive()) completeDream() else null
         val trialPassed = finishTranscendenceTrial()
+        if (signsRevealed()) grantSigns(ElderSigns.SIGNS_PER_TRANSCEND)
         // La Cadena de Invocación se deshace
         statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CHAIN_CYCLE_PREFIX) }
         statsManager.counters.remove(AchievementStat.CHAIN_POWER)
@@ -2760,7 +2889,8 @@ class GameEngine @Inject constructor(
                 Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY)) * DeepSleep.sanityMultiplier(dreamLevel(DreamNode.CELEPHAIS)) *
                 Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0) *
                 TranscendenceTrials.sanityReward(ttrialLevel(TranscendenceTrial.BROKEN)) *
-                Awakening.sanityMultiplier(visionLevel(VisionNode.SANITY))
+                Awakening.sanityMultiplier(visionLevel(VisionNode.SANITY)) *
+                signMultiplier(SignKind.MIND)
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -2808,6 +2938,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(if (lethargyActive()) Lethargy.PRODUCTION_FACTOR else 1.0))
             .multiply(BigDecimal.valueOf(TranscendenceTrials.productionReward(ttrialLevel(TranscendenceTrial.HUNGER))))
             .multiply(BigDecimal.valueOf(Awakening.productionMultiplier(visionLevel(VisionNode.FIRST))))
+            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.FLAME)))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -2987,6 +3118,10 @@ class GameEngine @Inject constructor(
             visionLevels = VisionNode.entries.associate { it.id to visionLevel(it) },
             oathsActive = activeOaths().map { it.id }.toSet(),
             oathsNext = nextOaths().map { it.id }.toSet(),
+            signsRevealed = signsRevealed(),
+            astralDust = statsManager.counter(AchievementStat.ASTRAL_DUST).toInt(),
+            signs = signs().mapValues { it.value.pack() },
+            signsEquipped = equippedNumbers().mapKeys { it.key.id },
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,

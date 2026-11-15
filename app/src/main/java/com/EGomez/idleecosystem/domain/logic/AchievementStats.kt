@@ -184,6 +184,22 @@ object AchievementStat {
     const val OATH_ACTIVE_PREFIX = "oath."
     const val AWAKEN_OATHS_MAX = "awaken_oaths_max"
     const val AWAKEN_OATHS_TOTAL = "awaken_oaths_total"
+    /**
+     * Los Signos Antiguos (v0.21.2): cada Signo como "sign.<n>" (empaquetado), el próximo n,
+     * el Signo equipado en cada planeta, el Polvo Astral y lo que cuentan los logros.
+     */
+    const val SIGN_PREFIX = "sign."
+    const val SIGN_SEQ = "sign_seq"
+    const val SIGN_EQUIP_PREFIX = "sign_eq."
+    const val ASTRAL_DUST = "astral_dust"
+    const val SIGNS_FOUND = "signs_found"
+    const val SIGNS_SOLD = "signs_sold"
+    const val SIGN_BEST_RARITY = "sign_best_rarity"
+    const val SIGN_MAX_LEVEL = "sign_max_level"
+    const val SIGN_PLANETS = "sign_planets"
+    const val SIGN_WITH_PREFIX = "sign_with."
+    const val SIGN_PATH_PREFIX = "sign_path."
+    const val FEAT_SIGN_PERFECT = "feat.sign_perfect"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -226,7 +242,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS
     )
 
     // --- Contadores guardados ---
@@ -391,6 +407,10 @@ object AchievementStat {
     fun visionNode(id: String) = VISION_NODE_PREFIX + id
     fun awakenWith(pactId: String) = AWAKEN_WITH_PREFIX + pactId
     fun awakenPath(pathId: String) = AWAKEN_PATH_PREFIX + pathId
+    fun sign(n: Int) = SIGN_PREFIX + n
+    fun signEquip(planetId: String) = SIGN_EQUIP_PREFIX + planetId
+    fun signWith(pactId: String) = SIGN_WITH_PREFIX + pactId
+    fun signPath(pathId: String) = SIGN_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -413,6 +433,7 @@ object AchievementStat {
         TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
         AWAKENINGS, VISIONS, VISIONS_EARNED, MAX_VISION_GAIN, AWAKEN_TRANSC_BASE, AWAKEN_ETHER_BASE, VISION_RESPECS, FEAT_AWAKEN_DREAMING,
         AWAKEN_OATHS_MAX, AWAKEN_OATHS_TOTAL,
+        SIGN_SEQ, ASTRAL_DUST, SIGNS_FOUND, SIGNS_SOLD, SIGN_BEST_RARITY, SIGN_MAX_LEVEL, FEAT_SIGN_PERFECT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -427,6 +448,7 @@ object AchievementStat {
         LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
         TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
         VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX, OATH_NEXT_PREFIX, OATH_ACTIVE_PREFIX,
+        SIGN_PREFIX, SIGN_EQUIP_PREFIX, SIGN_WITH_PREFIX, SIGN_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

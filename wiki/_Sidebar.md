@@ -22,6 +22,7 @@
 - [Letargo](Letargo)
 - [Pruebas de Trascendencia](Pruebas-de-Trascendencia)
 - [Despertar](Despertar)
+- [Signos Antiguos](Signos-Antiguos)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

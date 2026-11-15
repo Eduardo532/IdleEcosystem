@@ -251,6 +251,12 @@ class MainViewModel @Inject constructor(
             oathsActive = economy.oathsActive,
             oathsNext = economy.oathsNext
         ),
+        signsUi = com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(
+            awakenings = economy.awakenings,
+            dust = economy.astralDust,
+            signs = economy.signs,
+            equipped = economy.signsEquipped
+        ),
         ttrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
             next = economy.ttrialNext,
             active = economy.ttrialActive,
@@ -554,6 +560,16 @@ class MainViewModel @Inject constructor(
     fun awaken() = engine.awaken()
 
     fun setOath(id: String, sworn: Boolean) = engine.setOath(id, sworn)
+
+    fun equipSign(n: Int, planetId: String) = engine.equipSign(n, planetId)
+
+    fun unequipSign(planetId: String) = engine.unequipSign(planetId)
+
+    fun upgradeSign(n: Int) = engine.upgradeSign(n)
+
+    fun sellSign(n: Int) = engine.sellSign(n)
+
+    fun sellCommonSigns() = engine.sellCommonSigns()
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

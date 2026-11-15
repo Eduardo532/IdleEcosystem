@@ -557,4 +557,20 @@
     <string name="oaths_active">In force this Awakening: %1$d Oaths · Visions %2$s</string>
     <string name="oaths_next">For the next Awakening: %1$d Oaths · Visions %2$s</string>
     <string name="oath_in_force">in force</string>
+    <string name="tab_signs">Signs</string>
+    <string name="signs_title">ELDER SIGNS</string>
+    <string name="signs_hint">Each Transcendence grants a Sign and each Awakening, three. Equip them on the planets: each planet doubles the Sign of its affinity.</string>
+    <string name="signs_dust">ASTRAL DUST</string>
+    <string name="signs_planets">PLANETS</string>
+    <string name="signs_affinity">affinity: %1$s</string>
+    <string name="signs_planet_locked">Opens with %1$d Awakenings</string>
+    <string name="signs_planet_empty">No Sign</string>
+    <string name="signs_unequip">Remove</string>
+    <string name="signs_inventory">INVENTORY · %1$d / %2$d</string>
+    <string name="signs_sell_commons">Sell commons</string>
+    <string name="signs_empty">You have no Signs yet: Transcend to get the first one.</string>
+    <string name="signs_bonus">%1$s %2$s</string>
+    <string name="signs_equipped">equipped</string>
+    <string name="signs_upgrade">Upgrade (%1$d)</string>
+    <string name="signs_sell">Sell (+%1$d)</string>
 </resources>

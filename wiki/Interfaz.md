@@ -27,6 +27,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | ↳ Ciclos › Desafíos | Trascender por sexta vez |
 | **Despertar** | amarillo pálido (Visiones) | Despertar | llegar a 10 Trascendencias en total *(v0.21.0)* |
 | | | Visiones | ídem |
+| | | Signos | el primer Despertar *(v0.21.2)* |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 
@@ -57,6 +58,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Desafíos:** la Prueba de Trascendencia en curso (meta, mejor vida y si ya se alcanzó; botón para abandonarla) y las cuatro Pruebas con sus niveles superados, su restricción, su recompensa, la meta siguiente y el botón para elegirla para el próximo ciclo. Al superar una, el aviso de Trascender lo dice. Ver [Pruebas de Trascendencia](Pruebas-de-Trascendencia).
 - **Despertar:** los dos requisitos con su progreso, las Visiones que darías, el botón DESPERTAR (pide confirmación y lista lo que se pierde y lo que se conserva) y los cinco Hitos del Despertar. Al Despertar, un aviso dice cuántas Visiones ganaste. Ver [Despertar](Despertar).
 - **Visiones:** el Árbol de Visiones, de nueve nodos, con su reinicio gratis.
+- **Signos *(v0.21.2)*:** el Polvo Astral, los cuatro planetas (bloqueados, vacíos o con su Signo y su efecto, con botón para quitarlo) y el inventario ordenado por rareza. Cada Signo tiene botones para equiparlo en cada planeta abierto (la afinidad se marca en amarillo), mejorarlo y venderlo. Hay un botón para vender todos los comunes. Ver [Signos Antiguos](Signos-Antiguos).
 - **Juramentos *(v0.21.1)*:** en la pestaña Despertar, debajo del botón, una lista de las 14 Pruebas para jurar (con casilla y peso de Visiones). Arriba se ven los Juramentos vigentes y los jurados para el próximo Despertar, cada grupo con su multiplicador.
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.

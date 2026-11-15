@@ -31,7 +31,8 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     LETHARGY("lethargy", MenuLayer.TRANSCENDENCE),
     TTRIALS("ttrials", MenuLayer.TRANSCENDENCE),
     AWAKEN("awaken", MenuLayer.AWAKENING),
-    VISIONS("visions", MenuLayer.AWAKENING);
+    VISIONS("visions", MenuLayer.AWAKENING),
+    SIGNS("signs", MenuLayer.AWAKENING);
 
     /**
      * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
@@ -131,7 +132,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             chainRevealed: Boolean = false,
             lethargyRevealed: Boolean = false,
             ttrialRevealed: Boolean = false,
-            awakeningRevealed: Boolean = false
+            awakeningRevealed: Boolean = false,
+            signsRevealed: Boolean = false
         ): MenuUnlocks {
             val tabs = mutableSetOf(MenuTab.RESEARCH)
             if (reveal.grimoire) tabs += MenuTab.GRIMOIRE
@@ -154,6 +156,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
                 tabs += MenuTab.AWAKEN
                 tabs += MenuTab.VISIONS
             }
+            if (signsRevealed) tabs += MenuTab.SIGNS
             return MenuUnlocks(tabs)
         }
     }

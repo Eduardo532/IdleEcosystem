@@ -68,6 +68,7 @@ fun MenuTab.title(): String = stringResource(
         MenuTab.CYCLES -> R.string.tab_cycles
         MenuTab.AWAKEN -> R.string.tab_awaken
         MenuTab.VISIONS -> R.string.tab_visions
+        MenuTab.SIGNS -> R.string.tab_signs
         MenuTab.DREAM -> R.string.tab_dream
         MenuTab.CHAIN -> R.string.tab_chain
         MenuTab.LETHARGY -> R.string.tab_lethargy

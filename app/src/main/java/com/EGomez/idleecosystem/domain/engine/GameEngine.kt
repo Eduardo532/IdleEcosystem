@@ -32,6 +32,8 @@ import com.EGomez.idleecosystem.domain.logic.DeepSleep
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.ElderSign
 import com.EGomez.idleecosystem.domain.logic.ElderSigns
+import com.EGomez.idleecosystem.domain.logic.Expeditions
+import com.EGomez.idleecosystem.domain.logic.Relic
 import com.EGomez.idleecosystem.domain.logic.Planet
 import com.EGomez.idleecosystem.domain.logic.SignKind
 import com.EGomez.idleecosystem.domain.logic.SignRarity
@@ -205,6 +207,15 @@ data class EconomyState(
     val astralDust: Int = 0,
     val signs: Map<Int, Long> = emptyMap(),
     val signsEquipped: Map<String, Int> = emptyMap(),
+    /** Expediciones y Reliquias (v0.21.3). */
+    val expeditionRevealed: Boolean = false,
+    val expeditionLevel: Int = 0,
+    val expeditionDealt: Double = 0.0,
+    val expeditionDps: Double = 0.0,
+    val expeditionBest: Int = 0,
+    val expeditionGold: Int = 0,
+    val expeditionGoldOnAwaken: Int = 0,
+    val relicLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -843,6 +854,8 @@ class GameEngine @Inject constructor(
         put(AchievementStat.VISION_LEVELS, VisionNode.entries.sumOf { visionLevel(it) })
         put(AchievementStat.VISION_NODES, VisionNode.entries.count { visionLevel(it) > 0 })
         put(AchievementStat.SIGN_PLANETS, equippedSigns().size)
+        put(AchievementStat.RELIC_LEVELS, Relic.entries.sumOf { relicLevel(it) })
+        put(AchievementStat.RELICS_OWNED, Relic.entries.count { relicLevel(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1067,7 +1080,8 @@ class GameEngine @Inject constructor(
         lethargyRevealed = lethargyRevealed(),
         ttrialRevealed = ttrialRevealed(),
         awakeningRevealed = awakeningRevealed(),
-        signsRevealed = signsRevealed()
+        signsRevealed = signsRevealed(),
+        expeditionRevealed = expeditionRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1220,6 +1234,8 @@ class GameEngine @Inject constructor(
             statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
             addStardust(dust)
         }
+        // La Expedición sigue golpeando mientras no juegas
+        if (diffSeconds > 0) expeditionTick(diffSeconds)
         // El Letargo sigue sumando Sopor mientras no juegas
         if (diffSeconds > 0 && lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS, BigDecimal(diffSeconds))
         // La Cadena de Invocación sigue produciendo
@@ -1291,6 +1307,7 @@ class GameEngine @Inject constructor(
         starsTick()
         encounterTick()
         chainTick()
+        expeditionTick(1L)
         if (lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS)
 
         // Tutoriales basados en recursos
@@ -1435,6 +1452,7 @@ class GameEngine @Inject constructor(
         if (ttrialRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCENDENCE_TRIALS)
         if (awakeningRevealed()) tutorialManager.triggerStep(TutorialStep.AWAKENING)
         if (signsRevealed()) tutorialManager.triggerStep(TutorialStep.ELDER_SIGNS)
+        if (expeditionRevealed()) tutorialManager.triggerStep(TutorialStep.EXPEDITIONS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -2114,7 +2132,7 @@ class GameEngine @Inject constructor(
     private fun visionGainNow(): Int = if (!canAwaken()) 0 else Awakening.visionGain(
         transcendences(), etherSinceAwakening(),
         Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
-            signMultiplier(SignKind.EYE)
+            signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR))
     )
 
     // ---- Juramentos (v0.21.1) ----
@@ -2168,6 +2186,15 @@ class GameEngine @Inject constructor(
         if (kept > 0) statsManager.count(AchievementStat.AWAKEN_OATHS_TOTAL, BigDecimal(kept))
         statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.OATH_ACTIVE_PREFIX) }
         nextOaths().forEach { statsManager.flag(AchievementStat.OATH_ACTIVE_PREFIX + it.id) }
+
+        // La Expedición paga su Oro y vuelve a empezar
+        val gold = Expeditions.goldFor(expeditionLevel())
+        if (gold > 0) {
+            statsManager.count(AchievementStat.EXPEDITION_GOLD, BigDecimal(gold))
+            statsManager.count(AchievementStat.EXPEDITION_GOLD_EARNED, BigDecimal(gold))
+        }
+        statsManager.counters.remove(AchievementStat.EXPEDITION_LEVEL)
+        statsManager.counters.remove(AchievementStat.EXPEDITION_DEALT)
 
         // Desde aquí se cuentan de nuevo las Trascendencias y el Éter
         statsManager.counters[AchievementStat.AWAKEN_TRANSC_BASE] = statsManager.counter(AchievementStat.TRANSCENDENCES)
@@ -2347,6 +2374,61 @@ class GameEngine @Inject constructor(
         addDust(sign.dust())
         statsManager.count(AchievementStat.SIGNS_SOLD)
         return true
+    }
+
+    // =====================================================================
+    // EXPEDICIONES Y RELIQUIAS (v0.21.3)
+    // =====================================================================
+
+    private fun expeditionRevealed(): Boolean = awakenings() >= 1
+
+    private fun expeditionLevel(): Int = statsManager.counter(AchievementStat.EXPEDITION_LEVEL).toInt()
+
+    private fun relicLevel(relic: Relic): Int = statsManager.counter(AchievementStat.relic(relic.id)).toInt()
+
+    private fun expeditionDps(): Double = if (!expeditionRevealed()) 0.0
+    else Expeditions.damagePerSecond(productionPerSecond, Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)))
+
+    /** Golpea al horror en curso con [damage]; anota los vencidos. Devuelve cuántos cayeron. */
+    private fun expeditionHit(damage: Double): Int {
+        if (damage <= 0.0) return 0
+        val (level, dealt, kills) = Expeditions.strike(expeditionLevel(), statsManager.counter(AchievementStat.EXPEDITION_DEALT).toDouble(), damage)
+        statsManager.counters[AchievementStat.EXPEDITION_DEALT] = BigDecimal.valueOf(dealt)
+        if (kills > 0) {
+            statsManager.counters[AchievementStat.EXPEDITION_LEVEL] = BigDecimal(level)
+            statsManager.record(AchievementStat.EXPEDITION_BEST, BigDecimal(level))
+            statsManager.count(AchievementStat.EXPEDITION_KILLS, BigDecimal(kills))
+            statsManager.flag(AchievementStat.expeditionWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.expeditionPath(it.id)) }
+        }
+        return kills
+    }
+
+    /** [seconds] de Expedición: el círculo golpea solo. */
+    private fun expeditionTick(seconds: Long) {
+        if (!expeditionRevealed()) return
+        expeditionHit(expeditionDps() * seconds)
+    }
+
+    /** Un golpe a mano: una décima del daño por segundo. */
+    fun strikeExpedition() = post {
+        if (!expeditionRevealed()) return@post
+        if (expeditionHit(expeditionDps() * Expeditions.TAP_SHARE) > 0) statsManager.flag(AchievementStat.FEAT_EXPEDITION_TAP)
+        publishEconomy()
+    }
+
+    /** Sube un nivel una Reliquia con Oro de Expedición. */
+    fun buyRelic(id: String) = post {
+        val relic = Relic.fromId(id) ?: return@post
+        val level = relicLevel(relic)
+        val gold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt()
+        if (relic.isMaxed(level) || !relic.isUnlocked(statsManager.counter(AchievementStat.EXPEDITION_BEST).toInt())) return@post
+        if (gold < relic.cost(level)) return@post
+        statsManager.counters[AchievementStat.EXPEDITION_GOLD] = BigDecimal(gold - relic.cost(level))
+        statsManager.counters[AchievementStat.relic(relic.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
     }
 
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
@@ -2568,7 +2650,8 @@ class GameEngine @Inject constructor(
             Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
                 beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)) *
                     TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)) *
-                    Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER),
+                    Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER) *
+                    Expeditions.etherMultiplier(relicLevel(Relic.CROWN)),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -2939,6 +3022,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(TranscendenceTrials.productionReward(ttrialLevel(TranscendenceTrial.HUNGER))))
             .multiply(BigDecimal.valueOf(Awakening.productionMultiplier(visionLevel(VisionNode.FIRST))))
             .multiply(BigDecimal.valueOf(signMultiplier(SignKind.FLAME)))
+            .multiply(BigDecimal.valueOf(Expeditions.productionMultiplier(relicLevel(Relic.TRAPEZOHEDRON))))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -3122,6 +3206,14 @@ class GameEngine @Inject constructor(
             astralDust = statsManager.counter(AchievementStat.ASTRAL_DUST).toInt(),
             signs = signs().mapValues { it.value.pack() },
             signsEquipped = equippedNumbers().mapKeys { it.key.id },
+            expeditionRevealed = expeditionRevealed(),
+            expeditionLevel = expeditionLevel(),
+            expeditionDealt = statsManager.counter(AchievementStat.EXPEDITION_DEALT).toDouble(),
+            expeditionDps = expeditionDps(),
+            expeditionBest = statsManager.counter(AchievementStat.EXPEDITION_BEST).toInt(),
+            expeditionGold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt(),
+            expeditionGoldOnAwaken = Expeditions.goldFor(expeditionLevel()),
+            relicLevels = Relic.entries.associate { it.id to relicLevel(it) },
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,

@@ -175,6 +175,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - 1 Signo por Trascendencia y 3 por Despertar (desde el primer Despertar); inventario de 30. Rareza por peso 50/30/14/5/1 (x1, x2, x4, x8, x16); calidad 1–100; nivel 1–10.
 - Bono `base × rareza × (0,5 + calidad) × (1 + 0,5·(nivel − 1))`; equipado da `x(1 + bono)`, `x(1 + 2·bono)` en el planeta de su afinidad. Mejorar `10 × rareza × 2^(nivel − 1)`; vender `5 × rareza × (0,5 + calidad) × nivel`. *(Código: `ElderSigns`, `ElderSign`, `Planet`; test: `ElderSignsTest`.)*
 
+## Expediciones y Reliquias *(v0.21.3)*
+
+- Daño por segundo `(1 + log10(1 + producción))² × 2^Espejo`; golpe a mano 10 % de eso. Vida `100 × 1,25^nivel`; el daño sobrante pasa al siguiente (hasta 10.000 horrores de una vez). Sigue sin conexión.
+- Al Despertar: Oro `⌊nivel^1,3⌋` y el nivel vuelve a 0. Reliquias: producción `5^n`, Éter `1 + 0,5n`, Visiones `1 + 0,1n`. *(Código: `Expeditions`, `Relic`; test: `ExpeditionsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

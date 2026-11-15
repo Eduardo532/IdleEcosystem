@@ -47,6 +47,7 @@ class ContentTranslationsTest {
         "Signos Antiguos" to com.EGomez.idleecosystem.domain.logic.SignKind.entries.flatMap { listOf(it.title, it.effect) } +
             com.EGomez.idleecosystem.domain.logic.SignRarity.entries.map { it.title } +
             com.EGomez.idleecosystem.domain.logic.Planet.entries.map { it.title },
+        "Reliquias" to com.EGomez.idleecosystem.domain.logic.Relic.entries.flatMap { listOf(it.title, it.description) },
         "Bestiario" to com.EGomez.idleecosystem.domain.logic.Bestiary.beasts.flatMap { listOf(it.name, it.lore) } +
             com.EGomez.idleecosystem.domain.logic.Bestiary.domains.flatMap { listOf(it.title, it.description) } +
             com.EGomez.idleecosystem.domain.logic.BeastRarity.entries.map { it.title }

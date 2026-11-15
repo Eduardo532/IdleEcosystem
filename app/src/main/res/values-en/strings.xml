@@ -573,4 +573,16 @@
     <string name="signs_equipped">equipped</string>
     <string name="signs_upgrade">Upgrade (%1$d)</string>
     <string name="signs_sell">Sell (+%1$d)</string>
+    <string name="tab_expedition">Expedition</string>
+    <string name="expedition_title">THE EXPEDITION</string>
+    <string name="expedition_hint">The circle strikes by itself every second, with damage that grows with your production. On Awakening, the level pays Gold.</string>
+    <string name="expedition_gold">GOLD</string>
+    <string name="expedition_level">Level %1$d · best %2$d</string>
+    <string name="expedition_health">Health: %1$s / %2$s</string>
+    <string name="expedition_dps">Damage per second: %1$s</string>
+    <string name="expedition_strike">STRIKE</string>
+    <string name="expedition_gold_on_awaken">On Awakening: +%1$d Gold</string>
+    <string name="relics_title">RELICS</string>
+    <string name="relic_locked">Opens at Expedition level %1$d</string>
+    <string name="relic_cost">%1$d Gold</string>
 </resources>

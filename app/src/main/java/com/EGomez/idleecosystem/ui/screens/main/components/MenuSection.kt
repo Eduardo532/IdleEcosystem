@@ -143,6 +143,9 @@ fun MenuSection(
     onUpgradeSign: (Int) -> Unit = {},
     onSellSign: (Int) -> Unit = {},
     onSellCommonSigns: () -> Unit = {},
+    expeditionUi: ExpeditionUi = ExpeditionUi(),
+    onStrikeExpedition: () -> Unit = {},
+    onBuyRelic: (String) -> Unit = {},
     onBuyVisionNode: (String) -> Unit = {},
     onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
@@ -450,6 +453,7 @@ fun MenuSection(
                     MenuTab.AWAKEN -> item { AwakeningPanel(awakeningUi, onAwaken, onSetOath) }
                     MenuTab.VISIONS -> item { VisionsPanel(awakeningUi, onBuyVisionNode, onRespecVisions) }
                     MenuTab.SIGNS -> item { SignsPanel(signsUi, onEquipSign, onUnequipSign, onUpgradeSign, onSellSign, onSellCommonSigns) }
+                    MenuTab.EXPEDITION -> item { ExpeditionPanel(expeditionUi, onStrikeExpedition, onBuyRelic) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
                     MenuTab.CYCLES -> Unit
                 }

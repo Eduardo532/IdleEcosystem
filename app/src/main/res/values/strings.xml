@@ -574,4 +574,16 @@
     <string name="signs_equipped">equipado</string>
     <string name="signs_upgrade">Mejorar (%1$d)</string>
     <string name="signs_sell">Vender (+%1$d)</string>
+    <string name="tab_expedition">Expedición</string>
+    <string name="expedition_title">LA EXPEDICIÓN</string>
+    <string name="expedition_hint">El círculo golpea solo cada segundo, con un daño que crece con tu producción. Al Despertar, el nivel paga Oro.</string>
+    <string name="expedition_gold">ORO</string>
+    <string name="expedition_level">Nivel %1$d · mejor %2$d</string>
+    <string name="expedition_health">Vida: %1$s / %2$s</string>
+    <string name="expedition_dps">Daño por segundo: %1$s</string>
+    <string name="expedition_strike">GOLPEAR</string>
+    <string name="expedition_gold_on_awaken">Al Despertar: +%1$d de Oro</string>
+    <string name="relics_title">RELIQUIAS</string>
+    <string name="relic_locked">Se abre al llegar al nivel %1$d de Expedición</string>
+    <string name="relic_cost">%1$d Oro</string>
 </resources>

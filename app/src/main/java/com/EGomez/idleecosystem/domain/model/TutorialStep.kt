@@ -322,5 +322,12 @@ enum class TutorialStep(
         "Los Signos Antiguos",
         "Despertaste, y ahora ves los Signos que siempre estuvieron en el cielo. Cada Trascendencia te da un Signo Antiguo, y cada Despertar, tres. En la pestaña Signos los equipas en los planetas: cada planeta duplica el Signo de su afinidad. Los Signos tienen rareza y calidad, suben de nivel con Polvo Astral y se venden por él. Se abren más planetas con más Despertares.",
         "Tras el primer Despertar"
+    ),
+
+    EXPEDITIONS(
+        "expeditions",
+        "La Expedición",
+        "Al despertar trajiste algo contigo: un círculo que golpea. En la pestaña Expedición el círculo ataca cada segundo a un horror, con un daño que crece con tu producción, y también puedes golpear a mano. Cada horror vencido sube el nivel, que no tiene tope. Al Despertar, el nivel te paga Oro y la Expedición empieza de nuevo. El Oro compra Reliquias, que se abren al llegar a ciertos niveles y valen para siempre.",
+        "Tras el primer Despertar"
     )
 }

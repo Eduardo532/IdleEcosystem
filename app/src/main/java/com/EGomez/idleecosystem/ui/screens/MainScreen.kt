@@ -355,7 +355,7 @@ fun MainScreen(
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
                             onBeastViewed = { viewModel.onBeastViewed(it) },
-                            onBuyStar = { viewModel.buyStarUpgrade(it) },
+                            onBuyStar = { id, amount -> viewModel.buyStarUpgrade(id, amount) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
                             runeCatches = uiState.runeCatches,
@@ -744,7 +744,14 @@ fun MainScreen(
                     onDismiss = { showAchievementsDialog = false }
                 )
             }
-            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
+            if (showPrestigeShopDialog) {
+                PrestigeShopDialog(
+                    uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity,
+                    onBuy = { viewModel.onBuyPrestigeUpgrade(it) },
+                    onDismiss = { showPrestigeShopDialog = false },
+                    onBuyMany = { id, amount -> viewModel.onBuyPrestigeUpgrade(id, amount) }
+                )
+            }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
             uiState.currentEvent?.let { EventDialog(it, uiState.eventResultText) { opt -> viewModel.onEventOptionSelected(opt) } }

@@ -165,6 +165,8 @@ Si ya recorrías una Senda antes de la v0.19.2, la conservas y puedes seguir sub
 
 **Cambiar de Senda:** solo al Ascender. En la confirmación, toca la fila **Senda** para ver la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
 
+**Comprar varios niveles *(v0.20.5)*:** la ficha de un nodo tiene la fila **Comprar: x1 · x10 · x100 · MAX**. Con x10 o x100 se compra el lote entero si alcanza la Cordura (recortado al tope del nodo); con MAX, todos los niveles que alcancen. El botón dice cuántos niveles sube y el costo total, y "Siguiente" muestra el efecto al nivel que se llega. Las Sendas se compran de a una.
+
 ## Progreso sin conexión
 
 Si cierras el juego más de 10 segundos, al volver recibes:

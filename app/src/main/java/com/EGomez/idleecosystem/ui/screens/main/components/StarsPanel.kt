@@ -5,6 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.EGomez.idleecosystem.domain.logic.BulkBuy
+import com.EGomez.idleecosystem.ui.components.BulkAmountRow
+import java.math.BigDecimal
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +56,8 @@ private fun clock(seconds: Long): String = "%d:%02d".format(seconds / 60, second
  * están en posición (y cuánto falta) y las mejoras estelares.
  */
 @Composable
-fun StarsPanel(state: StarsUi, onBuy: (String) -> Unit) {
+fun StarsPanel(state: StarsUi, onBuy: (String) -> Unit, onBuyMany: (String, Int) -> Unit = { id, _ -> onBuy(id) }) {
+    var amount by rememberSaveable { mutableIntStateOf(1) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(STARS_PANEL_TAG)) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -74,8 +83,9 @@ fun StarsPanel(state: StarsUi, onBuy: (String) -> Unit) {
         AlignmentCard(state)
         Spacer(modifier = Modifier.height(8.dp))
         Text(stringResource(R.string.stars_upgrades_title), color = StarGold, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        BulkAmountRow(amount, StarGold, Modifier.padding(top = 6.dp)) { amount = it }
         StarUpgrade.entries.forEach { upgrade ->
-            StarRow(upgrade, state.levels[upgrade.id] ?: 0, state.stardust, onBuy)
+            StarRow(upgrade, state.levels[upgrade.id] ?: 0, state.stardust, amount, onBuyMany)
         }
     }
 }
@@ -111,9 +121,12 @@ private fun AlignmentCard(state: StarsUi) {
 }
 
 @Composable
-private fun StarRow(upgrade: StarUpgrade, level: Int, dust: Double, onBuy: (String) -> Unit) {
+private fun StarRow(upgrade: StarUpgrade, level: Int, dust: Double, amount: Int, onBuy: (String, Int) -> Unit) {
     val maxed = upgrade.isMaxed(level)
-    val cost = upgrade.cost(level)
+    val plan = remember(level, dust, amount) {
+        BulkBuy.plan(level, upgrade.maxLevel, BigDecimal.valueOf(dust), amount) { BigDecimal.valueOf(upgrade.cost(it)) }
+    }
+    val cost = plan.cost.toDouble()
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color(0xFF1C1A12),
@@ -135,13 +148,15 @@ private fun StarRow(upgrade: StarUpgrade, level: Int, dust: Double, onBuy: (Stri
                 Text(stringResource(R.string.eternal_maxed), color = StarGold, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             } else {
                 Button(
-                    onClick = { onBuy(upgrade.id) },
-                    enabled = dust >= cost,
+                    onClick = { onBuy(upgrade.id, amount) },
+                    enabled = !plan.isEmpty,
                     colors = ButtonDefaults.buttonColors(containerColor = StarGold, contentColor = Color.Black),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                     modifier = Modifier.testTag(STAR_BUY_TAG + upgrade.id)
                 ) {
-                    Text("✦ " + cost.pretty(), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    // "✦ 30" o, en lote, "x10 · ✦ 2.95K"
+                    val lot = if (plan.levels > 1) "x${plan.levels} · " else ""
+                    Text(lot + "✦ " + cost.pretty(), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

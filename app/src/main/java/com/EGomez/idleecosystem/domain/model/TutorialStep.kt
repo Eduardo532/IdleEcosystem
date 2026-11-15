@@ -308,5 +308,12 @@ enum class TutorialStep(
         "Las Pruebas de Trascendencia",
         "Seis veces trascendiste: ahora el ciclo entero puede ser una prueba. En Ciclos › Desafíos elige una Prueba de Trascendencia para el próximo ciclo; empieza al Trascender. Supérala con una vida que llegue al Conocimiento que pide su nivel y vuelve a Trascender. Cada Prueba tiene cinco niveles, de la I a la V, y su recompensa vale siempre.",
         "Tras la sexta Trascendencia"
+    ),
+
+    AWAKENING(
+        "awakening",
+        "El Despertar",
+        "Diez veces trascendiste y algo, por fin, abre los ojos. La capa Despertar reinicia la Trascendencia entera (Éter, mejoras eternas, Laboratorio, Estrellas y la cuenta de Trascendencias) a cambio de Visiones. Para Despertar necesitas 10 Trascendencias desde el último Despertar y 5 niveles superados de Pruebas de Trascendencia. Conservas los logros, el Bestiario, el Árbol del Sueño y las Pruebas de Trascendencia. Las Visiones compran el Árbol de Visiones, que vale para siempre, y cada Despertar acerca un Hito.",
+        "Tras la décima Trascendencia"
     )
 }

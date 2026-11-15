@@ -1,6 +1,6 @@
 # Logros
 
-Hay **545 logros**: 113 originales y **432 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **559 logros**: 113 originales y **446 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -282,6 +282,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Las Formas Ocultas | Supera una Prueba de Trascendencia con el pacto de Daoloth | +1 % |
 | La Mano Firme | Supera una Prueba de Trascendencia recorriendo la Senda de la Mano | +1 % |
 | Prueba Soñada | Supera una Prueba de Trascendencia recorriendo la Senda del Sueño | +1 % |
+| Primer Despertar | Despierta por primera vez | +1 % |
+| Ojos que no Duermen | Despierta 3 veces | +1 % |
+| El Que Ve | Despierta 10 veces | +2 % |
+| Destello | Gana 10 Visiones en total | +1 % |
+| Profecía | Gana 100 Visiones en total | +1 % |
+| El Ojo del Mundo | Gana 1.000 Visiones en total | +2 % |
+| Pestañeo | Sube 1 nivel en el Árbol de Visiones | +1 % |
+| Ojos de Mil Años | Suma 30 niveles en el Árbol de Visiones | +1 % |
+| El Árbol que Mira | Ten al menos un nivel en los 9 nodos del Árbol de Visiones | +2 % |
+| Bajo el Signo Amarillo | Despierta con el pacto de Hastur | +1 % |
+| Un Párpado Tiembla | Despierta con el pacto de Azathoth | +1 % |
+| Mente Despierta | Despierta recorriendo la Senda de la Mente | +1 % |
+| Despertar en el Vacío | Despierta recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -455,7 +468,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **35 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **36 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

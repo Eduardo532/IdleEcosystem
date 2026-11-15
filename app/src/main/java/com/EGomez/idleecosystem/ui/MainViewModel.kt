@@ -239,6 +239,16 @@ class MainViewModel @Inject constructor(
             active = economy.lethargyActive,
             seconds = economy.lethargySeconds
         ),
+        awakeningUi = com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(
+            awakenings = economy.awakenings,
+            visions = economy.visions,
+            visionsEarned = economy.visionsEarned,
+            visionGain = economy.visionGain,
+            canAwaken = economy.canAwaken,
+            transcendences = economy.transcendences,
+            trialLevels = economy.ttrialTotalLevels,
+            levels = economy.visionLevels
+        ),
         ttrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
             next = economy.ttrialNext,
             active = economy.ttrialActive,
@@ -317,6 +327,14 @@ class MainViewModel @Inject constructor(
                     _uiState.update {
                         if (it.transcendNotice == gain) it.copy(transcendNotice = null, dreamNotice = null, trialPassedNotice = null) else it
                     }
+                }
+            }
+            is EngineEffect.Awakened -> {
+                val visions = effect.visions
+                _uiState.update { it.copy(awakenNotice = visions) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
                 }
             }
             is EngineEffect.TrialCompleted -> {
@@ -530,6 +548,12 @@ class MainViewModel @Inject constructor(
     fun chooseTranscendenceTrial(id: String?) = engine.chooseTranscendenceTrial(id)
 
     fun abandonTranscendenceTrial() = engine.abandonTranscendenceTrial()
+
+    fun awaken() = engine.awaken()
+
+    fun buyVisionNode(id: String) = engine.buyVisionNode(id)
+
+    fun respecVisions() = engine.respecVisions()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

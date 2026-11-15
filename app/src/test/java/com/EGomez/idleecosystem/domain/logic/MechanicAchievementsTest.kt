@@ -49,6 +49,7 @@ class MechanicAchievementsTest {
         "Cadena de Invocación" to { it.stat?.startsWith("chain") == true },
         "Letargo" to { it.stat?.startsWith("lethargy") == true },
         "Pruebas de Trascendencia" to { it.stat?.startsWith("ttrial") == true },
+        "Despertar" to { s -> s.stat?.let { it.startsWith("awaken") || it.startsWith("vision") || it == AchievementStat.FEAT_AWAKEN_DREAMING } == true },
         "Bestiario" to {
             it.stat?.startsWith("beast") == true || it.stat in setOf(
                 AchievementStat.SEALS_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED, AchievementStat.SUMMONS,

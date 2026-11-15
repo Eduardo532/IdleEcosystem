@@ -195,6 +195,24 @@ object GameIcons {
         }
     }
 
+    /** Ojo abierto: el Despertar y sus Visiones. */
+    val Eye: ImageVector by lazy {
+        icon("Eye") {
+            moveTo(2f, 12f)
+            curveTo(4.5f, 7f, 8f, 5f, 12f, 5f)
+            curveTo(16f, 5f, 19.5f, 7f, 22f, 12f)
+            curveTo(19.5f, 17f, 16f, 19f, 12f, 19f)
+            curveTo(8f, 19f, 4.5f, 17f, 2f, 12f)
+            close()
+            moveTo(15f, 12f)
+            curveTo(15f, 13.7f, 13.7f, 15f, 12f, 15f)
+            curveTo(10.3f, 15f, 9f, 13.7f, 9f, 12f)
+            curveTo(9f, 10.3f, 10.3f, 9f, 12f, 9f)
+            curveTo(13.7f, 9f, 15f, 10.3f, 15f, 12f)
+            close()
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

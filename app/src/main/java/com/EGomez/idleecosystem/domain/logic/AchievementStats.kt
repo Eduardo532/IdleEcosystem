@@ -158,6 +158,24 @@ object AchievementStat {
     const val TTRIAL_ABANDONED = "ttrial_abandoned"
     const val TTRIAL_WITH_PREFIX = "ttrial_with."
     const val TTRIAL_PATH_PREFIX = "ttrial_path."
+    /**
+     * El Despertar (v0.21.0): Despertares, Visiones (las que hay y las ganadas), la cuenta
+     * de Trascendencias y de Éter ganado al último Despertar (para contar desde ahí sin
+     * tocar los totales), nodos del Árbol de Visiones y con qué pacto o Senda se Despertó.
+     */
+    const val AWAKENINGS = "awakenings"
+    const val VISIONS = "visions"
+    const val VISIONS_EARNED = "visions_earned"
+    const val MAX_VISION_GAIN = "max.vision_gain"
+    const val AWAKEN_TRANSC_BASE = "awaken.transc_base"
+    const val AWAKEN_ETHER_BASE = "awaken.ether_base"
+    const val VISION_NODE_PREFIX = "vision."
+    const val VISION_LEVELS = "vision_levels"
+    const val VISION_NODES = "vision_nodes"
+    const val VISION_RESPECS = "vision_respecs"
+    const val AWAKEN_WITH_PREFIX = "awaken_with."
+    const val AWAKEN_PATH_PREFIX = "awaken_path."
+    const val FEAT_AWAKEN_DREAMING = "feat.awaken_dreaming"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -200,7 +218,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES
     )
 
     // --- Contadores guardados ---
@@ -362,6 +380,9 @@ object AchievementStat {
     fun ttrial(id: String) = TTRIAL_PREFIX + id
     fun ttrialWith(pactId: String) = TTRIAL_WITH_PREFIX + pactId
     fun ttrialPath(pathId: String) = TTRIAL_PATH_PREFIX + pathId
+    fun visionNode(id: String) = VISION_NODE_PREFIX + id
+    fun awakenWith(pactId: String) = AWAKEN_WITH_PREFIX + pactId
+    fun awakenPath(pathId: String) = AWAKEN_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -382,6 +403,7 @@ object AchievementStat {
         CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
         LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
         TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
+        AWAKENINGS, VISIONS, VISIONS_EARNED, MAX_VISION_GAIN, AWAKEN_TRANSC_BASE, AWAKEN_ETHER_BASE, VISION_RESPECS, FEAT_AWAKEN_DREAMING,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -395,6 +417,7 @@ object AchievementStat {
         CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
         LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
         TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
+        VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

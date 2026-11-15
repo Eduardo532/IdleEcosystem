@@ -134,6 +134,10 @@ fun MenuSection(
     ttrialsUi: TranscendenceTrialsUi = TranscendenceTrialsUi(),
     onChooseTranscendenceTrial: (String?) -> Unit = {},
     onAbandonTranscendenceTrial: () -> Unit = {},
+    awakeningUi: AwakeningUi = AwakeningUi(),
+    onAwaken: () -> Unit = {},
+    onBuyVisionNode: (String) -> Unit = {},
+    onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
@@ -436,6 +440,8 @@ fun MenuSection(
                     MenuTab.CHAIN -> item { ChainPanel(chainUi, onBuyInvocation, onBuyMaxInvocations) }
                     MenuTab.LETHARGY -> item { LethargyPanel(lethargyUi, onSetLethargy) }
                     MenuTab.TTRIALS -> item { TranscendenceTrialsPanel(ttrialsUi, onChooseTranscendenceTrial, onAbandonTranscendenceTrial) }
+                    MenuTab.AWAKEN -> item { AwakeningPanel(awakeningUi, onAwaken) }
+                    MenuTab.VISIONS -> item { VisionsPanel(awakeningUi, onBuyVisionNode, onRespecVisions) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
                     MenuTab.CYCLES -> Unit
                 }

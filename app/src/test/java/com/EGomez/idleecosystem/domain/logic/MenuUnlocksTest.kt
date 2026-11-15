@@ -46,7 +46,7 @@ class MenuUnlocksTest {
     fun `runes and the transcendence layer need their own discoveries`() {
         assertTrue(compute(SystemReveal(), ascensions = 5, runeSlots = 1).has(MenuTab.RUNES))
         val transcended = compute(SystemReveal(), ascensions = 60, transcend = true, mutations = true, mastery = true)
-        assertEquals(MenuLayer.entries, transcended.layers)
+        assertEquals(listOf(MenuLayer.LIFE, MenuLayer.ASCENSION, MenuLayer.TRANSCENDENCE), transcended.layers)
         assertEquals(listOf(MenuTab.ETHER, MenuTab.MUTATIONS), transcended.tabsOf(MenuLayer.TRANSCENDENCE))
         assertTrue(transcended.has(MenuTab.RUNES))
         assertNull(transcended.next)
@@ -67,6 +67,14 @@ class MenuUnlocksTest {
         assertEquals(MenuTab.ETHER, all.entryOf(MenuTab.ETHER))
         assertEquals(MenuTab.LAB, all.entryOf(MenuTab.LAB))
         assertTrue(MenuTab.CYCLES in MenuUnlocks.NEVER_NEW)
+    }
+
+    @Test
+    fun `the awakening layer brings its two tabs`() {
+        val awake = MenuUnlocks.compute(SystemReveal(), 60, 0, false, true, true, awakeningRevealed = true)
+        assertEquals(listOf(MenuTab.AWAKEN, MenuTab.VISIONS), awake.topTabsOf(MenuLayer.AWAKENING))
+        assertTrue(MenuLayer.AWAKENING in awake.layers)
+        assertFalse(MenuLayer.AWAKENING in compute(transcend = true).layers)
     }
 
     @Test

@@ -57,6 +57,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Desafíos:** la Prueba de Trascendencia en curso (meta, mejor vida y si ya se alcanzó; botón para abandonarla) y las cuatro Pruebas con sus niveles superados, su restricción, su recompensa, la meta siguiente y el botón para elegirla para el próximo ciclo. Al superar una, el aviso de Trascender lo dice. Ver [Pruebas de Trascendencia](Pruebas-de-Trascendencia).
 - **Despertar:** los dos requisitos con su progreso, las Visiones que darías, el botón DESPERTAR (pide confirmación y lista lo que se pierde y lo que se conserva) y los cinco Hitos del Despertar. Al Despertar, un aviso dice cuántas Visiones ganaste. Ver [Despertar](Despertar).
 - **Visiones:** el Árbol de Visiones, de nueve nodos, con su reinicio gratis.
+- **Juramentos *(v0.21.1)*:** en la pestaña Despertar, debajo del botón, una lista de las 14 Pruebas para jurar (con casilla y peso de Visiones). Arriba se ven los Juramentos vigentes y los jurados para el próximo Despertar, cada grupo con su multiplicador.
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

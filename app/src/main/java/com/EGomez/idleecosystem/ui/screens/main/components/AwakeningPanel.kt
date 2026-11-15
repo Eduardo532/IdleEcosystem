@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.domain.logic.Awakening
 import com.EGomez.idleecosystem.domain.logic.AwakeningMilestone
+import com.EGomez.idleecosystem.domain.logic.Oaths
 import com.EGomez.idleecosystem.domain.logic.VisionNode
 import com.EGomez.idleecosystem.ui.components.GameIcons
 import com.EGomez.idleecosystem.ui.components.IconLabel
@@ -33,7 +34,10 @@ data class AwakeningUi(
     val canAwaken: Boolean = false,
     val transcendences: Int = 0,
     val trialLevels: Int = 0,
-    val levels: Map<String, Int> = emptyMap()
+    val levels: Map<String, Int> = emptyMap(),
+    /** Juramentos (v0.21.1). */
+    val oathsActive: Set<String> = emptySet(),
+    val oathsNext: Set<String> = emptySet()
 )
 
 /**
@@ -41,7 +45,7 @@ data class AwakeningUi(
  * confirmación) y los Hitos del Despertar.
  */
 @Composable
-fun AwakeningPanel(ui: AwakeningUi, onAwaken: () -> Unit) {
+fun AwakeningPanel(ui: AwakeningUi, onAwaken: () -> Unit, onSetOath: (String, Boolean) -> Unit = { _, _ -> }) {
     var confirming by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(AWAKEN_PANEL_TAG)) {
         Surface(
@@ -93,6 +97,7 @@ fun AwakeningPanel(ui: AwakeningUi, onAwaken: () -> Unit) {
                 }
             }
         }
+        OathsSection(ui, onSetOath)
         // Hitos
         Text(
             stringResource(R.string.awaken_milestones),
@@ -147,6 +152,75 @@ fun AwakeningPanel(ui: AwakeningUi, onAwaken: () -> Unit) {
         )
     }
 }
+
+/**
+ * Los Juramentos (v0.21.1): los que rigen este Despertar (y cuánto multiplican las
+ * Visiones) y la lista para jurar los del próximo.
+ */
+@Composable
+private fun OathsSection(ui: AwakeningUi, onSetOath: (String, Boolean) -> Unit) {
+    val active = Oaths.all.filter { it.id in ui.oathsActive }
+    val next = Oaths.all.filter { it.id in ui.oathsNext }
+    Text(
+        stringResource(R.string.oaths_title),
+        color = VisionColor,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(top = 12.dp)
+    )
+    Text(stringResource(R.string.oaths_hint), color = Color.LightGray, fontSize = 11.sp)
+    Text(
+        if (active.isEmpty()) stringResource(R.string.oaths_active_none)
+        else stringResource(R.string.oaths_active, active.size, multiplier(Oaths.visionMultiplier(active))),
+        color = if (active.isEmpty()) Color.Gray else VisionColor,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(top = 4.dp).testTag(OATHS_ACTIVE_TAG)
+    )
+    Text(
+        stringResource(R.string.oaths_next, next.size, multiplier(Oaths.visionMultiplier(next))),
+        color = Color.White,
+        fontSize = 12.sp,
+        modifier = Modifier.testTag(OATHS_NEXT_TAG)
+    )
+    Oaths.all.forEach { oath ->
+        val sworn = oath.id in ui.oathsNext
+        Surface(
+            onClick = { onSetOath(oath.id, !sworn) },
+            shape = RoundedCornerShape(10.dp),
+            color = if (sworn) Color(0xFF24220F) else Color(0xFF16150F),
+            border = BorderStroke(1.dp, if (sworn) VisionColor else Color(0xFF26251A)),
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp).testTag(OATH_TAG + oath.id)
+        ) {
+            Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        tr(oath.title) + if (oath.id in ui.oathsActive) " · " + stringResource(R.string.oath_in_force) else "",
+                        color = if (sworn) VisionColor else Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(tr(oath.rule), color = Color.LightGray, fontSize = 11.sp)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "+" + (oath.weight * 100).toInt() + " %",
+                    color = if (sworn) VisionColor else Color.Gray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Checkbox(
+                    checked = sworn,
+                    onCheckedChange = { onSetOath(oath.id, it) },
+                    colors = CheckboxDefaults.colors(checkedColor = VisionColor, checkmarkColor = Color.Black)
+                )
+            }
+        }
+    }
+}
+
+/** "x1.70". */
+private fun multiplier(value: Double): String = "x" + "%.2f".format(java.util.Locale.US, value)
 
 @Composable
 private fun Requirement(text: String, met: Boolean) {
@@ -236,6 +310,9 @@ private fun VisionNodeRow(node: VisionNode, levels: Map<String, Int>, visions: I
 }
 
 const val AWAKEN_PANEL_TAG = "awaken_panel"
+const val OATHS_ACTIVE_TAG = "oaths_active"
+const val OATHS_NEXT_TAG = "oaths_next"
+const val OATH_TAG = "oath_"
 const val AWAKEN_BUTTON_TAG = "awaken_button"
 const val AWAKEN_CONFIRM_TAG = "awaken_confirm"
 const val AWAKEN_MILESTONE_TAG = "awaken_milestone_"

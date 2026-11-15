@@ -551,4 +551,10 @@
     <string name="visions_tree_hint">Its effects last forever, even after Awakening. Resetting it is free.</string>
     <string name="visions_cost">%1$d V</string>
     <string name="visions_respec">Reset the tree (refunds %1$d V)</string>
+    <string name="oaths_title">OATHS</string>
+    <string name="oaths_hint">Swear Trials of any layer for the next Awakening: their rules will govern every life and cycle until the following Awakening, and multiply the Visions you gain when you fulfil it. Your choice is kept.</string>
+    <string name="oaths_active_none">This Awakening has no Oaths.</string>
+    <string name="oaths_active">In force this Awakening: %1$d Oaths · Visions %2$s</string>
+    <string name="oaths_next">For the next Awakening: %1$d Oaths · Visions %2$s</string>
+    <string name="oath_in_force">in force</string>
 </resources>

@@ -552,4 +552,10 @@
     <string name="visions_tree_hint">Sus efectos valen para siempre, también después de Despertar. Reiniciarlo es gratis.</string>
     <string name="visions_cost">%1$d V</string>
     <string name="visions_respec">Reiniciar el árbol (devuelve %1$d V)</string>
+    <string name="oaths_title">JURAMENTOS</string>
+    <string name="oaths_hint">Jura Pruebas de cualquier capa para el próximo Despertar: sus reglas regirán cada vida y cada ciclo hasta el Despertar siguiente, y multiplicarán las Visiones que ganes al cumplirlo. La elección se conserva.</string>
+    <string name="oaths_active_none">Este Despertar no tiene Juramentos.</string>
+    <string name="oaths_active">Rigen este Despertar: %1$d Juramentos · Visiones %2$s</string>
+    <string name="oaths_next">Para el próximo Despertar: %1$d Juramentos · Visiones %2$s</string>
+    <string name="oath_in_force">vigente</string>
 </resources>

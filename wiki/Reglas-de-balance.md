@@ -166,6 +166,10 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Reinicia Éter, mejoras eternas, Laboratorio, Estrellas, consagraciones y la cuenta de Trascendencias (con una base guardada: los totales no cambian). Los sistemas se descubren con las Trascendencias totales y los Hitos de Trascendencia usan las del Despertar más 5 (1 Despertar) o 12 (10 Despertares).
 - Árbol de Visiones: producción `10^n`, Cordura `3^n`, Éter `2^n`, +10 Ascensiones iniciales, −5 Ascensiones para Trascender (mínimo 10), sin conexión `3^n`, Puntos de Sueño `1,5^n`, Visiones `+25 %·n`, producción `^(1 + 0,02n)`. *(Código: `Awakening`, `VisionNode`, `AwakeningMilestone`; test: `AwakeningTest`.)*
 
+## Juramentos *(v0.21.1)*
+
+- Visiones `x(1 + 0,2·Juramentos de Locura + 0,5·Juramentos de Trascendencia)`, con los Juramentos que rigen el Despertar que se cumple. Las reglas se combinan con `TrialRules.combinedWith`: OR en las prohibiciones, producto en costos y producción, mínimo en tipos de edificio. *(Código: `Oaths`; test: `OathsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

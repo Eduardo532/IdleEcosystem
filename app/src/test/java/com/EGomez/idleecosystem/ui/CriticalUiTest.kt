@@ -537,6 +537,45 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `stellar upgrades can be bought ten at a time or to the max`() {
+        val bought = mutableListOf<Pair<String, Int>>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.StarsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(stardust = 1000.0),
+                    onBuy = {},
+                    onBuyMany = { id, amount -> bought += id to amount }
+                )
+            }
+        }
+
+        // x10 de Luz Estelar no alcanza con 1.000 de Polvo
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "x10").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().assertIsNotEnabled()
+        // MAX compra 4 niveles
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "MAX").performScrollTo().performClick()
+        compose.onNodeWithText("x4 · ✦ 400", substring = true).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.STAR_BUY_TAG + "light").performScrollTo().performClick()
+        assertEquals(listOf("light" to com.EGomez.idleecosystem.domain.logic.BulkBuy.MAX), bought)
+    }
+
+    @Test
+    fun `a map node can be bought several levels at once`() {
+        val node = PrestigeUpgrade("pu_core", "El Despertar", "Aumenta la Producción Global.", BigDecimal("1"), BigDecimal("1.5"), BigDecimal("0.10"), UpgradeType.GLOBAL_MULTIPLIER)
+        val bought = mutableListOf<Pair<String, Int>>()
+        compose.setContent {
+            PrestigeShopDialog(listOf(node), "200", BigDecimal(200), onBuy = {}, onDismiss = {}, onBuyMany = { id, amount -> bought += id to amount })
+        }
+        compose.onNodeWithTag(MAP_VIEW_TOGGLE_TAG + "list").performClick()
+        compose.onNodeWithTag(MAP_NODE_ROW_TAG + "pu_core").performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.components.BULK_AMOUNT_TAG + "x10").performClick()
+        compose.onNodeWithText("MEJORAR x10", substring = true).assertExists().performClick()
+        assertEquals(listOf("pu_core" to 10), bought)
+    }
+
+    @Test
     fun `the bestiary card shows the lore and bonus of a creature`() {
         compose.setContent {
             androidx.compose.foundation.layout.Column(
@@ -664,6 +703,145 @@ class CriticalUiTest {
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "ibn_ghazi").performScrollTo().performClick()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LAB_BUY_TAG + "pnakotic").performScrollTo().assertIsNotEnabled()
         assertEquals(listOf("ibn_ghazi"), bought)
+    }
+
+    @Test
+    fun `the dream panel toggles the next dream and buys from the tree`() {
+        val toggles = mutableListOf<Boolean>()
+        val bought = mutableListOf<String>()
+        var respecs = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(points = 2, levels = mapOf("steps" to 1)),
+                    onSetNext = { toggles += it },
+                    onWake = {},
+                    onBuy = { bought += it },
+                    onRespec = { respecs++ }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_NEXT_TAG).performClick()
+        assertEquals(listOf(true), toggles)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BUY_TAG + "flame").performScrollTo().performClick()
+        // Kadath pide Inquanok: bloqueado
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BUY_TAG + "kadath").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_RESPEC_TAG).performScrollTo().performClick()
+        assertEquals(listOf("flame"), bought)
+        assertEquals(1, respecs)
+    }
+
+    @Test
+    fun `the chain panel buys links it can afford and buys everything at once`() {
+        val bought = mutableListOf<Int>()
+        var max = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.ChainPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(
+                        knowledge = java.math.BigDecimal("5e6"),
+                        power = java.math.BigDecimal("1e10"),
+                        multiplier = 121.0,
+                        amounts = List(8) { java.math.BigDecimal.ZERO },
+                        bought = List(8) { 0 }
+                    ),
+                    onBuy = { bought += it },
+                    onBuyMax = { max++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Producción x121.00").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_TAG + 1).performScrollTo().performClick()
+        // El Cirio Negro cuesta 1e9: no alcanza
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_TAG + 2).performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAIN_BUY_MAX_TAG).performScrollTo().performClick()
+        assertEquals(listOf(1), bought)
+        assertEquals(1, max)
+    }
+
+    @Test
+    fun `the lethargy panel shows the torpor rewards and toggles`() {
+        val toggles = mutableListOf<Boolean>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.EGomez.idleecosystem.ui.screens.main.components.LethargyBanner(1800)
+                com.EGomez.idleecosystem.ui.screens.main.components.LethargyPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(active = true, seconds = 4200),
+                    onSet = { toggles += it }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LETHARGY_BANNER_TAG).assertExists()
+        compose.onNodeWithText("Sopor de esta vida: 1 h 10 min").assertExists()
+        compose.onNodeWithText("Al Ascender: Cordura x4.00").assertExists()
+        compose.onNodeWithText("Ascensiones extra: 1 de 4").assertExists()
+        compose.onNodeWithText("Próxima Ascensión extra en 50 min").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.LETHARGY_SWITCH_TAG).performClick()
+        assertEquals(listOf(false), toggles)
+    }
+
+    @Test
+    fun `the trials panel shows the active trial goal and chooses the next one`() {
+        val chosen = mutableListOf<String?>()
+        var abandoned = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
+                        next = "broken",
+                        active = "hunger",
+                        cycleBest = java.math.BigDecimal("2e12"),
+                        levels = mapOf("silence" to 5)
+                    ),
+                    onChoose = { chosen += it },
+                    onAbandon = { abandoned++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("En curso: La Prueba del Hambre I").assertExists()
+        compose.onNodeWithText("Meta alcanzada: Trasciende para superarla.").assertExists()
+        // La activa no se puede elegir; el Silencio ya está superado entero
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "hunger").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "silence").assertDoesNotExist()
+        // Tocar la elegida la quita; tocar otra la elige
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "broken").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_CHOOSE_TAG + "solitude").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.TTRIALS_ABANDON_TAG).performScrollTo().performClick()
+        assertEquals(listOf(null, "solitude"), chosen)
+        assertEquals(1, abandoned)
+    }
+
+    @Test
+    fun `while dreaming the panel shows the pending points and lets you wake up`() {
+        var woken = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column {
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamBanner(0.75)
+                com.EGomez.idleecosystem.ui.screens.main.components.DreamPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(active = true, pending = 8, cycleBest = java.math.BigDecimal("1e14")),
+                    onSetNext = {},
+                    onWake = { woken++ },
+                    onBuy = {},
+                    onRespec = {}
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_BANNER_TAG).assertExists()
+        compose.onNodeWithText("Al Trascender: +8 Puntos de Sueño").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_NEXT_TAG).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DREAM_WAKE_TAG).performClick()
+        assertEquals(1, woken)
     }
 
     @Test
@@ -843,6 +1021,59 @@ class CriticalUiTest {
         compose.onNodeWithTag(MENU_LAYER_TAG + "transcendence").assertDoesNotExist()
         compose.onNodeWithText("ASCENDER").assertExists()
         compose.onNodeWithText("Próximo descubrimiento: Asciende por primera vez.").assertExists()
+    }
+
+    @Test
+    fun `the transcendence layer groups its challenges under cycles`() {
+        val chosen = mutableListOf<MenuTab>()
+        compose.setContent {
+            MenuSection(
+                isMenuExpanded = true, onToggleMenu = {}, menuWeight = 0.65f,
+                selectedTab = MenuTab.CHAIN, onTabSelected = { chosen += it },
+                buyMultiplier = 1, onBuyMultiplierChanged = {}, showPurchased = false, onToggleShowPurchased = {},
+                buildings = emptyList(), upgrades = emptyList(), rituals = emptyList(),
+                currentKnowledge = BigDecimal.ZERO, currentEchoes = BigDecimal.ZERO, globalMultiplier = BigDecimal.ONE,
+                buildingCalculator = BuildingCalculator(), buildingCostMultiplier = 1.0,
+                onBuyBuilding = {}, onBuyUpgrade = {}, onActivateRitual = {},
+                prestigeCurrencyFormatted = "0", canPrestige = false, potentialPrestigeFormatted = "0",
+                unlocks = MenuUnlocks.ALL, newTabs = setOf(MenuTab.LETHARGY),
+                onAscendClicked = {}, onOpenMadnessMap = {}
+            )
+        }
+
+        // Arriba solo cuatro pestañas; los desafíos de ciclo van en chips
+        compose.onNodeWithTag(MENU_TAB_TAG + "cycles").assertExists()
+        compose.onNodeWithTag(MENU_TAB_TAG + "chain").assertDoesNotExist()
+        compose.onNodeWithTag(MENU_TAB_TAG + "mutations").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.MENU_CHIP_TAG + "dream").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.MENU_CHIP_TAG + "lethargy").performClick()
+        // Éter abre Éter (con Mutaciones como chip dentro)
+        compose.onNodeWithTag(MENU_TAB_TAG + "ether").performClick()
+        assertEquals(listOf(MenuTab.LETHARGY, MenuTab.ETHER), chosen)
+    }
+
+    @Test
+    fun `new creatures carry a badge until their card is opened`() {
+        val viewed = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.BestiaryPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
+                        levels = mapOf("deep_dagon" to 1, "deep_hydra" to 1),
+                        newBeasts = setOf("deep_dagon")
+                    ),
+                    onSummon = {}, onBuySeals = {}, onPickWithShards = {}, onViewed = { viewed += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("1 nuevas").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_NEW_TAG + "deep_dagon", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_NEW_TAG + "deep_hydra", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.BEAST_TILE_TAG + "deep_dagon").performScrollTo().performClick()
+        assertEquals(listOf("deep_dagon"), viewed)
     }
 
     @Test

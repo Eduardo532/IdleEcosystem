@@ -17,9 +17,16 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Runas | ganar tu primer Espacio de Runa o tu primera Trascendencia |
 | | | Bestiario | Ascender por primera vez |
 | **Trascendencia** | celeste (Éter) | Éter | tener 50 Ascensiones en el ciclo |
-| | | Mutaciones | Trascender por primera vez |
+| | | ↳ Éter › Mutaciones | Trascender por primera vez |
 | | | Estrellas | Trascender por primera vez |
 | | | Laboratorio | Trascender por primera vez |
+| | | Ciclos | Trascender por tercera vez (con su primer desafío) |
+| | | ↳ Ciclos › Sueño | Trascender por tercera vez |
+| | | ↳ Ciclos › Cadena | Trascender por cuarta vez |
+| | | ↳ Ciclos › Letargo | Trascender por quinta vez |
+| | | ↳ Ciclos › Desafíos | Trascender por sexta vez |
+
+**Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 
 Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 
@@ -29,6 +36,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - La pestaña y su capa llevan un **punto dorado** hasta que la abres.
 - Al final de la lista de Investigación, una línea con candado dice **cuál es el próximo descubrimiento** y qué falta (solo uno a la vez).
 - Al actualizar desde una versión anterior, lo que ya tenías no se marca como nuevo.
+- **Criaturas nuevas *(v0.20.4)*:** una criatura conseguida lleva la etiqueta **NUEVA** y borde dorado hasta que abres su tarjeta. Su Dominio lleva un punto dorado, el panel dice cuántas nuevas hay y la pestaña Bestiario sigue marcada mientras quede alguna sin mirar. El Bestiario se abre en el primer Dominio con criaturas nuevas.
 
 ## Qué hay en cada pestaña de Ascensión y Trascendencia
 
@@ -41,6 +49,10 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Mutaciones:** el catálogo de las 20 mutaciones. Las que todavía no elegiste se ven como **???**; la activa lleva la marca **ACTIVA**.
 - **Estrellas:** las Estrellas, el Polvo Estelar, la alineación (con su cuenta atrás) y las seis mejoras estelares. Ver [Estrellas](Estrellas).
 - **Laboratorio:** los seis experimentos de Miskatonic, con su exponente actual y su costo en Éter. Ver [Laboratorio](Laboratorio).
+- **Sueño:** elegir si el próximo ciclo será un Sueño Profundo, despertar antes de tiempo, los Puntos de Sueño y el Árbol del Sueño. Mientras se sueña, un aviso lunar en Investigación lo recuerda. Ver [El Sueño Profundo](El-Sueno-Profundo).
+- **Cadena:** el Poder de Invocación y su multiplicador, el botón para comprar todo lo posible y los ocho eslabones, cada uno con sus unidades, sus compras, su multiplicador y su precio en Conocimiento. Ver [Cadena de Invocación](Cadena-de-Invocacion).
+- **Letargo:** el interruptor para caer en Letargo o salir, el Sopor de la vida, la Cordura que multiplicará, las Ascensiones extra (y cuánto falta para la próxima) y el aviso de que salir lo pierde. Mientras dura, un aviso con reloj de arena aparece en Investigación. Ver [Letargo](Letargo).
+- **Desafíos:** la Prueba de Trascendencia en curso (meta, mejor vida y si ya se alcanzó; botón para abandonarla) y las cuatro Pruebas con sus niveles superados, su restricción, su recompensa, la meta siguiente y el botón para elegirla para el próximo ciclo. Al superar una, el aviso de Trascender lo dice. Ver [Pruebas de Trascendencia](Pruebas-de-Trascendencia).
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.
 

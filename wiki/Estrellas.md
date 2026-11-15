@@ -30,6 +30,8 @@ Cada **media hora** (en hora real) las estrellas se ponen **en posición** duran
 | Gran Conjunción | La alineación dura 1 minuto más por nivel | 100 · 6ⁿ | 5 |
 | Polvo de Éter | Éter ganado al Trascender +10 % por nivel | 500 · 5ⁿ | 10 |
 
+Desde la **v0.20.5**, la fila **Comprar: x1 · x10 · x100 · MAX** permite subir varios niveles de una vez. x10 y x100 compran el lote entero o nada, y MAX compra todos los que alcance el Polvo.
+
 ## Logros
 
 Las Estrellas traen **14 logros** (categoría Ascensión):

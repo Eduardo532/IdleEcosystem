@@ -97,6 +97,67 @@ object AchievementStat {
     const val LAB_BUY_WITH_PREFIX = "lab_with."
     const val LAB_BUY_PATH_PREFIX = "lab_path."
     const val FEAT_LAB_EXACT = "feat.lab_exact"
+    /**
+     * El Sueño Profundo (v0.20.0): si el próximo ciclo será un Sueño, si este lo es, el
+     * mejor Conocimiento de una vida en este Sueño y en todos, Puntos de Sueño (los que hay
+     * y los ganados en total), Sueños completados y nodos del árbol.
+     */
+    const val DREAM_NEXT = "dream_next"
+    const val DREAM_ACTIVE = "dream_active"
+    const val DREAM_CYCLE_BEST = "dream_cycle_best"
+    const val DREAM_BEST = "dream_best"
+    const val DREAM_POINTS = "dream_points"
+    const val DREAM_POINTS_EARNED = "dream_points_earned"
+    const val DREAMS_COMPLETED = "dreams_completed"
+    const val DREAM_WAKES = "dream_wakes"
+    const val DREAM_RESPECS = "dream_respecs"
+    const val DREAM_NODE_PREFIX = "dream."
+    const val DREAM_LEVELS = "dream_levels"
+    const val DREAM_NODES = "dream_nodes"
+    const val DREAM_END_WITH_PREFIX = "dream_with."
+    const val DREAM_END_PATH_PREFIX = "dream_path."
+    /**
+     * La Cadena de Invocación (v0.20.1): unidades y compras de cada eslabón en el ciclo,
+     * el Poder del ciclo, el mejor Poder de siempre, compras totales, el eslabón más alto
+     * comprado y con qué pacto o Senda se compró.
+     */
+    const val CHAIN_AMOUNT_PREFIX = "chain.a."
+    const val CHAIN_BOUGHT_PREFIX = "chain.b."
+    const val CHAIN_CYCLE_PREFIX = "chain."
+    const val CHAIN_POWER = "chain_power"
+    const val CHAIN_POWER_BEST = "chain_power_best"
+    const val CHAIN_BOUGHT = "chain_bought"
+    const val CHAIN_TOP_TIER = "chain_top_tier"
+    const val CHAIN_FULL = "chain_full"
+    const val CHAIN_DREAM = "chain_dream"
+    const val CHAIN_BUY_WITH_PREFIX = "chain_with."
+    const val CHAIN_BUY_PATH_PREFIX = "chain_path."
+    /**
+     * El Letargo (v0.20.2): si está activo, el Sopor (segundos) de la vida, Ascensiones en
+     * Letargo, Ascensiones extra, el mejor Sopor, cuántas veces se perdió y con qué pacto o
+     * Senda se Ascendió en Letargo.
+     */
+    const val LETHARGY_ACTIVE = "lethargy_active"
+    const val LETHARGY_SECONDS = "lethargy_seconds"
+    const val LETHARGY_ASCENSIONS = "lethargy_ascensions"
+    const val LETHARGY_EXTRA = "lethargy_extra"
+    const val LETHARGY_BEST_MINUTES = "lethargy_best_minutes"
+    const val LETHARGY_LOST = "lethargy_lost"
+    const val LETHARGY_WITH_PREFIX = "lethargy_with."
+    const val LETHARGY_PATH_PREFIX = "lethargy_path."
+    /**
+     * Las Pruebas de Trascendencia (v0.20.3): la elegida para el próximo ciclo y la activa
+     * (índice + 1), la mejor vida del ciclo, niveles superados de cada una (ttrial.<id>),
+     * el total, cuántas se abandonaron y con qué pacto o Senda se superaron.
+     */
+    const val TTRIAL_NEXT = "ttrial_next"
+    const val TTRIAL_ACTIVE = "ttrial_active"
+    const val TTRIAL_CYCLE_BEST = "ttrial_cycle_best"
+    const val TTRIAL_PREFIX = "ttrial."
+    const val TTRIAL_COMPLETIONS = "ttrial_completions"
+    const val TTRIAL_ABANDONED = "ttrial_abandoned"
+    const val TTRIAL_WITH_PREFIX = "ttrial_with."
+    const val TTRIAL_PATH_PREFIX = "ttrial_path."
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -139,7 +200,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS
     )
 
     // --- Contadores guardados ---
@@ -205,6 +266,12 @@ object AchievementStat {
     const val MUTATION_SEEN_PREFIX = "mutation_seen."
     /** "ui.seen.grimoire": el jugador ya abrió esa pestaña (v0.19.0; no es un logro). */
     const val SEEN_TAB_PREFIX = "ui.seen."
+    /** "ui.beast.shoggoth": el jugador ya abrió la tarjeta de esa criatura (v0.20.4). */
+    const val SEEN_BEAST_PREFIX = "ui.beast."
+    /** Marca única: las criaturas que ya se tenían al llegar a la v0.20.4 no se anuncian. */
+    const val SEEN_BEASTS_INIT = "ui.beasts_init"
+    /** El multiplicador de compra elegido (1, 5, 10, 100, -2 hito, -1 máximo; v0.20.4). */
+    const val BUY_MULTIPLIER = "ui.buy_multiplier"
     /** Se marcó lo ya visible al pasar a la interfaz por capas: no todo aparece como nuevo. */
     const val SEEN_TABS_INIT = "ui.seen_init"
     /** "mutation_with.cthulhu.rlyeh_rises": vida terminada con ese pacto y esa mutación. */
@@ -283,6 +350,18 @@ object AchievementStat {
     fun lab(id: String) = LAB_PREFIX + id
     fun labBuyWith(pactId: String) = LAB_BUY_WITH_PREFIX + pactId
     fun labBuyPath(pathId: String) = LAB_BUY_PATH_PREFIX + pathId
+    fun dreamNode(id: String) = DREAM_NODE_PREFIX + id
+    fun dreamEndWith(pactId: String) = DREAM_END_WITH_PREFIX + pactId
+    fun dreamEndPath(pathId: String) = DREAM_END_PATH_PREFIX + pathId
+    fun chainAmount(tier: Int) = CHAIN_AMOUNT_PREFIX + tier
+    fun chainBought(tier: Int) = CHAIN_BOUGHT_PREFIX + tier
+    fun chainBuyWith(pactId: String) = CHAIN_BUY_WITH_PREFIX + pactId
+    fun chainBuyPath(pathId: String) = CHAIN_BUY_PATH_PREFIX + pathId
+    fun lethargyWith(pactId: String) = LETHARGY_WITH_PREFIX + pactId
+    fun lethargyPath(pathId: String) = LETHARGY_PATH_PREFIX + pathId
+    fun ttrial(id: String) = TTRIAL_PREFIX + id
+    fun ttrialWith(pactId: String) = TTRIAL_WITH_PREFIX + pactId
+    fun ttrialPath(pathId: String) = TTRIAL_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -299,6 +378,10 @@ object AchievementStat {
         STARS, STARDUST_EARNED, ALIGNED_PURCHASES, ESSENCE_EARNED, ENCOUNTERS, FEAT_PRIMORDIAL_ALIGNED,
         SEALS_EARNED, SEALS_BOUGHT, CLICK_SEALS, SUMMONS, SHARDS_EARNED, SHARD_PICKS, DAILY_BEST_STREAK,
         LAB_ETHER_SPENT, FEAT_LAB_EXACT,
+        DREAM_NEXT, DREAM_ACTIVE, DREAM_CYCLE_BEST, DREAM_BEST, DREAM_POINTS, DREAM_POINTS_EARNED, DREAMS_COMPLETED, DREAM_WAKES, DREAM_RESPECS,
+        CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
+        LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
+        TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -308,6 +391,10 @@ object AchievementStat {
         STAR_BUY_WITH_PREFIX, STAR_ALIGNED_PATH_PREFIX, STAR_UPGRADE_PREFIX,
         BEAST_PREFIX, BEAST_CATCH_WITH_PREFIX, BEAST_CATCH_PATH_PREFIX,
         LAB_PREFIX, LAB_BUY_WITH_PREFIX, LAB_BUY_PATH_PREFIX,
+        DREAM_NODE_PREFIX, DREAM_END_WITH_PREFIX, DREAM_END_PATH_PREFIX,
+        CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
+        LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
+        TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

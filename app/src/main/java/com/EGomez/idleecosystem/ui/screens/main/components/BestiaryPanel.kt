@@ -40,6 +40,7 @@ import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.SummonResult
 import com.EGomez.idleecosystem.ui.components.GameIcons
 import com.EGomez.idleecosystem.ui.components.IconLabel
+import com.EGomez.idleecosystem.ui.theme.AncientGold
 import com.EGomez.idleecosystem.ui.i18n.tr
 import java.math.BigDecimal
 import kotlin.math.roundToInt
@@ -50,6 +51,8 @@ val SealTeal = Color(0xFF80CBC4)
 /** Lo que muestra la pestaña Bestiario (v0.19.10). */
 data class BestiaryUi(
     val levels: Map<String, Int> = emptyMap(),
+    /** Criaturas conseguidas cuya tarjeta todavía no se abrió (v0.20.4). */
+    val newBeasts: Set<String> = emptySet(),
     val seals: Int = 0,
     val shards: Int = 0,
     val sealPrice: BigDecimal = BigDecimal.ZERO,
@@ -140,10 +143,17 @@ fun BestiaryPanel(
     state: BestiaryUi,
     onSummon: (Int) -> Unit,
     onBuySeals: () -> Unit,
-    onPickWithShards: (String) -> Unit
+    onPickWithShards: (String) -> Unit,
+    onViewed: (String) -> Unit = {}
 ) {
     var selected by remember { mutableStateOf<String?>(null) }
-    var domainId by remember { mutableStateOf(Bestiary.domains.first().id) }
+    // Abre en el primer Dominio con criaturas nuevas, si hay alguno
+    var domainId by remember {
+        mutableStateOf(
+            Bestiary.domains.firstOrNull { domain -> Bestiary.beastsOf(domain.id).any { it.id in state.newBeasts } }?.id
+                ?: Bestiary.domains.first().id
+        )
+    }
     val seen = state.levels.count { it.value > 0 }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(BESTIARY_PANEL_TAG)) {
         // --- Monedas y colección
@@ -162,6 +172,15 @@ fun BestiaryPanel(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(stringResource(R.string.bestiary_title), color = SealTeal, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                     Text("$seen / ${Bestiary.beasts.size}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    if (state.newBeasts.isNotEmpty()) {
+                        Text(
+                            stringResource(R.string.bestiary_new_count, state.newBeasts.size),
+                            color = AncientGold,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.testTag(BESTIARY_NEW_COUNT_TAG)
+                        )
+                    }
                     if (state.dailyStreak > 0) Text(stringResource(R.string.daily_streak, state.dailyStreak), color = Color.Gray, fontSize = 10.sp)
                 }
             }
@@ -229,6 +248,7 @@ fun BestiaryPanel(
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Bestiary.domains.forEach { domain ->
                 val count = Bestiary.beastsOf(domain.id).count { (state.levels[it.id] ?: 0) > 0 }
+                val hasNew = Bestiary.beastsOf(domain.id).any { it.id in state.newBeasts }
                 val chosen = domain.id == domainId
                 // Sin el alto mínimo táctil de 48 dp: los ocho Dominios caben en pocas filas
                 Surface(
@@ -237,17 +257,22 @@ fun BestiaryPanel(
                     border = BorderStroke(1.dp, Color(domain.color).copy(alpha = if (chosen) 0.9f else 0.3f)),
                     modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable { domainId = domain.id }.testTag(DOMAIN_CHIP_TAG + domain.id)
                 ) {
-                    Text(
-                        tr(domain.title) + " $count/${Bestiary.beastsOf(domain.id).size}",
-                        color = if (chosen) Color.White else Color.Gray,
-                        fontSize = 11.sp,
-                        fontWeight = if (chosen) FontWeight.Bold else FontWeight.Normal,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) {
+                        Text(
+                            tr(domain.title) + " $count/${Bestiary.beastsOf(domain.id).size}",
+                            color = if (chosen) Color.White else Color.Gray,
+                            fontSize = 11.sp,
+                            fontWeight = if (chosen) FontWeight.Bold else FontWeight.Normal
+                        )
+                        if (hasNew) NewDot(Modifier.padding(start = 4.dp).testTag(DOMAIN_NEW_TAG + domain.id))
+                    }
                 }
             }
         }
-        DomainGrid(domainId, state.levels) { selected = it }
+        DomainGrid(domainId, state.levels, state.newBeasts) {
+            selected = it
+            if (it in state.newBeasts) onViewed(it)
+        }
     }
     selected?.let { id ->
         Bestiary.beast(id)?.let { beast ->
@@ -279,7 +304,7 @@ private fun SummonButton(label: String, cost: Int, enabled: Boolean, tag: String
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DomainGrid(domainId: String, levels: Map<String, Int>, onSelect: (String) -> Unit) {
+private fun DomainGrid(domainId: String, levels: Map<String, Int>, newBeasts: Set<String>, onSelect: (String) -> Unit) {
     val domain = Bestiary.domain(domainId) ?: return
     val beasts = Bestiary.beastsOf(domainId)
     val complete = beasts.all { (levels[it.id] ?: 0) > 0 }
@@ -306,7 +331,7 @@ private fun DomainGrid(domainId: String, levels: Map<String, Int>, onSelect: (St
             beasts.chunked(2).forEach { pair ->
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
                     pair.forEach { beast ->
-                        BeastTile(beast, levels[beast.id] ?: 0, Modifier.weight(1f)) { onSelect(beast.id) }
+                        BeastTile(beast, levels[beast.id] ?: 0, beast.id in newBeasts, Modifier.weight(1f)) { onSelect(beast.id) }
                     }
                     if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
                 }
@@ -316,14 +341,15 @@ private fun DomainGrid(domainId: String, levels: Map<String, Int>, onSelect: (St
 }
 
 @Composable
-private fun BeastTile(beast: Beast, level: Int, modifier: Modifier, onClick: () -> Unit) {
+private fun BeastTile(beast: Beast, level: Int, isNew: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val known = level > 0
     val rarity = beast.rarity.uiColor()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = if (known) Color(0xFF1C1C22) else Color(0xFF101012),
-        border = BorderStroke(1.dp, if (known) rarity.copy(alpha = 0.7f) else rarity.copy(alpha = 0.2f)),
+        color = if (isNew) Color(0xFF26220F) else if (known) Color(0xFF1C1C22) else Color(0xFF101012),
+        // Las nuevas, con borde dorado hasta que se abra su tarjeta
+        border = BorderStroke(if (isNew) 2.dp else 1.dp, if (isNew) AncientGold else if (known) rarity.copy(alpha = 0.7f) else rarity.copy(alpha = 0.2f)),
         modifier = modifier.testTag(BEAST_TILE_TAG + beast.id)
     ) {
         Row(modifier = Modifier.padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -346,8 +372,26 @@ private fun BeastTile(beast: Beast, level: Int, modifier: Modifier, onClick: () 
                     maxLines = 1
                 )
             }
+            if (isNew) {
+                Text(
+                    stringResource(R.string.beast_new),
+                    color = Color.Black,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier
+                        .background(AncientGold, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                        .testTag(BEAST_NEW_TAG + beast.id)
+                )
+            }
         }
     }
+}
+
+/** Punto dorado: algo nuevo sin mirar. */
+@Composable
+private fun NewDot(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.size(7.dp).background(AncientGold, androidx.compose.foundation.shape.CircleShape))
 }
 
 /**
@@ -669,6 +713,9 @@ const val BESTIARY_PANEL_TAG = "bestiary_panel"
 const val DOMAIN_CHIP_TAG = "beast_domain_chip_"
 const val DOMAIN_GRID_TAG = "beast_domain_"
 const val BEAST_TILE_TAG = "beast_tile_"
+const val BEAST_NEW_TAG = "beast_new_"
+const val DOMAIN_NEW_TAG = "domain_new_"
+const val BESTIARY_NEW_COUNT_TAG = "bestiary_new_count"
 const val CREATURE_CARD_TAG = "creature_card"
 const val CREATURE_IMAGE_TAG = "creature_image"
 const val CREATURE_HISTORY_TAG = "creature_history"

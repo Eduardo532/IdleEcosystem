@@ -55,7 +55,7 @@ La confirmación de Ascender muestra la lista en **Qué se pierde, qué se conse
 - El del Grimorio compra las mejoras que entran en ese presupuesto, de la más barata a la más cara.
 - El ritual automático se activa cuando está listo y te alcanzan los Ecos.
 
-**Panel de automatización** *(v0.15.1)*: el engranaje al lado del botón AUTO (o la tarjeta **Automatización** de la pestaña Cordura) abre un panel donde eliges el **presupuesto** (10 %, 25 %, 50 %, 75 % o 100 % del Conocimiento), **qué edificios** compra el autocomprador, el autocomprador del Grimorio, el ritual automático y la Ascensión automática. Las secciones bloqueadas dicen con cuántas Ascensiones se abren. La configuración se guarda en el teléfono (no viaja en el código de exportación).
+**Panel de automatización** *(v0.15.1)*: el engranaje al lado del botón AUTO (o la tarjeta **Automatización** de la pestaña Cordura) abre un panel donde eliges el **presupuesto** (10 %, 25 %, 50 %, 75 % o 100 % del Conocimiento), **qué edificios** compra el autocomprador, el autocomprador del Grimorio, el ritual automático y la Ascensión automática. Las secciones bloqueadas dicen con cuántas Ascensiones se abren. La configuración se guarda en el teléfono (no viaja en el código de exportación). Desde la v0.20.4, el autocomprador de edificios compra con el **multiplicador elegido** sobre Investigación (x1, x5, x10, x100, Hito o MAX), que además se guarda con la partida.
 
 **Ascensión automática** *(desde 10 Ascensiones, apagada por defecto)*: el juego Asciende solo cuando la Cordura que ganarías **iguala o supera** la que ya tienes, es decir, cuando la duplica. Un aviso muestra cuánta ganaste.
 
@@ -164,6 +164,8 @@ Cada constelación tiene en su **centro** una Senda con doble anillo, que se abr
 Si ya recorrías una Senda antes de la v0.19.2, la conservas y puedes seguir subiéndola aunque su constelación no esté completa.
 
 **Cambiar de Senda:** solo al Ascender. En la confirmación, toca la fila **Senda** para ver la casilla "Abandonar la Senda…": si la marcas, la Senda vuelve a nivel 0 y **recuperas toda la Cordura** que pusiste en ella (por ejemplo, 2 niveles = 2000 + 5000 = 7000). Después puedes elegir otra.
+
+**Comprar varios niveles *(v0.20.5)*:** la ficha de un nodo tiene la fila **Comprar: x1 · x10 · x100 · MAX**. Con x10 o x100 se compra el lote entero si alcanza la Cordura (recortado al tope del nodo); con MAX, todos los niveles que alcancen. El botón dice cuántos niveles sube y el costo total, y "Siguiente" muestra el efecto al nivel que se llega. Las Sendas se compran de a una.
 
 ## Progreso sin conexión
 

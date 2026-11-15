@@ -338,10 +338,24 @@ fun MainScreen(
                             bestiaryUi = uiState.bestiaryUi,
                             labLevels = uiState.labLevels,
                             onBuyLab = { viewModel.buyLab(it) },
+                            dreamUi = uiState.dreamUi,
+                            onSetDreamNext = { viewModel.setDreamNext(it) },
+                            onWakeUp = { viewModel.wakeUp() },
+                            onBuyDreamNode = { viewModel.buyDreamNode(it) },
+                            onRespecDream = { viewModel.respecDream() },
+                            chainUi = uiState.chainUi,
+                            onBuyInvocation = { viewModel.buyInvocation(it) },
+                            onBuyMaxInvocations = { viewModel.buyMaxInvocations() },
+                            lethargyUi = uiState.lethargyUi,
+                            onSetLethargy = { viewModel.setLethargy(it) },
+                            ttrialsUi = uiState.ttrialsUi,
+                            onChooseTranscendenceTrial = { viewModel.chooseTranscendenceTrial(it) },
+                            onAbandonTranscendenceTrial = { viewModel.abandonTranscendenceTrial() },
                             onSummon = { viewModel.summon(it) },
                             onBuySeals = { viewModel.buySeals() },
                             onPickWithShards = { viewModel.pickWithShards(it) },
-                            onBuyStar = { viewModel.buyStarUpgrade(it) },
+                            onBeastViewed = { viewModel.onBeastViewed(it) },
+                            onBuyStar = { id, amount -> viewModel.buyStarUpgrade(id, amount) },
                             runeSlots = uiState.runeSlots,
                             engravedRunes = uiState.engravedRunes,
                             runeCatches = uiState.runeCatches,
@@ -584,13 +598,30 @@ fun MainScreen(
                         .padding(top = 140.dp)
                         .zIndex(5f)
                 ) {
-                    Text(
-                        stringResource(R.string.transcend_notice, gain),
-                        color = EtherColor,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                    )
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            stringResource(R.string.transcend_notice, gain),
+                            color = EtherColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        uiState.trialPassedNotice?.let { title ->
+                            Text(
+                                stringResource(R.string.ttrials_notice, com.EGomez.idleecosystem.ui.i18n.tr(title.substringBeforeLast(' ')) + " " + title.substringAfterLast(' ')),
+                                color = com.EGomez.idleecosystem.ui.screens.main.components.TrialGold,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                        uiState.dreamNotice?.let { points ->
+                            Text(
+                                stringResource(R.string.dream_notice, points),
+                                color = com.EGomez.idleecosystem.ui.screens.main.components.DreamBlue,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
             }
 
@@ -713,7 +744,14 @@ fun MainScreen(
                     onDismiss = { showAchievementsDialog = false }
                 )
             }
-            if (showPrestigeShopDialog) PrestigeShopDialog(uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity, { viewModel.onBuyPrestigeUpgrade(it) }) { showPrestigeShopDialog = false }
+            if (showPrestigeShopDialog) {
+                PrestigeShopDialog(
+                    uiState.prestigeUpgrades, uiState.prestigeCurrencyFormatted, uiState.rawSanity,
+                    onBuy = { viewModel.onBuyPrestigeUpgrade(it) },
+                    onDismiss = { showPrestigeShopDialog = false },
+                    onBuyMany = { id, amount -> viewModel.onBuyPrestigeUpgrade(id, amount) }
+                )
+            }
             if (uiState.showOfflineDialog) OfflineGainsDialog(uiState.offlineTimeFormatted, uiState.offlineGains) { viewModel.dismissOfflineDialog() }
             if (uiState.showRefundDialog) RefundDialog(uiState.refundAmountString) { viewModel.dismissRefundDialog() }
             uiState.currentEvent?.let { EventDialog(it, uiState.eventResultText) { opt -> viewModel.onEventOptionSelected(opt) } }

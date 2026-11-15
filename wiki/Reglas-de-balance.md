@@ -72,7 +72,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 ## Hitos y automatización
 
 - Hitos en 1, 3, 5, 10, 25 y 50 Ascensiones totales. *(Código: `AscensionMilestone`.)*
-- Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): una unidad por edificio por segundo y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
+- Los autocompradores gastan como máximo un porcentaje del Conocimiento (**50 %** por defecto; 10–100 % en el panel): por segundo, cada edificio con el **multiplicador de compra elegido** (x1, x5, x10, x100, hasta el hito o el máximo que permita el presupuesto; con una cantidad fija, solo si alcanza para todo el lote; v0.20.4) y las mejoras que entren en el presupuesto. *(Código: `AutomationSettings.budgetFraction`.)*
 - Ascensión automática: cuando `Cordura ganada ≥ max(Cordura Residual, 1)`. *(Código: `AutomationSettings.shouldAutoAscend`.)*
 - Efecto neto de un nodo global: `(1 + e·(L+1)) / (1 + e·L) × (1 + 0,1·(S − costo)) / (1 + 0,1·S)`. *(Código: `SanitySpending`.)*
 
@@ -134,6 +134,31 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - Exponentes: producción `1 + 0,01·n`, clic `1 + 0,02·n`, Cordura `1 + 0,02·n`, Éter `1 + 0,05·n`, bonos del Bestiario `1 + 0,1·n`. Solo se eleva lo que es mayor que 1, y se calcula con log10 para no desbordar.
 - La producción se eleva sobre el total (un factor `total^(e−1)` aplicado a cada edificio). Ecuación del Velo: tope `1e25 · 10^n`. *(Código: `Lab`, `LabExperiment`; test: `LabTest`.)*
+
+## El Sueño Profundo
+
+- Se abre con 3 Trascendencias y se entra al Trascender. Exponente del Sueño `min(1; 0,75 + 0,02·Peldaños)`. Se aplica a la producción total (junto con Armitage), al clic (junto con Ibn Ghazi) y a la Cordura ganada (junto con las Sales).
+- Puntos totales `⌊(log10(mejor vida) − 10)^1,5 · (1 + 0,25·Descarnados)⌋`; se cobra lo que supere lo ya ganado. Kadath: exponente de producción `1 + 0,01·n` solo despierto. Reinicio del árbol gratis. *(Código: `DeepSleep`, `DreamNode`; test: `DeepSleepTest`.)*
+
+## Cadena de Invocación
+
+- Se abre con 4 Trascendencias. Precio del eslabón k: `10^(3 + 3k) · (1,5 + 0,5k)^compras`. Cada eslabón produce por segundo `unidades · 2^⌊compras/10⌋` del de abajo; el primero produce Poder.
+- Multiplicador de producción `(1 + log10(1 + Poder))²`. Se reinicia al Trascender. Sin conexión avanza en hasta 120 pasos. *(Código: `SummoningChain`, `Invocation`; test: `SummoningChainTest`.)*
+
+## Letargo
+
+- Se abre con 5 Trascendencias. Producción x0,1 mientras dura (también sin conexión). Sopor = segundos en Letargo en la vida.
+- Al Ascender: Cordura `x(1 + log2(1 + minutos/10))`; Ascensiones extra `min(4; ⌊minutos/60⌋)`, sumadas al total de Ascensiones. Salir del Letargo borra el Sopor. *(Código: `Lethargy`; test: `LethargyTest`.)*
+
+## Pruebas de Trascendencia
+
+- Se abren con 6 Trascendencias. Meta del nivel n (1..5): `10^(9 + 3n)` de Conocimiento en una vida del ciclo. Se elige antes de Trascender y se supera al volver a Trascender.
+- Restricciones: Hambre, exponente de producción x0,85; Cordura Quebrada, exponente de Cordura x0,6; Soledad, pacto forzado a ninguno; Silencio, clic 0.
+- Recompensas: producción `3^n`, Cordura `1,5^n`, Éter `1 + 0,2n` y Ascensiones para Trascender `−2n` (mínimo 10). *(Código: `TranscendenceTrials`, `TranscendenceTrial`; test: `TranscendenceTrialsTest`.)*
+
+## Compra de varios niveles *(v0.20.5)*
+
+- En el Mapa de Locura y en las Estrellas se eligen x1, x10, x100 o MAX. Con cantidad fija se compra el lote entero o nada (recortado al tope del nodo); MAX compra todo lo que alcance, hasta 1.000 niveles por compra. Las Sendas, de a uno. *(Código: `BulkBuy`; test: `BulkBuyTest`.)*
 
 ## Consagrar edificios
 

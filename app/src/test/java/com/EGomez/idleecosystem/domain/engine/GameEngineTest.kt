@@ -35,6 +35,10 @@ import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
 import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
+import com.EGomez.idleecosystem.domain.logic.BulkBuy
+import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.Invocation
+import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -327,6 +331,36 @@ class GameEngineTest {
         val list = await(engine.buildings) { list -> list.any { it.id == NOTES && it.amountOwned > 0 } }
         assertTrue(list.first { it.id == NOTES }.amountOwned > 0)
         assertTrue(engine.economy.value.knowledge > BigDecimal(400))
+    }
+
+    @Test
+    fun `the autobuyer follows the buy multiplier the player chose`() = runBlocking {
+        stats.totalPrestiges = 5
+        engine.setBuyMultiplier(10)
+        await(engine.economy) { it.buyMultiplier == 10 }
+        engine.grantKnowledge(BigDecimal(1_000_000))
+
+        val list = await(engine.buildings) { list -> list.any { it.amountOwned >= 10 } }
+        // Todo lo comprado va de 10 en 10
+        assertTrue(list.all { it.amountOwned % 10 == 0 })
+        assertTrue(stats.counter(AchievementStat.AUTO_UNITS).toInt() % 10 == 0)
+    }
+
+    @Test
+    fun `new creatures are marked until their card is opened`() = runBlocking {
+        stats.counters[AchievementStat.beast("deep_dagon")] = BigDecimal.ONE
+        engine.grantKnowledge(BigDecimal.ONE)
+        val marked = await(engine.economy) { "deep_dagon" in it.newBeasts }
+        assertTrue(MenuTab.BESTIARY in marked.newTabs)
+
+        engine.onMenuTabSelected(MenuTab.BESTIARY)
+        // Abrir la pestaña no basta: sigue marcada mientras haya criaturas sin mirar
+        val stillNew = await(engine.economy) { it.newBeasts.isNotEmpty() }
+        assertTrue(MenuTab.BESTIARY in stillNew.newTabs)
+
+        engine.onBeastViewed("deep_dagon")
+        val seen = await(engine.economy) { it.newBeasts.isEmpty() }
+        assertFalse(MenuTab.BESTIARY in seen.newTabs)
     }
 
     @Test
@@ -698,6 +732,37 @@ class GameEngineTest {
     }
 
     @Test
+    fun `stellar upgrades and map nodes can be bought several levels at once`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.TRANSCENDENCES)
+            count(AchievementStat.STARDUST, BigDecimal(1000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal(1000), echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.transcendences == 1 }
+
+        // Estrellas: x10 de Luz Estelar cuesta 295.240 de Polvo, no alcanza; MAX compra 4
+        // niveles (10 + 30 + 90 + 270)
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id, 10)
+        engine.buyStarUpgrade(StarUpgrade.STARLIGHT.id, BulkBuy.MAX)
+        val stars = await(engine.economy) { (it.starLevels[StarUpgrade.STARLIGHT.id] ?: 0) > 0 }
+        assertEquals(4, stars.starLevels[StarUpgrade.STARLIGHT.id])
+        assertEquals(600.0, stars.stardust, 1.0)
+
+        // Mapa de Locura: El Despertar x10 y después todo lo que alcance
+        engine.buyPrestigeUpgrade("pu_core", 10)
+        await(engine.prestigeUpgrades) { list -> list.find { it.id == "pu_core" }?.level == 10 }
+        engine.buyPrestigeUpgrade("pu_core", BulkBuy.MAX)
+        val map = await(engine.prestigeUpgrades) { list -> (list.find { it.id == "pu_core" }?.level ?: 0) > 10 }
+        assertEquals(15, map.find { it.id == "pu_core" }?.level)
+    }
+
+    @Test
     fun `there are no stars before the first transcendence`() = runBlocking {
         engine.grantKnowledge(BigDecimal.TEN)
         val state = await(engine.economy) { it.knowledge.signum() > 0 }
@@ -808,6 +873,190 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `a transcendence trial is chosen, restricts the cycle and is passed by transcending`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(6))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.ttrialRevealed && it.etherGain > 0 }
+        assertTrue(MenuTab.TTRIALS in before.menuUnlocks.tabs)
+
+        engine.chooseTranscendenceTrial(TranscendenceTrial.SILENCE.id)
+        await(engine.economy) { it.ttrialNext == TranscendenceTrial.SILENCE.id }
+        engine.transcend()
+        val inTrial = await(engine.economy) { it.transcendences == 7 && it.ttrialActive == TranscendenceTrial.SILENCE.id }
+        // La elección se consume al empezar
+        assertEquals(null, inTrial.ttrialNext)
+
+        // Una vida de 1e12 supera el nivel I
+        stats.runKnowledge = BigDecimal("1e12")
+        stats.totalPrestiges = 50
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        await(engine.economy) { it.ttrialCycleBest >= BigDecimal("1e12") && it.etherGain > 0 }
+        engine.transcend()
+        val passed = await(engine.economy) { it.transcendences == 8 && it.ttrialLevels[TranscendenceTrial.SILENCE.id] == 1 }
+        assertEquals(null, passed.ttrialActive)
+
+        // Abandonar: sin superar nada
+        engine.chooseTranscendenceTrial(TranscendenceTrial.HUNGER.id)
+        await(engine.economy) { it.ttrialNext == TranscendenceTrial.HUNGER.id }
+        stats.totalPrestiges = 100
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        await(engine.economy) { it.etherGain > 0 }
+        engine.transcend()
+        await(engine.economy) { it.ttrialActive == TranscendenceTrial.HUNGER.id }
+        engine.abandonTranscendenceTrial()
+        val abandoned = await(engine.economy) { it.ttrialActive == null }
+        assertEquals(0, abandoned.ttrialLevels[TranscendenceTrial.HUNGER.id])
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.TTRIAL_ABANDONED)))
+    }
+
+    @Test
+    fun `the lethargy slows production and pays sanity and extra ascensions`() = runBlocking {
+        val saved = StatisticsManager().apply { count(AchievementStat.TRANSCENDENCES, BigDecimal(5)) }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1e7"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val awake = await(engine.economy) { it.lethargyRevealed && it.canPrestige }
+        assertTrue(MenuTab.LETHARGY in awake.menuUnlocks.tabs)
+        assertFalse(awake.lethargyActive)
+        val before = stats.totalPrestiges
+
+        engine.setLethargy(true)
+        await(engine.economy) { it.lethargyActive }
+        // Dos horas de Sopor: Cordura x(1 + log2(13)) y dos Ascensiones extra
+        stats.counters[AchievementStat.LETHARGY_SECONDS] = BigDecimal(7200)
+        await(engine.economy) { it.potentialPrestige > awake.potentialPrestige.multiply(BigDecimal(3)) }
+
+        engine.ascend()
+        val after = await(engine.economy) { it.lethargySeconds < 60 && stats.totalPrestiges > before }
+        assertEquals(before + 3, stats.totalPrestiges)
+        assertTrue(after.lethargyActive)
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.LETHARGY_EXTRA)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.LETHARGY_ASCENSIONS)))
+
+        // Salir con una hora de Sopor la pierde (y da el logro secreto)
+        stats.counters[AchievementStat.LETHARGY_SECONDS] = BigDecimal(3600)
+        engine.setLethargy(false)
+        val off = await(engine.economy) { !it.lethargyActive }
+        assertEquals(0L, off.lethargySeconds)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.LETHARGY_LOST)))
+    }
+
+    @Test
+    fun `the summoning chain is bought with knowledge and breaks on transcending`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(4))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.CHAIN_POWER] = BigDecimal("1e10")
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal("1e10"), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.chainRevealed && it.chainBought.size == 8 && it.etherGain > 0 }
+        assertTrue(MenuTab.CHAIN in before.menuUnlocks.tabs)
+        // 1e10 de Poder: (1 + 10)² = x121
+        assertEquals(121.0, before.chainMultiplier, 1e-3)
+
+        engine.buyInvocation(Invocation.CHALK.tier)
+        val one = await(engine.economy) { it.chainBought[0] == 1 }
+        assertEquals(0, BigDecimal.ONE.compareTo(one.chainAmounts[0]))
+        assertTrue(one.knowledge <= BigDecimal("9.999e9"))
+
+        // Comprar todo: del eslabón más alto al primero (3 Cirios: 1e9 + 2,5e9 + 6,25e9)
+        engine.buyMaxInvocations()
+        val max = await(engine.economy) { it.chainBought[1] == 3 }
+        assertTrue(max.chainBought[0] > 1)
+        assertEquals(0, max.chainBought[2])
+        assertTrue(stats.counter(AchievementStat.CHAIN_TOP_TIER).toInt() == 2)
+
+        engine.transcend()
+        val after = await(engine.economy) { it.transcendences == 5 }
+        assertTrue(after.chainBought.all { it == 0 })
+        assertEquals(0, after.chainPower.signum())
+        assertEquals(1.0, after.chainMultiplier, 1e-12)
+    }
+
+    @Test
+    fun `the deep sleep is entered by transcending and pays dream points`() = runBlocking {
+        // Tercera Trascendencia hecha y un ciclo listo para Trascender
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(3))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        engine.setAutomation(AutomationSettings(buildings = false, grimoire = false))
+        val before = await(engine.economy) { it.transcendences == 3 && it.etherGain > 0 }
+        assertTrue(MenuTab.DREAM in before.menuUnlocks.tabs)
+        assertFalse(before.dreamActive)
+
+        engine.setDreamNext(true)
+        await(engine.economy) { it.dreamNext }
+        engine.transcend()
+        val dreaming = await(engine.economy) { it.transcendences == 4 && it.dreamActive }
+        assertEquals(0.75, dreaming.dreamExponent, 1e-9)
+
+        // La mejor vida del Sueño: 1e14 de Conocimiento vale 8 Puntos
+        stats.runKnowledge = BigDecimal("1e14")
+        stats.totalPrestiges = 50
+        stats.count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+        val ready = await(engine.economy) { it.dreamPendingPoints == 8 && it.etherGain > 0 }
+        assertEquals(0, ready.dreamPoints)
+
+        engine.transcend()
+        val awake = await(engine.economy) { it.transcendences == 5 && it.dreamPoints == 8 }
+        // El interruptor sigue encendido: el ciclo nuevo también es un Sueño
+        assertTrue(awake.dreamActive)
+        assertEquals(8, awake.dreamPointsEarned)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.DREAMS_COMPLETED)))
+
+        // El árbol: Los Setenta Peldaños primero, después la Llama
+        engine.buyDreamNode(DreamNode.FLAME.id) // sin el nodo padre no se puede
+        engine.buyDreamNode(DreamNode.STEPS.id)
+        val bought = await(engine.economy) { it.dreamLevels[DreamNode.STEPS.id] == 1 }
+        assertEquals(0, bought.dreamLevels[DreamNode.FLAME.id])
+        assertEquals(7, bought.dreamPoints)
+        assertEquals(0.77, bought.dreamExponent, 1e-9)
+
+        engine.respecDream()
+        val refunded = await(engine.economy) { it.dreamLevels[DreamNode.STEPS.id] == 0 }
+        assertEquals(8, refunded.dreamPoints)
+
+        // Despertar antes de tiempo: el ciclo sigue normal y no paga nada
+        engine.wakeUp()
+        val woken = await(engine.economy) { !it.dreamActive }
+        assertEquals(8, woken.dreamPoints)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.DREAM_WAKES)))
     }
 
     @Test

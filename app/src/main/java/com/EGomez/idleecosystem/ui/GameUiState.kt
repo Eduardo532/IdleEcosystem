@@ -103,6 +103,16 @@ data class GameUiState(
     val starsUi: com.EGomez.idleecosystem.ui.screens.main.components.StarsUi = com.EGomez.idleecosystem.ui.screens.main.components.StarsUi(),
     /** Laboratorio de Miskatonic (v0.19.9). */
     val labLevels: Map<String, Int> = emptyMap(),
+    /** El Sueño Profundo (v0.20.0). */
+    val dreamUi: com.EGomez.idleecosystem.ui.screens.main.components.DreamUi = com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(),
+    val dreamNotice: Int? = null,
+    /** La Cadena de Invocación (v0.20.1). */
+    val chainUi: com.EGomez.idleecosystem.ui.screens.main.components.ChainUi = com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(),
+    /** El Letargo (v0.20.2). */
+    val lethargyUi: com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi = com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(),
+    /** Las Pruebas de Trascendencia (v0.20.3). */
+    val ttrialsUi: com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(),
+    val trialPassedNotice: String? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

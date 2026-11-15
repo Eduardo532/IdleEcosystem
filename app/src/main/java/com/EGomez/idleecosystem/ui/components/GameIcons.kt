@@ -134,6 +134,67 @@ object GameIcons {
         }
     }
 
+    /** Luna creciente con una estrella: el Sueño Profundo. */
+    val Moon: ImageVector by lazy {
+        icon("Moon") {
+            moveTo(20f, 14.5f)
+            curveTo(18.8f, 15.1f, 17.5f, 15.4f, 16f, 15.4f)
+            curveTo(11.3f, 15.4f, 7.6f, 11.7f, 7.6f, 7f)
+            curveTo(7.6f, 5.5f, 7.9f, 4.2f, 8.5f, 3f)
+            curveTo(5.2f, 4.4f, 3f, 7.6f, 3f, 11.4f)
+            curveTo(3f, 16.7f, 7.3f, 21f, 12.6f, 21f)
+            curveTo(16.4f, 21f, 19.6f, 18.8f, 20f, 14.5f)
+            close()
+            moveTo(17f, 3f); lineTo(17f, 7f)
+            moveTo(15f, 5f); lineTo(19f, 5f)
+        }
+    }
+
+    /** Dos eslabones: la Cadena de Invocación. */
+    val Chain: ImageVector by lazy {
+        icon("Chain") {
+            // Eslabón de arriba a la izquierda
+            moveTo(10f, 14f); lineTo(6.5f, 17.5f)
+            curveTo(5.1f, 18.9f, 2.9f, 16.9f, 4.3f, 15.5f)
+            lineTo(8.5f, 11.3f)
+            curveTo(9.9f, 9.9f, 11.9f, 10.1f, 12.7f, 11.3f)
+            // Eslabón de abajo a la derecha
+            moveTo(14f, 10f); lineTo(17.5f, 6.5f)
+            curveTo(18.9f, 5.1f, 20.9f, 7.1f, 19.7f, 8.5f)
+            lineTo(15.5f, 12.7f)
+            curveTo(14.1f, 14.1f, 12.1f, 13.9f, 11.3f, 12.7f)
+        }
+    }
+
+    /** Reloj de arena: el Letargo. */
+    val Hourglass: ImageVector by lazy {
+        icon("Hourglass") {
+            moveTo(6f, 3f); lineTo(18f, 3f)
+            moveTo(6f, 21f); lineTo(18f, 21f)
+            moveTo(7f, 3f)
+            curveTo(7f, 8f, 12f, 9f, 12f, 12f)
+            curveTo(12f, 15f, 7f, 16f, 7f, 21f)
+            moveTo(17f, 3f)
+            curveTo(17f, 8f, 12f, 9f, 12f, 12f)
+            curveTo(12f, 15f, 17f, 16f, 17f, 21f)
+        }
+    }
+
+    /** Copa: las Pruebas de Trascendencia. */
+    val Trophy: ImageVector by lazy {
+        icon("Trophy") {
+            moveTo(7f, 4f); lineTo(17f, 4f)
+            lineTo(17f, 9f)
+            curveTo(17f, 12f, 14.8f, 14f, 12f, 14f)
+            curveTo(9.2f, 14f, 7f, 12f, 7f, 9f)
+            close()
+            moveTo(7f, 6f); curveTo(4f, 6f, 4f, 10f, 7.4f, 10.5f)
+            moveTo(17f, 6f); curveTo(20f, 6f, 20f, 10f, 16.6f, 10.5f)
+            moveTo(12f, 14f); lineTo(12f, 18f)
+            moveTo(8f, 20f); lineTo(16f, 20f)
+        }
+    }
+
     /** Candado: algo que aún no se alcanza. */
     val Lock: ImageVector by lazy {
         icon("Lock") {

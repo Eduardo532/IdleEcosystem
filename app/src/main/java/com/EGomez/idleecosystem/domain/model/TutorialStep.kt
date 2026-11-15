@@ -280,5 +280,33 @@ enum class TutorialStep(
         "El Laboratorio de Miskatonic",
         "En la Universidad Miskatonic se experimenta con lo que no debería medirse. En la pestaña Laboratorio, el Éter paga experimentos que elevan la producción, el clic, la Cordura y el Éter a un exponente: crecen más cuanto más grandes son.",
         "Tras la primera Trascendencia"
+    ),
+
+    DEEP_SLEEP(
+        "deep_sleep",
+        "El Sueño Profundo",
+        "Tres veces trascendiste, y ahora puedes bajar los setenta peldaños. En Ciclos › Sueño elige que el próximo ciclo sea un Sueño Profundo: mientras dura, la producción, el clic y la Cordura se elevan a ^0,75. Al Trascender desde el Sueño ganas Puntos de Sueño según tu mejor vida, y con ellos compras el Árbol del Sueño, que vale en todos los ciclos.",
+        "Tras la tercera Trascendencia"
+    ),
+
+    SUMMONING_CHAIN(
+        "summoning_chain",
+        "La Cadena de Invocación",
+        "Cuatro veces trascendiste, y ya sabes trazar círculos que llaman a otros círculos. En Ciclos › Cadena compras ocho eslabones con Conocimiento: el Círculo de Sal produce Poder de Invocación, que multiplica tu producción, y cada eslabón produce al de abajo. Cada 10 compras de un eslabón, produce el doble. La Cadena sobrevive a las Ascensiones y se deshace al Trascender.",
+        "Tras la cuarta Trascendencia"
+    ),
+
+    LETHARGY(
+        "lethargy",
+        "El Letargo",
+        "Cinco veces trascendiste, y ya no tienes prisa. En Ciclos › Letargo puedes caer en un sopor: la producción baja a una décima parte, pero cada minuto suma Sopor. Al Ascender, el Sopor multiplica la Cordura ganada y, cada hora, la Ascensión cuenta una vez más (hasta 4 de más). Si sales del Letargo antes de Ascender, pierdes el Sopor de esa vida.",
+        "Tras la quinta Trascendencia"
+    ),
+
+    TRANSCENDENCE_TRIALS(
+        "transcendence_trials",
+        "Las Pruebas de Trascendencia",
+        "Seis veces trascendiste: ahora el ciclo entero puede ser una prueba. En Ciclos › Desafíos elige una Prueba de Trascendencia para el próximo ciclo; empieza al Trascender. Supérala con una vida que llegue al Conocimiento que pide su nivel y vuelve a Trascender. Cada Prueba tiene cinco niveles, de la I a la V, y su recompensa vale siempre.",
+        "Tras la sexta Trascendencia"
     )
 }

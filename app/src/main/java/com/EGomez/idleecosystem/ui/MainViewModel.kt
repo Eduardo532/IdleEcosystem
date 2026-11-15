@@ -184,6 +184,7 @@ class MainViewModel @Inject constructor(
         echoesFormatted = economy.echoes.toBeautifulString(),
         revealed = economy.revealed,
         menuUnlocks = economy.menuUnlocks,
+        buyMultiplier = economy.buyMultiplier,
         newTabs = economy.newTabs,
         seenMutations = economy.seenMutations,
         ascensions = economy.ascensions,
@@ -217,8 +218,36 @@ class MainViewModel @Inject constructor(
             secondsLeft = economy.alignmentSecondsLeft
         ),
         labLevels = economy.labLevels,
+        dreamUi = com.EGomez.idleecosystem.ui.screens.main.components.DreamUi(
+            next = economy.dreamNext,
+            active = economy.dreamActive,
+            exponent = economy.dreamExponent,
+            points = economy.dreamPoints,
+            earned = economy.dreamPointsEarned,
+            cycleBest = economy.dreamCycleBest,
+            pending = economy.dreamPendingPoints,
+            levels = economy.dreamLevels
+        ),
+        chainUi = com.EGomez.idleecosystem.ui.screens.main.components.ChainUi(
+            knowledge = economy.knowledge,
+            power = economy.chainPower,
+            multiplier = economy.chainMultiplier,
+            amounts = economy.chainAmounts,
+            bought = economy.chainBought
+        ),
+        lethargyUi = com.EGomez.idleecosystem.ui.screens.main.components.LethargyUi(
+            active = economy.lethargyActive,
+            seconds = economy.lethargySeconds
+        ),
+        ttrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
+            next = economy.ttrialNext,
+            active = economy.ttrialActive,
+            cycleBest = economy.ttrialCycleBest,
+            levels = economy.ttrialLevels
+        ),
         bestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(
             levels = economy.beastLevels,
+            newBeasts = economy.newBeasts,
             seals = economy.seals,
             shards = economy.shards,
             sealPrice = economy.sealPrice,
@@ -280,10 +309,14 @@ class MainViewModel @Inject constructor(
             EngineEffect.MadnessCollapse -> showMadnessNotice(MadnessNotice(collapse = true))
             is EngineEffect.Transcended -> {
                 val gain = effect.ether
-                _uiState.update { it.copy(transcendNotice = gain) }
+                val dream = effect.dreamPoints
+                val passed = effect.trialPassed
+                _uiState.update { it.copy(transcendNotice = gain, dreamNotice = dream, trialPassedNotice = passed) }
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
-                    _uiState.update { if (it.transcendNotice == gain) it.copy(transcendNotice = null) else it }
+                    _uiState.update {
+                        if (it.transcendNotice == gain) it.copy(transcendNotice = null, dreamNotice = null, trialPassedNotice = null) else it
+                    }
                 }
             }
             is EngineEffect.TrialCompleted -> {
@@ -339,7 +372,11 @@ class MainViewModel @Inject constructor(
         return ManualClickResult(economy.clickPower, echoFound)
     }
 
-    fun setBuyMultiplier(value: Int) = _uiState.update { it.copy(buyMultiplier = value) }
+    fun setBuyMultiplier(value: Int) {
+        _uiState.update { it.copy(buyMultiplier = value) }
+        // Se guarda en la partida: el autocomprador de edificios lo sigue
+        engine.setBuyMultiplier(value)
+    }
 
     fun toggleShowPurchased() = _showPurchasedState.update { !it }
 
@@ -349,7 +386,7 @@ class MainViewModel @Inject constructor(
 
     fun onBuyAllUpgrades() = engine.buyAllAffordableUpgrades()
 
-    fun onBuyPrestigeUpgrade(id: String) = engine.buyPrestigeUpgrade(id)
+    fun onBuyPrestigeUpgrade(id: String, amount: Int = 1) = engine.buyPrestigeUpgrade(id, amount)
 
     fun onActivateRitual(ritualId: String) = engine.activateRitual(ritualId)
 
@@ -460,7 +497,7 @@ class MainViewModel @Inject constructor(
 
     fun breakVeil() = engine.breakVeil()
 
-    fun buyStarUpgrade(id: String) = engine.buyStarUpgrade(id)
+    fun buyStarUpgrade(id: String, amount: Int = 1) = engine.buyStarUpgrade(id, amount)
 
     fun catchEncounter() = engine.catchEncounter()
 
@@ -470,9 +507,29 @@ class MainViewModel @Inject constructor(
 
     fun pickWithShards(id: String) = engine.pickWithShards(id)
 
+    fun onBeastViewed(id: String) = engine.onBeastViewed(id)
+
     fun dismissSummonResults() = _uiState.update { it.copy(summonResults = null) }
 
     fun buyLab(id: String) = engine.buyLab(id)
+
+    fun setDreamNext(enabled: Boolean) = engine.setDreamNext(enabled)
+
+    fun wakeUp() = engine.wakeUp()
+
+    fun buyDreamNode(id: String) = engine.buyDreamNode(id)
+
+    fun respecDream() = engine.respecDream()
+
+    fun buyInvocation(tier: Int) = engine.buyInvocation(tier)
+
+    fun buyMaxInvocations() = engine.buyMaxInvocations()
+
+    fun setLethargy(enabled: Boolean) = engine.setLethargy(enabled)
+
+    fun chooseTranscendenceTrial(id: String?) = engine.chooseTranscendenceTrial(id)
+
+    fun abandonTranscendenceTrial() = engine.abandonTranscendenceTrial()
 
     /** Marca o desmarca un edificio para el autocomprador. */
     fun toggleBuildingAutobuy(buildingId: String) = updateAutomation {

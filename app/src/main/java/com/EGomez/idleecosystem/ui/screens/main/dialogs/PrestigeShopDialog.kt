@@ -6,6 +6,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.remember
 import com.EGomez.idleecosystem.domain.logic.SanitySpending
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
+import com.EGomez.idleecosystem.domain.logic.BulkBuy
+import com.EGomez.idleecosystem.ui.components.BulkAmountRow
 import java.util.Locale
 import java.text.DecimalFormatSymbols
 import java.text.DecimalFormat
@@ -51,8 +53,11 @@ fun PrestigeShopDialog(
     currencyFormatted: String,
     currency: BigDecimal,
     onBuy: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onBuyMany: (String, Int) -> Unit = { id, _ -> onBuy(id) }
 ) {
+    // Cuántos niveles se compran de una vez (v0.20.5)
+    var amount by rememberSaveable { mutableIntStateOf(1) }
     // Se guarda el ID, no el objeto: el nodo se busca en la lista ACTUAL (si no, tras
     // comprar el panel seguía mostrando el nivel y el costo viejos)
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -119,7 +124,7 @@ fun PrestigeShopDialog(
                     }
                 }
             }
-            selectedNode?.let { node -> NodeCard(node, upgrades, currency, onBuy) { selectedId = null } }
+            selectedNode?.let { node -> NodeCard(node, upgrades, currency, amount, { amount = it }, onBuyMany) { selectedId = null } }
         }
     }
 }
@@ -268,11 +273,21 @@ private fun NodeCard(
     node: PrestigeUpgrade,
     upgrades: List<PrestigeUpgrade>,
     currency: BigDecimal,
-    onBuy: (String) -> Unit,
+    amount: Int,
+    onAmount: (Int) -> Unit,
+    onBuy: (String, Int) -> Unit,
     onClose: () -> Unit
 ) {
     val state = nodeState(node, upgrades, currency)
     val color = node.constellation.color()
+    // Las Sendas y los nodos de un solo nivel se compran de a uno
+    val multi = !MadnessPaths.isPath(node.id) && (node.maxLevel ?: Int.MAX_VALUE) > 1
+    val wanted = if (multi) amount else 1
+    val plan = remember(node.id, node.level, currency, wanted) {
+        BulkBuy.plan(node.level, node.maxLevel, currency, wanted) { node.baseCost.multiply(node.costMultiplier.pow(it)) }
+    }
+    // El efecto que se ve como "siguiente": el del nivel al que llega el lote
+    val target = node.level + maxOf(plan.levels, 1)
     Card(
         modifier = Modifier.fillMaxWidth().padding(12.dp).testTag(MAP_NODE_CARD_TAG)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {},
@@ -315,8 +330,11 @@ private fun NodeCard(
             }
             Spacer(modifier = Modifier.height(8.dp))
             if (node.level > 0) Text(stringResource(R.string.map_now, mapNodeEffect(node, node.level)), color = Color(0xFF81C784), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-            if (!node.isMaxed) Text(stringResource(R.string.map_next, mapNodeEffect(node, node.level + 1)), color = Color(0xFFB0BEC5), fontSize = 12.sp)
+            if (!node.isMaxed) Text(stringResource(R.string.map_next, mapNodeEffect(node, target)), color = Color(0xFFB0BEC5), fontSize = 12.sp)
             if (state.reachable && !node.isMaxed) SpendPreviewLines(node, currency)
+            if (multi && state.reachable && !node.isMaxed && !state.sealed && !state.pathLocked) {
+                BulkAmountRow(amount, color, Modifier.padding(top = 10.dp), onAmount)
+            }
             Spacer(modifier = Modifier.height(12.dp))
             val disabledLabel = when {
                 state.sealed -> R.string.path_sealed_button
@@ -332,10 +350,10 @@ private fun NodeCard(
                     colors = ButtonDefaults.buttonColors(disabledContainerColor = if (state.sealed) Color(0xFF3A1A1A) else Color(0xFF2A2A2A))
                 ) { Text(stringResource(disabledLabel), color = if (state.sealed) Color(0xFFE57373) else Color.Gray) }
             } else {
-                val cost = node.currentCost
-                val canAfford = currency >= cost
+                val cost = plan.cost
+                val canAfford = !plan.isEmpty
                 Button(
-                    onClick = { onBuy(node.id) },
+                    onClick = { onBuy(node.id, wanted) },
                     enabled = canAfford,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -346,7 +364,10 @@ private fun NodeCard(
                     )
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.upgrade_button), fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(R.string.upgrade_button) + if (plan.levels > 1) " x${plan.levels}" else "",
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(stringResource(R.string.cost_sanity, cost.toBeautifulString()), fontSize = 10.sp)
                         if (!canAfford) {
                             Text(

@@ -121,10 +121,24 @@ fun MenuSection(
     bestiaryUi: BestiaryUi = BestiaryUi(),
     labLevels: Map<String, Int> = emptyMap(),
     onBuyLab: (String) -> Unit = {},
+    dreamUi: DreamUi = DreamUi(),
+    onSetDreamNext: (Boolean) -> Unit = {},
+    onWakeUp: () -> Unit = {},
+    onBuyDreamNode: (String) -> Unit = {},
+    onRespecDream: () -> Unit = {},
+    chainUi: ChainUi = ChainUi(),
+    onBuyInvocation: (Int) -> Unit = {},
+    onBuyMaxInvocations: () -> Unit = {},
+    lethargyUi: LethargyUi = LethargyUi(),
+    onSetLethargy: (Boolean) -> Unit = {},
+    ttrialsUi: TranscendenceTrialsUi = TranscendenceTrialsUi(),
+    onChooseTranscendenceTrial: (String?) -> Unit = {},
+    onAbandonTranscendenceTrial: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
     onBuySeals: () -> Unit = {},
     onPickWithShards: (String) -> Unit = {},
-    onBuyStar: (String) -> Unit = {},
+    onBeastViewed: (String) -> Unit = {},
+    onBuyStar: (String, Int) -> Unit = { _, _ -> },
     runeSlots: Int = 0,
     engravedRunes: List<String> = emptyList(),
     runeCatches: Map<String, Int> = emptyMap(),
@@ -203,10 +217,19 @@ fun MenuSection(
                 }
             }
 
-            // Pestañas de la capa actual (una sola pestaña no necesita fila)
-            val layerTabs = unlocks.tabsOf(tab.layer)
-            if (layerTabs.size > 1) {
-                SubTabRow(layerTabs, tab, tab.layer.color(), newTabs, onTabSelected)
+            // Pestañas de la capa actual (una sola pestaña no necesita fila). Los grupos
+            // (Éter con Mutaciones; Ciclos con Sueño, Cadena, Letargo y Desafíos) abren una
+            // segunda fila de chips con sus pestañas (v0.20.4)
+            val topTabs = unlocks.topTabsOf(tab.layer)
+            val top = tab.group ?: tab
+            if (topTabs.size > 1) {
+                SubTabRow(topTabs, top, tab.layer.color(), newTabs, unlocks) { chosen ->
+                    onTabSelected(unlocks.entryOf(chosen, newTabs))
+                }
+            }
+            val groupChoices = unlocks.choicesOf(top)
+            if (groupChoices.size > 1) {
+                GroupChipRow(groupChoices, tab, tab.layer.color(), newTabs, onTabSelected)
             }
 
             if (tab == MenuTab.RESEARCH && showBuyMultipliers) {
@@ -246,6 +269,8 @@ fun MenuSection(
                     item { LockedSystem(lockedTabText) }
                 } else when (tab) {
                     MenuTab.RESEARCH -> {
+                        if (dreamUi.active) item(key = "dream_banner") { DreamBanner(dreamUi.exponent) }
+                        if (lethargyUi.active) item(key = "lethargy_banner") { LethargyBanner(lethargyUi.seconds) }
                         if (veilPressing) item(key = "veil_banner") { VeilBanner(veilFactor) }
                         items(buildings, key = { it.id }) { building ->
                             BuildingItem(
@@ -404,9 +429,15 @@ fun MenuSection(
                     MenuTab.RUNES -> item { RuneAltar(runeSlots, engravedRunes, runeCatches, onEngraveRune, onRemoveEngraving, runeMastery) }
                     MenuTab.ETHER -> item { EtherPanel(cycleAscensions, etherGain, ether, eternalLevels, onBuyEternal, onTranscend, transcendences, transcendRequired) }
                     MenuTab.MUTATIONS -> item { MutationCatalog(seenMutations, activeMutation) }
-                    MenuTab.STARS -> item { StarsPanel(starsUi, onBuyStar) }
-                    MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards) }
+                    MenuTab.STARS -> item { StarsPanel(starsUi, onBuy = { onBuyStar(it, 1) }, onBuyMany = onBuyStar) }
+                    MenuTab.BESTIARY -> item { BestiaryPanel(bestiaryUi, onSummon, onBuySeals, onPickWithShards, onBeastViewed) }
                     MenuTab.LAB -> item { LabPanel(ether, labLevels, onBuyLab) }
+                    MenuTab.DREAM -> item { DreamPanel(dreamUi, onSetDreamNext, onWakeUp, onBuyDreamNode, onRespecDream) }
+                    MenuTab.CHAIN -> item { ChainPanel(chainUi, onBuyInvocation, onBuyMaxInvocations) }
+                    MenuTab.LETHARGY -> item { LethargyPanel(lethargyUi, onSetLethargy) }
+                    MenuTab.TTRIALS -> item { TranscendenceTrialsPanel(ttrialsUi, onChooseTranscendenceTrial, onAbandonTranscendenceTrial) }
+                    // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
+                    MenuTab.CYCLES -> Unit
                 }
             }
 
@@ -554,6 +585,7 @@ private fun SubTabRow(
     selected: MenuTab,
     accent: Color,
     newTabs: Set<MenuTab>,
+    unlocks: MenuUnlocks,
     onSelect: (MenuTab) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 2.dp)) {
@@ -568,7 +600,9 @@ private fun SubTabRow(
                         .testTag(MENU_TAB_TAG + item.id)
                 ) {
                     Box(modifier = Modifier.height(36.dp).padding(horizontal = 2.dp), contentAlignment = Alignment.Center) {
-                        TabTitle(item.title(), item in newTabs, color = if (isSelected) accent else Color.Gray, fontSize = 13)
+                        // Un grupo lleva la marca si algo de adentro es nuevo
+                        val isNew = item in newTabs || unlocks.membersOf(item).any { it in newTabs }
+                        TabTitle(item.title(), isNew, color = if (isSelected) accent else Color.Gray, fontSize = 13)
                     }
                     Box(
                         modifier = Modifier
@@ -580,6 +614,43 @@ private fun SubTabRow(
             }
         }
         HorizontalDivider(color = Color(0xFF2A2A2A))
+    }
+}
+
+/**
+ * Las pestañas de un grupo (v0.20.4): chips compactos bajo la fila de pestañas, que se
+ * desplazan si no caben.
+ */
+@Composable
+private fun GroupChipRow(
+    tabs: List<MenuTab>,
+    selected: MenuTab,
+    accent: Color,
+    newTabs: Set<MenuTab>,
+    onSelect: (MenuTab) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .testTag(MENU_GROUP_TAG)
+    ) {
+        tabs.forEach { item ->
+            val isSelected = item == selected
+            Surface(
+                onClick = { onSelect(item) },
+                shape = RoundedCornerShape(14.dp),
+                color = if (isSelected) accent.copy(alpha = 0.18f) else Color(0xFF202020),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) accent else Color(0xFF333333)),
+                modifier = Modifier.height(28.dp).testTag(MENU_CHIP_TAG + item.id)
+            ) {
+                Box(modifier = Modifier.padding(horizontal = 12.dp), contentAlignment = Alignment.Center) {
+                    TabTitle(item.title(), item in newTabs, color = if (isSelected) accent else Color.Gray, fontSize = 12)
+                }
+            }
+        }
     }
 }
 
@@ -612,6 +683,8 @@ private fun TabTitle(title: String, isNew: Boolean, color: Color = Color.Unspeci
 const val BUY_MULTIPLIERS_AT = 5
 const val MENU_TAB_TAG = "menu_tab_"
 const val MENU_LAYER_TAG = "menu_layer_"
+const val MENU_GROUP_TAG = "menu_group"
+const val MENU_CHIP_TAG = "menu_chip_"
 const val MENU_CONTENT_TAG = "menu_content_"
 const val NEW_BADGE_TAG = "new_badge"
 const val ASCEND_BUTTON_TAG = "ascend_button"

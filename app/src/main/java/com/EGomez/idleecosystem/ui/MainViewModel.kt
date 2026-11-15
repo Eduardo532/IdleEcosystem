@@ -247,7 +247,9 @@ class MainViewModel @Inject constructor(
             canAwaken = economy.canAwaken,
             transcendences = economy.transcendences,
             trialLevels = economy.ttrialTotalLevels,
-            levels = economy.visionLevels
+            levels = economy.visionLevels,
+            oathsActive = economy.oathsActive,
+            oathsNext = economy.oathsNext
         ),
         ttrialsUi = com.EGomez.idleecosystem.ui.screens.main.components.TranscendenceTrialsUi(
             next = economy.ttrialNext,
@@ -550,6 +552,8 @@ class MainViewModel @Inject constructor(
     fun abandonTranscendenceTrial() = engine.abandonTranscendenceTrial()
 
     fun awaken() = engine.awaken()
+
+    fun setOath(id: String, sworn: Boolean) = engine.setOath(id, sworn)
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

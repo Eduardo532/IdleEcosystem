@@ -847,6 +847,30 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `oaths are sworn for the next awakening and show their multiplier`() {
+        val sworn = mutableListOf<Pair<String, Boolean>>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.AwakeningPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(
+                        awakenings = 1, oathsActive = setOf("t_silence"), oathsNext = setOf("t_silence", "m_blindness")
+                    ),
+                    onAwaken = {},
+                    onSetOath = { id, value -> sworn += id to value }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Rigen este Despertar: 1 Juramentos · Visiones x1.50").assertExists()
+        compose.onNodeWithText("Para el próximo Despertar: 2 Juramentos · Visiones x1.70").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.OATH_TAG + "m_hunger").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.OATH_TAG + "m_blindness").performScrollTo().performClick()
+        assertEquals(listOf("m_hunger" to true, "m_blindness" to false), sworn)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

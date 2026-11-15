@@ -1,6 +1,6 @@
 # Logros
 
-Hay **559 logros**: 113 originales y **446 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **563 logros**: 113 originales y **450 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -295,6 +295,10 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Un Párpado Tiembla | Despierta con el pacto de Azathoth | +1 % |
 | Mente Despierta | Despierta recorriendo la Senda de la Mente | +1 % |
 | Despertar en el Vacío | Despierta recorriendo la Senda del Vacío | +1 % |
+| Palabra Dada | Despierta habiendo cumplido 1 Juramento | +1 % |
+| Cinco Votos | Despierta habiendo cumplido 5 Juramentos a la vez | +1 % |
+| El Juramento Completo | Despierta habiendo cumplido los 14 Juramentos a la vez | +2 % |
+| Fiel a su Palabra | Cumple 20 Juramentos en total | +1 % |
 
 ### Panteón
 

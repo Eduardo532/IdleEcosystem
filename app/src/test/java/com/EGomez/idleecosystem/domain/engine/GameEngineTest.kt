@@ -934,6 +934,49 @@ class GameEngineTest {
     }
 
     @Test
+    fun `sworn oaths govern the next awakening and multiply its visions`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.canAwaken }
+        engine.setOath("t_silence", true)
+        engine.setOath("m_blindness", true)
+        val sworn = await(engine.economy) { it.oathsNext.size == 2 }
+        // Jurar no cambia el Despertar en curso
+        assertTrue(sworn.oathsActive.isEmpty())
+        assertEquals(6, sworn.visionGain)
+
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 }
+        assertEquals(setOf("t_silence", "m_blindness"), awake.oathsActive)
+        // La elección se conserva para el Despertar siguiente
+        assertEquals(setOf("t_silence", "m_blindness"), awake.oathsNext)
+        // El Silencio jurado: el clic no produce nada
+        assertEquals(0, awake.clickPower.signum())
+
+        // Al cumplir este Despertar, las Visiones salen x1,7: ⌊√(10 × log10(1001)) × 1,7⌋ = 9
+        stats.count(AchievementStat.TRANSCENDENCES, BigDecimal(10))
+        stats.count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+        engine.setOath("m_blindness", false)
+        val ready = await(engine.economy) { it.canAwaken && it.oathsNext.size == 1 }
+        assertEquals(9, ready.visionGain)
+        engine.awaken()
+        val second = await(engine.economy) { it.awakenings == 2 }
+        assertEquals(setOf("t_silence"), second.oathsActive)
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.AWAKEN_OATHS_MAX)))
+    }
+
+    @Test
     fun `a transcendence trial is chosen, restricts the cycle and is passed by transcending`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

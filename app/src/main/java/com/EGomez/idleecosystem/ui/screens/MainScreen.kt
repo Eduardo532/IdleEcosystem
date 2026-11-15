@@ -353,6 +353,7 @@ fun MainScreen(
                             onAbandonTranscendenceTrial = { viewModel.abandonTranscendenceTrial() },
                             awakeningUi = uiState.awakeningUi,
                             onAwaken = { viewModel.awaken() },
+                            onSetOath = { id, sworn -> viewModel.setOath(id, sworn) },
                             onBuyVisionNode = { viewModel.buyVisionNode(it) },
                             onRespecVisions = { viewModel.respecVisions() },
                             onSummon = { viewModel.summon(it) },

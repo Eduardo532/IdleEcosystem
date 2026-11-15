@@ -54,7 +54,7 @@ Sus efectos valen para siempre. Cada nodo pide tener antes al menos un nivel del
 
 ## Logros
 
-El Despertar trae **14 logros** (categoría Ascensión):
+El Despertar trae **14 logros** (categoría Ascensión), más 4 de los Juramentos:
 - Despertar 1, 3 y 10 veces;
 - ganar 10, 100 y 1.000 Visiones;
 - sumar 1 y 30 niveles en el árbol, y tener los 9 nodos;
@@ -62,6 +62,15 @@ El Despertar trae **14 logros** (categoría Ascensión):
 - Despertar en la Senda de la Mente o en la del Vacío;
 - uno secreto.
 
-## Próximamente
+## Juramentos *(v0.21.1)*
 
-**Juramentos (v0.21.1):** antes de Despertar se eligen restricciones tomadas de las Pruebas de Locura y de Trascendencia. Duran todo el Despertar siguiente y multiplican las Visiones.
+Son las **Pruebas de todas las capas combinadas**. En la pestaña Despertar puedes **jurar** cualquiera de las 10 Pruebas de Locura y de las 4 Pruebas de Trascendencia **para el próximo Despertar**:
+
+- Al Despertar, los jurados pasan a **regir el Despertar nuevo entero**:
+  - las reglas de una Prueba de Locura jurada valen en **cada vida**, sumadas a la Prueba que elijas al Ascender;
+  - la restricción de una Prueba de Trascendencia jurada vale en **cada ciclo**.
+- Cuando cumples ese Despertar (al volver a Despertar), las Visiones se multiplican por **1 + 0,2 por cada Juramento de Locura + 0,5 por cada uno de Trascendencia**. Con los 14 Juramentos, eso da x5.
+- La elección se **conserva** de un Despertar al siguiente hasta que la cambies. La pestaña muestra los Juramentos que rigen ahora y los jurados para el próximo, cada grupo con su multiplicador.
+- Las reglas se combinan tomando lo más estricto: los costos y la producción se multiplican, y el límite de tipos de edificio es el menor.
+
+Los Juramentos suman **4 logros**: cumplir 1, 5 y los 14 a la vez, y 20 en total.

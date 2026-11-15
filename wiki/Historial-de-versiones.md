@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.21.x *(en pruebas)*
 
 - **v0.21.0:** El Despertar, la tercera capa de prestigio. Con 10 Trascendencias y 5 niveles de Pruebas de Trascendencia, reinicia la capa Trascendencia (Éter, mejoras eternas, Laboratorio, Estrellas y la cuenta de Trascendencias) a cambio de Visiones. Las Visiones compran un Árbol de 9 nodos, y hay cinco Hitos del Despertar que devuelven parte de lo perdido. 14 logros nuevos.
+- **v0.21.1:** Juramentos, las Pruebas de todas las capas combinadas. Se juran Pruebas de Locura y de Trascendencia para el próximo Despertar. Rigen cada vida y cada ciclo de ese Despertar y multiplican sus Visiones: +20 % por cada una de Locura y +50 % por cada una de Trascendencia. 4 logros nuevos.
 
 ## v0.20.5 · "Profundidad de Trascender" *(oficial, 15 nov 2026)*
 

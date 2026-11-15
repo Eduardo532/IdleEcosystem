@@ -176,6 +176,14 @@ object AchievementStat {
     const val AWAKEN_WITH_PREFIX = "awaken_with."
     const val AWAKEN_PATH_PREFIX = "awaken_path."
     const val FEAT_AWAKEN_DREAMING = "feat.awaken_dreaming"
+    /**
+     * Los Juramentos (v0.21.1): los jurados para el próximo Despertar, los activos en este,
+     * el récord de Juramentos activos al Despertar y cuántos se cumplieron en total.
+     */
+    const val OATH_NEXT_PREFIX = "oath_next."
+    const val OATH_ACTIVE_PREFIX = "oath."
+    const val AWAKEN_OATHS_MAX = "awaken_oaths_max"
+    const val AWAKEN_OATHS_TOTAL = "awaken_oaths_total"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -404,6 +412,7 @@ object AchievementStat {
         LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
         TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
         AWAKENINGS, VISIONS, VISIONS_EARNED, MAX_VISION_GAIN, AWAKEN_TRANSC_BASE, AWAKEN_ETHER_BASE, VISION_RESPECS, FEAT_AWAKEN_DREAMING,
+        AWAKEN_OATHS_MAX, AWAKEN_OATHS_TOTAL,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -417,7 +426,7 @@ object AchievementStat {
         CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
         LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
         TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
-        VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX,
+        VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX, OATH_NEXT_PREFIX, OATH_ACTIVE_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

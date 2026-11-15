@@ -2,7 +2,9 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
-## v0.20.x *(en pruebas)*
+## v0.20.5 · "Profundidad de Trascender" *(oficial, 15 nov 2026)*
+
+Séptima etapa del Roadmap: cada ciclo de Trascender tiene un desafío largo propio.
 
 - **v0.20.0:** El Sueño Profundo: desde la tercera Trascendencia se puede elegir que el próximo ciclo sea un Sueño, donde la producción, el clic y la Cordura se elevan a ^0,75. Trascender desde el Sueño paga Puntos de Sueño según la mejor vida, y estos compran el Árbol del Sueño (8 nodos, reinicio gratis), que vale en todos los ciclos. 16 logros nuevos.
 - **v0.20.1:** La Cadena de Invocación: desde la cuarta Trascendencia se compran con Conocimiento ocho eslabones, del Círculo de Sal a la Conjunción Estelar. Cada uno produce al de abajo y el primero produce Poder de Invocación, que multiplica la producción. Sobrevive a las Ascensiones, sigue sin conexión y se deshace al Trascender. 14 logros nuevos.
@@ -14,7 +16,9 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
   - el autocomprador de edificios sigue el multiplicador de compra elegido, que ahora se guarda con la partida.
 - **v0.20.5:** compra de varios niveles a la vez (x1, x10, x100 o MAX) en el Mapa de Locura y en las Estrellas.
 
-## v0.19.x *(en pruebas)*
+## v0.19.12 · "Más Allá del Velo" *(oficial, 13 nov 2026)*
+
+Sexta etapa del Roadmap: completar la segunda capa.
 
 - **v0.19.0:** interfaz por capas: el menú empieza con una sola pestaña y cada sistema aparece al llegar a él, agrupado en las capas Vida, Ascensión y Trascendencia, con aviso de lo nuevo, punto dorado y una pista del próximo descubrimiento. El Mapa de Locura, la Atención y la automatización pasan a la pestaña Cordura; el Éter y las mejoras eternas, a su pestaña; catálogo de mutaciones. Runas más claras: placa con nombre y efecto real, aviso al capturarlas y chips con el nombre de la runa.
 

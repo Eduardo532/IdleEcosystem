@@ -137,6 +137,12 @@ fun MenuSection(
     awakeningUi: AwakeningUi = AwakeningUi(),
     onAwaken: () -> Unit = {},
     onSetOath: (String, Boolean) -> Unit = { _, _ -> },
+    signsUi: SignsUi = SignsUi(),
+    onEquipSign: (Int, String) -> Unit = { _, _ -> },
+    onUnequipSign: (String) -> Unit = {},
+    onUpgradeSign: (Int) -> Unit = {},
+    onSellSign: (Int) -> Unit = {},
+    onSellCommonSigns: () -> Unit = {},
     onBuyVisionNode: (String) -> Unit = {},
     onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
@@ -443,6 +449,7 @@ fun MenuSection(
                     MenuTab.TTRIALS -> item { TranscendenceTrialsPanel(ttrialsUi, onChooseTranscendenceTrial, onAbandonTranscendenceTrial) }
                     MenuTab.AWAKEN -> item { AwakeningPanel(awakeningUi, onAwaken, onSetOath) }
                     MenuTab.VISIONS -> item { VisionsPanel(awakeningUi, onBuyVisionNode, onRespecVisions) }
+                    MenuTab.SIGNS -> item { SignsPanel(signsUi, onEquipSign, onUnequipSign, onUpgradeSign, onSellSign, onSellCommonSigns) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
                     MenuTab.CYCLES -> Unit
                 }

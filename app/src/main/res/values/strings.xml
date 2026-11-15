@@ -558,4 +558,20 @@
     <string name="oaths_active">Rigen este Despertar: %1$d Juramentos · Visiones %2$s</string>
     <string name="oaths_next">Para el próximo Despertar: %1$d Juramentos · Visiones %2$s</string>
     <string name="oath_in_force">vigente</string>
+    <string name="tab_signs">Signos</string>
+    <string name="signs_title">SIGNOS ANTIGUOS</string>
+    <string name="signs_hint">Cada Trascendencia da un Signo y cada Despertar, tres. Equípalos en los planetas: cada planeta duplica el Signo de su afinidad.</string>
+    <string name="signs_dust">POLVO ASTRAL</string>
+    <string name="signs_planets">PLANETAS</string>
+    <string name="signs_affinity">afinidad: %1$s</string>
+    <string name="signs_planet_locked">Se abre con %1$d Despertares</string>
+    <string name="signs_planet_empty">Sin Signo</string>
+    <string name="signs_unequip">Quitar</string>
+    <string name="signs_inventory">INVENTARIO · %1$d / %2$d</string>
+    <string name="signs_sell_commons">Vender comunes</string>
+    <string name="signs_empty">Aún no tienes Signos: Trasciende para conseguir el primero.</string>
+    <string name="signs_bonus">%1$s %2$s</string>
+    <string name="signs_equipped">equipado</string>
+    <string name="signs_upgrade">Mejorar (%1$d)</string>
+    <string name="signs_sell">Vender (+%1$d)</string>
 </resources>

@@ -170,6 +170,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - Visiones `x(1 + 0,2·Juramentos de Locura + 0,5·Juramentos de Trascendencia)`, con los Juramentos que rigen el Despertar que se cumple. Las reglas se combinan con `TrialRules.combinedWith`: OR en las prohibiciones, producto en costos y producción, mínimo en tipos de edificio. *(Código: `Oaths`; test: `OathsTest`.)*
 
+## Signos Antiguos *(v0.21.2)*
+
+- 1 Signo por Trascendencia y 3 por Despertar (desde el primer Despertar); inventario de 30. Rareza por peso 50/30/14/5/1 (x1, x2, x4, x8, x16); calidad 1–100; nivel 1–10.
+- Bono `base × rareza × (0,5 + calidad) × (1 + 0,5·(nivel − 1))`; equipado da `x(1 + bono)`, `x(1 + 2·bono)` en el planeta de su afinidad. Mejorar `10 × rareza × 2^(nivel − 1)`; vender `5 × rareza × (0,5 + calidad) × nivel`. *(Código: `ElderSigns`, `ElderSign`, `Planet`; test: `ElderSignsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

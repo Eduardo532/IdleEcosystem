@@ -116,6 +116,8 @@ data class GameUiState(
     /** El Despertar (v0.21.0). */
     val awakeningUi: com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi = com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(),
     val awakenNotice: Int? = null,
+    /** Los Signos Antiguos (v0.21.2). */
+    val signsUi: com.EGomez.idleecosystem.ui.screens.main.components.SignsUi = com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

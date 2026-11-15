@@ -871,6 +871,37 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `elder signs are equipped on open planets, upgraded and sold`() {
+        val actions = mutableListOf<String>()
+        val flame = com.EGomez.idleecosystem.domain.logic.ElderSign(
+            com.EGomez.idleecosystem.domain.logic.SignKind.FLAME, com.EGomez.idleecosystem.domain.logic.SignRarity.EPIC, 80
+        )
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.SignsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(awakenings = 2, dust = 100, signs = mapOf(7 to flame.pack())),
+                    onEquip = { n, planet -> actions += "equip $n $planet" },
+                    onUnequip = { actions += "unequip $it" },
+                    onUpgrade = { actions += "upgrade $it" },
+                    onSell = { actions += "sell $it" },
+                    onSellCommons = { actions += "commons" }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Signo de la Llama · Épico · 80 % · Nv 1").assertExists()
+        compose.onNodeWithText("Se abre con 3 Despertares").assertExists()
+        // Solo hay botones para los planetas abiertos
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EQUIP_TAG + "7_xoth").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EQUIP_TAG + "7_yuggoth").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.UPGRADE_SIGN_TAG + 7).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SELL_SIGN_TAG + 7).performScrollTo().performClick()
+        assertEquals(listOf("equip 7 yuggoth", "upgrade 7", "sell 7"), actions)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

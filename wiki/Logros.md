@@ -1,6 +1,6 @@
 # Logros
 
-Hay **563 logros**: 113 originales y **450 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **577 logros**: 113 originales y **464 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -299,6 +299,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Cinco Votos | Despierta habiendo cumplido 5 Juramentos a la vez | +1 % |
 | El Juramento Completo | Despierta habiendo cumplido los 14 Juramentos a la vez | +2 % |
 | Fiel a su Palabra | Cumple 20 Juramentos en total | +1 % |
+| Primer Signo | Consigue un Signo Antiguo | +1 % |
+| Astrólogo del Abismo | Consigue 25 Signos Antiguos | +1 % |
+| Zodíaco Arcano | Consigue 100 Signos Antiguos | +2 % |
+| Estrella Fugaz Dorada | Consigue un Signo Legendario | +1 % |
+| Signo Imposible | Consigue un Signo Mítico | +2 % |
+| Signo Pulido | Sube un Signo a nivel 5 | +1 % |
+| Signo Consumado | Sube un Signo a nivel 10 | +2 % |
+| Los Cuatro Mundos | Equipa un Signo en los cuatro planetas | +2 % |
+| Mercader de Astros | Vende 20 Signos | +1 % |
+| Bajo el Signo de Nug | Consigue un Signo con el pacto de Nug | +1 % |
+| Bajo el Signo de Yeb | Consigue un Signo con el pacto de Yeb | +1 % |
+| Astrolabio del Engranaje | Consigue un Signo recorriendo la Senda del Engranaje | +1 % |
+| Horóscopo del Culto | Consigue un Signo recorriendo la Senda del Culto | +1 % |
 
 ### Panteón
 
@@ -472,7 +485,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **36 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **37 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

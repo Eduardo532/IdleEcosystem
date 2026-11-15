@@ -53,7 +53,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | Mecánica | Inspiración | Idea |
 |---|---|---|
 | **Despertar** ✅ *v0.21.0 – v0.21.1* | Unidad | La tercera capa: con 10 Trascendencias y 5 niveles de Pruebas de Trascendencia reinicia Trascender y da Visiones para un árbol de 9 nodos, con 5 hitos. Los **Juramentos** combinan las Pruebas de todas las capas: se juran para el próximo Despertar, rigen todo el Despertar y multiplican las Visiones. Ver [Despertar](Despertar). |
-| **Signos Antiguos y planetas** | Astrología | Signos con rareza y calidad equipados en planetas (Yuggoth, Saturno, Xoth, Kythanil); suben de nivel y al venderlos dan Polvo Astral. |
+| **Signos Antiguos y planetas** ✅ *v0.21.2* | Astrología | Desde el primer Despertar, Signos con rareza y calidad (1 por Trascendencia y 3 por Despertar) equipados en Yuggoth, Saturno, Xoth y Kythanil, cada planeta con su afinidad; suben de nivel con Polvo Astral y al venderlos lo dan. Ver [Signos Antiguos](Signos-Antiguos). |
 | **Expediciones** | Ataque | Un círculo que golpea horrores con daño basado en el Conocimiento; el nivel no tiene tope y da Oro al Despertar. |
 | **Reliquias** | Reliquias | Compradas con Oro y desbloqueadas por nivel de Expedición: Trapezoedro Resplandeciente, Corona de Yig, Espejo de Nitocris. |
 | **Cristales de Yuggoth** | Minerales | Una cuadrícula donde dos cristales iguales se fusionan en uno mayor; prestigios propios Pulir y Refinar con un árbol de refinado. |

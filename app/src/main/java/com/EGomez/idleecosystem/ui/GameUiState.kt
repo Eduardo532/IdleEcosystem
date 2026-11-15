@@ -118,6 +118,8 @@ data class GameUiState(
     val awakenNotice: Int? = null,
     /** Los Signos Antiguos (v0.21.2). */
     val signsUi: com.EGomez.idleecosystem.ui.screens.main.components.SignsUi = com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(),
+    /** Expediciones y Reliquias (v0.21.3). */
+    val expeditionUi: com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

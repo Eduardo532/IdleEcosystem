@@ -251,6 +251,15 @@ class MainViewModel @Inject constructor(
             oathsActive = economy.oathsActive,
             oathsNext = economy.oathsNext
         ),
+        expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
+            level = economy.expeditionLevel,
+            dealt = economy.expeditionDealt,
+            dps = economy.expeditionDps,
+            best = economy.expeditionBest,
+            gold = economy.expeditionGold,
+            goldOnAwaken = economy.expeditionGoldOnAwaken,
+            relics = economy.relicLevels
+        ),
         signsUi = com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(
             awakenings = economy.awakenings,
             dust = economy.astralDust,
@@ -570,6 +579,10 @@ class MainViewModel @Inject constructor(
     fun sellSign(n: Int) = engine.sellSign(n)
 
     fun sellCommonSigns() = engine.sellCommonSigns()
+
+    fun strikeExpedition() = engine.strikeExpedition()
+
+    fun buyRelic(id: String) = engine.buyRelic(id)
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

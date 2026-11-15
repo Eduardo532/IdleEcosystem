@@ -1,6 +1,6 @@
 # Logros
 
-Hay **577 logros**: 113 originales y **464 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **591 logros**: 113 originales y **478 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -312,6 +312,19 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Bajo el Signo de Yeb | Consigue un Signo con el pacto de Yeb | +1 % |
 | Astrolabio del Engranaje | Consigue un Signo recorriendo la Senda del Engranaje | +1 % |
 | Horóscopo del Culto | Consigue un Signo recorriendo la Senda del Culto | +1 % |
+| Primeros Trofeos | Vence 10 horrores en la Expedición | +1 % |
+| Cazador de Horrores | Vence 100 horrores en la Expedición | +1 % |
+| Mil Cabezas | Vence 1.000 horrores en la Expedición | +2 % |
+| Tierra Adentro | Llega al nivel 25 de Expedición | +1 % |
+| Las Tierras Sin Nombre | Llega al nivel 50 de Expedición | +1 % |
+| El Último Horizonte | Llega al nivel 100 de Expedición | +2 % |
+| Botín | Gana 100 de Oro de Expedición | +1 % |
+| El Tesoro de Yig | Gana 1.000 de Oro de Expedición | +2 % |
+| Coleccionista de Reliquias | Ten al menos un nivel de las tres Reliquias | +2 % |
+| Fuego Verde en el Círculo | Vence un horror con el pacto de Tulzscha | +1 % |
+| Desde R'lyeh, con Garras | Vence un horror con el pacto de Cthulhu | +1 % |
+| El Puño de la Senda | Vence un horror recorriendo la Senda de la Mano | +1 % |
+| Golpes en el Vacío | Vence un horror recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -485,7 +498,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **37 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **38 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

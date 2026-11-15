@@ -38,6 +38,7 @@ import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.DreamNode
 import com.EGomez.idleecosystem.domain.logic.ElderSign
+import com.EGomez.idleecosystem.domain.logic.Relic
 import com.EGomez.idleecosystem.domain.logic.Planet
 import com.EGomez.idleecosystem.domain.logic.SignKind
 import com.EGomez.idleecosystem.domain.logic.SignRarity
@@ -935,6 +936,52 @@ class GameEngineTest {
         engine.respecVisions()
         val refunded = await(engine.economy) { it.visionLevels["first"] == 0 }
         assertEquals(6, refunded.visions)
+    }
+
+    @Test
+    fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.canAwaken }
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 && it.expeditionRevealed }
+        assertTrue(MenuTab.EXPEDITION in awake.menuUnlocks.tabs)
+        assertTrue(awake.expeditionDps >= 1.0)
+
+        // Un golpe a mano hace una décima del daño por segundo
+        engine.strikeExpedition()
+        await(engine.economy) { it.expeditionDealt > 0.0 || it.expeditionLevel > 0 }
+
+        // Nivel 20 al Despertar: ⌊20^1,3⌋ = 49 de Oro
+        stats.counters[AchievementStat.EXPEDITION_LEVEL] = BigDecimal(20)
+        stats.counters[AchievementStat.EXPEDITION_BEST] = BigDecimal(20)
+        stats.count(AchievementStat.TRANSCENDENCES, BigDecimal(10))
+        stats.count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+        val ready = await(engine.economy) { it.canAwaken && it.expeditionGoldOnAwaken == 49 }
+        assertEquals(20, ready.expeditionLevel)
+        engine.awaken()
+        val paid = await(engine.economy) { it.awakenings == 2 }
+        assertEquals(49, paid.expeditionGold)
+        assertTrue(paid.expeditionLevel < 20)
+        assertEquals(20, paid.expeditionBest)
+
+        // El Trapezoedro (nivel 10) se compra; el Espejo (nivel 50) todavía no
+        engine.buyRelic(Relic.MIRROR.id)
+        engine.buyRelic(Relic.TRAPEZOHEDRON.id)
+        val relic = await(engine.economy) { it.relicLevels[Relic.TRAPEZOHEDRON.id] == 1 }
+        assertEquals(39, relic.expeditionGold)
+        assertEquals(0, relic.relicLevels[Relic.MIRROR.id])
     }
 
     @Test

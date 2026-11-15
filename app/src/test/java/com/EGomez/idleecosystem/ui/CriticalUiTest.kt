@@ -902,6 +902,30 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the expedition shows the horror, strikes and buys unlocked relics`() {
+        val actions = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(level = 12, best = 30, gold = 30, goldOnAwaken = 25, dps = 961.0),
+                    onStrike = { actions += "strike" },
+                    onBuyRelic = { actions += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Nivel 12 · mejor 30").assertExists()
+        compose.onNodeWithText("Al Despertar: +25 de Oro").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EXPEDITION_STRIKE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.RELIC_BUY_TAG + "trapezohedron").performScrollTo().performClick()
+        // La Corona pide 25 de Oro y se abre en el nivel 25: alcanza; el Espejo pide el nivel 50
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.RELIC_BUY_TAG + "mirror").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("strike", "trapezohedron"), actions)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

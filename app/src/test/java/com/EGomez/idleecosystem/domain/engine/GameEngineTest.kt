@@ -37,8 +37,14 @@ import com.EGomez.idleecosystem.domain.logic.PrestigeUpgradeSaveModel
 import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.ElderSign
+import com.EGomez.idleecosystem.domain.logic.Relic
+import com.EGomez.idleecosystem.domain.logic.Planet
+import com.EGomez.idleecosystem.domain.logic.SignKind
+import com.EGomez.idleecosystem.domain.logic.SignRarity
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
+import com.EGomez.idleecosystem.domain.logic.VisionNode
 import com.EGomez.idleecosystem.domain.logic.LabExperiment
 import com.EGomez.idleecosystem.domain.logic.BeastRarity
 import com.EGomez.idleecosystem.domain.logic.BeastKind
@@ -873,6 +879,195 @@ class GameEngineTest {
         engine.grantKnowledge(BigDecimal.ONE)
         val still = await(engine.economy) { it.knowledge > after.knowledge }
         assertEquals(1, still.labLevels[LabExperiment.ARMITAGE.id])
+    }
+
+    @Test
+    fun `awakening resets the transcendence layer and pays visions`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER, BigDecimal(500))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+            counters[AchievementStat.eternal("fire")] = BigDecimal(3)
+            counters[AchievementStat.lab("armitage")] = BigDecimal(2)
+            counters[AchievementStat.starUpgrade("light")] = BigDecimal(2)
+            counters[AchievementStat.STARDUST] = BigDecimal(100)
+            counters[AchievementStat.dreamNode("steps")] = BigDecimal(2)
+            counters[AchievementStat.beast("deep_dagon")] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.awakeningRevealed && it.canAwaken }
+        assertTrue(MenuTab.AWAKEN in before.menuUnlocks.tabs)
+        assertEquals(6, before.visionGain)
+
+        engine.awaken()
+        val after = await(engine.economy) { it.awakenings == 1 }
+        assertEquals(6, after.visions)
+        // La capa Trascendencia se reinicia...
+        assertEquals(0, after.transcendences)
+        assertEquals(0, stats.counter(AchievementStat.ETHER).signum())
+        assertEquals(0, stats.counter(AchievementStat.eternal("fire")).signum())
+        assertEquals(0, stats.counter(AchievementStat.lab("armitage")).signum())
+        assertEquals(0, stats.counter(AchievementStat.starUpgrade("light")).signum())
+        assertFalse(after.canAwaken)
+        // ...pero los totales, el Bestiario, el Árbol del Sueño y las Pruebas T. quedan
+        assertEquals(0, BigDecimal(12).compareTo(stats.counter(AchievementStat.TRANSCENDENCES)))
+        assertEquals(2, after.dreamLevels["steps"])
+        assertEquals(5, after.ttrialLevels["silence"])
+        assertEquals(1, after.beastLevels["deep_dagon"])
+        // Lo descubierto no se esconde
+        assertTrue(MenuTab.DREAM in after.menuUnlocks.tabs)
+        assertTrue(MenuTab.AWAKEN in after.menuUnlocks.tabs)
+
+        // El Árbol de Visiones
+        engine.buyVisionNode(VisionNode.SANITY.id) // sin la Primera Visión no se puede
+        engine.buyVisionNode(VisionNode.FIRST.id)
+        val bought = await(engine.economy) { it.visionLevels["first"] == 1 }
+        assertEquals(5, bought.visions)
+        assertEquals(0, bought.visionLevels["sanity"])
+        engine.respecVisions()
+        val refunded = await(engine.economy) { it.visionLevels["first"] == 0 }
+        assertEquals(6, refunded.visions)
+    }
+
+    @Test
+    fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.canAwaken }
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 && it.expeditionRevealed }
+        assertTrue(MenuTab.EXPEDITION in awake.menuUnlocks.tabs)
+        assertTrue(awake.expeditionDps >= 1.0)
+
+        // Un golpe a mano hace una décima del daño por segundo
+        engine.strikeExpedition()
+        await(engine.economy) { it.expeditionDealt > 0.0 || it.expeditionLevel > 0 }
+
+        // Nivel 20 al Despertar: ⌊20^1,3⌋ = 49 de Oro
+        stats.counters[AchievementStat.EXPEDITION_LEVEL] = BigDecimal(20)
+        stats.counters[AchievementStat.EXPEDITION_BEST] = BigDecimal(20)
+        stats.count(AchievementStat.TRANSCENDENCES, BigDecimal(10))
+        stats.count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+        val ready = await(engine.economy) { it.canAwaken && it.expeditionGoldOnAwaken == 49 }
+        assertEquals(20, ready.expeditionLevel)
+        engine.awaken()
+        val paid = await(engine.economy) { it.awakenings == 2 }
+        assertEquals(49, paid.expeditionGold)
+        assertTrue(paid.expeditionLevel < 20)
+        assertEquals(20, paid.expeditionBest)
+
+        // El Trapezoedro (nivel 10) se compra; el Espejo (nivel 50) todavía no
+        engine.buyRelic(Relic.MIRROR.id)
+        engine.buyRelic(Relic.TRAPEZOHEDRON.id)
+        val relic = await(engine.economy) { it.relicLevels[Relic.TRAPEZOHEDRON.id] == 1 }
+        assertEquals(39, relic.expeditionGold)
+        assertEquals(0, relic.relicLevels[Relic.MIRROR.id])
+    }
+
+    @Test
+    fun `awakening grants elder signs that are equipped, upgraded and sold`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canAwaken }
+        assertFalse(before.signsRevealed)
+
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 && it.signs.size == 3 }
+        assertTrue(awake.signsRevealed)
+        assertTrue(MenuTab.SIGNS in awake.menuUnlocks.tabs)
+        assertEquals(0, BigDecimal(3).compareTo(stats.counter(AchievementStat.SIGNS_FOUND)))
+
+        // Un Signo de la Llama conocido, equipado en Yuggoth (su afinidad): producción x5
+        stats.counters[AchievementStat.sign(99)] = BigDecimal(ElderSign(SignKind.FLAME, SignRarity.COMMON, 50).pack())
+        engine.equipSign(99, Planet.YUGGOTH.id)
+        // Saturno todavía no se abre con un solo Despertar
+        engine.equipSign(99, Planet.SATURN.id)
+        val equipped = await(engine.economy) { it.signsEquipped[Planet.YUGGOTH.id] == 99 }
+        assertEquals(null, equipped.signsEquipped[Planet.SATURN.id])
+
+        // Subir de nivel cuesta Polvo Astral; vender lo devuelve
+        stats.counters[AchievementStat.ASTRAL_DUST] = BigDecimal(10)
+        engine.upgradeSign(99)
+        val up = await(engine.economy) { ElderSign.unpack(it.signs.getValue(99)).level == 2 }
+        assertEquals(0, up.astralDust)
+        engine.sellSign(99)
+        val sold = await(engine.economy) { 99 !in it.signs }
+        assertEquals(ElderSign(SignKind.FLAME, SignRarity.COMMON, 50, 2).dust(), sold.astralDust)
+        assertTrue(sold.signsEquipped.isEmpty())
+    }
+
+    @Test
+    fun `sworn oaths govern the next awakening and multiply its visions`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.canAwaken }
+        engine.setOath("t_silence", true)
+        engine.setOath("m_blindness", true)
+        val sworn = await(engine.economy) { it.oathsNext.size == 2 }
+        // Jurar no cambia el Despertar en curso
+        assertTrue(sworn.oathsActive.isEmpty())
+        assertEquals(6, sworn.visionGain)
+
+        engine.awaken()
+        val awake = await(engine.economy) { it.awakenings == 1 }
+        assertEquals(setOf("t_silence", "m_blindness"), awake.oathsActive)
+        // La elección se conserva para el Despertar siguiente
+        assertEquals(setOf("t_silence", "m_blindness"), awake.oathsNext)
+        // El Silencio jurado: el clic no produce nada
+        assertEquals(0, awake.clickPower.signum())
+
+        // Al cumplir este Despertar, las Visiones salen x1,7: ⌊√(10 × log10(1001)) × 1,7⌋ = 9
+        stats.count(AchievementStat.TRANSCENDENCES, BigDecimal(10))
+        stats.count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+        engine.setOath("m_blindness", false)
+        val ready = await(engine.economy) { it.canAwaken && it.oathsNext.size == 1 }
+        assertEquals(9, ready.visionGain)
+        engine.awaken()
+        val second = await(engine.economy) { it.awakenings == 2 }
+        assertEquals(setOf("t_silence"), second.oathsActive)
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.AWAKEN_OATHS_MAX)))
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Logros
 
-Hay **545 logros**: 113 originales y **432 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **591 logros**: 113 originales y **478 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -282,6 +282,49 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Las Formas Ocultas | Supera una Prueba de Trascendencia con el pacto de Daoloth | +1 % |
 | La Mano Firme | Supera una Prueba de Trascendencia recorriendo la Senda de la Mano | +1 % |
 | Prueba Soñada | Supera una Prueba de Trascendencia recorriendo la Senda del Sueño | +1 % |
+| Primer Despertar | Despierta por primera vez | +1 % |
+| Ojos que no Duermen | Despierta 3 veces | +1 % |
+| El Que Ve | Despierta 10 veces | +2 % |
+| Destello | Gana 10 Visiones en total | +1 % |
+| Profecía | Gana 100 Visiones en total | +1 % |
+| El Ojo del Mundo | Gana 1.000 Visiones en total | +2 % |
+| Pestañeo | Sube 1 nivel en el Árbol de Visiones | +1 % |
+| Ojos de Mil Años | Suma 30 niveles en el Árbol de Visiones | +1 % |
+| El Árbol que Mira | Ten al menos un nivel en los 9 nodos del Árbol de Visiones | +2 % |
+| Bajo el Signo Amarillo | Despierta con el pacto de Hastur | +1 % |
+| Un Párpado Tiembla | Despierta con el pacto de Azathoth | +1 % |
+| Mente Despierta | Despierta recorriendo la Senda de la Mente | +1 % |
+| Despertar en el Vacío | Despierta recorriendo la Senda del Vacío | +1 % |
+| Palabra Dada | Despierta habiendo cumplido 1 Juramento | +1 % |
+| Cinco Votos | Despierta habiendo cumplido 5 Juramentos a la vez | +1 % |
+| El Juramento Completo | Despierta habiendo cumplido los 14 Juramentos a la vez | +2 % |
+| Fiel a su Palabra | Cumple 20 Juramentos en total | +1 % |
+| Primer Signo | Consigue un Signo Antiguo | +1 % |
+| Astrólogo del Abismo | Consigue 25 Signos Antiguos | +1 % |
+| Zodíaco Arcano | Consigue 100 Signos Antiguos | +2 % |
+| Estrella Fugaz Dorada | Consigue un Signo Legendario | +1 % |
+| Signo Imposible | Consigue un Signo Mítico | +2 % |
+| Signo Pulido | Sube un Signo a nivel 5 | +1 % |
+| Signo Consumado | Sube un Signo a nivel 10 | +2 % |
+| Los Cuatro Mundos | Equipa un Signo en los cuatro planetas | +2 % |
+| Mercader de Astros | Vende 20 Signos | +1 % |
+| Bajo el Signo de Nug | Consigue un Signo con el pacto de Nug | +1 % |
+| Bajo el Signo de Yeb | Consigue un Signo con el pacto de Yeb | +1 % |
+| Astrolabio del Engranaje | Consigue un Signo recorriendo la Senda del Engranaje | +1 % |
+| Horóscopo del Culto | Consigue un Signo recorriendo la Senda del Culto | +1 % |
+| Primeros Trofeos | Vence 10 horrores en la Expedición | +1 % |
+| Cazador de Horrores | Vence 100 horrores en la Expedición | +1 % |
+| Mil Cabezas | Vence 1.000 horrores en la Expedición | +2 % |
+| Tierra Adentro | Llega al nivel 25 de Expedición | +1 % |
+| Las Tierras Sin Nombre | Llega al nivel 50 de Expedición | +1 % |
+| El Último Horizonte | Llega al nivel 100 de Expedición | +2 % |
+| Botín | Gana 100 de Oro de Expedición | +1 % |
+| El Tesoro de Yig | Gana 1.000 de Oro de Expedición | +2 % |
+| Coleccionista de Reliquias | Ten al menos un nivel de las tres Reliquias | +2 % |
+| Fuego Verde en el Círculo | Vence un horror con el pacto de Tulzscha | +1 % |
+| Desde R'lyeh, con Garras | Vence un horror con el pacto de Cthulhu | +1 % |
+| El Puño de la Senda | Vence un horror recorriendo la Senda de la Mano | +1 % |
+| Golpes en el Vacío | Vence un horror recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -455,7 +498,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **35 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **38 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

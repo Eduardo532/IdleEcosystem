@@ -158,6 +158,65 @@ object AchievementStat {
     const val TTRIAL_ABANDONED = "ttrial_abandoned"
     const val TTRIAL_WITH_PREFIX = "ttrial_with."
     const val TTRIAL_PATH_PREFIX = "ttrial_path."
+    /**
+     * El Despertar (v0.21.0): Despertares, Visiones (las que hay y las ganadas), la cuenta
+     * de Trascendencias y de Éter ganado al último Despertar (para contar desde ahí sin
+     * tocar los totales), nodos del Árbol de Visiones y con qué pacto o Senda se Despertó.
+     */
+    const val AWAKENINGS = "awakenings"
+    const val VISIONS = "visions"
+    const val VISIONS_EARNED = "visions_earned"
+    const val MAX_VISION_GAIN = "max.vision_gain"
+    const val AWAKEN_TRANSC_BASE = "awaken.transc_base"
+    const val AWAKEN_ETHER_BASE = "awaken.ether_base"
+    const val VISION_NODE_PREFIX = "vision."
+    const val VISION_LEVELS = "vision_levels"
+    const val VISION_NODES = "vision_nodes"
+    const val VISION_RESPECS = "vision_respecs"
+    const val AWAKEN_WITH_PREFIX = "awaken_with."
+    const val AWAKEN_PATH_PREFIX = "awaken_path."
+    const val FEAT_AWAKEN_DREAMING = "feat.awaken_dreaming"
+    /**
+     * Los Juramentos (v0.21.1): los jurados para el próximo Despertar, los activos en este,
+     * el récord de Juramentos activos al Despertar y cuántos se cumplieron en total.
+     */
+    const val OATH_NEXT_PREFIX = "oath_next."
+    const val OATH_ACTIVE_PREFIX = "oath."
+    const val AWAKEN_OATHS_MAX = "awaken_oaths_max"
+    const val AWAKEN_OATHS_TOTAL = "awaken_oaths_total"
+    /**
+     * Los Signos Antiguos (v0.21.2): cada Signo como "sign.<n>" (empaquetado), el próximo n,
+     * el Signo equipado en cada planeta, el Polvo Astral y lo que cuentan los logros.
+     */
+    const val SIGN_PREFIX = "sign."
+    const val SIGN_SEQ = "sign_seq"
+    const val SIGN_EQUIP_PREFIX = "sign_eq."
+    const val ASTRAL_DUST = "astral_dust"
+    const val SIGNS_FOUND = "signs_found"
+    const val SIGNS_SOLD = "signs_sold"
+    const val SIGN_BEST_RARITY = "sign_best_rarity"
+    const val SIGN_MAX_LEVEL = "sign_max_level"
+    const val SIGN_PLANETS = "sign_planets"
+    const val SIGN_WITH_PREFIX = "sign_with."
+    const val SIGN_PATH_PREFIX = "sign_path."
+    const val FEAT_SIGN_PERFECT = "feat.sign_perfect"
+    /**
+     * Las Expediciones y Reliquias (v0.21.3): nivel actual y daño al horror en curso (se
+     * reinician al Despertar), mejor nivel, horrores vencidos, Oro (el que hay y el ganado),
+     * niveles de Reliquias y con qué pacto o Senda se venció un horror.
+     */
+    const val EXPEDITION_LEVEL = "expedition_level"
+    const val EXPEDITION_DEALT = "expedition_dealt"
+    const val EXPEDITION_BEST = "expedition_best"
+    const val EXPEDITION_KILLS = "expedition_kills"
+    const val EXPEDITION_GOLD = "expedition_gold"
+    const val EXPEDITION_GOLD_EARNED = "expedition_gold_earned"
+    const val EXPEDITION_WITH_PREFIX = "expedition_with."
+    const val EXPEDITION_PATH_PREFIX = "expedition_path."
+    const val FEAT_EXPEDITION_TAP = "feat.expedition_tap"
+    const val RELIC_PREFIX = "relic."
+    const val RELIC_LEVELS = "relic_levels"
+    const val RELICS_OWNED = "relics_owned"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -200,7 +259,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED
     )
 
     // --- Contadores guardados ---
@@ -362,6 +421,16 @@ object AchievementStat {
     fun ttrial(id: String) = TTRIAL_PREFIX + id
     fun ttrialWith(pactId: String) = TTRIAL_WITH_PREFIX + pactId
     fun ttrialPath(pathId: String) = TTRIAL_PATH_PREFIX + pathId
+    fun visionNode(id: String) = VISION_NODE_PREFIX + id
+    fun awakenWith(pactId: String) = AWAKEN_WITH_PREFIX + pactId
+    fun awakenPath(pathId: String) = AWAKEN_PATH_PREFIX + pathId
+    fun sign(n: Int) = SIGN_PREFIX + n
+    fun signEquip(planetId: String) = SIGN_EQUIP_PREFIX + planetId
+    fun signWith(pactId: String) = SIGN_WITH_PREFIX + pactId
+    fun signPath(pathId: String) = SIGN_PATH_PREFIX + pathId
+    fun relic(id: String) = RELIC_PREFIX + id
+    fun expeditionWith(pactId: String) = EXPEDITION_WITH_PREFIX + pactId
+    fun expeditionPath(pathId: String) = EXPEDITION_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -382,6 +451,10 @@ object AchievementStat {
         CHAIN_POWER, CHAIN_POWER_BEST, CHAIN_BOUGHT, CHAIN_TOP_TIER, CHAIN_FULL, CHAIN_DREAM,
         LETHARGY_ACTIVE, LETHARGY_SECONDS, LETHARGY_ASCENSIONS, LETHARGY_EXTRA, LETHARGY_BEST_MINUTES, LETHARGY_LOST,
         TTRIAL_NEXT, TTRIAL_ACTIVE, TTRIAL_CYCLE_BEST, TTRIAL_ABANDONED,
+        AWAKENINGS, VISIONS, VISIONS_EARNED, MAX_VISION_GAIN, AWAKEN_TRANSC_BASE, AWAKEN_ETHER_BASE, VISION_RESPECS, FEAT_AWAKEN_DREAMING,
+        AWAKEN_OATHS_MAX, AWAKEN_OATHS_TOTAL,
+        SIGN_SEQ, ASTRAL_DUST, SIGNS_FOUND, SIGNS_SOLD, SIGN_BEST_RARITY, SIGN_MAX_LEVEL, FEAT_SIGN_PERFECT,
+        EXPEDITION_LEVEL, EXPEDITION_DEALT, EXPEDITION_BEST, EXPEDITION_KILLS, EXPEDITION_GOLD, EXPEDITION_GOLD_EARNED, FEAT_EXPEDITION_TAP,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -395,6 +468,9 @@ object AchievementStat {
         CHAIN_CYCLE_PREFIX, CHAIN_BUY_WITH_PREFIX, CHAIN_BUY_PATH_PREFIX,
         LETHARGY_WITH_PREFIX, LETHARGY_PATH_PREFIX,
         TTRIAL_PREFIX, TTRIAL_WITH_PREFIX, TTRIAL_PATH_PREFIX,
+        VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX, OATH_NEXT_PREFIX, OATH_ACTIVE_PREFIX,
+        SIGN_PREFIX, SIGN_EQUIP_PREFIX, SIGN_WITH_PREFIX, SIGN_PATH_PREFIX,
+        EXPEDITION_WITH_PREFIX, EXPEDITION_PATH_PREFIX, RELIC_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

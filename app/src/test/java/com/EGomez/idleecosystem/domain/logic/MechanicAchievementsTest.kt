@@ -49,6 +49,9 @@ class MechanicAchievementsTest {
         "Cadena de Invocación" to { it.stat?.startsWith("chain") == true },
         "Letargo" to { it.stat?.startsWith("lethargy") == true },
         "Pruebas de Trascendencia" to { it.stat?.startsWith("ttrial") == true },
+        "Despertar" to { s -> s.stat?.let { it.startsWith("awaken") || it.startsWith("vision") || it == AchievementStat.FEAT_AWAKEN_DREAMING } == true },
+        "Signos Antiguos" to { s -> s.stat?.let { it.startsWith("sign") || it == AchievementStat.FEAT_SIGN_PERFECT } == true },
+        "Expediciones y Reliquias" to { s -> s.stat?.let { it.startsWith("expedition") || it.startsWith("relic") || it == AchievementStat.FEAT_EXPEDITION_TAP } == true },
         "Bestiario" to {
             it.stat?.startsWith("beast") == true || it.stat in setOf(
                 AchievementStat.SEALS_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED, AchievementStat.SUMMONS,

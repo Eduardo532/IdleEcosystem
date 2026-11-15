@@ -822,6 +822,133 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the awakening tab shows the requirements and asks before awakening`() {
+        var awakened = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.AwakeningPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(
+                        canAwaken = true, visionGain = 6, transcendences = 12, trialLevels = 5, awakenings = 1
+                    ),
+                    onAwaken = { awakened++ }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Trascendencias desde el último Despertar: 12 / 10").assertExists()
+        compose.onNodeWithText("DESPERTAR (+6 Visiones)").performClick()
+        // Primero la confirmación, con lo que se pierde y lo que se conserva
+        compose.onNodeWithText("Ganarás 6 Visiones.").assertExists()
+        assertEquals(0, awakened)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.AWAKEN_CONFIRM_TAG).performClick()
+        assertEquals(1, awakened)
+    }
+
+    @Test
+    fun `oaths are sworn for the next awakening and show their multiplier`() {
+        val sworn = mutableListOf<Pair<String, Boolean>>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.AwakeningPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(
+                        awakenings = 1, oathsActive = setOf("t_silence"), oathsNext = setOf("t_silence", "m_blindness")
+                    ),
+                    onAwaken = {},
+                    onSetOath = { id, value -> sworn += id to value }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Rigen este Despertar: 1 Juramentos · Visiones x1.50").assertExists()
+        compose.onNodeWithText("Para el próximo Despertar: 2 Juramentos · Visiones x1.70").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.OATH_TAG + "m_hunger").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.OATH_TAG + "m_blindness").performScrollTo().performClick()
+        assertEquals(listOf("m_hunger" to true, "m_blindness" to false), sworn)
+    }
+
+    @Test
+    fun `elder signs are equipped on open planets, upgraded and sold`() {
+        val actions = mutableListOf<String>()
+        val flame = com.EGomez.idleecosystem.domain.logic.ElderSign(
+            com.EGomez.idleecosystem.domain.logic.SignKind.FLAME, com.EGomez.idleecosystem.domain.logic.SignRarity.EPIC, 80
+        )
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.SignsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(awakenings = 2, dust = 100, signs = mapOf(7 to flame.pack())),
+                    onEquip = { n, planet -> actions += "equip $n $planet" },
+                    onUnequip = { actions += "unequip $it" },
+                    onUpgrade = { actions += "upgrade $it" },
+                    onSell = { actions += "sell $it" },
+                    onSellCommons = { actions += "commons" }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Signo de la Llama · Épico · 80 % · Nv 1").assertExists()
+        compose.onNodeWithText("Se abre con 3 Despertares").assertExists()
+        // Solo hay botones para los planetas abiertos
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EQUIP_TAG + "7_xoth").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EQUIP_TAG + "7_yuggoth").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.UPGRADE_SIGN_TAG + 7).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.SELL_SIGN_TAG + 7).performScrollTo().performClick()
+        assertEquals(listOf("equip 7 yuggoth", "upgrade 7", "sell 7"), actions)
+    }
+
+    @Test
+    fun `the expedition shows the horror, strikes and buys unlocked relics`() {
+        val actions = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(level = 12, best = 30, gold = 30, goldOnAwaken = 25, dps = 961.0),
+                    onStrike = { actions += "strike" },
+                    onBuyRelic = { actions += it }
+                )
+            }
+        }
+
+        compose.onNodeWithText("Nivel 12 · mejor 30").assertExists()
+        compose.onNodeWithText("Al Despertar: +25 de Oro").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EXPEDITION_STRIKE_TAG).performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.RELIC_BUY_TAG + "trapezohedron").performScrollTo().performClick()
+        // La Corona pide 25 de Oro y se abre en el nivel 25: alcanza; el Espejo pide el nivel 50
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.RELIC_BUY_TAG + "mirror").performScrollTo().assertIsNotEnabled()
+        assertEquals(listOf("strike", "trapezohedron"), actions)
+    }
+
+    @Test
+    fun `the vision tree buys from the root and refunds`() {
+        val bought = mutableListOf<String>()
+        var respecs = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.VisionsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.AwakeningUi(visions = 3, levels = mapOf("first" to 1)),
+                    onBuy = { bought += it },
+                    onRespec = { respecs++ }
+                )
+            }
+        }
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISION_BUY_TAG + "sanity").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISION_BUY_TAG + "abyss").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.VISIONS_RESPEC_TAG).performScrollTo().performClick()
+        assertEquals(listOf("sanity"), bought)
+        assertEquals(1, respecs)
+    }
+
+    @Test
     fun `while dreaming the panel shows the pending points and lets you wake up`() {
         var woken = 0
         compose.setContent {

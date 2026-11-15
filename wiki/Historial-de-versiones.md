@@ -2,6 +2,15 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.21.3 · "El Despertar" *(oficial, 15 nov 2026)*
+
+Octava etapa del Roadmap, primera parte: la tercera capa y sus dos primeros minijuegos.
+
+- **v0.21.0:** El Despertar, la tercera capa de prestigio. Con 10 Trascendencias y 5 niveles de Pruebas de Trascendencia, reinicia la capa Trascendencia (Éter, mejoras eternas, Laboratorio, Estrellas y la cuenta de Trascendencias) a cambio de Visiones. Las Visiones compran un Árbol de 9 nodos, y hay cinco Hitos del Despertar que devuelven parte de lo perdido. 14 logros nuevos.
+- **v0.21.1:** Juramentos, las Pruebas de todas las capas combinadas. Se juran Pruebas de Locura y de Trascendencia para el próximo Despertar. Rigen cada vida y cada ciclo de ese Despertar y multiplican sus Visiones: +20 % por cada una de Locura y +50 % por cada una de Trascendencia. 4 logros nuevos.
+- **v0.21.2:** Signos Antiguos. Desde el primer Despertar, cada Trascendencia da un Signo (y cada Despertar, tres), con tipo, rareza, calidad y nivel. Se equipan en cuatro planetas, que se abren con Despertares y duplican el Signo de su afinidad. Suben de nivel con Polvo Astral y se venden por él. 14 logros nuevos.
+- **v0.21.3:** Expediciones y Reliquias. Desde el primer Despertar, un círculo golpea horrores del Bestiario con un daño que crece con la producción, y se puede golpear a mano. El nivel no tiene tope; al Despertar paga Oro y vuelve a cero. El Oro compra tres Reliquias: el Trapezoedro Resplandeciente, la Corona de Yig y el Espejo de Nitocris. 14 logros nuevos.
+
 ## v0.20.5 · "Profundidad de Trascender" *(oficial, 15 nov 2026)*
 
 Séptima etapa del Roadmap: cada ciclo de Trascender tiene un desafío largo propio.

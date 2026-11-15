@@ -308,5 +308,26 @@ enum class TutorialStep(
         "Las Pruebas de Trascendencia",
         "Seis veces trascendiste: ahora el ciclo entero puede ser una prueba. En Ciclos › Desafíos elige una Prueba de Trascendencia para el próximo ciclo; empieza al Trascender. Supérala con una vida que llegue al Conocimiento que pide su nivel y vuelve a Trascender. Cada Prueba tiene cinco niveles, de la I a la V, y su recompensa vale siempre.",
         "Tras la sexta Trascendencia"
+    ),
+
+    AWAKENING(
+        "awakening",
+        "El Despertar",
+        "Diez veces trascendiste y algo, por fin, abre los ojos. La capa Despertar reinicia la Trascendencia entera (Éter, mejoras eternas, Laboratorio, Estrellas y la cuenta de Trascendencias) a cambio de Visiones. Para Despertar necesitas 10 Trascendencias desde el último Despertar y 5 niveles superados de Pruebas de Trascendencia. Conservas los logros, el Bestiario, el Árbol del Sueño y las Pruebas de Trascendencia. Las Visiones compran el Árbol de Visiones, que vale para siempre, y cada Despertar acerca un Hito.",
+        "Tras la décima Trascendencia"
+    ),
+
+    ELDER_SIGNS(
+        "elder_signs",
+        "Los Signos Antiguos",
+        "Despertaste, y ahora ves los Signos que siempre estuvieron en el cielo. Cada Trascendencia te da un Signo Antiguo, y cada Despertar, tres. En la pestaña Signos los equipas en los planetas: cada planeta duplica el Signo de su afinidad. Los Signos tienen rareza y calidad, suben de nivel con Polvo Astral y se venden por él. Se abren más planetas con más Despertares.",
+        "Tras el primer Despertar"
+    ),
+
+    EXPEDITIONS(
+        "expeditions",
+        "La Expedición",
+        "Al despertar trajiste algo contigo: un círculo que golpea. En la pestaña Expedición el círculo ataca cada segundo a un horror, con un daño que crece con tu producción, y también puedes golpear a mano. Cada horror vencido sube el nivel, que no tiene tope. Al Despertar, el nivel te paga Oro y la Expedición empieza de nuevo. El Oro compra Reliquias, que se abren al llegar a ciertos niveles y valen para siempre.",
+        "Tras el primer Despertar"
     )
 }

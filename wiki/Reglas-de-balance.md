@@ -160,6 +160,26 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - En el Mapa de Locura y en las Estrellas se eligen x1, x10, x100 o MAX. Con cantidad fija se compra el lote entero o nada (recortado al tope del nodo); MAX compra todo lo que alcance, hasta 1.000 niveles por compra. Las Sendas, de a uno. *(Código: `BulkBuy`; test: `BulkBuyTest`.)*
 
+## Despertar *(v0.21.0)*
+
+- Pide 10 Trascendencias desde el último Despertar y 5 niveles de Pruebas de Trascendencia. Visiones `⌊√(T × log10(1 + Éter desde el último Despertar)) × (1 + 0,25·Profeta)⌋`.
+- Reinicia Éter, mejoras eternas, Laboratorio, Estrellas, consagraciones y la cuenta de Trascendencias (con una base guardada: los totales no cambian). Los sistemas se descubren con las Trascendencias totales y los Hitos de Trascendencia usan las del Despertar más 5 (1 Despertar) o 12 (10 Despertares).
+- Árbol de Visiones: producción `10^n`, Cordura `3^n`, Éter `2^n`, +10 Ascensiones iniciales, −5 Ascensiones para Trascender (mínimo 10), sin conexión `3^n`, Puntos de Sueño `1,5^n`, Visiones `+25 %·n`, producción `^(1 + 0,02n)`. *(Código: `Awakening`, `VisionNode`, `AwakeningMilestone`; test: `AwakeningTest`.)*
+
+## Juramentos *(v0.21.1)*
+
+- Visiones `x(1 + 0,2·Juramentos de Locura + 0,5·Juramentos de Trascendencia)`, con los Juramentos que rigen el Despertar que se cumple. Las reglas se combinan con `TrialRules.combinedWith`: OR en las prohibiciones, producto en costos y producción, mínimo en tipos de edificio. *(Código: `Oaths`; test: `OathsTest`.)*
+
+## Signos Antiguos *(v0.21.2)*
+
+- 1 Signo por Trascendencia y 3 por Despertar (desde el primer Despertar); inventario de 30. Rareza por peso 50/30/14/5/1 (x1, x2, x4, x8, x16); calidad 1–100; nivel 1–10.
+- Bono `base × rareza × (0,5 + calidad) × (1 + 0,5·(nivel − 1))`; equipado da `x(1 + bono)`, `x(1 + 2·bono)` en el planeta de su afinidad. Mejorar `10 × rareza × 2^(nivel − 1)`; vender `5 × rareza × (0,5 + calidad) × nivel`. *(Código: `ElderSigns`, `ElderSign`, `Planet`; test: `ElderSignsTest`.)*
+
+## Expediciones y Reliquias *(v0.21.3)*
+
+- Daño por segundo `(1 + log10(1 + producción))² × 2^Espejo`; golpe a mano 10 % de eso. Vida `100 × 1,25^nivel`; el daño sobrante pasa al siguiente (hasta 10.000 horrores de una vez). Sigue sin conexión.
+- Al Despertar: Oro `⌊nivel^1,3⌋` y el nivel vuelve a 0. Reliquias: producción `5^n`, Éter `1 + 0,5n`, Visiones `1 + 0,1n`. *(Código: `Expeditions`, `Relic`; test: `ExpeditionsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

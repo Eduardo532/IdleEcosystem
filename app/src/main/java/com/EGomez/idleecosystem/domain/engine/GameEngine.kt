@@ -30,8 +30,17 @@ import com.EGomez.idleecosystem.domain.logic.Bestiary
 import com.EGomez.idleecosystem.domain.logic.SummonResult
 import com.EGomez.idleecosystem.domain.logic.DeepSleep
 import com.EGomez.idleecosystem.domain.logic.DreamNode
+import com.EGomez.idleecosystem.domain.logic.ElderSign
+import com.EGomez.idleecosystem.domain.logic.ElderSigns
+import com.EGomez.idleecosystem.domain.logic.Expeditions
+import com.EGomez.idleecosystem.domain.logic.Relic
+import com.EGomez.idleecosystem.domain.logic.Planet
+import com.EGomez.idleecosystem.domain.logic.SignKind
+import com.EGomez.idleecosystem.domain.logic.SignRarity
 import com.EGomez.idleecosystem.domain.logic.Invocation
 import com.EGomez.idleecosystem.domain.logic.Lab
+import com.EGomez.idleecosystem.domain.logic.Oath
+import com.EGomez.idleecosystem.domain.logic.Oaths
 import com.EGomez.idleecosystem.domain.logic.Lethargy
 import com.EGomez.idleecosystem.domain.logic.SummoningChain
 import com.EGomez.idleecosystem.domain.logic.TranscendenceTrial
@@ -43,7 +52,10 @@ import com.EGomez.idleecosystem.domain.logic.AchievementContext
 import com.EGomez.idleecosystem.domain.logic.AchievementStat
 import com.EGomez.idleecosystem.domain.logic.MadnessPaths
 import com.EGomez.idleecosystem.domain.logic.BuildingManager
+import com.EGomez.idleecosystem.domain.logic.Awakening
+import com.EGomez.idleecosystem.domain.logic.AwakeningMilestone
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
+import com.EGomez.idleecosystem.domain.logic.VisionNode
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
@@ -178,6 +190,32 @@ data class EconomyState(
     val ttrialActive: String? = null,
     val ttrialCycleBest: BigDecimal = BigDecimal.ZERO,
     val ttrialLevels: Map<String, Int> = emptyMap(),
+    /** El Despertar (v0.21.0). [transcendences] cuenta desde el último Despertar. */
+    val awakeningRevealed: Boolean = false,
+    val awakenings: Int = 0,
+    val visions: Int = 0,
+    val visionsEarned: Int = 0,
+    val visionGain: Int = 0,
+    val canAwaken: Boolean = false,
+    val ttrialTotalLevels: Int = 0,
+    val visionLevels: Map<String, Int> = emptyMap(),
+    /** Juramentos (v0.21.1): los que rigen este Despertar y los jurados para el próximo. */
+    val oathsActive: Set<String> = emptySet(),
+    val oathsNext: Set<String> = emptySet(),
+    /** Signos Antiguos (v0.21.2): número -> Signo empaquetado, y planeta -> número. */
+    val signsRevealed: Boolean = false,
+    val astralDust: Int = 0,
+    val signs: Map<Int, Long> = emptyMap(),
+    val signsEquipped: Map<String, Int> = emptyMap(),
+    /** Expediciones y Reliquias (v0.21.3). */
+    val expeditionRevealed: Boolean = false,
+    val expeditionLevel: Int = 0,
+    val expeditionDealt: Double = 0.0,
+    val expeditionDps: Double = 0.0,
+    val expeditionBest: Int = 0,
+    val expeditionGold: Int = 0,
+    val expeditionGoldOnAwaken: Int = 0,
+    val relicLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -260,6 +298,8 @@ sealed interface EngineEffect {
     data class MadnessOmen(val possessedBuilding: String?, val echoesLost: BigDecimal?) : EngineEffect
     /** Se Trascendió y se ganó [ether] de Éter. */
     data class Transcended(val ether: Int, val auto: Boolean = false, val dreamPoints: Int? = null, val trialPassed: String? = null) : EngineEffect
+    /** Despertar (v0.21.0): las Visiones ganadas. */
+    data class Awakened(val visions: Int) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -568,7 +608,7 @@ class GameEngine @Inject constructor(
             return
         }
         // Trascendencia automática (hito): cuando el Éter ganado iguale al que se tiene
-        if (automation.autoTranscend && TranscendenceMilestone.AUTO_TRANSCEND.isReached(transcendences()) &&
+        if (automation.autoTranscend && TranscendenceMilestone.AUTO_TRANSCEND.isReached(milestoneTranscendences()) &&
             TranscendenceMilestone.shouldAutoTranscend(etherGainNow(), statsManager.counter(AchievementStat.ETHER).toInt())
         ) {
             performTranscend(auto = true)
@@ -577,7 +617,15 @@ class GameEngine @Inject constructor(
         if (changed) requestSave()
     }
 
-    private fun transcendences(): Int = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt()
+    /** Trascendencias desde el último Despertar (v0.21.0); los totales no se tocan. */
+    private fun transcendences(): Int =
+        (statsManager.counter(AchievementStat.TRANSCENDENCES) - statsManager.counter(AchievementStat.AWAKEN_TRANSC_BASE)).toInt().coerceAtLeast(0)
+
+    /** Trascendencias de toda la partida: descubren sistemas, que nunca vuelven a esconderse. */
+    private fun lifetimeTranscendences(): Int = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt()
+
+    /** Las Trascendencias que cuentan para los Hitos de Trascendencia (los Hitos del Despertar suman). */
+    private fun milestoneTranscendences(): Int = transcendences() + Awakening.milestoneBonus(awakenings())
 
     /**
      * Las Ascensiones que cuentan para los hitos de Ascensión. Con Memoria de la Máquina
@@ -585,14 +633,17 @@ class GameEngine @Inject constructor(
      */
     private fun milestoneAscensions(): Int {
         val real = statsManager.totalPrestiges
-        return if (TranscendenceMilestone.MACHINE_MEMORY.isReached(transcendences())) {
+        return if (TranscendenceMilestone.MACHINE_MEMORY.isReached(milestoneTranscendences())) {
             maxOf(real, AscensionMilestone.entries.maxOf { it.ascensions })
         } else real
     }
 
     /** Ascensiones del ciclo que pide Trascender (El Atajo las baja). */
-    private fun transcendRequired(): Int = TranscendenceTrials.requiredAscensions(
-        TranscendenceMilestone.requiredAscensions(transcendences()), ttrialLevel(TranscendenceTrial.SILENCE)
+    private fun transcendRequired(): Int = Awakening.requiredAscensions(
+        TranscendenceTrials.requiredAscensions(
+            TranscendenceMilestone.requiredAscensions(milestoneTranscendences()), ttrialLevel(TranscendenceTrial.SILENCE)
+        ),
+        visionLevel(VisionNode.HORIZON)
     )
 
     /**
@@ -792,7 +843,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.MASTERY_LEVELS, mastery.sum())
         put(AchievementStat.MASTERY_KINDS, mastery.count { it > 0 })
         put(AchievementStat.MASTERY_MAXED, mastery.count { it >= RuneEngraving.MAX_MASTERY })
-        put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(transcendences()))
+        put(AchievementStat.TRANSCEND_MILESTONES, TranscendenceMilestone.reached(milestoneTranscendences()))
         put(AchievementStat.VEIL_DEPTH, Veil.depth(knowledgeThisRun(), veilThreshold()))
         put(AchievementStat.LAB_LEVELS, LabExperiment.entries.sumOf { labLevel(it) })
         put(AchievementStat.LAB_MAXED, LabExperiment.entries.count { it.isMaxed(labLevel(it)) })
@@ -800,6 +851,11 @@ class GameEngine @Inject constructor(
         put(AchievementStat.DREAM_NODES, DreamNode.entries.count { dreamLevel(it) > 0 })
         put(AchievementStat.CHAIN_FULL, Invocation.entries.count { chainBought(it) > 0 })
         put(AchievementStat.TTRIAL_COMPLETIONS, TranscendenceTrial.entries.sumOf { ttrialLevel(it) })
+        put(AchievementStat.VISION_LEVELS, VisionNode.entries.sumOf { visionLevel(it) })
+        put(AchievementStat.VISION_NODES, VisionNode.entries.count { visionLevel(it) > 0 })
+        put(AchievementStat.SIGN_PLANETS, equippedSigns().size)
+        put(AchievementStat.RELIC_LEVELS, Relic.entries.sumOf { relicLevel(it) })
+        put(AchievementStat.RELICS_OWNED, Relic.entries.count { relicLevel(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1022,7 +1078,10 @@ class GameEngine @Inject constructor(
         dreamRevealed = dreamRevealed(),
         chainRevealed = chainRevealed(),
         lethargyRevealed = lethargyRevealed(),
-        ttrialRevealed = ttrialRevealed()
+        ttrialRevealed = ttrialRevealed(),
+        awakeningRevealed = awakeningRevealed(),
+        signsRevealed = signsRevealed(),
+        expeditionRevealed = expeditionRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1175,6 +1234,8 @@ class GameEngine @Inject constructor(
             statsManager.counters[AchievementStat.STARS] = BigDecimal.valueOf(stars)
             addStardust(dust)
         }
+        // La Expedición sigue golpeando mientras no juegas
+        if (diffSeconds > 0) expeditionTick(diffSeconds)
         // El Letargo sigue sumando Sopor mientras no juegas
         if (diffSeconds > 0 && lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS, BigDecimal(diffSeconds))
         // La Cadena de Invocación sigue produciendo
@@ -1194,6 +1255,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(pact.offline))
             .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal.valueOf(DeepSleep.offlineMultiplier(dreamLevel(DreamNode.ZOOGS))))
+            .multiply(BigDecimal.valueOf(Awakening.offlineMultiplier(visionLevel(VisionNode.SLEEPER))))
             .multiply(BigDecimal.valueOf(trialReward().offline * if (trialRules().noOffline) 0.0 else 1.0))
             .let { rate -> Veil.offlineGain(knowledgeThisRun(), rate, diffSeconds, veilBroken(), veilThreshold()) }
 
@@ -1245,6 +1307,7 @@ class GameEngine @Inject constructor(
         starsTick()
         encounterTick()
         chainTick()
+        expeditionTick(1L)
         if (lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS)
 
         // Tutoriales basados en recursos
@@ -1360,9 +1423,10 @@ class GameEngine @Inject constructor(
      */
     private fun currentClickPower(): BigDecimal = Lab.pow(
         buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
-            .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR)))),
+            .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR))))
+            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.HAND))),
         LabExperiment.IBN_GHAZI.exponent(labLevel(LabExperiment.IBN_GHAZI)) * dreamExponent()
-    ).let { if (ttrialActive() == TranscendenceTrial.SILENCE) BigDecimal.ZERO else it }
+    ).let { if (ttrialRestricts(TranscendenceTrial.SILENCE)) BigDecimal.ZERO else it }
 
     /** Tutoriales de las mecánicas de la v0.14, cada uno cuando su sistema entra en juego. */
     private fun triggerDepthTutorials() {
@@ -1386,6 +1450,9 @@ class GameEngine @Inject constructor(
         if (chainRevealed()) tutorialManager.triggerStep(TutorialStep.SUMMONING_CHAIN)
         if (lethargyRevealed()) tutorialManager.triggerStep(TutorialStep.LETHARGY)
         if (ttrialRevealed()) tutorialManager.triggerStep(TutorialStep.TRANSCENDENCE_TRIALS)
+        if (awakeningRevealed()) tutorialManager.triggerStep(TutorialStep.AWAKENING)
+        if (signsRevealed()) tutorialManager.triggerStep(TutorialStep.ELDER_SIGNS)
+        if (expeditionRevealed()) tutorialManager.triggerStep(TutorialStep.EXPEDITIONS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1436,7 +1503,12 @@ class GameEngine @Inject constructor(
         .firstOrNull { it.startsWith(AchievementStat.ACTIVE_TRIAL_PREFIX) }
         ?.let { Trial.fromId(it.removePrefix(AchievementStat.ACTIVE_TRIAL_PREFIX)) }
 
-    private fun trialRules(): TrialRules = activeTrial()?.rules ?: NO_TRIAL_RULES
+    /** Las reglas de la vida: las de la Prueba de Locura elegida y las de los Juramentos (v0.21.1). */
+    private fun trialRules(): TrialRules {
+        val oaths = activeOaths()
+        return if (oaths.none { it.madness != null }) activeTrial()?.rules ?: NO_TRIAL_RULES
+        else Oaths.rules(activeTrial()?.rules, oaths)
+    }
 
     private fun completedTrials(): Set<Trial> =
         Trial.entries.filter { statsManager.counter(AchievementStat.trial(it.id)).signum() > 0 }.toSet()
@@ -1448,7 +1520,7 @@ class GameEngine @Inject constructor(
     /** Puntos de Atención: los de las Ascensiones y, desde la primera, los de las Pruebas. */
     private fun attentionPoints(): Int {
         // Ojos Abiertos (hito de Trascendencia): cuentan todas las Ascensiones desde siempre
-        val counted = if (TranscendenceMilestone.OPEN_EYES.isReached(transcendences())) totalAscensionsEver() else statsManager.totalPrestiges
+        val counted = if (TranscendenceMilestone.OPEN_EYES.isReached(milestoneTranscendences())) totalAscensionsEver() else statsManager.totalPrestiges
         val base = Attention.available(counted)
         return if (base > 0) base + trialReward().attentionPoints + prestigeShopManager.getAttentionBonus() else 0
     }
@@ -1464,7 +1536,7 @@ class GameEngine @Inject constructor(
     // ESTRELLAS (v0.19.7)
     // =====================================================================
 
-    private fun starsRevealed(): Boolean = transcendences() >= 1
+    private fun starsRevealed(): Boolean = lifetimeTranscendences() >= 1
 
     private fun starLevel(upgrade: StarUpgrade): Int = statsManager.counter(AchievementStat.starUpgrade(upgrade.id)).toInt()
 
@@ -1706,7 +1778,7 @@ class GameEngine @Inject constructor(
 
     private fun labLevel(experiment: LabExperiment): Int = statsManager.counter(AchievementStat.lab(experiment.id)).toInt()
 
-    private fun labRevealed(): Boolean = transcendences() >= 1
+    private fun labRevealed(): Boolean = lifetimeTranscendences() >= 1
 
     private fun veilThreshold(): BigDecimal = Lab.veilThreshold(labLevel(LabExperiment.VEIL))
 
@@ -1716,7 +1788,7 @@ class GameEngine @Inject constructor(
      */
     private fun labSanity(gain: BigDecimal): BigDecimal {
         val exponent = LabExperiment.CURWEN.exponent(labLevel(LabExperiment.CURWEN)) * dreamExponent() *
-            (if (ttrialActive() == TranscendenceTrial.BROKEN) TranscendenceTrials.BROKEN_EXPONENT else 1.0)
+            (if (ttrialRestricts(TranscendenceTrial.BROKEN)) TranscendenceTrials.BROKEN_EXPONENT else 1.0)
         return if (exponent == 1.0) gain else Lab.pow(gain, exponent).setScale(0, java.math.RoundingMode.FLOOR)
     }
 
@@ -1746,7 +1818,7 @@ class GameEngine @Inject constructor(
     // EL SUEÑO PROFUNDO (v0.20.0)
     // =====================================================================
 
-    private fun dreamRevealed(): Boolean = DeepSleep.isUnlocked(transcendences())
+    private fun dreamRevealed(): Boolean = DeepSleep.isUnlocked(lifetimeTranscendences())
 
     private fun dreamNext(): Boolean = statsManager.counter(AchievementStat.DREAM_NEXT).signum() > 0
 
@@ -1766,9 +1838,11 @@ class GameEngine @Inject constructor(
     /** Armitage siempre; Kadath solo despierto; el Sueño, mientras dura. */
     private fun productionExponent(): Double {
         val armitage = LabExperiment.ARMITAGE.exponent(labLevel(LabExperiment.ARMITAGE)) *
-            (if (ttrialActive() == TranscendenceTrial.HUNGER) TranscendenceTrials.HUNGER_EXPONENT else 1.0)
-        return if (dreamActive()) armitage * dreamExponent()
-        else armitage * DeepSleep.kadathExponent(dreamLevel(DreamNode.KADATH))
+            (if (ttrialRestricts(TranscendenceTrial.HUNGER)) TranscendenceTrials.HUNGER_EXPONENT else 1.0)
+        // La Visión del Abismo vale siempre
+        val abyss = Awakening.productionExponent(visionLevel(VisionNode.ABYSS))
+        return if (dreamActive()) armitage * dreamExponent() * abyss
+        else armitage * DeepSleep.kadathExponent(dreamLevel(DreamNode.KADATH)) * abyss
     }
 
     /** El mejor Conocimiento de una vida en este Sueño, contando la vida actual. */
@@ -1776,7 +1850,8 @@ class GameEngine @Inject constructor(
         if (dreamActive()) statsManager.counter(AchievementStat.DREAM_CYCLE_BEST).max(knowledgeThisRun()) else BigDecimal.ZERO
 
     private fun dreamGainNow(): Int = DeepSleep.gain(
-        dreamCycleBest(), dreamPointsEarned(), DeepSleep.pointsMultiplier(dreamLevel(DreamNode.NIGHTGAUNTS))
+        dreamCycleBest(), dreamPointsEarned(),
+        DeepSleep.pointsMultiplier(dreamLevel(DreamNode.NIGHTGAUNTS)) * Awakening.dreamPointsMultiplier(visionLevel(VisionNode.DREAMER))
     )
 
     /** Se Trasciende desde el Sueño: paga los Puntos y anota los logros. Devuelve lo ganado. */
@@ -1845,7 +1920,7 @@ class GameEngine @Inject constructor(
     // LA CADENA DE INVOCACIÓN (v0.20.1)
     // =====================================================================
 
-    private fun chainRevealed(): Boolean = SummoningChain.isUnlocked(transcendences())
+    private fun chainRevealed(): Boolean = SummoningChain.isUnlocked(lifetimeTranscendences())
 
     private fun chainPower(): BigDecimal = statsManager.counter(AchievementStat.CHAIN_POWER)
 
@@ -1923,7 +1998,7 @@ class GameEngine @Inject constructor(
     // EL LETARGO (v0.20.2)
     // =====================================================================
 
-    private fun lethargyRevealed(): Boolean = Lethargy.isUnlocked(transcendences())
+    private fun lethargyRevealed(): Boolean = Lethargy.isUnlocked(lifetimeTranscendences())
 
     private fun lethargyActive(): Boolean = statsManager.counter(AchievementStat.LETHARGY_ACTIVE).signum() > 0
 
@@ -1968,7 +2043,7 @@ class GameEngine @Inject constructor(
     // LAS PRUEBAS DE TRASCENDENCIA (v0.20.3)
     // =====================================================================
 
-    private fun ttrialRevealed(): Boolean = TranscendenceTrials.isUnlocked(transcendences())
+    private fun ttrialRevealed(): Boolean = TranscendenceTrials.isUnlocked(lifetimeTranscendences())
 
     private fun ttrialNext(): TranscendenceTrial? =
         TranscendenceTrial.fromIndex(statsManager.counter(AchievementStat.TTRIAL_NEXT).toInt())
@@ -2028,6 +2103,330 @@ class GameEngine @Inject constructor(
         statsManager.counters.remove(AchievementStat.TTRIAL_ACTIVE)
         statsManager.counters.remove(AchievementStat.TTRIAL_CYCLE_BEST)
         statsManager.count(AchievementStat.TTRIAL_ABANDONED)
+        recalculate()
+        requestSave()
+    }
+
+    // =====================================================================
+    // EL DESPERTAR (v0.21.0)
+    // =====================================================================
+
+    private fun awakenings(): Int = statsManager.counter(AchievementStat.AWAKENINGS).toInt()
+
+    private fun visions(): Int = statsManager.counter(AchievementStat.VISIONS).toInt()
+
+    private fun visionLevel(node: VisionNode): Int = statsManager.counter(AchievementStat.visionNode(node.id)).toInt()
+
+    private fun visionLevels(): Map<String, Int> = VisionNode.entries.associate { it.id to visionLevel(it) }
+
+    private fun ttrialTotalLevels(): Int = TranscendenceTrial.entries.sumOf { ttrialLevel(it) }
+
+    private fun awakeningRevealed(): Boolean = Awakening.isRevealed(lifetimeTranscendences(), awakenings())
+
+    private fun canAwaken(): Boolean = Awakening.canAwaken(transcendences(), ttrialTotalLevels())
+
+    /** Éter ganado desde el último Despertar. */
+    private fun etherSinceAwakening(): Double =
+        (statsManager.counter(AchievementStat.ETHER_EARNED) - statsManager.counter(AchievementStat.AWAKEN_ETHER_BASE)).toDouble().coerceAtLeast(0.0)
+
+    private fun visionGainNow(): Int = if (!canAwaken()) 0 else Awakening.visionGain(
+        transcendences(), etherSinceAwakening(),
+        Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
+            signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR))
+    )
+
+    // ---- Juramentos (v0.21.1) ----
+
+    private fun oathsWith(prefix: String): List<Oath> = Oaths.all.filter { statsManager.counter(prefix + it.id).signum() > 0 }
+
+    /** Los Juramentos que rigen este Despertar. */
+    private fun activeOaths(): List<Oath> = oathsWith(AchievementStat.OATH_ACTIVE_PREFIX)
+
+    /** Los jurados para el próximo Despertar. */
+    private fun nextOaths(): List<Oath> = oathsWith(AchievementStat.OATH_NEXT_PREFIX)
+
+    /** Si una Prueba de Trascendencia restringe el ciclo: en curso o jurada. */
+    private fun ttrialRestricts(trial: TranscendenceTrial): Boolean = Oaths.restricts(trial, ttrialActive(), activeOaths())
+
+    /** Jura (o deja de jurar) una Prueba para el próximo Despertar. */
+    fun setOath(id: String, sworn: Boolean) = post {
+        val oath = Oaths.fromId(id) ?: return@post
+        if (!awakeningRevealed()) return@post
+        val key = AchievementStat.OATH_NEXT_PREFIX + oath.id
+        if (sworn) statsManager.flag(key) else statsManager.counters.remove(key)
+        publishEconomy()
+        requestSave()
+    }
+
+    fun awaken() = post { performAwaken() }
+
+    /**
+     * Despertar: paga las Visiones y reinicia la capa Trascendencia. Se pierden el Éter,
+     * las mejoras eternas, el Laboratorio, las Estrellas, las consagraciones y la cuenta de
+     * Trascendencias (los Hitos del Despertar conservan parte); se conservan los logros,
+     * el Bestiario, el Árbol del Sueño, las Pruebas de Trascendencia y las Visiones.
+     */
+    private fun performAwaken() {
+        if (!canAwaken()) return
+        val gain = visionGainNow()
+        if (gain <= 0) return
+
+        // Logros: con qué pacto y Senda, y si se Despertó soñando
+        statsManager.flag(AchievementStat.awakenWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.awakenPath(it.id)) }
+        if (dreamActive()) statsManager.flag(AchievementStat.FEAT_AWAKEN_DREAMING)
+        statsManager.count(AchievementStat.AWAKENINGS)
+        statsManager.count(AchievementStat.VISIONS, BigDecimal(gain))
+        statsManager.count(AchievementStat.VISIONS_EARNED, BigDecimal(gain))
+        statsManager.record(AchievementStat.MAX_VISION_GAIN, BigDecimal(gain))
+        statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycleAscensions()))
+        // Juramentos cumplidos; los jurados pasan a regir el Despertar nuevo
+        val kept = activeOaths().size
+        statsManager.record(AchievementStat.AWAKEN_OATHS_MAX, BigDecimal(kept))
+        if (kept > 0) statsManager.count(AchievementStat.AWAKEN_OATHS_TOTAL, BigDecimal(kept))
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.OATH_ACTIVE_PREFIX) }
+        nextOaths().forEach { statsManager.flag(AchievementStat.OATH_ACTIVE_PREFIX + it.id) }
+
+        // La Expedición paga su Oro y vuelve a empezar
+        val gold = Expeditions.goldFor(expeditionLevel())
+        if (gold > 0) {
+            statsManager.count(AchievementStat.EXPEDITION_GOLD, BigDecimal(gold))
+            statsManager.count(AchievementStat.EXPEDITION_GOLD_EARNED, BigDecimal(gold))
+        }
+        statsManager.counters.remove(AchievementStat.EXPEDITION_LEVEL)
+        statsManager.counters.remove(AchievementStat.EXPEDITION_DEALT)
+
+        // Desde aquí se cuentan de nuevo las Trascendencias y el Éter
+        statsManager.counters[AchievementStat.AWAKEN_TRANSC_BASE] = statsManager.counter(AchievementStat.TRANSCENDENCES)
+        statsManager.counters[AchievementStat.AWAKEN_ETHER_BASE] = statsManager.counter(AchievementStat.ETHER_EARNED)
+
+        // La capa Trascendencia, salvo lo que guardan los Hitos del Despertar
+        val reached = awakenings()
+        val keepEternals = AwakeningMilestone.KEPT_ETERNALS.isReached(reached)
+        val keptEternals = listOf(EternalUpgrade.REMEMBERED_TRIALS, EternalUpgrade.ETERNAL_RUNES)
+            .filter { keepEternals }
+            .associateWith { eternalLevel(it) }
+        statsManager.counters.remove(AchievementStat.ETHER)
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.ETERNAL_PREFIX) }
+        keptEternals.forEach { (upgrade, level) -> if (level > 0) statsManager.counters[AchievementStat.eternal(upgrade.id)] = BigDecimal(level) }
+        if (!AwakeningMilestone.AWAKE_LAB.isReached(reached)) {
+            statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.LAB_PREFIX) }
+        }
+        if (!AwakeningMilestone.ETERNAL_SKY.isReached(reached)) {
+            statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.STAR_UPGRADE_PREFIX) }
+            statsManager.counters.remove(AchievementStat.STARDUST)
+        }
+        statsManager.counters.remove(AchievementStat.STARS)
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CONSECRATED_PREFIX) }
+        // Lo del ciclo en curso
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CHAIN_CYCLE_PREFIX) }
+        statsManager.counters.remove(AchievementStat.CHAIN_POWER)
+        statsManager.counters.remove(AchievementStat.DREAM_ACTIVE)
+        statsManager.counters.remove(AchievementStat.DREAM_CYCLE_BEST)
+        statsManager.counters.remove(AchievementStat.TTRIAL_ACTIVE)
+        statsManager.counters.remove(AchievementStat.TTRIAL_CYCLE_BEST)
+        statsManager.counters.remove(AchievementStat.TTRIAL_NEXT)
+
+        // Sin Pruebas Recordadas ni Runas Eternas, resetCycle borra también Pruebas y runas
+        resetCycle()
+        // Cada Despertar trae tres Signos Antiguos
+        grantSigns(ElderSigns.SIGNS_PER_AWAKEN)
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Awakened(gain))
+        recalculate()
+        requestSave(replace = true)
+    }
+
+    /** Sube un nodo del Árbol de Visiones. */
+    fun buyVisionNode(id: String) = post {
+        val node = VisionNode.fromId(id) ?: return@post
+        if (!awakeningRevealed()) return@post
+        val points = visions()
+        if (!Awakening.canBuy(node, visionLevels(), points)) return@post
+        val level = visionLevel(node)
+        val left = points - node.cost(level)
+        statsManager.counters.remove(AchievementStat.VISIONS)
+        if (left > 0) statsManager.counters[AchievementStat.VISIONS] = BigDecimal(left)
+        statsManager.counters[AchievementStat.visionNode(node.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /** Reinicia el Árbol de Visiones: devuelve todas las Visiones gastadas. */
+    fun respecVisions() = post {
+        val refund = Awakening.refund(visionLevels())
+        if (refund <= 0) return@post
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.VISION_NODE_PREFIX) }
+        statsManager.counters[AchievementStat.VISIONS] = BigDecimal(visions() + refund)
+        statsManager.count(AchievementStat.VISION_RESPECS)
+        recalculate()
+        requestSave()
+    }
+
+    // =====================================================================
+    // LOS SIGNOS ANTIGUOS (v0.21.2)
+    // =====================================================================
+
+    private fun signsRevealed(): Boolean = awakenings() >= 1
+
+    /** Los Signos del inventario: número -> Signo. */
+    private fun signs(): Map<Int, ElderSign> = statsManager.counters
+        .filterKeys { it.startsWith(AchievementStat.SIGN_PREFIX) }
+        .mapNotNull { (key, value) -> key.removePrefix(AchievementStat.SIGN_PREFIX).toIntOrNull()?.let { it to ElderSign.unpack(value.toLong()) } }
+        .toMap()
+
+    /** Planeta abierto -> número del Signo equipado en él. */
+    private fun equippedNumbers(): Map<Planet, Int> = Planet.entries
+        .filter { it.isOpen(awakenings()) }
+        .mapNotNull { planet ->
+            statsManager.counter(AchievementStat.signEquip(planet.id)).toInt().takeIf { it > 0 }?.let { planet to it }
+        }
+        .toMap()
+
+    private fun equippedSigns(): Map<Planet, ElderSign> {
+        val all = signs()
+        return equippedNumbers().mapNotNull { (planet, n) -> all[n]?.let { planet to it } }.toMap()
+    }
+
+    private fun signMultiplier(kind: SignKind): Double = ElderSigns.multiplier(kind, equippedSigns())
+
+    private fun dust(): Int = statsManager.counter(AchievementStat.ASTRAL_DUST).toInt()
+
+    private fun addDust(amount: Int) {
+        if (amount > 0) statsManager.count(AchievementStat.ASTRAL_DUST, BigDecimal(amount))
+    }
+
+    /** Da [count] Signos al azar; con el inventario lleno, se venden solos. */
+    private fun grantSigns(count: Int) {
+        repeat(count) {
+            val sign = ElderSigns.roll(Random)
+            statsManager.count(AchievementStat.SIGNS_FOUND)
+            statsManager.record(AchievementStat.SIGN_BEST_RARITY, BigDecimal(sign.rarity.ordinal + 1))
+            statsManager.flag(AchievementStat.signWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.signPath(it.id)) }
+            if (signs().size >= ElderSigns.INVENTORY) {
+                addDust(sign.dust())
+                statsManager.count(AchievementStat.SIGNS_SOLD)
+                return@repeat
+            }
+            val n = statsManager.counter(AchievementStat.SIGN_SEQ).toInt() + 1
+            statsManager.counters[AchievementStat.SIGN_SEQ] = BigDecimal(n)
+            statsManager.counters[AchievementStat.sign(n)] = BigDecimal(sign.pack())
+        }
+    }
+
+    /** Equipa el Signo [n] en un planeta abierto (si estaba en otro, se mueve). */
+    fun equipSign(n: Int, planetId: String) = post {
+        val planet = Planet.fromId(planetId) ?: return@post
+        val sign = signs()[n] ?: return@post
+        if (!planet.isOpen(awakenings())) return@post
+        Planet.entries.forEach { if (statsManager.counter(AchievementStat.signEquip(it.id)).toInt() == n) statsManager.counters.remove(AchievementStat.signEquip(it.id)) }
+        statsManager.counters[AchievementStat.signEquip(planet.id)] = BigDecimal(n)
+        if (sign.quality == 100 && planet.affinity == sign.kind) statsManager.flag(AchievementStat.FEAT_SIGN_PERFECT)
+        recalculate()
+        requestSave()
+    }
+
+    /** Quita el Signo de un planeta. */
+    fun unequipSign(planetId: String) = post {
+        statsManager.counters.remove(AchievementStat.signEquip(planetId))
+        recalculate()
+        requestSave()
+    }
+
+    /** Sube un nivel el Signo [n] con Polvo Astral. */
+    fun upgradeSign(n: Int) = post {
+        val sign = signs()[n] ?: return@post
+        if (sign.isMaxed || dust() < sign.upgradeCost()) return@post
+        statsManager.counters[AchievementStat.ASTRAL_DUST] = BigDecimal(dust() - sign.upgradeCost())
+        val up = sign.copy(level = sign.level + 1)
+        statsManager.counters[AchievementStat.sign(n)] = BigDecimal(up.pack())
+        statsManager.record(AchievementStat.SIGN_MAX_LEVEL, BigDecimal(up.level))
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /** Vende el Signo [n] (si está equipado, se quita). */
+    fun sellSign(n: Int) = post {
+        if (sellSignNow(n)) {
+            recalculate()
+            requestSave()
+        }
+    }
+
+    /** Vende todos los Signos comunes que no estén equipados. */
+    fun sellCommonSigns() = post {
+        val equipped = equippedNumbers().values.toSet()
+        val sold = signs().filter { it.value.rarity == SignRarity.COMMON && it.key !in equipped }.keys.count { sellSignNow(it) }
+        if (sold > 0) {
+            recalculate()
+            requestSave()
+        }
+    }
+
+    private fun sellSignNow(n: Int): Boolean {
+        val sign = signs()[n] ?: return false
+        Planet.entries.forEach { if (statsManager.counter(AchievementStat.signEquip(it.id)).toInt() == n) statsManager.counters.remove(AchievementStat.signEquip(it.id)) }
+        statsManager.counters.remove(AchievementStat.sign(n))
+        addDust(sign.dust())
+        statsManager.count(AchievementStat.SIGNS_SOLD)
+        return true
+    }
+
+    // =====================================================================
+    // EXPEDICIONES Y RELIQUIAS (v0.21.3)
+    // =====================================================================
+
+    private fun expeditionRevealed(): Boolean = awakenings() >= 1
+
+    private fun expeditionLevel(): Int = statsManager.counter(AchievementStat.EXPEDITION_LEVEL).toInt()
+
+    private fun relicLevel(relic: Relic): Int = statsManager.counter(AchievementStat.relic(relic.id)).toInt()
+
+    private fun expeditionDps(): Double = if (!expeditionRevealed()) 0.0
+    else Expeditions.damagePerSecond(productionPerSecond, Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)))
+
+    /** Golpea al horror en curso con [damage]; anota los vencidos. Devuelve cuántos cayeron. */
+    private fun expeditionHit(damage: Double): Int {
+        if (damage <= 0.0) return 0
+        val (level, dealt, kills) = Expeditions.strike(expeditionLevel(), statsManager.counter(AchievementStat.EXPEDITION_DEALT).toDouble(), damage)
+        statsManager.counters[AchievementStat.EXPEDITION_DEALT] = BigDecimal.valueOf(dealt)
+        if (kills > 0) {
+            statsManager.counters[AchievementStat.EXPEDITION_LEVEL] = BigDecimal(level)
+            statsManager.record(AchievementStat.EXPEDITION_BEST, BigDecimal(level))
+            statsManager.count(AchievementStat.EXPEDITION_KILLS, BigDecimal(kills))
+            statsManager.flag(AchievementStat.expeditionWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.expeditionPath(it.id)) }
+        }
+        return kills
+    }
+
+    /** [seconds] de Expedición: el círculo golpea solo. */
+    private fun expeditionTick(seconds: Long) {
+        if (!expeditionRevealed()) return
+        expeditionHit(expeditionDps() * seconds)
+    }
+
+    /** Un golpe a mano: una décima del daño por segundo. */
+    fun strikeExpedition() = post {
+        if (!expeditionRevealed()) return@post
+        if (expeditionHit(expeditionDps() * Expeditions.TAP_SHARE) > 0) statsManager.flag(AchievementStat.FEAT_EXPEDITION_TAP)
+        publishEconomy()
+    }
+
+    /** Sube un nivel una Reliquia con Oro de Expedición. */
+    fun buyRelic(id: String) = post {
+        val relic = Relic.fromId(id) ?: return@post
+        val level = relicLevel(relic)
+        val gold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt()
+        if (relic.isMaxed(level) || !relic.isUnlocked(statsManager.counter(AchievementStat.EXPEDITION_BEST).toInt())) return@post
+        if (gold < relic.cost(level)) return@post
+        statsManager.counters[AchievementStat.EXPEDITION_GOLD] = BigDecimal(gold - relic.cost(level))
+        statsManager.counters[AchievementStat.relic(relic.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
         recalculate()
         requestSave()
     }
@@ -2250,7 +2649,9 @@ class GameEngine @Inject constructor(
             cycleSanity(),
             Transcendence.etherMultiplier(eternalLevel(EternalUpgrade.ETHER_ECHO)) * Stars.etherMultiplier(starLevel(StarUpgrade.ETHER_DUST)) *
                 beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)) *
-                    TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)),
+                    TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)) *
+                    Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER) *
+                    Expeditions.etherMultiplier(relicLevel(Relic.CROWN)),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -2313,7 +2714,7 @@ class GameEngine @Inject constructor(
         val gain = etherGainNow()
         if (gain <= 0) return
         val cycle = cycleAscensions()
-        val shortcut = TranscendenceMilestone.SHORTCUT.isReached(transcendences())
+        val shortcut = TranscendenceMilestone.SHORTCUT.isReached(milestoneTranscendences())
 
         // Logros: con qué pacto y Senda se Trascendió
         statsManager.flag(AchievementStat.transcendWith(activePact.id))
@@ -2331,12 +2732,29 @@ class GameEngine @Inject constructor(
         statsManager.count(AchievementStat.ASCENSIONS_PAST, BigDecimal(cycle))
         val dreamGain = if (dreamActive()) completeDream() else null
         val trialPassed = finishTranscendenceTrial()
+        if (signsRevealed()) grantSigns(ElderSigns.SIGNS_PER_TRANSCEND)
         // La Cadena de Invocación se deshace
         statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CHAIN_CYCLE_PREFIX) }
         statsManager.counters.remove(AchievementStat.CHAIN_POWER)
 
-        // El ciclo nuevo
-        val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY
+        resetCycle()
+        // El ciclo nuevo es un Sueño si así se eligió (ya con la Trascendencia contada)
+        if (dreamNext() && dreamRevealed()) statsManager.flag(AchievementStat.DREAM_ACTIVE)
+        startNextTranscendenceTrial()
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Transcended(gain, auto, dreamGain, trialPassed))
+        recalculate()
+        requestSave(replace = true)
+    }
+
+    /**
+     * Empieza un ciclo nuevo: todo lo que reinicia Trascender (y, debajo, el Despertar).
+     * Las Trascendencias ya están contadas, así que los hitos usan la cuenta nueva.
+     */
+    private fun resetCycle() {
+        val start = eternalLevel(EternalUpgrade.MEMORY) * Transcendence.ASCENSIONS_PER_MEMORY +
+            Awakening.startingAscensions(visionLevel(VisionNode.MEMORY))
         statsManager.trackPrestige(BigDecimal.ZERO)
         statsManager.counters.remove(AchievementStat.LETHARGY_SECONDS)
         statsManager.totalPrestiges = start
@@ -2357,7 +2775,7 @@ class GameEngine @Inject constructor(
         echoes = BigDecimal.ZERO
         prestigeManager.residualSanity = BigDecimal.ZERO
         // Hitos de Trascendencia: la Senda (Senda Eterna) y las primeras estrellas (Cielo Recordado)
-        val reached = transcendences()
+        val reached = milestoneTranscendences()
         val keptPath = MadnessPaths.active(prestigeShopManager.upgrades)
             ?.takeIf { TranscendenceMilestone.ETERNAL_PATH.isReached(reached) }
         prestigeShopManager.upgrades.forEach { if (it !== keptPath) it.level = 0 }
@@ -2380,19 +2798,11 @@ class GameEngine @Inject constructor(
                 ?.amountOwned = AscensionMilestone.SYNAPSES_AT_START
         }
         applyStartingBuildings()
-        // El ciclo nuevo es un Sueño si así se eligió (ya con la Trascendencia contada)
-        if (dreamNext() && dreamRevealed()) statsManager.flag(AchievementStat.DREAM_ACTIVE)
-        startNextTranscendenceTrial()
-
-        soundManager.playSound(SoundType.ACHIEVEMENT)
-        _effects.trySend(EngineEffect.Transcended(gain, auto, dreamGain, trialPassed))
-        recalculate()
-        requestSave(replace = true)
     }
 
     private fun setPact(newPact: Pact) {
         // La Prueba de la Soledad: ningún dios acepta pactos
-        activePact = if (ttrialActive() == TranscendenceTrial.SOLITUDE) Pact.NONE else newPact
+        activePact = if (ttrialRestricts(TranscendenceTrial.SOLITUDE)) Pact.NONE else newPact
         chaosMultiplier = 1
         refreshEngravings()
     }
@@ -2561,7 +2971,9 @@ class GameEngine @Inject constructor(
             pact.sanityGain * trialReward().sanityGain * Transcendence.sanityMultiplier(eternalLevel(EternalUpgrade.PRIMORDIAL_SANITY)) *
                 Stars.sanityMultiplier(starLevel(StarUpgrade.STAR_SANITY)) * DeepSleep.sanityMultiplier(dreamLevel(DreamNode.CELEPHAIS)) *
                 Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0) *
-                TranscendenceTrials.sanityReward(ttrialLevel(TranscendenceTrial.BROKEN))
+                TranscendenceTrials.sanityReward(ttrialLevel(TranscendenceTrial.BROKEN)) *
+                Awakening.sanityMultiplier(visionLevel(VisionNode.SANITY)) *
+                signMultiplier(SignKind.MIND)
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -2608,6 +3020,9 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(SummoningChain.productionMultiplier(chainPower())))
             .multiply(BigDecimal.valueOf(if (lethargyActive()) Lethargy.PRODUCTION_FACTOR else 1.0))
             .multiply(BigDecimal.valueOf(TranscendenceTrials.productionReward(ttrialLevel(TranscendenceTrial.HUNGER))))
+            .multiply(BigDecimal.valueOf(Awakening.productionMultiplier(visionLevel(VisionNode.FIRST))))
+            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.FLAME)))
+            .multiply(BigDecimal.valueOf(Expeditions.productionMultiplier(relicLevel(Relic.TRAPEZOHEDRON))))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -2746,7 +3161,7 @@ class GameEngine @Inject constructor(
             cycleAscensions = cycleAscensions(),
             etherGain = etherGainNow(),
             ether = statsManager.counter(AchievementStat.ETHER).toInt(),
-            transcendences = statsManager.counter(AchievementStat.TRANSCENDENCES).toInt(),
+            transcendences = transcendences(),
             milestoneAscensions = milestoneAscensions(),
             transcendRequired = transcendRequired(),
             veilBroken = veilBroken(),
@@ -2777,6 +3192,28 @@ class GameEngine @Inject constructor(
             ttrialActive = ttrialActive()?.id,
             ttrialCycleBest = ttrialCycleBest(),
             ttrialLevels = TranscendenceTrial.entries.associate { it.id to ttrialLevel(it) },
+            awakeningRevealed = awakeningRevealed(),
+            awakenings = awakenings(),
+            visions = visions(),
+            visionsEarned = statsManager.counter(AchievementStat.VISIONS_EARNED).toInt(),
+            visionGain = visionGainNow(),
+            canAwaken = canAwaken(),
+            ttrialTotalLevels = ttrialTotalLevels(),
+            visionLevels = VisionNode.entries.associate { it.id to visionLevel(it) },
+            oathsActive = activeOaths().map { it.id }.toSet(),
+            oathsNext = nextOaths().map { it.id }.toSet(),
+            signsRevealed = signsRevealed(),
+            astralDust = statsManager.counter(AchievementStat.ASTRAL_DUST).toInt(),
+            signs = signs().mapValues { it.value.pack() },
+            signsEquipped = equippedNumbers().mapKeys { it.key.id },
+            expeditionRevealed = expeditionRevealed(),
+            expeditionLevel = expeditionLevel(),
+            expeditionDealt = statsManager.counter(AchievementStat.EXPEDITION_DEALT).toDouble(),
+            expeditionDps = expeditionDps(),
+            expeditionBest = statsManager.counter(AchievementStat.EXPEDITION_BEST).toInt(),
+            expeditionGold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt(),
+            expeditionGoldOnAwaken = Expeditions.goldFor(expeditionLevel()),
+            relicLevels = Relic.entries.associate { it.id to relicLevel(it) },
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,

@@ -34,7 +34,8 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     VISIONS("visions", MenuLayer.AWAKENING),
     SIGNS("signs", MenuLayer.AWAKENING),
     EXPEDITION("expedition", MenuLayer.AWAKENING),
-    CRYSTALS("crystals", MenuLayer.AWAKENING);
+    CRYSTALS("crystals", MenuLayer.AWAKENING),
+    ELEMENTALS("elementals", MenuLayer.AWAKENING);
 
     /**
      * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
@@ -137,7 +138,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             awakeningRevealed: Boolean = false,
             signsRevealed: Boolean = false,
             expeditionRevealed: Boolean = false,
-            crystalsRevealed: Boolean = false
+            crystalsRevealed: Boolean = false,
+            elementalsRevealed: Boolean = false
         ): MenuUnlocks {
             val tabs = mutableSetOf(MenuTab.RESEARCH)
             if (reveal.grimoire) tabs += MenuTab.GRIMOIRE
@@ -163,6 +165,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (signsRevealed) tabs += MenuTab.SIGNS
             if (expeditionRevealed) tabs += MenuTab.EXPEDITION
             if (crystalsRevealed) tabs += MenuTab.CRYSTALS
+            if (elementalsRevealed) tabs += MenuTab.ELEMENTALS
             return MenuUnlocks(tabs)
         }
     }

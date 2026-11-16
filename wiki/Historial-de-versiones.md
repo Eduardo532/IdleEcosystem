@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.23.x *(en pruebas)*
+
+- **v0.23.0:** Los Cuatro Elementales. Desde el tercer Despertar se invoca a Cthugha, Ithaqua, Cthulhu o Nyarlathotep, uno a la vez. El invocado junta Favor con el tiempo (también sin conexión), y su Favor compra los cuatro nodos de su árbol: producción y clic con el fuego, tiempo y Estrellas con el viento, Cordura, Sueño y Visiones con el agua, Éter y Oro con la tierra. Solo el árbol del invocado hace efecto. Completa la etapa 8. 15 logros nuevos.
+
 ## v0.22.1 · "Los Cristales de Yuggoth" *(oficial, 16 nov 2026)*
 
 Octava etapa del Roadmap, segunda parte: el tercer minijuego del Despertar.

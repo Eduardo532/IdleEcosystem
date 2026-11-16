@@ -244,6 +244,18 @@ object AchievementStat {
     const val REFINE_WITH_PREFIX = "refine_with."
     const val REFINE_PATH_PREFIX = "refine_path."
     const val FEAT_REFINE_EXACT = "feat.refine_exact"
+
+    // Los Cuatro Elementales (v0.23.0)
+    /** El Elemental activo: 1 + su posición (0 o nada: ninguno). */
+    const val ELEMENTAL_ACTIVE = "elemental_active"
+    const val ELEMENTAL_FAVOR_PREFIX = "elemental_favor."
+    const val ELEMENTAL_FAVOR_EARNED = "elemental_favor_earned"
+    const val ELEMENTAL_NODE_PREFIX = "elemental_node."
+    const val ELEMENTAL_LEVELS = "elemental_levels"
+    const val ELEMENTAL_SWITCHES = "elemental_switches"
+    const val ELEMENTAL_WITH_PREFIX = "elemental_with."
+    const val ELEMENTAL_PATH_PREFIX = "elemental_path."
+    const val FEAT_ELEMENTAL_RIVAL = "feat.elemental_rival"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -286,7 +298,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED, REFINE_LEVELS, REFINE_NODES
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED, REFINE_LEVELS, REFINE_NODES, ELEMENTAL_LEVELS
     )
 
     // --- Contadores guardados ---
@@ -464,6 +476,11 @@ object AchievementStat {
     fun refineNode(id: String) = REFINE_NODE_PREFIX + id
     fun refineWith(pactId: String) = REFINE_WITH_PREFIX + pactId
     fun refinePath(pathId: String) = REFINE_PATH_PREFIX + pathId
+    fun elementalFavor(elementalId: String) = ELEMENTAL_FAVOR_PREFIX + elementalId
+    /** "elemental_node.cthugha.ember". */
+    fun elementalNode(nodeId: String) = ELEMENTAL_NODE_PREFIX + nodeId
+    fun elementalWith(pactId: String) = ELEMENTAL_WITH_PREFIX + pactId
+    fun elementalPath(pathId: String) = ELEMENTAL_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -490,6 +507,7 @@ object AchievementStat {
         EXPEDITION_LEVEL, EXPEDITION_DEALT, EXPEDITION_BEST, EXPEDITION_KILLS, EXPEDITION_GOLD, EXPEDITION_GOLD_EARNED, FEAT_EXPEDITION_TAP,
         CRYSTAL_TIMER, CRYSTAL_LUSTRE, CRYSTAL_LUSTRE_EARNED, CRYSTAL_MERGES, CRYSTAL_POLISHES, CRYSTAL_BEST_TIER, FEAT_CRYSTAL_UNIFORM,
         CRYSTAL_ESSENCE, CRYSTAL_ESSENCE_EARNED, CRYSTAL_REFINES, REFINE_RESPECS, FEAT_REFINE_EXACT,
+        ELEMENTAL_ACTIVE, ELEMENTAL_FAVOR_EARNED, ELEMENTAL_SWITCHES, FEAT_ELEMENTAL_RIVAL,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -507,6 +525,7 @@ object AchievementStat {
         SIGN_PREFIX, SIGN_EQUIP_PREFIX, SIGN_WITH_PREFIX, SIGN_PATH_PREFIX,
         EXPEDITION_WITH_PREFIX, EXPEDITION_PATH_PREFIX, RELIC_PREFIX,
         CRYSTAL_PREFIX, CRYSTAL_WITH_PREFIX, CRYSTAL_PATH_PREFIX, REFINE_NODE_PREFIX, REFINE_WITH_PREFIX, REFINE_PATH_PREFIX,
+        ELEMENTAL_FAVOR_PREFIX, ELEMENTAL_NODE_PREFIX, ELEMENTAL_WITH_PREFIX, ELEMENTAL_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

@@ -1011,6 +1011,43 @@ class GameEngineTest {
     }
 
     @Test
+    fun `only one elemental is summoned and its favor buys its tree`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(3))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(30))
+            counters[AchievementStat.elementalFavor("cthugha")] = BigDecimal(10)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.elementalsRevealed }
+        assertTrue(MenuTab.ELEMENTALS in before.menuUnlocks.tabs)
+        assertEquals(null, before.activeElemental)
+        assertEquals(0.0, before.favorPerSecond, 1e-12)
+
+        engine.setElemental("cthugha")
+        val summoned = await(engine.economy) { it.activeElemental == "cthugha" }
+        assertTrue(summoned.favorPerSecond > 0.0)
+
+        // Brasa de Fomalhaut cuesta 2 de Favor
+        engine.buyElementalNode("cthugha.ember")
+        val bought = await(engine.economy) { it.elementalLevels["cthugha.ember"] == 1 }
+        assertTrue((bought.elementalFavor["cthugha"] ?: 0.0) < 10.0)
+
+        // Otro Elemental: Cthugha se despide
+        engine.setElemental("ithaqua")
+        await(engine.economy) { it.activeElemental == "ithaqua" }
+        engine.setElemental(null)
+        await(engine.economy) { it.activeElemental == null }
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.ELEMENTAL_SWITCHES)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.elementalWith("none"))))
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

@@ -331,6 +331,13 @@ enum class TutorialStep(
         "Tras el segundo Despertar"
     ),
 
+    ELEMENTALS(
+        "elementals",
+        "Los Cuatro Elementales",
+        "Tres veces despertaste, y cuatro dioses te oyeron: Cthugha, el fuego; Ithaqua, el viento; Cthulhu, el agua; y Nyarlathotep, la tierra. En la pestaña Elementales puedes invocar a uno, y solo a uno a la vez. El invocado junta Favor con el tiempo, también sin conexión, y su Favor compra los nodos de su árbol. Solo el árbol del Elemental invocado hace efecto; los demás duermen hasta que vuelvas a llamarlos.",
+        "Tras el tercer Despertar"
+    ),
+
     EXPEDITIONS(
         "expeditions",
         "La Expedición",

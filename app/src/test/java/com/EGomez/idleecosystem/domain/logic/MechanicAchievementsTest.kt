@@ -53,6 +53,7 @@ class MechanicAchievementsTest {
         "Signos Antiguos" to { s -> s.stat?.let { it.startsWith("sign") || it == AchievementStat.FEAT_SIGN_PERFECT } == true },
         "Expediciones y Reliquias" to { s -> s.stat?.let { it.startsWith("expedition") || it.startsWith("relic") || it == AchievementStat.FEAT_EXPEDITION_TAP } == true },
         "Cristales de Yuggoth" to { s -> s.stat?.let { it.startsWith("crystal") || it == AchievementStat.FEAT_CRYSTAL_UNIFORM } == true },
+        "Los Cuatro Elementales" to { s -> s.stat?.let { it.startsWith("elemental") || it == AchievementStat.FEAT_ELEMENTAL_RIVAL } == true },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

@@ -146,8 +146,9 @@ object YuggothCrystals {
 
     fun canRefine(lustre: Int): Boolean = lustre >= REFINE_LUSTRE
 
-    /** Esencia de los Mi-Go al Refinar: ⌊√(Lustre / 5)⌋. */
-    fun essenceGain(lustre: Int): Int = if (!canRefine(lustre)) 0 else floor(sqrt(lustre / 5.0) + 1e-9).toInt()
+    /** Esencia de los Mi-Go al Refinar: ⌊√(Lustre / 5) × bono⌋ (El Hombre Negro, v0.23.0). */
+    fun essenceGain(lustre: Int, multiplier: Double = 1.0): Int =
+        if (!canRefine(lustre)) 0 else floor(sqrt(lustre / 5.0) * multiplier + 1e-9).toInt()
 
     /** El Éter que da la Lente de Yuggoth: x(1 + 0,1 × nivel × log10(1 + Poder)). */
     fun etherMultiplier(power: Double, lens: Int): Double = 1.0 + 0.1 * lens * log10(1.0 + power)

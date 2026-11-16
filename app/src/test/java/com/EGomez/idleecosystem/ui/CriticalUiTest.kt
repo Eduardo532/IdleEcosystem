@@ -986,6 +986,38 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `an elemental is summoned from its card and its tree buys from the root`() {
+        val summoned = mutableListOf<String?>()
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.ElementalsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.ElementalsUi(
+                        active = "cthugha",
+                        favor = mapOf("cthugha" to 5.0, "ithaqua" to 0.0),
+                        favorPerSecond = 0.5
+                    ),
+                    onSummon = { summoned += it },
+                    onBuyNode = { bought += it }
+                )
+            }
+        }
+        compose.onNodeWithText("Cthugha invocado · +30.00 Favor por minuto").assertExists()
+        // El árbol del invocado: la raíz se compra, lo que pide la raíz no
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ELEMENTAL_BUY_TAG + "cthugha.pyre").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ELEMENTAL_BUY_TAG + "cthugha.ember").performScrollTo().performClick()
+        assertEquals(listOf("cthugha.ember"), bought)
+
+        // Mirar a Ithaqua e invocarlo
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ELEMENTAL_CARD_TAG + "ithaqua").performScrollTo().performClick()
+        compose.onNodeWithText("Dormido: este árbol no hace efecto hasta que lo invoques.").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ELEMENTAL_SUMMON_TAG + "ithaqua").performScrollTo().performClick()
+        assertEquals(listOf<String?>("ithaqua"), summoned)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

@@ -25,6 +25,7 @@
 - [Signos Antiguos](Signos-Antiguos)
 - [Expediciones y Reliquias](Expediciones)
 - [Cristales de Yuggoth](Cristales-de-Yuggoth)
+- [Los Cuatro Elementales](Los-Cuatro-Elementales)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

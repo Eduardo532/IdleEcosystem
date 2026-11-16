@@ -608,4 +608,16 @@
     <string name="refine_confirm_gain">You gain %1$d Mi-Go Essence.</string>
     <string name="refine_confirm_loses">You lose %1$d Lustre and every crystal on the grid. The refining tree is kept.</string>
     <string name="refine_confirm">REFINE</string>
+    <string name="tab_elementals">Elementals</string>
+    <string name="elementals_title">THE FOUR ELEMENTALS</string>
+    <string name="elementals_hint">Summon an Elemental: it gathers Favor over time, and its Favor buys its tree. Only one is summoned at a time, and only its tree takes effect.</string>
+    <string name="elementals_rate">%1$s summoned · +%2$s Favor per minute</string>
+    <string name="elementals_none">No Elemental summoned.</string>
+    <string name="elementals_tree">TREE OF %1$s</string>
+    <string name="elementals_favor">Favor: %1$s</string>
+    <string name="elementals_summon">SUMMON</string>
+    <string name="elementals_dismiss">Dismiss</string>
+    <string name="elementals_active">SUMMONED</string>
+    <string name="elementals_dormant">Dormant: this tree has no effect until you summon it.</string>
+    <string name="elementals_cost">%1$d F</string>
 </resources>

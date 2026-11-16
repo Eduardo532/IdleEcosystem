@@ -13,7 +13,7 @@ Cada etapa termina en una **puerta**: una condición que debería cumplirse ante
 | 5 | v0.18 – v0.19 | Segunda capa | Trascender (nueva capa de prestigio) ✅, mutaciones ✅, maestría de runas ✅, consagrar edificios ✅ | Trascender abre sistemas, no solo multiplica |
 | 6 | v0.19 | Completar la segunda capa | Romper el Velo ✅, Hitos de Trascendencia ✅, Cuando las Estrellas Estén en Posición ✅, Bestiario ✅, Laboratorio de Miskatonic ✅ | Las 10 Pruebas tienen un objetivo final y Trascender se automatiza |
 | 7 | v0.20 | Profundidad de Trascender | El Sueño Profundo ✅, Cadena de Invocación ✅, Letargo ✅, Pruebas de Trascendencia (I–V) ✅ | Un ciclo de Trascender tiene un desafío largo propio |
-| 8 | v0.21 – v0.23 | Tercera capa: el Despertar | Despertar (Pruebas combinadas), Signos Antiguos y planetas, Expediciones y Reliquias, Cristales de Yuggoth, los Cuatro Elementales | El Despertar abre minijuegos distintos que alimentan a las capas anteriores |
+| 8 | v0.21 – v0.23 | Tercera capa: el Despertar | Despertar (Pruebas combinadas) ✅, Signos Antiguos y planetas ✅, Expediciones y Reliquias ✅, Cristales de Yuggoth ✅, los Cuatro Elementales ✅ | El Despertar abre minijuegos distintos que alimentan a las capas anteriores |
 | 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo, Artefactos, El Sueño de Azathoth; actos con un final visible, interfaz narrativa, eventos con memoria, contenido oculto | El juego tiene un final visible |
 
 ## Las capas como actos
@@ -57,7 +57,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **Expediciones** ✅ *v0.21.3* | Ataque | Desde el primer Despertar, un círculo golpea horrores del Bestiario con daño basado en la producción; el nivel no tiene tope y da Oro al Despertar. Ver [Expediciones y Reliquias](Expediciones). |
 | **Reliquias** ✅ *v0.21.3* | Reliquias | Compradas con Oro y desbloqueadas por nivel de Expedición: Trapezoedro Resplandeciente (producción), Corona de Yig (Éter), Espejo de Nitocris (daño y Visiones). |
 | **Cristales de Yuggoth** ✅ *v0.22.0 – v0.22.1* | Minerales | Desde el segundo Despertar, una cuadrícula de 4 × 4 donde dos cristales iguales se fusionan en uno mayor y su Poder multiplica la producción. Dos prestigios propios: Pulir (Lustre) y Refinar (Esencia de los Mi-Go), con un árbol de refinado de 8 nodos. Ver [Cristales de Yuggoth](Cristales-de-Yuggoth). |
-| **Los Cuatro Elementales** | Elementos | Cthugha (fuego), Ithaqua (viento), Cthulhu (agua) y Nyarlathotep (tierra), cada uno con su árbol; solo uno activo a la vez. |
+| **Los Cuatro Elementales** ✅ *v0.23.0* | Elementos | Desde el tercer Despertar, Cthugha (fuego), Ithaqua (viento), Cthulhu (agua) y Nyarlathotep (tierra), cada uno con su árbol de 4 nodos comprado con su Favor; solo uno invocado a la vez y solo su árbol hace efecto. Ver [Los Cuatro Elementales](Los-Cuatro-Elementales). |
 
 ### Etapa 9: el arco final
 

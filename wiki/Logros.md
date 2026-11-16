@@ -1,6 +1,6 @@
 # Logros
 
-Hay **616 logros**: 113 originales y **503 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **631 logros**: 113 originales y **518 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -348,6 +348,20 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Horno de Nug | Refina los cristales con el pacto de Nug | +1 % |
 | Engranajes de Cuarzo | Refina los cristales recorriendo la Senda del Engranaje | +1 % |
 | Manos de Joyero | Refina los cristales recorriendo la Senda de la Mano | +1 % |
+| Primer Favor | Gana 100 de Favor en total | +1 % |
+| Favor de los Dioses | Gana 1.000 de Favor en total | +1 % |
+| Elegido de los Cuatro | Gana 10.000 de Favor en total | +2 % |
+| Raíces Elementales | Ten 10 niveles en los árboles de los Elementales | +1 % |
+| Árbol de los Cuatro | Ten 50 niveles en los árboles de los Elementales | +2 % |
+| Rosa de los Vientos | Invoca Elementales 10 veces | +1 % |
+| Corona de Fomalhaut | Compra el Fuego Estelar de Cthugha | +1 % |
+| El Que Camina en el Viento | Compra el Norte Blanco de Ithaqua | +1 % |
+| Señor de las Profundidades | Compra Las Torres de R'lyeh de Cthulhu | +1 % |
+| Trono de Khem | Compra El Faraón Negro de Nyarlathotep | +1 % |
+| Ghroth Escucha | Invoca un Elemental con el pacto de Ghroth | +1 % |
+| La Cabra y los Cuatro | Invoca un Elemental con el pacto de Shub-Niggurath | +1 % |
+| Viento del Vacío | Invoca un Elemental recorriendo la Senda del Vacío | +1 % |
+| Soñar con los Elementos | Invoca un Elemental recorriendo la Senda del Sueño | +1 % |
 
 ### Panteón
 
@@ -521,7 +535,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **40 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **41 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

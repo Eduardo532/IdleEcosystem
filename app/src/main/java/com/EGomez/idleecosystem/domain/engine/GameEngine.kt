@@ -56,6 +56,9 @@ import com.EGomez.idleecosystem.domain.logic.Awakening
 import com.EGomez.idleecosystem.domain.logic.AwakeningMilestone
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.VisionNode
+import com.EGomez.idleecosystem.domain.logic.Elemental
+import com.EGomez.idleecosystem.domain.logic.ElementalNode
+import com.EGomez.idleecosystem.domain.logic.Elementals
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YuggothCrystals
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
@@ -229,6 +232,12 @@ data class EconomyState(
     val crystalEssence: Int = 0,
     val crystalEssenceGain: Int = 0,
     val refineLevels: Map<String, Int> = emptyMap(),
+    /** Los Cuatro Elementales (v0.23.0). */
+    val elementalsRevealed: Boolean = false,
+    val activeElemental: String? = null,
+    val elementalFavor: Map<String, Double> = emptyMap(),
+    val elementalLevels: Map<String, Int> = emptyMap(),
+    val favorPerSecond: Double = 0.0,
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -871,6 +880,7 @@ class GameEngine @Inject constructor(
         put(AchievementStat.RELICS_OWNED, Relic.entries.count { relicLevel(it) > 0 })
         put(AchievementStat.REFINE_LEVELS, RefineNode.entries.sumOf { refineLevel(it) })
         put(AchievementStat.REFINE_NODES, RefineNode.entries.count { refineLevel(it) > 0 })
+        put(AchievementStat.ELEMENTAL_LEVELS, ElementalNode.entries.sumOf { elementalLevel(it) })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1097,7 +1107,8 @@ class GameEngine @Inject constructor(
         awakeningRevealed = awakeningRevealed(),
         signsRevealed = signsRevealed(),
         expeditionRevealed = expeditionRevealed(),
-        crystalsRevealed = crystalsRevealed()
+        crystalsRevealed = crystalsRevealed(),
+        elementalsRevealed = elementalsRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1254,6 +1265,7 @@ class GameEngine @Inject constructor(
         if (diffSeconds > 0) expeditionTick(diffSeconds)
         // La Mina de Yuggoth sigue dejando cristales (las fusiones esperan al jugador)
         if (diffSeconds > 0) crystalTick(diffSeconds.toDouble())
+        if (diffSeconds > 0) elementalTick(diffSeconds.toDouble())
         // El Letargo sigue sumando Sopor mientras no juegas
         if (diffSeconds > 0 && lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS, BigDecimal(diffSeconds))
         // La Cadena de Invocación sigue produciendo
@@ -1274,6 +1286,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(attentionMultiplier(Attention.DREAM)))
             .multiply(BigDecimal.valueOf(DeepSleep.offlineMultiplier(dreamLevel(DreamNode.ZOOGS))))
             .multiply(BigDecimal.valueOf(Awakening.offlineMultiplier(visionLevel(VisionNode.SLEEPER))))
+            .multiply(BigDecimal.valueOf(Elementals.offlineMultiplier(el(ElementalNode.GALE))))
             .multiply(BigDecimal.valueOf(trialReward().offline * if (trialRules().noOffline) 0.0 else 1.0))
             .let { rate -> Veil.offlineGain(knowledgeThisRun(), rate, diffSeconds, veilBroken(), veilThreshold()) }
 
@@ -1327,6 +1340,7 @@ class GameEngine @Inject constructor(
         chainTick()
         expeditionTick(1L)
         crystalTick(1.0)
+        elementalTick(1.0)
         if (lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS)
 
         // Tutoriales basados en recursos
@@ -1443,7 +1457,8 @@ class GameEngine @Inject constructor(
     private fun currentClickPower(): BigDecimal = Lab.pow(
         buildingManager.getClickBuildingBonus().max(BigDecimal.ONE)
             .multiply(BigDecimal.valueOf(DeepSleep.clickMultiplier(dreamLevel(DreamNode.ULTHAR))))
-            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.HAND))),
+            .multiply(BigDecimal.valueOf(signMultiplier(SignKind.HAND)))
+            .multiply(BigDecimal.valueOf(Elementals.clickMultiplier(el(ElementalNode.PYRE)))),
         LabExperiment.IBN_GHAZI.exponent(labLevel(LabExperiment.IBN_GHAZI)) * dreamExponent()
     ).let { if (ttrialRestricts(TranscendenceTrial.SILENCE)) BigDecimal.ZERO else it }
 
@@ -1473,6 +1488,7 @@ class GameEngine @Inject constructor(
         if (signsRevealed()) tutorialManager.triggerStep(TutorialStep.ELDER_SIGNS)
         if (expeditionRevealed()) tutorialManager.triggerStep(TutorialStep.EXPEDITIONS)
         if (crystalsRevealed()) tutorialManager.triggerStep(TutorialStep.YUGGOTH_CRYSTALS)
+        if (elementalsRevealed()) tutorialManager.triggerStep(TutorialStep.ELEMENTALS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1570,7 +1586,7 @@ class GameEngine @Inject constructor(
 
     private fun addStardust(amount: Double) {
         if (amount <= 0.0) return
-        val add = BigDecimal.valueOf(amount * beastBonus(BeastKind.STARDUST))
+        val add = BigDecimal.valueOf(amount * beastBonus(BeastKind.STARDUST) * Elementals.stardustMultiplier(el(ElementalNode.WHIRL)))
         statsManager.counters[AchievementStat.STARDUST] = statsManager.counter(AchievementStat.STARDUST).add(add)
         statsManager.count(AchievementStat.STARDUST_EARNED, add)
     }
@@ -1860,7 +1876,8 @@ class GameEngine @Inject constructor(
         val armitage = LabExperiment.ARMITAGE.exponent(labLevel(LabExperiment.ARMITAGE)) *
             (if (ttrialRestricts(TranscendenceTrial.HUNGER)) TranscendenceTrials.HUNGER_EXPONENT else 1.0)
         // La Visión del Abismo vale siempre
-        val abyss = Awakening.productionExponent(visionLevel(VisionNode.ABYSS))
+        val abyss = Awakening.productionExponent(visionLevel(VisionNode.ABYSS)) *
+            Elementals.productionExponent(el(ElementalNode.STARFIRE))
         return if (dreamActive()) armitage * dreamExponent() * abyss
         else armitage * DeepSleep.kadathExponent(dreamLevel(DreamNode.KADATH)) * abyss
     }
@@ -1871,7 +1888,8 @@ class GameEngine @Inject constructor(
 
     private fun dreamGainNow(): Int = DeepSleep.gain(
         dreamCycleBest(), dreamPointsEarned(),
-        DeepSleep.pointsMultiplier(dreamLevel(DreamNode.NIGHTGAUNTS)) * Awakening.dreamPointsMultiplier(visionLevel(VisionNode.DREAMER))
+        DeepSleep.pointsMultiplier(dreamLevel(DreamNode.NIGHTGAUNTS)) * Awakening.dreamPointsMultiplier(visionLevel(VisionNode.DREAMER)) *
+            Elementals.dreamMultiplier(el(ElementalNode.SUNKEN))
     )
 
     /** Se Trasciende desde el Sueño: paga los Puntos y anota los logros. Devuelve lo ganado. */
@@ -2152,7 +2170,8 @@ class GameEngine @Inject constructor(
     private fun visionGainNow(): Int = if (!canAwaken()) 0 else Awakening.visionGain(
         transcendences(), etherSinceAwakening(),
         Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
-            signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR))
+            signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR)) *
+            Elementals.visionMultiplier(el(ElementalNode.RISING))
     )
 
     // ---- Juramentos (v0.21.1) ----
@@ -2208,7 +2227,7 @@ class GameEngine @Inject constructor(
         nextOaths().forEach { statsManager.flag(AchievementStat.OATH_ACTIVE_PREFIX + it.id) }
 
         // La Expedición paga su Oro y vuelve a empezar
-        val gold = Expeditions.goldFor(expeditionLevel())
+        val gold = goldOnAwaken()
         if (gold > 0) {
             statsManager.count(AchievementStat.EXPEDITION_GOLD, BigDecimal(gold))
             statsManager.count(AchievementStat.EXPEDITION_GOLD_EARNED, BigDecimal(gold))
@@ -2407,7 +2426,14 @@ class GameEngine @Inject constructor(
     private fun relicLevel(relic: Relic): Int = statsManager.counter(AchievementStat.relic(relic.id)).toInt()
 
     private fun expeditionDps(): Double = if (!expeditionRevealed()) 0.0
-    else Expeditions.damagePerSecond(productionPerSecond, Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)))
+    else Expeditions.damagePerSecond(
+        productionPerSecond,
+        Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)) * Elementals.damageMultiplier(el(ElementalNode.BLAZE))
+    )
+
+    /** El Oro que pagaría Despertar ahora, con el Oro de Khem (v0.23.0). */
+    private fun goldOnAwaken(): Int =
+        kotlin.math.floor(Expeditions.goldFor(expeditionLevel()) * Elementals.goldMultiplier(el(ElementalNode.KHEM)) + 1e-9).toInt()
 
     /** Golpea al horror en curso con [damage]; anota los vencidos. Devuelve cuántos cayeron. */
     private fun expeditionHit(damage: Double): Int {
@@ -2466,9 +2492,13 @@ class GameEngine @Inject constructor(
 
     private fun crystalMultiplier(): Double = YuggothCrystals.productionMultiplier(crystalPower(), refineLevel(RefineNode.CORE))
 
-    private fun crystalSpawnSeconds(): Double = YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS))
+    private fun crystalSpawnSeconds(): Double =
+        YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS)) / Elementals.mineSpeed(el(ElementalNode.DRIFT))
 
-    private fun crystalLustreGain(): Int = YuggothCrystals.lustreGain(crystalGrid(), refineLevel(RefineNode.FUNGAL))
+    private fun crystalLustreGain(): Int =
+        YuggothCrystals.lustreGain(crystalGrid(), refineLevel(RefineNode.FUNGAL) + el(ElementalNode.ABYSSAL))
+
+    private fun essenceGainFor(lustre: Int): Int = YuggothCrystals.essenceGain(lustre, Elementals.essenceMultiplier(el(ElementalNode.MASKS)))
 
     private fun essence(): Int = statsManager.counter(AchievementStat.CRYSTAL_ESSENCE).toInt()
 
@@ -2554,7 +2584,7 @@ class GameEngine @Inject constructor(
     /** Refina: el Lustre y la cuadrícula vuelven a cero a cambio de Esencia de los Mi-Go. */
     fun refineCrystals() = post {
         val lustre = lustre()
-        val gain = YuggothCrystals.essenceGain(lustre)
+        val gain = essenceGainFor(lustre)
         if (!crystalsRevealed() || gain <= 0) return@post
         statsManager.count(AchievementStat.CRYSTAL_ESSENCE, BigDecimal(gain))
         statsManager.count(AchievementStat.CRYSTAL_ESSENCE_EARNED, BigDecimal(gain))
@@ -2593,6 +2623,70 @@ class GameEngine @Inject constructor(
         statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.REFINE_NODE_PREFIX) }
         statsManager.counters[AchievementStat.CRYSTAL_ESSENCE] = BigDecimal(essence() + refund)
         statsManager.count(AchievementStat.REFINE_RESPECS)
+        recalculate()
+        requestSave()
+    }
+
+    // =====================================================================
+    // LOS CUATRO ELEMENTALES (v0.23.0)
+    // =====================================================================
+
+    private fun elementalsRevealed(): Boolean = Elementals.isUnlocked(awakenings())
+
+    /** El Elemental invocado, o ninguno. */
+    private fun activeElemental(): Elemental? =
+        if (!elementalsRevealed()) null
+        else Elemental.entries.getOrNull(statsManager.counter(AchievementStat.ELEMENTAL_ACTIVE).toInt() - 1)
+
+    private fun elementalLevel(node: ElementalNode): Int = statsManager.counter(AchievementStat.elementalNode(node.id)).toInt()
+
+    private fun elementalLevels(): Map<String, Int> = ElementalNode.entries.associate { it.id to elementalLevel(it) }
+
+    /** El nivel que vale de [node]: el suyo si su Elemental es el activo; si no, 0. */
+    private fun el(node: ElementalNode): Int = if (activeElemental() == node.elemental) elementalLevel(node) else 0
+
+    private fun favor(elemental: Elemental): Double = statsManager.counter(AchievementStat.elementalFavor(elemental.id)).toDouble()
+
+    private fun favorRate(): Double = Elementals.favorPerSecond(productionPerSecond, el(ElementalNode.NORTH))
+
+    /** [seconds] de Favor para el Elemental activo (también sin conexión). */
+    private fun elementalTick(seconds: Double) {
+        val active = activeElemental() ?: return
+        val gain = favorRate() * seconds
+        if (gain <= 0.0 || gain.isNaN()) return
+        statsManager.count(AchievementStat.elementalFavor(active.id), BigDecimal.valueOf(gain))
+        statsManager.count(AchievementStat.ELEMENTAL_FAVOR_EARNED, BigDecimal.valueOf(gain))
+    }
+
+    /** Invoca a un Elemental (o a ninguno, con [id] nulo). Solo uno está activo a la vez. */
+    fun setElemental(id: String?) = post {
+        if (!elementalsRevealed()) return@post
+        val next = Elemental.fromId(id)
+        if (next == activeElemental()) return@post
+        if (next == null) {
+            statsManager.counters.remove(AchievementStat.ELEMENTAL_ACTIVE)
+        } else {
+            statsManager.counters[AchievementStat.ELEMENTAL_ACTIVE] = BigDecimal(next.ordinal + 1)
+            statsManager.count(AchievementStat.ELEMENTAL_SWITCHES)
+            statsManager.flag(AchievementStat.elementalWith(activePact.id))
+            MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.elementalPath(it.id)) }
+            // Cthugha quemó el bosque de Nyarlathotep: invocarlo bajo su pacto es un desafío
+            if (next == Elemental.CTHUGHA && activePact.id == "nyarlathotep") statsManager.flag(AchievementStat.FEAT_ELEMENTAL_RIVAL)
+        }
+        recalculate()
+        requestSave()
+    }
+
+    /** Sube un nodo del árbol de un Elemental con su Favor. */
+    fun buyElementalNode(id: String) = post {
+        val node = ElementalNode.fromId(id) ?: return@post
+        if (!elementalsRevealed()) return@post
+        val points = favor(node.elemental)
+        if (!Elementals.canBuy(node, elementalLevels(), points)) return@post
+        val level = elementalLevel(node)
+        statsManager.counters[AchievementStat.elementalFavor(node.elemental.id)] = BigDecimal.valueOf(points - node.cost(level))
+        statsManager.counters[AchievementStat.elementalNode(node.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
         recalculate()
         requestSave()
     }
@@ -2818,7 +2912,8 @@ class GameEngine @Inject constructor(
                     TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)) *
                     Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER) *
                     Expeditions.etherMultiplier(relicLevel(Relic.CROWN)) *
-                    YuggothCrystals.etherMultiplier(crystalPower(), refineLevel(RefineNode.LENS)),
+                    YuggothCrystals.etherMultiplier(crystalPower(), refineLevel(RefineNode.LENS)) *
+                    Elementals.etherMultiplier(el(ElementalNode.STONE), el(ElementalNode.PHARAOH), awakenings()),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -3140,7 +3235,7 @@ class GameEngine @Inject constructor(
                 Lethargy.sanityMultiplier(if (lethargyActive()) lethargySeconds() else 0) *
                 TranscendenceTrials.sanityReward(ttrialLevel(TranscendenceTrial.BROKEN)) *
                 Awakening.sanityMultiplier(visionLevel(VisionNode.SANITY)) *
-                signMultiplier(SignKind.MIND)
+                signMultiplier(SignKind.MIND) * Elementals.sanityMultiplier(el(ElementalNode.TIDE))
         ))
 
     private fun rollEcho(): Boolean = Random.nextDouble() < echoChance()
@@ -3191,6 +3286,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(signMultiplier(SignKind.FLAME)))
             .multiply(BigDecimal.valueOf(Expeditions.productionMultiplier(relicLevel(Relic.TRAPEZOHEDRON))))
             .multiply(BigDecimal.valueOf(crystalMultiplier()))
+            .multiply(BigDecimal.valueOf(Elementals.productionMultiplier(el(ElementalNode.EMBER))))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -3380,7 +3476,7 @@ class GameEngine @Inject constructor(
             expeditionDps = expeditionDps(),
             expeditionBest = statsManager.counter(AchievementStat.EXPEDITION_BEST).toInt(),
             expeditionGold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt(),
-            expeditionGoldOnAwaken = Expeditions.goldFor(expeditionLevel()),
+            expeditionGoldOnAwaken = goldOnAwaken(),
             relicLevels = Relic.entries.associate { it.id to relicLevel(it) },
             crystalsRevealed = crystalsRevealed(),
             crystalGrid = crystalGrid(),
@@ -3389,8 +3485,13 @@ class GameEngine @Inject constructor(
             crystalLustreGain = crystalLustreGain(),
             crystalMultiplier = crystalMultiplier(),
             crystalEssence = essence(),
-            crystalEssenceGain = YuggothCrystals.essenceGain(lustre()),
+            crystalEssenceGain = essenceGainFor(lustre()),
             refineLevels = refineLevels(),
+            elementalsRevealed = elementalsRevealed(),
+            activeElemental = activeElemental()?.id,
+            elementalFavor = Elemental.entries.associate { it.id to favor(it) },
+            elementalLevels = elementalLevels(),
+            favorPerSecond = if (activeElemental() != null) favorRate() else 0.0,
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

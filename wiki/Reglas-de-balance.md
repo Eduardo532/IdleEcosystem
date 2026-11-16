@@ -186,6 +186,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Poder `Σ 3^(grado − 1) × (1 + 0,1·Lustre)`; producción `x(1 + Poder)`. Pulir (con grado 5 o más) vacía la cuadrícula y da `⌊√(Poder sin Lustre / 10)⌋` de Lustre. *(Código: `YuggothCrystals`; test: `YuggothCrystalsTest`.)*
 - *(v0.22.1)* Refinar (con 25 de Lustre) vuelve el Lustre a 0 y vacía la cuadrícula: Esencia `⌊√(Lustre / 5)⌋`. Árbol de refinado (`RefineNode`, 8 nodos, costo `⌈base × crecimiento^nivel⌉`, reinicio gratis): Mina `/1,5^Taladros`, Poder `x2^Facetas`, grado al nacer `1 + Semilla`, cristales por vez `1 + Veta`, Lustre `x(1 + 0,5·Pulidor)`, Éter `x(1 + 0,1·Lente·log10(1 + Poder))`, Eco (conserva el mayor, −2 grados), multiplicador `^(1 + 0,05·Núcleo)`.
 
+## Los Cuatro Elementales *(v0.23.0)*
+
+- Desde el tercer Despertar. Uno invocado a la vez; solo el árbol del invocado hace efecto (`Elementals.effective`). Favor por segundo `(1 + log10(1 + producción)) / 300 × 1,5^Norte`, solo para el invocado, también sin conexión.
+- Cuatro árboles de 4 nodos (`ElementalNode`), costo `⌈base × crecimiento^nivel⌉`. Efectos: producción `5^n`, clic `10^n`, daño `3^n`, producción `^(1 + 0,02n)`; sin conexión `3^n`, Mina `/1,5^n`, Polvo `2^n`, Favor `1,5^n`; Cordura `5^n`, Sueño `2^n`, Lustre `+0,5n` (suma con el Pulidor), Visiones `1 + 0,2n`; Éter `2^n × (1 + 0,5·Despertares)^n`, Oro `1 + 0,25n`, Esencia `1 + 0,25n`. *(Código: `Elementals`, `ElementalNode`; test: `ElementalsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

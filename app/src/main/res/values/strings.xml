@@ -586,4 +586,27 @@
     <string name="relics_title">RELIQUIAS</string>
     <string name="relic_locked">Se abre al llegar al nivel %1$d de Expedición</string>
     <string name="relic_cost">%1$d Oro</string>
+    <string name="tab_crystals">Cristales</string>
+    <string name="crystals_title">CRISTALES DE YUGGOTH</string>
+    <string name="crystals_hint">Toca un cristal y después otro del mismo grado para fusionarlos. El Poder multiplica tu producción.</string>
+    <string name="crystals_lustre">LUSTRE</string>
+    <string name="crystals_power">Poder %1$s · producción x%2$s</string>
+    <string name="crystals_next">Próximo cristal en %1$s s</string>
+    <string name="crystals_full">La cuadrícula está llena: fusiona para hacer lugar.</string>
+    <string name="crystals_merge_all">Fusionar todo</string>
+    <string name="crystals_polish">PULIR (+%1$d Lustre)</string>
+    <string name="crystals_polish_locked">Pulir pide grado %1$d</string>
+    <string name="crystals_rules">Poder de un cristal: 3^(grado − 1), +10 % por Lustre. Cada Lustre acelera la Mina un 5 %. Pulir vacía la cuadrícula.</string>
+    <string name="refine_title">REFINAR</string>
+    <string name="refine_hint">Con %1$d de Lustre, Refinar vuelve el Lustre y la cuadrícula a cero a cambio de Esencia de los Mi-Go, que compra el árbol de refinado.</string>
+    <string name="refine_essence">ESENCIA</string>
+    <string name="refine_button">REFINAR (+%1$d Esencia)</string>
+    <string name="refine_locked">Refinar pide Lustre: %1$d/%2$d</string>
+    <string name="refine_tree_title">ÁRBOL DE REFINADO</string>
+    <string name="refine_cost">%1$d E</string>
+    <string name="refine_respec">Reiniciar el árbol (devuelve %1$d E)</string>
+    <string name="refine_confirm_title">¿Refinar los cristales?</string>
+    <string name="refine_confirm_gain">Ganas %1$d de Esencia de los Mi-Go.</string>
+    <string name="refine_confirm_loses">Pierdes %1$d de Lustre y todos los cristales de la cuadrícula. El árbol de refinado no se pierde.</string>
+    <string name="refine_confirm">REFINAR</string>
 </resources>

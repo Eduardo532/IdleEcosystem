@@ -217,6 +217,33 @@ object AchievementStat {
     const val RELIC_PREFIX = "relic."
     const val RELIC_LEVELS = "relic_levels"
     const val RELICS_OWNED = "relics_owned"
+    /**
+     * Los Cristales de Yuggoth (v0.22.0): el grado de cada casilla, los segundos hacia el
+     * próximo cristal, el Lustre (el que hay y el ganado), fusiones, pulidos, mejor grado y
+     * con qué pacto o Senda se fusionó.
+     */
+    const val CRYSTAL_PREFIX = "crystal."
+    const val CRYSTAL_TIMER = "crystal_timer"
+    const val CRYSTAL_LUSTRE = "crystal_lustre"
+    const val CRYSTAL_LUSTRE_EARNED = "crystal_lustre_earned"
+    const val CRYSTAL_MERGES = "crystal_merges"
+    const val CRYSTAL_POLISHES = "crystal_polishes"
+    const val CRYSTAL_BEST_TIER = "crystal_best_tier"
+    const val CRYSTAL_WITH_PREFIX = "crystal_with."
+    const val CRYSTAL_PATH_PREFIX = "crystal_path."
+    const val FEAT_CRYSTAL_UNIFORM = "feat.crystal_uniform"
+
+    // Refinar y el árbol de refinado (v0.22.1)
+    const val CRYSTAL_ESSENCE = "crystal_essence"
+    const val CRYSTAL_ESSENCE_EARNED = "crystal_essence_earned"
+    const val CRYSTAL_REFINES = "crystal_refines"
+    const val REFINE_NODE_PREFIX = "refine."
+    const val REFINE_LEVELS = "refine_levels"
+    const val REFINE_NODES = "refine_nodes"
+    const val REFINE_RESPECS = "refine_respecs"
+    const val REFINE_WITH_PREFIX = "refine_with."
+    const val REFINE_PATH_PREFIX = "refine_path."
+    const val FEAT_REFINE_EXACT = "feat.refine_exact"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -259,7 +286,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED, REFINE_LEVELS, REFINE_NODES
     )
 
     // --- Contadores guardados ---
@@ -431,6 +458,12 @@ object AchievementStat {
     fun relic(id: String) = RELIC_PREFIX + id
     fun expeditionWith(pactId: String) = EXPEDITION_WITH_PREFIX + pactId
     fun expeditionPath(pathId: String) = EXPEDITION_PATH_PREFIX + pathId
+    fun crystal(cell: Int) = CRYSTAL_PREFIX + cell
+    fun crystalWith(pactId: String) = CRYSTAL_WITH_PREFIX + pactId
+    fun crystalPath(pathId: String) = CRYSTAL_PATH_PREFIX + pathId
+    fun refineNode(id: String) = REFINE_NODE_PREFIX + id
+    fun refineWith(pactId: String) = REFINE_WITH_PREFIX + pactId
+    fun refinePath(pathId: String) = REFINE_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -455,6 +488,8 @@ object AchievementStat {
         AWAKEN_OATHS_MAX, AWAKEN_OATHS_TOTAL,
         SIGN_SEQ, ASTRAL_DUST, SIGNS_FOUND, SIGNS_SOLD, SIGN_BEST_RARITY, SIGN_MAX_LEVEL, FEAT_SIGN_PERFECT,
         EXPEDITION_LEVEL, EXPEDITION_DEALT, EXPEDITION_BEST, EXPEDITION_KILLS, EXPEDITION_GOLD, EXPEDITION_GOLD_EARNED, FEAT_EXPEDITION_TAP,
+        CRYSTAL_TIMER, CRYSTAL_LUSTRE, CRYSTAL_LUSTRE_EARNED, CRYSTAL_MERGES, CRYSTAL_POLISHES, CRYSTAL_BEST_TIER, FEAT_CRYSTAL_UNIFORM,
+        CRYSTAL_ESSENCE, CRYSTAL_ESSENCE_EARNED, CRYSTAL_REFINES, REFINE_RESPECS, FEAT_REFINE_EXACT,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -471,6 +506,7 @@ object AchievementStat {
         VISION_NODE_PREFIX, AWAKEN_WITH_PREFIX, AWAKEN_PATH_PREFIX, OATH_NEXT_PREFIX, OATH_ACTIVE_PREFIX,
         SIGN_PREFIX, SIGN_EQUIP_PREFIX, SIGN_WITH_PREFIX, SIGN_PATH_PREFIX,
         EXPEDITION_WITH_PREFIX, EXPEDITION_PATH_PREFIX, RELIC_PREFIX,
+        CRYSTAL_PREFIX, CRYSTAL_WITH_PREFIX, CRYSTAL_PATH_PREFIX, REFINE_NODE_PREFIX, REFINE_WITH_PREFIX, REFINE_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

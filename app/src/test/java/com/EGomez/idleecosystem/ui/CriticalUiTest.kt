@@ -926,6 +926,66 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `tapping two crystals of the same tier fuses them`() {
+        val merges = mutableListOf<Pair<Int, Int>>()
+        var polished = 0
+        val grid = List(com.EGomez.idleecosystem.domain.logic.YuggothCrystals.CELLS) { 0 }.toMutableList().also { it[0] = 3; it[5] = 3; it[6] = 2 }
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.CrystalsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(grid = grid, lustreGain = 4),
+                    onMerge = { from, to -> merges += from to to },
+                    onMergeAll = {},
+                    onPolish = { polished++ }
+                )
+            }
+        }
+
+        // Distinto grado: cambia la selección, no fusiona
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 6).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 0).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 5).performClick()
+        assertEquals(listOf(0 to 5), merges)
+        compose.onNodeWithText("PULIR (+4 Lustre)").performScrollTo().performClick()
+        assertEquals(1, polished)
+    }
+
+    @Test
+    fun `refining asks for confirmation and the refining tree buys from the drills`() {
+        var refined = 0
+        val bought = mutableListOf<String>()
+        var ui by androidx.compose.runtime.mutableStateOf(
+            com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(lustre = 10, essence = 1)
+        )
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.CrystalsPanel(
+                    ui,
+                    onMerge = { _, _ -> },
+                    onMergeAll = {},
+                    onPolish = {},
+                    onRefine = { refined++ },
+                    onBuyNode = { bought += it }
+                )
+            }
+        }
+        compose.onNodeWithText("Refinar pide Lustre: 10/25").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.REFINE_BUY_TAG + "facets").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.REFINE_BUY_TAG + "drills").performScrollTo().performClick()
+        assertEquals(listOf("drills"), bought)
+
+        ui = ui.copy(lustre = 25, essenceGain = 2)
+        compose.onNodeWithText("REFINAR (+2 Esencia)").performScrollTo().performClick()
+        assertEquals(0, refined)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.REFINE_CONFIRM_TAG).performClick()
+        assertEquals(1, refined)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

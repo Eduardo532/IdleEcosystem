@@ -56,6 +56,8 @@ import com.EGomez.idleecosystem.domain.logic.Awakening
 import com.EGomez.idleecosystem.domain.logic.AwakeningMilestone
 import com.EGomez.idleecosystem.domain.logic.BuildingMilestones
 import com.EGomez.idleecosystem.domain.logic.VisionNode
+import com.EGomez.idleecosystem.domain.logic.RefineNode
+import com.EGomez.idleecosystem.domain.logic.YuggothCrystals
 import com.EGomez.idleecosystem.domain.logic.BulkBuy
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.GrimoireShopping
@@ -216,6 +218,17 @@ data class EconomyState(
     val expeditionGold: Int = 0,
     val expeditionGoldOnAwaken: Int = 0,
     val relicLevels: Map<String, Int> = emptyMap(),
+    /** Los Cristales de Yuggoth (v0.22.0). */
+    val crystalsRevealed: Boolean = false,
+    val crystalGrid: List<Int> = emptyList(),
+    val crystalPower: Double = 0.0,
+    val crystalLustre: Int = 0,
+    val crystalLustreGain: Int = 0,
+    val crystalNextSpawn: Double = 0.0,
+    val crystalMultiplier: Double = 1.0,
+    val crystalEssence: Int = 0,
+    val crystalEssenceGain: Int = 0,
+    val refineLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -856,6 +869,8 @@ class GameEngine @Inject constructor(
         put(AchievementStat.SIGN_PLANETS, equippedSigns().size)
         put(AchievementStat.RELIC_LEVELS, Relic.entries.sumOf { relicLevel(it) })
         put(AchievementStat.RELICS_OWNED, Relic.entries.count { relicLevel(it) > 0 })
+        put(AchievementStat.REFINE_LEVELS, RefineNode.entries.sumOf { refineLevel(it) })
+        put(AchievementStat.REFINE_NODES, RefineNode.entries.count { refineLevel(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1081,7 +1096,8 @@ class GameEngine @Inject constructor(
         ttrialRevealed = ttrialRevealed(),
         awakeningRevealed = awakeningRevealed(),
         signsRevealed = signsRevealed(),
-        expeditionRevealed = expeditionRevealed()
+        expeditionRevealed = expeditionRevealed(),
+        crystalsRevealed = crystalsRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1236,6 +1252,8 @@ class GameEngine @Inject constructor(
         }
         // La Expedición sigue golpeando mientras no juegas
         if (diffSeconds > 0) expeditionTick(diffSeconds)
+        // La Mina de Yuggoth sigue dejando cristales (las fusiones esperan al jugador)
+        if (diffSeconds > 0) crystalTick(diffSeconds.toDouble())
         // El Letargo sigue sumando Sopor mientras no juegas
         if (diffSeconds > 0 && lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS, BigDecimal(diffSeconds))
         // La Cadena de Invocación sigue produciendo
@@ -1308,6 +1326,7 @@ class GameEngine @Inject constructor(
         encounterTick()
         chainTick()
         expeditionTick(1L)
+        crystalTick(1.0)
         if (lethargyActive()) statsManager.count(AchievementStat.LETHARGY_SECONDS)
 
         // Tutoriales basados en recursos
@@ -1453,6 +1472,7 @@ class GameEngine @Inject constructor(
         if (awakeningRevealed()) tutorialManager.triggerStep(TutorialStep.AWAKENING)
         if (signsRevealed()) tutorialManager.triggerStep(TutorialStep.ELDER_SIGNS)
         if (expeditionRevealed()) tutorialManager.triggerStep(TutorialStep.EXPEDITIONS)
+        if (crystalsRevealed()) tutorialManager.triggerStep(TutorialStep.YUGGOTH_CRYSTALS)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -2431,6 +2451,152 @@ class GameEngine @Inject constructor(
         requestSave()
     }
 
+    // =====================================================================
+    // LOS CRISTALES DE YUGGOTH (v0.22.0)
+    // =====================================================================
+
+    private fun crystalsRevealed(): Boolean = YuggothCrystals.isUnlocked(awakenings())
+
+    private fun crystalGrid(): List<Int> = (0 until YuggothCrystals.CELLS).map { statsManager.counter(AchievementStat.crystal(it)).toInt() }
+
+    private fun lustre(): Int = statsManager.counter(AchievementStat.CRYSTAL_LUSTRE).toInt()
+
+    private fun crystalPower(): Double =
+        if (!crystalsRevealed()) 0.0 else YuggothCrystals.gridPower(crystalGrid(), lustre(), refineLevel(RefineNode.FACETS))
+
+    private fun crystalMultiplier(): Double = YuggothCrystals.productionMultiplier(crystalPower(), refineLevel(RefineNode.CORE))
+
+    private fun crystalSpawnSeconds(): Double = YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS))
+
+    private fun crystalLustreGain(): Int = YuggothCrystals.lustreGain(crystalGrid(), refineLevel(RefineNode.FUNGAL))
+
+    private fun essence(): Int = statsManager.counter(AchievementStat.CRYSTAL_ESSENCE).toInt()
+
+    private fun refineLevel(node: RefineNode): Int = statsManager.counter(AchievementStat.refineNode(node.id)).toInt()
+
+    private fun refineLevels(): Map<String, Int> = RefineNode.entries.associate { it.id to refineLevel(it) }
+
+    private fun storeGrid(grid: List<Int>) {
+        grid.forEachIndexed { cell, tier ->
+            val key = AchievementStat.crystal(cell)
+            if (tier > 0) statsManager.counters[key] = BigDecimal(tier) else statsManager.counters.remove(key)
+        }
+        val best = grid.maxOrNull() ?: 0
+        if (best > 0) statsManager.record(AchievementStat.CRYSTAL_BEST_TIER, BigDecimal(best))
+        if (grid.all { it > 0 } && grid.distinct().size == 1) statsManager.flag(AchievementStat.FEAT_CRYSTAL_UNIFORM)
+    }
+
+    /** [seconds] de Mina: deja un cristal cada tanto mientras haya casillas vacías. */
+    private fun crystalTick(seconds: Double) {
+        if (!crystalsRevealed()) return
+        val every = crystalSpawnSeconds()
+        val tier = 1 + refineLevel(RefineNode.SEED)
+        val count = 1 + refineLevel(RefineNode.VEIN)
+        var timer = statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble() + seconds
+        var grid = crystalGrid()
+        var spawned = false
+        while (timer >= every && grid.any { it == 0 }) {
+            grid = YuggothCrystals.spawn(grid, Random, tier, count)
+            timer -= every
+            spawned = true
+        }
+        // Con la cuadrícula llena, la Mina espera con el próximo cristal listo
+        timer = timer.coerceAtMost(every)
+        statsManager.counters[AchievementStat.CRYSTAL_TIMER] = BigDecimal.valueOf(timer)
+        if (spawned) storeGrid(grid)
+    }
+
+    private fun noteMerges(count: Int) {
+        if (count <= 0) return
+        statsManager.count(AchievementStat.CRYSTAL_MERGES, BigDecimal(count))
+        statsManager.flag(AchievementStat.crystalWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.crystalPath(it.id)) }
+    }
+
+    /** Fusiona el cristal de [from] en el de [to] (mismo grado). */
+    fun mergeCrystals(from: Int, to: Int) = post {
+        val grid = crystalGrid()
+        if (!crystalsRevealed() || !YuggothCrystals.canMerge(grid, from, to)) return@post
+        storeGrid(YuggothCrystals.merge(grid, from, to))
+        noteMerges(1)
+        recalculate()
+        requestSave()
+    }
+
+    /** Fusiona todas las parejas posibles. */
+    fun mergeAllCrystals() = post {
+        if (!crystalsRevealed()) return@post
+        val (grid, merges) = YuggothCrystals.mergeAll(crystalGrid())
+        if (merges == 0) return@post
+        storeGrid(grid)
+        noteMerges(merges)
+        recalculate()
+        requestSave()
+    }
+
+    /** Pule la cuadrícula: la vacía a cambio de Lustre. */
+    fun polishCrystals() = post {
+        val grid = crystalGrid()
+        val gain = crystalLustreGain()
+        if (!crystalsRevealed() || gain <= 0) return@post
+        statsManager.count(AchievementStat.CRYSTAL_LUSTRE, BigDecimal(gain))
+        statsManager.count(AchievementStat.CRYSTAL_LUSTRE_EARNED, BigDecimal(gain))
+        statsManager.count(AchievementStat.CRYSTAL_POLISHES)
+        storeGrid(YuggothCrystals.afterPolish(grid, refineLevel(RefineNode.ECHO) > 0))
+        statsManager.counters.remove(AchievementStat.CRYSTAL_TIMER)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        recalculate()
+        requestSave()
+    }
+
+    // ---------------------------------------------------------------- Refinar (v0.22.1)
+
+    /** Refina: el Lustre y la cuadrícula vuelven a cero a cambio de Esencia de los Mi-Go. */
+    fun refineCrystals() = post {
+        val lustre = lustre()
+        val gain = YuggothCrystals.essenceGain(lustre)
+        if (!crystalsRevealed() || gain <= 0) return@post
+        statsManager.count(AchievementStat.CRYSTAL_ESSENCE, BigDecimal(gain))
+        statsManager.count(AchievementStat.CRYSTAL_ESSENCE_EARNED, BigDecimal(gain))
+        statsManager.count(AchievementStat.CRYSTAL_REFINES)
+        statsManager.flag(AchievementStat.refineWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.refinePath(it.id)) }
+        if (lustre == YuggothCrystals.REFINE_LUSTRE) statsManager.flag(AchievementStat.FEAT_REFINE_EXACT)
+        statsManager.counters.remove(AchievementStat.CRYSTAL_LUSTRE)
+        storeGrid(List(YuggothCrystals.CELLS) { 0 })
+        statsManager.counters.remove(AchievementStat.CRYSTAL_TIMER)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        recalculate()
+        requestSave(replace = true)
+    }
+
+    /** Sube un nodo del árbol de refinado. */
+    fun buyRefineNode(id: String) = post {
+        val node = RefineNode.fromId(id) ?: return@post
+        if (!crystalsRevealed()) return@post
+        val points = essence()
+        if (!YuggothCrystals.canBuy(node, refineLevels(), points)) return@post
+        val level = refineLevel(node)
+        val left = points - node.cost(level)
+        statsManager.counters.remove(AchievementStat.CRYSTAL_ESSENCE)
+        if (left > 0) statsManager.counters[AchievementStat.CRYSTAL_ESSENCE] = BigDecimal(left)
+        statsManager.counters[AchievementStat.refineNode(node.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
+
+    /** Reinicia el árbol de refinado: devuelve toda la Esencia gastada. */
+    fun respecRefine() = post {
+        val refund = YuggothCrystals.refund(refineLevels())
+        if (refund <= 0) return@post
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.REFINE_NODE_PREFIX) }
+        statsManager.counters[AchievementStat.CRYSTAL_ESSENCE] = BigDecimal(essence() + refund)
+        statsManager.count(AchievementStat.REFINE_RESPECS)
+        recalculate()
+        requestSave()
+    }
+
     private fun veilBroken(): Boolean = statsManager.counter(AchievementStat.VEIL_BROKEN).signum() > 0
 
     /** El Velo frena esta vida: se anota para el logro y se explica una vez. */
@@ -2651,7 +2817,8 @@ class GameEngine @Inject constructor(
                 beastBonus(BeastKind.ETHER) * DeepSleep.etherMultiplier(dreamLevel(DreamNode.INQUANOK)) *
                     TranscendenceTrials.etherReward(ttrialLevel(TranscendenceTrial.SOLITUDE)) *
                     Awakening.etherMultiplier(visionLevel(VisionNode.ETHER)) * signMultiplier(SignKind.ETHER) *
-                    Expeditions.etherMultiplier(relicLevel(Relic.CROWN)),
+                    Expeditions.etherMultiplier(relicLevel(Relic.CROWN)) *
+                    YuggothCrystals.etherMultiplier(crystalPower(), refineLevel(RefineNode.LENS)),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -3023,6 +3190,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(Awakening.productionMultiplier(visionLevel(VisionNode.FIRST))))
             .multiply(BigDecimal.valueOf(signMultiplier(SignKind.FLAME)))
             .multiply(BigDecimal.valueOf(Expeditions.productionMultiplier(relicLevel(Relic.TRAPEZOHEDRON))))
+            .multiply(BigDecimal.valueOf(crystalMultiplier()))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -3214,6 +3382,16 @@ class GameEngine @Inject constructor(
             expeditionGold = statsManager.counter(AchievementStat.EXPEDITION_GOLD).toInt(),
             expeditionGoldOnAwaken = Expeditions.goldFor(expeditionLevel()),
             relicLevels = Relic.entries.associate { it.id to relicLevel(it) },
+            crystalsRevealed = crystalsRevealed(),
+            crystalGrid = crystalGrid(),
+            crystalPower = crystalPower(),
+            crystalLustre = lustre(),
+            crystalLustreGain = crystalLustreGain(),
+            crystalMultiplier = crystalMultiplier(),
+            crystalEssence = essence(),
+            crystalEssenceGain = YuggothCrystals.essenceGain(lustre()),
+            refineLevels = refineLevels(),
+            crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),
             starsPerHour = if (starsRevealed()) starRate() * 3600.0 else 0.0,

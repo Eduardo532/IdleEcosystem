@@ -52,6 +52,13 @@ class MechanicAchievementsTest {
         "Despertar" to { s -> s.stat?.let { it.startsWith("awaken") || it.startsWith("vision") || it == AchievementStat.FEAT_AWAKEN_DREAMING } == true },
         "Signos Antiguos" to { s -> s.stat?.let { it.startsWith("sign") || it == AchievementStat.FEAT_SIGN_PERFECT } == true },
         "Expediciones y Reliquias" to { s -> s.stat?.let { it.startsWith("expedition") || it.startsWith("relic") || it == AchievementStat.FEAT_EXPEDITION_TAP } == true },
+        "Cristales de Yuggoth" to { s -> s.stat?.let { it.startsWith("crystal") || it == AchievementStat.FEAT_CRYSTAL_UNIFORM } == true },
+        "Refinar" to { s ->
+            s.stat?.let {
+                it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||
+                    it == AchievementStat.CRYSTAL_REFINES || it == AchievementStat.CRYSTAL_ESSENCE_EARNED
+            } == true
+        },
         "Bestiario" to {
             it.stat?.startsWith("beast") == true || it.stat in setOf(
                 AchievementStat.SEALS_EARNED, AchievementStat.ENCOUNTERS, AchievementStat.FEAT_PRIMORDIAL_ALIGNED, AchievementStat.SUMMONS,

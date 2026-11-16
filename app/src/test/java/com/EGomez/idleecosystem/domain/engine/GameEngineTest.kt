@@ -939,6 +939,78 @@ class GameEngineTest {
     }
 
     @Test
+    fun `yuggoth crystals fuse, multiply production and polish into lustre`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(2))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(20))
+            counters[AchievementStat.crystal(0)] = BigDecimal(4)
+            counters[AchievementStat.crystal(1)] = BigDecimal(4)
+            counters[AchievementStat.crystal(2)] = BigDecimal(1)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.crystalsRevealed && it.crystalGrid.isNotEmpty() }
+        assertTrue(MenuTab.CRYSTALS in before.menuUnlocks.tabs)
+        assertEquals(0, before.crystalLustreGain)
+
+        // Dos de grado 4 → uno de grado 5: ya se puede Pulir
+        engine.mergeCrystals(0, 1)
+        val merged = await(engine.economy) { it.crystalGrid[1] == 5 }
+        assertEquals(0, merged.crystalGrid[0])
+        assertTrue(merged.crystalPower >= 81.0)
+        assertTrue(merged.crystalLustreGain > 0)
+
+        engine.polishCrystals()
+        val polished = await(engine.economy) { it.crystalLustre > 0 }
+        assertEquals(merged.crystalLustreGain, polished.crystalLustre)
+        assertTrue(polished.crystalGrid.count { it > 1 } == 0)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.CRYSTAL_POLISHES)))
+        assertEquals(0, BigDecimal(5).compareTo(stats.counter(AchievementStat.CRYSTAL_BEST_TIER)))
+    }
+
+    @Test
+    fun `refining trades lustre for essence that buys the refining tree`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(2))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(20))
+            counters[AchievementStat.CRYSTAL_LUSTRE] = BigDecimal(25)
+            counters[AchievementStat.crystal(0)] = BigDecimal(3)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.crystalsRevealed && it.crystalLustre == 25 }
+        assertEquals(2, before.crystalEssenceGain)
+
+        engine.refineCrystals()
+        val refined = await(engine.economy) { it.crystalEssence == 2 }
+        assertEquals(0, refined.crystalLustre)
+        assertEquals(0, refined.crystalEssenceGain)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.CRYSTAL_REFINES)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.FEAT_REFINE_EXACT)))
+
+        // Taladros (1) y después Facetas (1)
+        engine.buyRefineNode("drills")
+        engine.buyRefineNode("facets")
+        val bought = await(engine.economy) { it.refineLevels["facets"] == 1 }
+        assertEquals(1, bought.refineLevels["drills"])
+        assertEquals(0, bought.crystalEssence)
+
+        engine.respecRefine()
+        val respec = await(engine.economy) { it.crystalEssence == 2 }
+        assertTrue(respec.refineLevels.values.all { it == 0 })
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

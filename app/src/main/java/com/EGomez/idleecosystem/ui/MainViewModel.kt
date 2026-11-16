@@ -256,7 +256,11 @@ class MainViewModel @Inject constructor(
             power = economy.crystalPower,
             lustre = economy.crystalLustre,
             lustreGain = economy.crystalLustreGain,
-            nextSpawn = economy.crystalNextSpawn
+            nextSpawn = economy.crystalNextSpawn,
+            multiplier = economy.crystalMultiplier,
+            essence = economy.crystalEssence,
+            essenceGain = economy.crystalEssenceGain,
+            refineLevels = economy.refineLevels
         ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
@@ -596,6 +600,12 @@ class MainViewModel @Inject constructor(
     fun mergeAllCrystals() = engine.mergeAllCrystals()
 
     fun polishCrystals() = engine.polishCrystals()
+
+    fun refineCrystals() = engine.refineCrystals()
+
+    fun buyRefineNode(id: String) = engine.buyRefineNode(id)
+
+    fun respecRefine() = engine.respecRefine()
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

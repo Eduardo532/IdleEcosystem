@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.22.x *(en pruebas)*
 
 - **v0.22.0:** Cristales de Yuggoth. Desde el segundo Despertar, la Mina deja cristales en una cuadrícula de 4 × 4; dos del mismo grado se fusionan en uno del grado siguiente (a mano o con Fusionar todo). El Poder de los cristales multiplica la producción. Pulir vacía la cuadrícula a cambio de Lustre, que hace los cristales más fuertes y la Mina más rápida. 13 logros nuevos.
+- **v0.22.1:** Refinar, el segundo prestigio de los Cristales. Con 25 de Lustre vuelve el Lustre y la cuadrícula a cero a cambio de Esencia de los Mi-Go. La Esencia compra el árbol de refinado, de ocho nodos, que vale para siempre: una Mina más rápida, más Poder, cristales que nacen más grandes o de a dos, más Lustre, Éter según el Poder, un Eco que guarda el mejor cristal y un multiplicador más fuerte. 12 logros nuevos.
 
 ## v0.21.3 · "El Despertar" *(oficial, 15 nov 2026)*
 

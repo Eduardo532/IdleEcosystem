@@ -1,6 +1,6 @@
 # Logros
 
-Hay **604 logros**: 113 originales y **491 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **616 logros**: 113 originales y **503 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -337,6 +337,17 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Facetas de Daoloth | Fusiona cristales con el pacto de Daoloth | +1 % |
 | Geometría Cristalina | Fusiona cristales recorriendo la Senda Arcana | +1 % |
 | Mente Facetada | Fusiona cristales recorriendo la Senda de la Mente | +1 % |
+| Primera Refinación | Refina los cristales | +1 % |
+| Refinador de Yuggoth | Refina los cristales 5 veces | +1 % |
+| Alquimia de los Mi-Go | Refina los cristales 25 veces | +2 % |
+| Esencia Destilada | Gana 10 de Esencia de los Mi-Go en total | +1 % |
+| Mar de Esencia | Gana 100 de Esencia de los Mi-Go en total | +2 % |
+| Ramas de Cuarzo | Ten 4 nodos del árbol de refinado | +1 % |
+| Árbol de Cristal | Ten los 8 nodos del árbol de refinado | +2 % |
+| Lo que Yeb Talla | Refina los cristales con el pacto de Yeb | +1 % |
+| El Horno de Nug | Refina los cristales con el pacto de Nug | +1 % |
+| Engranajes de Cuarzo | Refina los cristales recorriendo la Senda del Engranaje | +1 % |
+| Manos de Joyero | Refina los cristales recorriendo la Senda de la Mano | +1 % |
 
 ### Panteón
 
@@ -510,7 +521,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **39 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **40 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

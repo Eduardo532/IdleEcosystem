@@ -974,6 +974,43 @@ class GameEngineTest {
     }
 
     @Test
+    fun `refining trades lustre for essence that buys the refining tree`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(2))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(20))
+            counters[AchievementStat.CRYSTAL_LUSTRE] = BigDecimal(25)
+            counters[AchievementStat.crystal(0)] = BigDecimal(3)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.crystalsRevealed && it.crystalLustre == 25 }
+        assertEquals(2, before.crystalEssenceGain)
+
+        engine.refineCrystals()
+        val refined = await(engine.economy) { it.crystalEssence == 2 }
+        assertEquals(0, refined.crystalLustre)
+        assertEquals(0, refined.crystalEssenceGain)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.CRYSTAL_REFINES)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.FEAT_REFINE_EXACT)))
+
+        // Taladros (1) y después Facetas (1)
+        engine.buyRefineNode("drills")
+        engine.buyRefineNode("facets")
+        val bought = await(engine.economy) { it.refineLevels["facets"] == 1 }
+        assertEquals(1, bought.refineLevels["drills"])
+        assertEquals(0, bought.crystalEssence)
+
+        engine.respecRefine()
+        val respec = await(engine.economy) { it.crystalEssence == 2 }
+        assertTrue(respec.refineLevels.values.all { it == 0 })
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

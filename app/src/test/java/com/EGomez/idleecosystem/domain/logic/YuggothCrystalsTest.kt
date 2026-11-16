@@ -66,6 +66,6 @@ class YuggothCrystalsTest {
         assertEquals(0, YuggothCrystals.lustreGain(grid(4, 4)))
         // √(84 / 10) ≈ 2,9
         assertEquals(2, YuggothCrystals.lustreGain(grid(5, 2)))
-        assertEquals(15, YuggothCrystals.lustreGain(grid(8)))
+        assertEquals(14, YuggothCrystals.lustreGain(grid(8))) // √218,7 ≈ 14,8
     }
 }

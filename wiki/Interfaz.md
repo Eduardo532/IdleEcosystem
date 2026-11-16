@@ -29,6 +29,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Visiones | ídem |
 | | | Signos | el primer Despertar *(v0.21.2)* |
 | | | Expedición | el primer Despertar *(v0.21.3)* |
+| | | Cristales | el segundo Despertar *(v0.22.0)* |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 
@@ -61,6 +62,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Visiones:** el Árbol de Visiones, de nueve nodos, con su reinicio gratis.
 - **Signos *(v0.21.2)*:** el Polvo Astral, los cuatro planetas (bloqueados, vacíos o con su Signo y su efecto, con botón para quitarlo) y el inventario ordenado por rareza. Cada Signo tiene botones para equiparlo en cada planeta abierto (la afinidad se marca en amarillo), mejorarlo y venderlo. Hay un botón para vender todos los comunes. Ver [Signos Antiguos](Signos-Antiguos).
 - **Expedición *(v0.21.3)*:** el Oro, el nivel y el mejor nivel, el círculo con el horror en curso (retrato del Bestiario), su barra de vida, el daño por segundo, el botón GOLPEAR, el Oro que daría Despertar y las tres Reliquias con su nivel para abrirse. Ver [Expediciones y Reliquias](Expediciones).
+- **Cristales *(v0.22.0)*:** el Lustre, el Poder y el multiplicador de producción, cuánto falta para el próximo cristal, la cuadrícula de 4 × 4 (cada cristal con su grado y su color; el elegido en blanco y sus parejas en violeta), los botones Fusionar todo y PULIR. Ver [Cristales de Yuggoth](Cristales-de-Yuggoth).
 - **Juramentos *(v0.21.1)*:** en la pestaña Despertar, debajo del botón, una lista de las 14 Pruebas para jurar (con casilla y peso de Visiones). Arriba se ven los Juramentos vigentes y los jurados para el próximo Despertar, cada grupo con su multiplicador.
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.

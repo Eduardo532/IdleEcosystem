@@ -926,6 +926,33 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `tapping two crystals of the same tier fuses them`() {
+        val merges = mutableListOf<Pair<Int, Int>>()
+        var polished = 0
+        val grid = List(com.EGomez.idleecosystem.domain.logic.YuggothCrystals.CELLS) { 0 }.toMutableList().also { it[0] = 3; it[5] = 3; it[6] = 2 }
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.CrystalsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(grid = grid, lustreGain = 4),
+                    onMerge = { from, to -> merges += from to to },
+                    onMergeAll = {},
+                    onPolish = { polished++ }
+                )
+            }
+        }
+
+        // Distinto grado: cambia la selección, no fusiona
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 6).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 0).performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CRYSTAL_CELL_TAG + 5).performClick()
+        assertEquals(listOf(0 to 5), merges)
+        compose.onNodeWithText("PULIR (+4 Lustre)").performScrollTo().performClick()
+        assertEquals(1, polished)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

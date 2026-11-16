@@ -324,6 +324,13 @@ enum class TutorialStep(
         "Tras el primer Despertar"
     ),
 
+    YUGGOTH_CRYSTALS(
+        "yuggoth_crystals",
+        "Los Cristales de Yuggoth",
+        "En tu segundo Despertar trajiste piedras de Yuggoth que crecen solas. En la pestaña Cristales, la Mina deja un cristal en una casilla vacía cada pocos segundos. Toca un cristal y después otro del mismo grado para fusionarlos en uno mayor. El Poder de los cristales multiplica tu producción. Con un cristal de grado 5 puedes Pulir: la cuadrícula se vacía a cambio de Lustre, que hace los cristales más fuertes y la Mina más rápida.",
+        "Tras el segundo Despertar"
+    ),
+
     EXPEDITIONS(
         "expeditions",
         "La Expedición",

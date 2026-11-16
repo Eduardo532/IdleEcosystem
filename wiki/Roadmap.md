@@ -56,7 +56,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **Signos Antiguos y planetas** ✅ *v0.21.2* | Astrología | Desde el primer Despertar, Signos con rareza y calidad (1 por Trascendencia y 3 por Despertar) equipados en Yuggoth, Saturno, Xoth y Kythanil, cada planeta con su afinidad; suben de nivel con Polvo Astral y al venderlos lo dan. Ver [Signos Antiguos](Signos-Antiguos). |
 | **Expediciones** ✅ *v0.21.3* | Ataque | Desde el primer Despertar, un círculo golpea horrores del Bestiario con daño basado en la producción; el nivel no tiene tope y da Oro al Despertar. Ver [Expediciones y Reliquias](Expediciones). |
 | **Reliquias** ✅ *v0.21.3* | Reliquias | Compradas con Oro y desbloqueadas por nivel de Expedición: Trapezoedro Resplandeciente (producción), Corona de Yig (Éter), Espejo de Nitocris (daño y Visiones). |
-| **Cristales de Yuggoth** | Minerales | Una cuadrícula donde dos cristales iguales se fusionan en uno mayor; prestigios propios Pulir y Refinar con un árbol de refinado. |
+| **Cristales de Yuggoth** 🔶 *v0.22.0* | Minerales | Desde el segundo Despertar, una cuadrícula de 4 × 4 donde dos cristales iguales se fusionan en uno mayor y su Poder multiplica la producción. ✅ Pulir (Lustre). Pendiente: Refinar con un árbol de refinado (v0.22.1). Ver [Cristales de Yuggoth](Cristales-de-Yuggoth). |
 | **Los Cuatro Elementales** | Elementos | Cthugha (fuego), Ithaqua (viento), Cthulhu (agua) y Nyarlathotep (tierra), cada uno con su árbol; solo uno activo a la vez. |
 
 ### Etapa 9: el arco final

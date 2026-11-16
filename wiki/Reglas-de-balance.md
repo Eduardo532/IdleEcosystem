@@ -180,6 +180,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Daño por segundo `(1 + log10(1 + producción))² × 2^Espejo`; golpe a mano 10 % de eso. Vida `100 × 1,25^nivel`; el daño sobrante pasa al siguiente (hasta 10.000 horrores de una vez). Sigue sin conexión.
 - Al Despertar: Oro `⌊nivel^1,3⌋` y el nivel vuelve a 0. Reliquias: producción `5^n`, Éter `1 + 0,5n`, Visiones `1 + 0,1n`. *(Código: `Expeditions`, `Relic`; test: `ExpeditionsTest`.)*
 
+## Cristales de Yuggoth *(v0.22.0)*
+
+- Desde el segundo Despertar. Cuadrícula de 4 × 4; un cristal de grado 1 cada `10 / (1 + 0,05·Lustre)` s en una casilla vacía (sigue sin conexión). Dos del mismo grado → uno del siguiente.
+- Poder `Σ 3^(grado − 1) × (1 + 0,1·Lustre)`; producción `x(1 + Poder)`. Pulir (con grado 5 o más) vacía la cuadrícula y da `⌊√(Poder sin Lustre / 10)⌋` de Lustre. *(Código: `YuggothCrystals`; test: `YuggothCrystalsTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

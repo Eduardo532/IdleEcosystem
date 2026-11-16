@@ -585,4 +585,15 @@
     <string name="relics_title">RELICS</string>
     <string name="relic_locked">Opens at Expedition level %1$d</string>
     <string name="relic_cost">%1$d Gold</string>
+    <string name="tab_crystals">Crystals</string>
+    <string name="crystals_title">CRYSTALS OF YUGGOTH</string>
+    <string name="crystals_hint">Tap a crystal and then another of the same tier to fuse them. Their Power multiplies your production.</string>
+    <string name="crystals_lustre">LUSTRE</string>
+    <string name="crystals_power">Power %1$s · production x%2$s</string>
+    <string name="crystals_next">Next crystal in %1$s s</string>
+    <string name="crystals_full">The grid is full: fuse to make room.</string>
+    <string name="crystals_merge_all">Fuse all</string>
+    <string name="crystals_polish">POLISH (+%1$d Lustre)</string>
+    <string name="crystals_polish_locked">Polishing needs tier %1$d</string>
+    <string name="crystals_rules">A crystal\'s Power: 3^(tier − 1), +10% per Lustre. Each Lustre speeds up the Mine by 5%. Polishing empties the grid.</string>
 </resources>

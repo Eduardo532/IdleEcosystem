@@ -120,6 +120,8 @@ data class GameUiState(
     val signsUi: com.EGomez.idleecosystem.ui.screens.main.components.SignsUi = com.EGomez.idleecosystem.ui.screens.main.components.SignsUi(),
     /** Expediciones y Reliquias (v0.21.3). */
     val expeditionUi: com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(),
+    /** Los Cristales de Yuggoth (v0.22.0). */
+    val crystalsUi: com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi = com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(),
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

@@ -1,6 +1,6 @@
 # Logros
 
-Hay **591 logros**: 113 originales y **478 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **604 logros**: 113 originales y **491 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -325,6 +325,18 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Desde R'lyeh, con Garras | Vence un horror con el pacto de Cthulhu | +1 % |
 | El Puño de la Senda | Vence un horror recorriendo la Senda de la Mano | +1 % |
 | Golpes en el Vacío | Vence un horror recorriendo la Senda del Vacío | +1 % |
+| Geoda Abierta | Consigue un cristal de grado 5 | +1 % |
+| Corazón de Yuggoth | Consigue un cristal de grado 10 | +1 % |
+| Cristal Imposible | Consigue un cristal de grado 15 | +2 % |
+| Joyero de Yuggoth | Fusiona cristales 100 veces | +1 % |
+| Mil Fusiones | Fusiona cristales 1.000 veces | +2 % |
+| Primer Pulido | Pule la cuadrícula | +1 % |
+| Brillo Eterno | Pule la cuadrícula 10 veces | +1 % |
+| Lustre de Yuggoth | Gana 100 de Lustre en total | +2 % |
+| Lo que Abhoth Engendra | Fusiona cristales con el pacto de Abhoth | +1 % |
+| Facetas de Daoloth | Fusiona cristales con el pacto de Daoloth | +1 % |
+| Geometría Cristalina | Fusiona cristales recorriendo la Senda Arcana | +1 % |
+| Mente Facetada | Fusiona cristales recorriendo la Senda de la Mente | +1 % |
 
 ### Panteón
 
@@ -498,7 +510,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **38 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **39 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

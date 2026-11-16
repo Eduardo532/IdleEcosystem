@@ -251,6 +251,13 @@ class MainViewModel @Inject constructor(
             oathsActive = economy.oathsActive,
             oathsNext = economy.oathsNext
         ),
+        crystalsUi = com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(
+            grid = economy.crystalGrid.ifEmpty { List(com.EGomez.idleecosystem.domain.logic.YuggothCrystals.CELLS) { 0 } },
+            power = economy.crystalPower,
+            lustre = economy.crystalLustre,
+            lustreGain = economy.crystalLustreGain,
+            nextSpawn = economy.crystalNextSpawn
+        ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
             dealt = economy.expeditionDealt,
@@ -583,6 +590,12 @@ class MainViewModel @Inject constructor(
     fun strikeExpedition() = engine.strikeExpedition()
 
     fun buyRelic(id: String) = engine.buyRelic(id)
+
+    fun mergeCrystals(from: Int, to: Int) = engine.mergeCrystals(from, to)
+
+    fun mergeAllCrystals() = engine.mergeAllCrystals()
+
+    fun polishCrystals() = engine.polishCrystals()
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

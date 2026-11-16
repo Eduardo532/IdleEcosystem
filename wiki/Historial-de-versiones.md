@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.22.x *(en pruebas)*
+
+- **v0.22.0:** Cristales de Yuggoth. Desde el segundo Despertar, la Mina deja cristales en una cuadrícula de 4 × 4; dos del mismo grado se fusionan en uno del grado siguiente (a mano o con Fusionar todo). El Poder de los cristales multiplica la producción. Pulir vacía la cuadrícula a cambio de Lustre, que hace los cristales más fuertes y la Mina más rápida. 13 logros nuevos.
+
 ## v0.21.3 · "El Despertar" *(oficial, 15 nov 2026)*
 
 Octava etapa del Roadmap, primera parte: la tercera capa y sus dos primeros minijuegos.

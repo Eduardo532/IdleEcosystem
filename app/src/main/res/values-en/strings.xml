@@ -596,4 +596,16 @@
     <string name="crystals_polish">POLISH (+%1$d Lustre)</string>
     <string name="crystals_polish_locked">Polishing needs tier %1$d</string>
     <string name="crystals_rules">A crystal\'s Power: 3^(tier − 1), +10% per Lustre. Each Lustre speeds up the Mine by 5%. Polishing empties the grid.</string>
+    <string name="refine_title">REFINE</string>
+    <string name="refine_hint">With %1$d Lustre, Refining resets Lustre and the grid for Mi-Go Essence, which buys the refining tree.</string>
+    <string name="refine_essence">ESSENCE</string>
+    <string name="refine_button">REFINE (+%1$d Essence)</string>
+    <string name="refine_locked">Refining needs Lustre: %1$d/%2$d</string>
+    <string name="refine_tree_title">REFINING TREE</string>
+    <string name="refine_cost">%1$d E</string>
+    <string name="refine_respec">Reset the tree (refunds %1$d E)</string>
+    <string name="refine_confirm_title">Refine the crystals?</string>
+    <string name="refine_confirm_gain">You gain %1$d Mi-Go Essence.</string>
+    <string name="refine_confirm_loses">You lose %1$d Lustre and every crystal on the grid. The refining tree is kept.</string>
+    <string name="refine_confirm">REFINE</string>
 </resources>

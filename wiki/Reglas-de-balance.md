@@ -184,6 +184,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - Desde el segundo Despertar. Cuadrícula de 4 × 4; un cristal de grado 1 cada `10 / (1 + 0,05·Lustre)` s en una casilla vacía (sigue sin conexión). Dos del mismo grado → uno del siguiente.
 - Poder `Σ 3^(grado − 1) × (1 + 0,1·Lustre)`; producción `x(1 + Poder)`. Pulir (con grado 5 o más) vacía la cuadrícula y da `⌊√(Poder sin Lustre / 10)⌋` de Lustre. *(Código: `YuggothCrystals`; test: `YuggothCrystalsTest`.)*
+- *(v0.22.1)* Refinar (con 25 de Lustre) vuelve el Lustre a 0 y vacía la cuadrícula: Esencia `⌊√(Lustre / 5)⌋`. Árbol de refinado (`RefineNode`, 8 nodos, costo `⌈base × crecimiento^nivel⌉`, reinicio gratis): Mina `/1,5^Taladros`, Poder `x2^Facetas`, grado al nacer `1 + Semilla`, cristales por vez `1 + Veta`, Lustre `x(1 + 0,5·Pulidor)`, Éter `x(1 + 0,1·Lente·log10(1 + Poder))`, Eco (conserva el mayor, −2 grados), multiplicador `^(1 + 0,05·Núcleo)`.
 
 ## Consagrar edificios
 

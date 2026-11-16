@@ -150,6 +150,9 @@ fun MenuSection(
     onMergeCrystals: (Int, Int) -> Unit = { _, _ -> },
     onMergeAllCrystals: () -> Unit = {},
     onPolishCrystals: () -> Unit = {},
+    onRefineCrystals: () -> Unit = {},
+    onBuyRefineNode: (String) -> Unit = {},
+    onRespecRefine: () -> Unit = {},
     onBuyVisionNode: (String) -> Unit = {},
     onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
@@ -458,7 +461,7 @@ fun MenuSection(
                     MenuTab.VISIONS -> item { VisionsPanel(awakeningUi, onBuyVisionNode, onRespecVisions) }
                     MenuTab.SIGNS -> item { SignsPanel(signsUi, onEquipSign, onUnequipSign, onUpgradeSign, onSellSign, onSellCommonSigns) }
                     MenuTab.EXPEDITION -> item { ExpeditionPanel(expeditionUi, onStrikeExpedition, onBuyRelic) }
-                    MenuTab.CRYSTALS -> item { CrystalsPanel(crystalsUi, onMergeCrystals, onMergeAllCrystals, onPolishCrystals) }
+                    MenuTab.CRYSTALS -> item { CrystalsPanel(crystalsUi, onMergeCrystals, onMergeAllCrystals, onPolishCrystals, onRefineCrystals, onBuyRefineNode, onRespecRefine) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
                     MenuTab.CYCLES -> Unit
                 }

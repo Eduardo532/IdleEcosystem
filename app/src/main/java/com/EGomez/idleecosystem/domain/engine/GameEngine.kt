@@ -61,7 +61,9 @@ import com.EGomez.idleecosystem.domain.logic.ElementalNode
 import com.EGomez.idleecosystem.domain.logic.Elementals
 import com.EGomez.idleecosystem.domain.logic.Artifact
 import com.EGomez.idleecosystem.domain.logic.Artifacts
+import com.EGomez.idleecosystem.domain.logic.AzathothDream
 import com.EGomez.idleecosystem.domain.logic.CardBonus
+import com.EGomez.idleecosystem.domain.logic.ChaosNode
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.logic.YellowCards
@@ -252,6 +254,16 @@ data class EconomyState(
     val cardTranscendences: Int = 0,
     /** Los Artefactos (v0.24.1). */
     val artifactLevels: Map<String, Int> = emptyMap(),
+    /** El Sueño de Azathoth (v0.25.0). */
+    val descentRevealed: Boolean = false,
+    val canDescend: Boolean = false,
+    val chaos: Int = 0,
+    val chaosGain: Int = 0,
+    val descents: Int = 0,
+    val awakeningsSinceDescent: Int = 0,
+    val descentRequired: Int = AzathothDream.REQUIRED_AWAKENINGS,
+    val kingCompleted: Boolean = false,
+    val chaosLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -338,6 +350,8 @@ sealed interface EngineEffect {
     data class Awakened(val visions: Int) : EngineEffect
     /** Se completó una Carta del Rey de Amarillo (v0.24.0). */
     data class CardCompleted(val cardId: String, val firstTime: Boolean, val fragments: Int) : EngineEffect
+    /** Se Descendió al Sueño de Azathoth (v0.25.0). */
+    data class Descended(val chaos: Int) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -900,6 +914,8 @@ class GameEngine @Inject constructor(
         put(AchievementStat.CARDS_DONE, completedCards().size)
         put(AchievementStat.ARTIFACT_LEVELS, Artifact.entries.sumOf { artifactLevel(it) })
         put(AchievementStat.ARTIFACTS_OWNED, Artifact.entries.count { artifactLevel(it) > 0 })
+        put(AchievementStat.CHAOS_LEVELS, ChaosNode.entries.sumOf { chaosLevel(it) })
+        put(AchievementStat.CHAOS_NODES, ChaosNode.entries.count { chaosLevel(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1128,7 +1144,8 @@ class GameEngine @Inject constructor(
         expeditionRevealed = expeditionRevealed(),
         crystalsRevealed = crystalsRevealed(),
         elementalsRevealed = elementalsRevealed(),
-        cardsRevealed = cardsRevealed()
+        cardsRevealed = cardsRevealed(),
+        descentRevealed = descentRevealed()
     )
 
     /** Pestañas visibles que el jugador todavía no abrió: llevan la marca de "nuevo". */
@@ -1511,6 +1528,7 @@ class GameEngine @Inject constructor(
         if (crystalsRevealed()) tutorialManager.triggerStep(TutorialStep.YUGGOTH_CRYSTALS)
         if (elementalsRevealed()) tutorialManager.triggerStep(TutorialStep.ELEMENTALS)
         if (cardsRevealed()) tutorialManager.triggerStep(TutorialStep.YELLOW_CARDS)
+        if (descentRevealed()) tutorialManager.triggerStep(TutorialStep.AZATHOTH_DREAM)
         // Los pactos se eligen al Ascender: se presentan cuando la Ascensión está a mano
         if (potentialPrestige.signum() > 0) tutorialManager.triggerStep(TutorialStep.PACTS)
         if (Attention.available(ascensions) > 0) tutorialManager.triggerStep(TutorialStep.ATTENTION)
@@ -1900,7 +1918,8 @@ class GameEngine @Inject constructor(
             (if (ttrialRestricts(TranscendenceTrial.HUNGER)) TranscendenceTrials.HUNGER_EXPONENT else 1.0)
         // La Visión del Abismo vale siempre
         val abyss = Awakening.productionExponent(visionLevel(VisionNode.ABYSS)) *
-            Elementals.productionExponent(el(ElementalNode.STARFIRE)) * cardFactor(CardBonus.EXPONENT)
+            Elementals.productionExponent(el(ElementalNode.STARFIRE)) * cardFactor(CardBonus.EXPONENT) *
+            AzathothDream.productionExponent(chaosLevel(ChaosNode.THRONE))
         return if (dreamActive()) armitage * dreamExponent() * abyss
         else armitage * DeepSleep.kadathExponent(dreamLevel(DreamNode.KADATH)) * abyss
     }
@@ -2196,7 +2215,7 @@ class GameEngine @Inject constructor(
         Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
             signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR)) *
             Elementals.visionMultiplier(el(ElementalNode.RISING)) * cardFactor(CardBonus.VISIONS) *
-            Artifacts.visionMultiplier(artifactLevel(Artifact.VEIL))
+            Artifacts.visionMultiplier(artifactLevel(Artifact.VEIL)) * AzathothDream.visionMultiplier(chaosLevel(ChaosNode.DAEMON))
     )
 
     // ---- Juramentos (v0.21.1) ----
@@ -2270,6 +2289,21 @@ class GameEngine @Inject constructor(
         statsManager.counters.remove(AchievementStat.EXPEDITION_LEVEL)
         statsManager.counters.remove(AchievementStat.EXPEDITION_DEALT)
 
+        resetAwakeningCycle()
+        // Cada Despertar trae tres Signos Antiguos
+        grantSigns(ElderSigns.SIGNS_PER_AWAKEN)
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Awakened(gain))
+        recalculate()
+        requestSave(replace = true)
+    }
+
+    /**
+     * Reinicia la capa Trascendencia y el ciclo, como al Despertar (extraído en la v0.25.0
+     * para que Descender al Sueño de Azathoth haga lo mismo).
+     */
+    private fun resetAwakeningCycle() {
         // Desde aquí se cuentan de nuevo las Trascendencias y el Éter
         statsManager.counters[AchievementStat.AWAKEN_TRANSC_BASE] = statsManager.counter(AchievementStat.TRANSCENDENCES)
         statsManager.counters[AchievementStat.AWAKEN_ETHER_BASE] = statsManager.counter(AchievementStat.ETHER_EARNED)
@@ -2303,13 +2337,6 @@ class GameEngine @Inject constructor(
 
         // Sin Pruebas Recordadas ni Runas Eternas, resetCycle borra también Pruebas y runas
         resetCycle()
-        // Cada Despertar trae tres Signos Antiguos
-        grantSigns(ElderSigns.SIGNS_PER_AWAKEN)
-
-        soundManager.playSound(SoundType.ACHIEVEMENT)
-        _effects.trySend(EngineEffect.Awakened(gain))
-        recalculate()
-        requestSave(replace = true)
     }
 
     /** Sube un nodo del Árbol de Visiones. */
@@ -2464,7 +2491,7 @@ class GameEngine @Inject constructor(
     else Expeditions.damagePerSecond(
         productionPerSecond,
         Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)) * Elementals.damageMultiplier(el(ElementalNode.BLAZE)) *
-            Artifacts.damageMultiplier(artifactLevel(Artifact.DAGGER))
+            Artifacts.damageMultiplier(artifactLevel(Artifact.DAGGER)) * AzathothDream.dancersMultiplier(chaosLevel(ChaosNode.DANCERS))
     )
 
     /** El Oro que pagaría Despertar ahora, con el Oro de Khem (v0.23.0). */
@@ -2530,7 +2557,7 @@ class GameEngine @Inject constructor(
 
     private fun crystalSpawnSeconds(): Double =
         YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS)) / Elementals.mineSpeed(el(ElementalNode.DRIFT)) /
-            Artifacts.mineSpeed(artifactLevel(Artifact.HAMMER))
+            Artifacts.mineSpeed(artifactLevel(Artifact.HAMMER)) / AzathothDream.dancersMultiplier(chaosLevel(ChaosNode.DANCERS))
 
     private fun crystalLustreGain(): Int =
         YuggothCrystals.lustreGain(crystalGrid(), refineLevel(RefineNode.FUNGAL) + el(ElementalNode.ABYSSAL))
@@ -2685,7 +2712,8 @@ class GameEngine @Inject constructor(
     private fun favor(elemental: Elemental): Double = statsManager.counter(AchievementStat.elementalFavor(elemental.id)).toDouble()
 
     private fun favorRate(): Double =
-        Elementals.favorPerSecond(productionPerSecond, el(ElementalNode.NORTH)) * Artifacts.favorMultiplier(artifactLevel(Artifact.LAMP))
+        Elementals.favorPerSecond(productionPerSecond, el(ElementalNode.NORTH)) * Artifacts.favorMultiplier(artifactLevel(Artifact.LAMP)) *
+            AzathothDream.dancersMultiplier(chaosLevel(ChaosNode.DANCERS))
 
     /** [seconds] de Favor para el Elemental activo (también sin conexión). */
     private fun elementalTick(seconds: Double) {
@@ -2790,6 +2818,96 @@ class GameEngine @Inject constructor(
     }
 
     private fun artifactLevel(artifact: Artifact): Int = statsManager.counter(AchievementStat.artifact(artifact.id)).toInt()
+
+    // =====================================================================
+    // EL SUEÑO DE AZATHOTH (v0.25.0)
+    // =====================================================================
+
+    private fun descents(): Int = statsManager.counter(AchievementStat.DESCENTS).toInt()
+
+    private fun chaos(): Int = statsManager.counter(AchievementStat.AZATHOTH_CHAOS).toInt()
+
+    private fun chaosLevel(node: ChaosNode): Int = statsManager.counter(AchievementStat.chaosNode(node.id)).toInt()
+
+    private fun chaosLevels(): Map<String, Int> = ChaosNode.entries.associate { it.id to chaosLevel(it) }
+
+    private fun awakeningsSinceDescent(): Int =
+        (awakenings() - statsManager.counter(AchievementStat.DESCENT_AWAKEN_BASE).toInt()).coerceAtLeast(0)
+
+    private fun kingCompleted(): Boolean = cardDoneCount(YellowCard.KING) > 0
+
+    private fun descentRevealed(): Boolean = AzathothDream.isRevealed(completedCards().size, descents())
+
+    private fun canDescend(): Boolean =
+        AzathothDream.canDescend(kingCompleted(), awakeningsSinceDescent(), chaosLevel(ChaosNode.GATES))
+
+    private fun chaosGainNow(): Int = AzathothDream.chaosGain(
+        kingCompleted(), awakeningsSinceDescent(), chaosLevel(ChaosNode.GATES), chaosLevel(ChaosNode.ECHOES)
+    )
+
+    fun descend() = post { performDescent() }
+
+    /**
+     * Descender al Sueño de Azathoth: da Caos y reinicia la capa Despertar. Se pierden las
+     * Visiones y su árbol, los Juramentos, la Carta en juego y la elegida, la Expedición en
+     * curso y su Oro, la cuadrícula y el Lustre de los Cristales y el Favor de los
+     * Elementales; además, todo lo que reinicia un Despertar. Se conservan los Signos, las
+     * Reliquias, el árbol de refinado y la Esencia, los nodos de los Elementales, las Cartas
+     * completadas, los Artefactos y los Fragmentos.
+     */
+    private fun performDescent() {
+        if (!canDescend()) return
+        val gain = chaosGainNow()
+        if (gain <= 0) return
+
+        statsManager.flag(AchievementStat.descentWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.descentPath(it.id)) }
+        if (dreamActive()) statsManager.flag(AchievementStat.FEAT_DESCENT_DREAMING)
+        statsManager.count(AchievementStat.DESCENTS)
+        statsManager.count(AchievementStat.AZATHOTH_CHAOS, BigDecimal(gain))
+        statsManager.count(AchievementStat.CHAOS_EARNED, BigDecimal(gain))
+        statsManager.record(AchievementStat.MAX_CHAOS_GAIN, BigDecimal(gain))
+        statsManager.counters[AchievementStat.DESCENT_AWAKEN_BASE] = BigDecimal(awakenings())
+
+        // La capa Despertar
+        statsManager.counters.remove(AchievementStat.VISIONS)
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.VISION_NODE_PREFIX) }
+        statsManager.counters.keys.removeAll {
+            it.startsWith(AchievementStat.OATH_ACTIVE_PREFIX) || it.startsWith(AchievementStat.OATH_NEXT_PREFIX)
+        }
+        statsManager.counters.remove(AchievementStat.CARD_ACTIVE)
+        statsManager.counters.remove(AchievementStat.CARD_NEXT)
+        statsManager.counters.remove(AchievementStat.EXPEDITION_LEVEL)
+        statsManager.counters.remove(AchievementStat.EXPEDITION_DEALT)
+        statsManager.counters.remove(AchievementStat.EXPEDITION_GOLD)
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.CRYSTAL_PREFIX) }
+        statsManager.counters.remove(AchievementStat.CRYSTAL_LUSTRE)
+        statsManager.counters.remove(AchievementStat.CRYSTAL_TIMER)
+        statsManager.counters.keys.removeAll { it.startsWith(AchievementStat.ELEMENTAL_FAVOR_PREFIX) }
+
+        resetAwakeningCycle()
+
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.Descended(gain))
+        recalculate()
+        requestSave(replace = true)
+    }
+
+    /** Sube un nodo del árbol del Caos. */
+    fun buyChaosNode(id: String) = post {
+        val node = ChaosNode.fromId(id) ?: return@post
+        if (!descentRevealed()) return@post
+        val points = chaos()
+        if (!AzathothDream.canBuy(node, chaosLevels(), points)) return@post
+        val level = chaosLevel(node)
+        val left = points - node.cost(level)
+        statsManager.counters.remove(AchievementStat.AZATHOTH_CHAOS)
+        if (left > 0) statsManager.counters[AchievementStat.AZATHOTH_CHAOS] = BigDecimal(left)
+        statsManager.counters[AchievementStat.chaosNode(node.id)] = BigDecimal(level + 1)
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
+        requestSave()
+    }
 
     /** Sube un Artefacto con Fragmentos Amarillos (v0.24.1). */
     fun buyArtifact(id: String) = post {
@@ -3045,7 +3163,7 @@ class GameEngine @Inject constructor(
                     Expeditions.etherMultiplier(relicLevel(Relic.CROWN)) *
                     YuggothCrystals.etherMultiplier(crystalPower(), refineLevel(RefineNode.LENS)) *
                     Elementals.etherMultiplier(el(ElementalNode.STONE), el(ElementalNode.PHARAOH), awakenings()) *
-                    cardFactor(CardBonus.ETHER),
+                    cardFactor(CardBonus.ETHER) * AzathothDream.etherMultiplier(chaosLevel(ChaosNode.NUCLEAR)),
             transcendRequired()
         )
         // Manuscritos Pnakóticos (Laboratorio): el Éter ganado elevado a un exponente
@@ -3420,6 +3538,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(crystalMultiplier()))
             .multiply(BigDecimal.valueOf(Elementals.productionMultiplier(el(ElementalNode.EMBER))))
             .multiply(BigDecimal.valueOf(cardFactor(CardBonus.PRODUCTION)))
+            .multiply(BigDecimal.valueOf(AzathothDream.productionMultiplier(chaosLevel(ChaosNode.FLUTES))))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -3632,6 +3751,15 @@ class GameEngine @Inject constructor(
             cardFragments = cardFragments(),
             cardTranscendences = transcendences(),
             artifactLevels = Artifact.entries.associate { it.id to artifactLevel(it) },
+            descentRevealed = descentRevealed(),
+            canDescend = canDescend(),
+            chaos = chaos(),
+            chaosGain = chaosGainNow(),
+            descents = descents(),
+            awakeningsSinceDescent = awakeningsSinceDescent(),
+            descentRequired = AzathothDream.requiredAwakenings(chaosLevel(ChaosNode.GATES)),
+            kingCompleted = kingCompleted(),
+            chaosLevels = ChaosNode.entries.associate { it.id to chaosLevel(it) },
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

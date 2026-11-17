@@ -644,4 +644,22 @@
     <string name="artifacts_title">THE ARTIFACTS</string>
     <string name="artifacts_hint">Bought with Yellow Fragments, they last forever and speed up specific systems.</string>
     <string name="artifacts_cost">%1$d YF</string>
+    <string name="layer_chaos">Azathoth</string>
+    <string name="tab_descent">Descent</string>
+    <string name="descent_title">THE DREAM OF AZATHOTH</string>
+    <string name="descent_hint">Descending resets the Awakening layer for Chaos. Chaos buys the Chaos tree, which lasts forever.</string>
+    <string name="descent_chaos">CHAOS</string>
+    <string name="descent_req_king">Complete The King in Yellow</string>
+    <string name="descent_req_awakenings">Awakenings since the last Descent: %1$d/%2$d</string>
+    <string name="descent_count">Descents: %1$d</string>
+    <string name="descent_button">DESCEND (+%1$d Chaos)</string>
+    <string name="descent_locked">You cannot Descend yet</string>
+    <string name="descent_confirm_title">Descend into the Dream of Azathoth?</string>
+    <string name="descent_confirm_gain">You gain %1$d Chaos.</string>
+    <string name="descent_confirm_loses">You lose your Visions and their tree, the Oaths, the Card in play and the chosen one, the current Expedition and its Gold, the Crystal grid and Lustre, and the Elementals\' Favor; plus everything an Awakening resets.</string>
+    <string name="descent_confirm_keeps">You keep the Signs, the Relics, the refining tree and Essence, the Elemental nodes, completed Cards, Artifacts, Fragments and the Chaos tree.</string>
+    <string name="descent_confirm">DESCEND</string>
+    <string name="descent_notice">You descended into the Dream of Azathoth: +%1$d Chaos</string>
+    <string name="chaos_tree_title">THE CHAOS TREE</string>
+    <string name="chaos_cost">%1$d C</string>
 </resources>

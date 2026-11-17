@@ -1,6 +1,6 @@
 # Logros
 
-Hay **654 logros**: 113 originales y **541 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **666 logros**: 113 originales y **553 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -383,6 +383,17 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Llave de Todas las Puertas | Compra un Artefacto con el pacto de Yog-Sothoth | +1 % |
 | Objetos de la Mente | Compra un Artefacto recorriendo la Senda de la Mente | +1 % |
 | Mecanismos Prohibidos | Compra un Artefacto recorriendo la Senda del Engranaje | +1 % |
+| Caer en el Sueño | Desciende al Sueño de Azathoth | +1 % |
+| Hijo del Caos | Desciende 5 veces | +1 % |
+| Sultán Ciego | Desciende 10 veces | +2 % |
+| Puñado de Caos | Gana 25 de Caos en total | +1 % |
+| Mar de Caos | Gana 150 de Caos en total | +2 % |
+| Raíces en el Vacío | Ten 4 nodos del árbol del Caos | +1 % |
+| El Árbol Ciego | Ten los 7 nodos del árbol del Caos | +2 % |
+| Azathoth Sueña Contigo | Desciende con el pacto de Azathoth | +1 % |
+| Daoloth Desgarra | Desciende con el pacto de Daoloth | +1 % |
+| La Mano que Cae | Desciende recorriendo la Senda de la Mano | +1 % |
+| Vacío sobre Vacío | Desciende recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -556,7 +567,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **43 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **44 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

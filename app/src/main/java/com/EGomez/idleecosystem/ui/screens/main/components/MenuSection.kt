@@ -160,6 +160,9 @@ fun MenuSection(
     onChooseCard: (String?) -> Unit = {},
     onAbandonCard: () -> Unit = {},
     onBuyArtifact: (String) -> Unit = {},
+    descentUi: DescentUi = DescentUi(),
+    onDescend: () -> Unit = {},
+    onBuyChaosNode: (String) -> Unit = {},
     onBuyVisionNode: (String) -> Unit = {},
     onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
@@ -471,6 +474,7 @@ fun MenuSection(
                     MenuTab.CRYSTALS -> item { CrystalsPanel(crystalsUi, onMergeCrystals, onMergeAllCrystals, onPolishCrystals, onRefineCrystals, onBuyRefineNode, onRespecRefine) }
                     MenuTab.ELEMENTALS -> item { ElementalsPanel(elementalsUi, onSummonElemental, onBuyElementalNode) }
                     MenuTab.CARDS -> item { CardsPanel(cardsUi, onChooseCard, onAbandonCard, onBuyArtifact) }
+                    MenuTab.DESCENT -> item { DescentPanel(descentUi, onDescend, onBuyChaosNode) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
                     MenuTab.CYCLES -> Unit
                 }

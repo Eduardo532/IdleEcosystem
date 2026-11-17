@@ -29,6 +29,7 @@ import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuLayer
 import com.EGomez.idleecosystem.domain.logic.MenuTab
 import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.model.TidePhase
@@ -1124,6 +1125,55 @@ class GameEngineTest {
         assertEquals(0, await(engine.economy) { true }.artifactLevels["veil"])
         assertEquals(0, BigDecimal(13).compareTo(stats.counter(AchievementStat.ARTIFACT_FRAGMENTS_SPENT)))
         assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.FEAT_ARTIFACT_BROKE)))
+    }
+
+    @Test
+    fun `descending resets the awakening layer for chaos and keeps the minigames`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(9))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(90))
+            counters[AchievementStat.cardDone("king")] = BigDecimal.ONE
+            counters[AchievementStat.VISIONS] = BigDecimal(50)
+            counters[AchievementStat.VISION_NODE_PREFIX + "prophet"] = BigDecimal(2)
+            counters[AchievementStat.crystal(0)] = BigDecimal(4)
+            counters[AchievementStat.CRYSTAL_LUSTRE] = BigDecimal(7)
+            counters[AchievementStat.EXPEDITION_GOLD] = BigDecimal(30)
+            counters[AchievementStat.elementalFavor("cthulhu")] = BigDecimal(12)
+            counters[AchievementStat.relic("crown")] = BigDecimal(2)
+            counters[AchievementStat.artifact("lamp")] = BigDecimal(1)
+            counters[AchievementStat.refineNode("drills")] = BigDecimal(1)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.descentRevealed && it.canDescend }
+        assertTrue(MenuTab.DESCENT in before.menuUnlocks.tabs)
+        assertTrue(MenuLayer.CHAOS in before.menuUnlocks.layers)
+        // 9 Despertares, pide 8: 2 × 2
+        assertEquals(4, before.chaosGain)
+
+        engine.descend()
+        val after = await(engine.economy) { it.descents == 1 }
+        assertEquals(4, after.chaos)
+        assertEquals(0, after.awakeningsSinceDescent)
+        assertFalse(after.canDescend)
+        assertEquals(0, after.visions)
+        assertEquals(0, after.crystalLustre)
+        assertEquals(0, stats.counter(AchievementStat.VISION_NODE_PREFIX + "prophet").signum())
+        assertEquals(0, stats.counter(AchievementStat.EXPEDITION_GOLD).signum())
+        assertEquals(0, stats.counter(AchievementStat.elementalFavor("cthulhu")).signum())
+        // Los minijuegos conservan lo comprado
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.relic("crown"))))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.artifact("lamp"))))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.refineNode("drills"))))
+
+        engine.buyChaosNode("flutes")
+        val bought = await(engine.economy) { it.chaosLevels["flutes"] == 1 }
+        assertEquals(3, bought.chaos)
     }
 
     @Test

@@ -32,6 +32,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Cristales | el segundo Despertar *(v0.22.0)* |
 | | | Elementales | el tercer Despertar *(v0.23.0)* |
 | | | Cartas | el quinto Despertar, con los cuatro Elementales invocados *(v0.24.0)* |
+| **Azathoth** | magenta (Caos) | Descenso | completar la primera Carta del Rey de Amarillo *(v0.25.0)* |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 
@@ -67,6 +68,7 @@ Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 - **Cristales *(v0.22.0)*:** el Lustre, el Poder y el multiplicador de producción, cuánto falta para el próximo cristal, la cuadrícula de 4 × 4 (cada cristal con su grado y su color; el elegido en blanco y sus parejas en violeta), los botones Fusionar todo y PULIR. Debajo, *(v0.22.1)* la tarjeta de Refinar (Esencia, botón REFINAR con confirmación) y el árbol de refinado, de ocho nodos, con su reinicio gratis. Ver [Cristales de Yuggoth](Cristales-de-Yuggoth).
 - **Elementales *(v0.23.0)*:** el Elemental invocado y su Favor por minuto, las cuatro tarjetas (nombre, elemento, Favor y si está invocado), y el árbol del que se mira con su botón INVOCAR o Despedir; si no es el invocado, un aviso de que está dormido. Ver [Los Cuatro Elementales](Los-Cuatro-Elementales).
 - **Cartas *(v0.24.0)*:** los Fragmentos Amarillos; la Carta en juego con sus Trascendencias en este Despertar, una barra hasta la meta y el botón Abandonar; y el mazo, donde cada Carta muestra sus Juramentos, su meta, su premio, el botón ELEGIR (o «Elegida para el próximo Despertar») y, si ya se completó, Leer el capítulo. Al completar una Carta por primera vez aparece un aviso con su capítulo. Debajo del mazo, *(v0.24.1)* los siete Artefactos con su nivel, su efecto y su costo en Fragmentos. Ver [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo).
+- **Descenso *(v0.25.0)*:** el Caos; lo que pide Descender (El Rey de Amarillo y los Despertares desde el último Descenso, cada uno con ✓ o ✗); el botón DESCENDER con su confirmación (qué se gana, qué se pierde y qué se conserva) y el árbol del Caos. Al Descender aparece un aviso con el Caos ganado. Ver [El Sueño de Azathoth](El-Sueno-de-Azathoth).
 - **Juramentos *(v0.21.1)*:** en la pestaña Despertar, debajo del botón, una lista de las 14 Pruebas para jurar (con casilla y peso de Visiones). Arriba se ven los Juramentos vigentes y los jurados para el próximo Despertar, cada grupo con su multiplicador.
 
 Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de Ascender**: tu Cordura, el pacto y la mutación de esta vida, y el botón **ASCENDER**.

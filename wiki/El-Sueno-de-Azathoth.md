@@ -4,7 +4,7 @@ Es la **última capa de prestigio**, la cuarta. Azathoth, el sultán ciego del c
 
 ## Cuándo aparece
 
-La capa **Azathoth**, con la pestaña **Descenso**, aparece al completar la primera **Carta del Rey de Amarillo**.
+La capa **Caos**, con la pestaña **Descenso**, aparece al completar la primera **Carta del Rey de Amarillo**.
 
 ## Descender
 

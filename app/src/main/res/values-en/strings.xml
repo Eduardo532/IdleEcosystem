@@ -644,7 +644,7 @@
     <string name="artifacts_title">THE ARTIFACTS</string>
     <string name="artifacts_hint">Bought with Yellow Fragments, they last forever and speed up specific systems.</string>
     <string name="artifacts_cost">%1$d YF</string>
-    <string name="layer_chaos">Azathoth</string>
+    <string name="layer_chaos">Chaos</string>
     <string name="tab_descent">Descent</string>
     <string name="descent_title">THE DREAM OF AZATHOTH</string>
     <string name="descent_hint">Descending resets the Awakening layer for Chaos. Chaos buys the Chaos tree, which lasts forever.</string>

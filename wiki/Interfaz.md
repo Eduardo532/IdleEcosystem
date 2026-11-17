@@ -32,7 +32,7 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | Cristales | el segundo Despertar *(v0.22.0)* |
 | | | Elementales | el tercer Despertar *(v0.23.0)* |
 | | | Cartas | el quinto Despertar, con los cuatro Elementales invocados *(v0.24.0)* |
-| **Azathoth** | magenta (Caos) | Descenso | completar la primera Carta del Rey de Amarillo *(v0.25.0)* |
+| **Caos** | magenta (Caos) | Descenso | completar la primera Carta del Rey de Amarillo *(v0.25.0)* |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
 

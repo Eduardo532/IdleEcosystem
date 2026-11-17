@@ -1074,6 +1074,34 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `descending asks for confirmation and the chaos tree buys from the flutes`() {
+        var descended = 0
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.DescentPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
+                        chaos = 1, chaosGain = 4, canDescend = true, awakeningsSince = 9, kingCompleted = true
+                    ),
+                    onDescend = { descended++ },
+                    onBuyNode = { bought += it }
+                )
+            }
+        }
+        compose.onNodeWithText("✓ Despertares desde el último Descenso: 9/8").assertExists()
+        compose.onNodeWithText("DESCENDER (+4 Caos)").performClick()
+        assertEquals(0, descended)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.DESCEND_CONFIRM_TAG).performClick()
+        assertEquals(1, descended)
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAOS_BUY_TAG + "daemon").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CHAOS_BUY_TAG + "flutes").performScrollTo().performClick()
+        assertEquals(listOf("flutes"), bought)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

@@ -283,6 +283,21 @@ object AchievementStat {
     const val ARTIFACT_WITH_PREFIX = "artifact_with."
     const val ARTIFACT_PATH_PREFIX = "artifact_path."
     const val FEAT_ARTIFACT_BROKE = "feat.artifact_broke"
+
+    // El Sueño de Azathoth (v0.25.0)
+    const val DESCENTS = "descents"
+    /** El Caos del Sueño de Azathoth (no confundir con CHAOS, el multiplicador del pacto de Azathoth). */
+    const val AZATHOTH_CHAOS = "azathoth_chaos"
+    const val CHAOS_EARNED = "chaos_earned"
+    const val MAX_CHAOS_GAIN = "max_chaos_gain"
+    /** Los Despertares que había al último Descenso. */
+    const val DESCENT_AWAKEN_BASE = "descent_awaken_base"
+    const val CHAOS_NODE_PREFIX = "chaos."
+    const val CHAOS_LEVELS = "chaos_levels"
+    const val CHAOS_NODES = "chaos_nodes"
+    const val DESCENT_WITH_PREFIX = "descent_with."
+    const val DESCENT_PATH_PREFIX = "descent_path."
+    const val FEAT_DESCENT_DREAMING = "feat.descent_dreaming"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -325,7 +340,7 @@ object AchievementStat {
         TRIALS_COMPLETED, RUNE_SLOTS, ENGRAVED, ENGRAVED_T3, RUNE_KINDS, ENGRAVED_KINDS, MADNESS, TIDE_PHASE, ETERNAL_LEVELS,
         CONSECRATION_LEVELS, CONSECRATED_BUILDINGS, CONSECRATED_MAX,
         MASTERY_LEVELS, MASTERY_KINDS, MASTERY_MAXED, MUTATIONS_SEEN, TRANSCEND_MILESTONES, VEIL_DEPTH, STAR_LEVELS,
-        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED, REFINE_LEVELS, REFINE_NODES, ELEMENTAL_LEVELS, CARDS_DONE, ARTIFACT_LEVELS, ARTIFACTS_OWNED
+        BEASTS_SEEN, BEAST_LEVELS, DOMAINS_COMPLETE, PRIMORDIALS_SEEN, LAB_LEVELS, LAB_MAXED, DREAM_LEVELS, DREAM_NODES, TTRIAL_COMPLETIONS, VISION_LEVELS, VISION_NODES, SIGN_PLANETS, RELIC_LEVELS, RELICS_OWNED, REFINE_LEVELS, REFINE_NODES, ELEMENTAL_LEVELS, CARDS_DONE, ARTIFACT_LEVELS, ARTIFACTS_OWNED, CHAOS_LEVELS, CHAOS_NODES
     )
 
     // --- Contadores guardados ---
@@ -515,6 +530,9 @@ object AchievementStat {
     fun artifact(id: String) = ARTIFACT_PREFIX + id
     fun artifactWith(pactId: String) = ARTIFACT_WITH_PREFIX + pactId
     fun artifactPath(pathId: String) = ARTIFACT_PATH_PREFIX + pathId
+    fun chaosNode(id: String) = CHAOS_NODE_PREFIX + id
+    fun descentWith(pactId: String) = DESCENT_WITH_PREFIX + pactId
+    fun descentPath(pathId: String) = DESCENT_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -544,6 +562,7 @@ object AchievementStat {
         ELEMENTAL_ACTIVE, ELEMENTAL_FAVOR_EARNED, ELEMENTAL_SWITCHES, FEAT_ELEMENTAL_RIVAL,
         CARD_NEXT, CARD_ACTIVE, CARD_COMPLETIONS, CARD_ABANDONS, CARD_FRAGMENTS, CARD_FRAGMENTS_EARNED, FEAT_CARD_HASTUR,
         ARTIFACT_FRAGMENTS_SPENT, FEAT_ARTIFACT_BROKE,
+        DESCENTS, AZATHOTH_CHAOS, CHAOS_EARNED, MAX_CHAOS_GAIN, DESCENT_AWAKEN_BASE, FEAT_DESCENT_DREAMING,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -564,6 +583,7 @@ object AchievementStat {
         ELEMENTAL_FAVOR_PREFIX, ELEMENTAL_NODE_PREFIX, ELEMENTAL_WITH_PREFIX, ELEMENTAL_PATH_PREFIX,
         ELEMENTAL_SUMMONED_PREFIX, CARD_DONE_PREFIX, CARD_WITH_PREFIX, CARD_PATH_PREFIX,
         ARTIFACT_PREFIX, ARTIFACT_WITH_PREFIX, ARTIFACT_PATH_PREFIX,
+        CHAOS_NODE_PREFIX, DESCENT_WITH_PREFIX, DESCENT_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

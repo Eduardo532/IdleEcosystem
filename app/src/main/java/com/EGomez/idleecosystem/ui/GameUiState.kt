@@ -126,6 +126,9 @@ data class GameUiState(
     val cardsUi: com.EGomez.idleecosystem.ui.screens.main.components.CardsUi = com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(),
     /** Una Carta del Rey de Amarillo recién completada, con su capítulo (v0.24.0). */
     val cardChapter: com.EGomez.idleecosystem.ui.screens.main.components.CardChapterNotice? = null,
+    val descentUi: com.EGomez.idleecosystem.ui.screens.main.components.DescentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(),
+    /** Caos ganado al Descender, para el aviso (v0.25.0). */
+    val descentNotice: Int? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

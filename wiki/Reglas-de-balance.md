@@ -197,6 +197,11 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 - Primera vez: bono permanente (clic x100, producción x10, Sueño x3, Cordura x10, Polvo x5, Éter x5, Visiones x1,5, producción ^1,05) y Fragmentos (5 a 20); repetida: la mitad de los Fragmentos. El Rey pide las otras siete. *(Código: `YellowCards`, `YellowCard`; test: `YellowCardsTest`.)*
 - *(v0.24.1)* Artefactos con Fragmentos, costo `⌈base × crecimiento^nivel⌉` (34 niveles en total): Favor `1,5^n`, Sueño `2^n`, Mina `/1,5^n`, Polvo `2^n`, daño `3^n`, Visiones `1 + 0,1n`, Fragmentos de las Cartas `⌊base × (1 + 0,25n)⌋`. *(Código: `Artifacts`; test: `ArtifactsTest`.)*
 
+## El Sueño de Azathoth *(v0.25.0)*
+
+- Aparece con la primera Carta completada. Descender pide El Rey de Amarillo y `8 − Puertas` Despertares desde el último Descenso; da `2 × (Despertares − mínimo + 1) + 2·Ecos` de Caos. Reinicia la capa Despertar (Visiones, su árbol, Juramentos, Carta, Expedición en curso y Oro, cuadrícula y Lustre, Favor) y todo lo que reinicia un Despertar; la cuenta total de Despertares no se toca, así que nada abierto se cierra.
+- Árbol del Caos (`ChaosNode`, costo `⌈base × 2^nivel⌉`): producción `100^n`, Visiones `2^n`, Éter `10^n`, mínimo `−n`, Caos `+2n`, Favor, Mina y daño `2^n`, producción `^(1,05^n)`. *(Código: `AzathothDream`; test: `AzathothDreamTest`.)*
+
 ## Consagrar edificios
 
 - Nivel n+1: tener `100 × (n+1)` unidades en la vida y pagar `n+1` de Éter. Máximo V. *(Código: `Consecration`; test: `ConsecrationTest`.)*

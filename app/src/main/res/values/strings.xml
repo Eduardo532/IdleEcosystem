@@ -645,4 +645,22 @@
     <string name="artifacts_title">LOS ARTEFACTOS</string>
     <string name="artifacts_hint">Se compran con Fragmentos Amarillos, valen para siempre y aceleran sistemas concretos.</string>
     <string name="artifacts_cost">%1$d FA</string>
+    <string name="layer_chaos">Caos</string>
+    <string name="tab_descent">Descenso</string>
+    <string name="descent_title">EL SUEÑO DE AZATHOTH</string>
+    <string name="descent_hint">Descender reinicia la capa Despertar a cambio de Caos. El Caos compra el árbol del Caos, que vale para siempre.</string>
+    <string name="descent_chaos">CAOS</string>
+    <string name="descent_req_king">Completar El Rey de Amarillo</string>
+    <string name="descent_req_awakenings">Despertares desde el último Descenso: %1$d/%2$d</string>
+    <string name="descent_count">Descensos: %1$d</string>
+    <string name="descent_button">DESCENDER (+%1$d Caos)</string>
+    <string name="descent_locked">Aún no puedes Descender</string>
+    <string name="descent_confirm_title">¿Descender al Sueño de Azathoth?</string>
+    <string name="descent_confirm_gain">Ganas %1$d de Caos.</string>
+    <string name="descent_confirm_loses">Pierdes las Visiones y su árbol, los Juramentos, la Carta en juego y la elegida, la Expedición en curso y su Oro, la cuadrícula y el Lustre de los Cristales y el Favor de los Elementales; además, todo lo que reinicia un Despertar.</string>
+    <string name="descent_confirm_keeps">Conservas los Signos, las Reliquias, el árbol de refinado y la Esencia, los nodos de los Elementales, las Cartas completadas, los Artefactos, los Fragmentos y el árbol del Caos.</string>
+    <string name="descent_confirm">DESCENDER</string>
+    <string name="descent_notice">Descendiste al Sueño de Azathoth: +%1$d Caos</string>
+    <string name="chaos_tree_title">EL ÁRBOL DEL CAOS</string>
+    <string name="chaos_cost">%1$d C</string>
 </resources>

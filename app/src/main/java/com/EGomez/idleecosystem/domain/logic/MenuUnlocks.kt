@@ -9,7 +9,7 @@ import com.EGomez.idleecosystem.domain.model.Trial
  * cuando hay más de una.
  */
 /** Despertar: la tercera capa (v0.21.0). */
-enum class MenuLayer { LIFE, ASCENSION, TRANSCENDENCE, AWAKENING }
+enum class MenuLayer { LIFE, ASCENSION, TRANSCENDENCE, AWAKENING, CHAOS }
 
 enum class MenuTab(val id: String, val layer: MenuLayer) {
     RESEARCH("research", MenuLayer.LIFE),
@@ -36,7 +36,8 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     EXPEDITION("expedition", MenuLayer.AWAKENING),
     CRYSTALS("crystals", MenuLayer.AWAKENING),
     ELEMENTALS("elementals", MenuLayer.AWAKENING),
-    CARDS("cards", MenuLayer.AWAKENING);
+    CARDS("cards", MenuLayer.AWAKENING),
+    DESCENT("descent", MenuLayer.CHAOS);
 
     /**
      * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
@@ -141,7 +142,8 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             expeditionRevealed: Boolean = false,
             crystalsRevealed: Boolean = false,
             elementalsRevealed: Boolean = false,
-            cardsRevealed: Boolean = false
+            cardsRevealed: Boolean = false,
+            descentRevealed: Boolean = false
         ): MenuUnlocks {
             val tabs = mutableSetOf(MenuTab.RESEARCH)
             if (reveal.grimoire) tabs += MenuTab.GRIMOIRE
@@ -169,6 +171,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (crystalsRevealed) tabs += MenuTab.CRYSTALS
             if (elementalsRevealed) tabs += MenuTab.ELEMENTALS
             if (cardsRevealed) tabs += MenuTab.CARDS
+            if (descentRevealed) tabs += MenuTab.DESCENT
             return MenuUnlocks(tabs)
         }
     }

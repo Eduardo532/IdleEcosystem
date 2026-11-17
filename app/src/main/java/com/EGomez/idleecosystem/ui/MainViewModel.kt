@@ -276,6 +276,16 @@ class MainViewModel @Inject constructor(
             transcendences = economy.cardTranscendences,
             artifacts = economy.artifactLevels
         ),
+        descentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
+            chaos = economy.chaos,
+            chaosGain = economy.chaosGain,
+            canDescend = economy.canDescend,
+            descents = economy.descents,
+            awakeningsSince = economy.awakeningsSinceDescent,
+            required = economy.descentRequired,
+            kingCompleted = economy.kingCompleted,
+            levels = economy.chaosLevels
+        ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
             dealt = economy.expeditionDealt,
@@ -377,6 +387,14 @@ class MainViewModel @Inject constructor(
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
+                }
+            }
+            is EngineEffect.Descended -> {
+                val chaos = effect.chaos
+                _uiState.update { it.copy(descentNotice = chaos) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.descentNotice == chaos) it.copy(descentNotice = null) else it }
                 }
             }
             is EngineEffect.CardCompleted -> _uiState.update {
@@ -633,6 +651,10 @@ class MainViewModel @Inject constructor(
     fun abandonCard() = engine.abandonCard()
 
     fun buyArtifact(id: String) = engine.buyArtifact(id)
+
+    fun descend() = engine.descend()
+
+    fun buyChaosNode(id: String) = engine.buyChaosNode(id)
 
     fun dismissCardChapter() = _uiState.update { it.copy(cardChapter = null) }
 

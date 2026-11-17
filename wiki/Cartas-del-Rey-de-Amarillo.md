@@ -1,4 +1,4 @@
-# Las Cartas del Rey de Amarillo *(v0.24.0)*
+# Las Cartas del Rey de Amarillo y los Artefactos *(v0.24.0 – v0.24.1)*
 
 Es la primera mecánica de la **etapa 9, el arco final**. Son desafíos de la tercera capa: cada Carta impone varios Juramentos a la vez durante todo un Despertar, y al completarla da un bono permanente, **Fragmentos Amarillos** y un **capítulo de la historia** del acto final.
 
@@ -31,11 +31,27 @@ Al Despertar, la elegida pasa a estar en juego y la elección se borra: cada Car
 
 - **El Rey de Amarillo** pide completar las otras siete Cartas.
 - El bono y el capítulo se ganan **la primera vez**. Repetir una Carta da **la mitad de sus Fragmentos**.
-- Los Fragmentos Amarillos se gastarán en los **Artefactos** (v0.24.1).
+- Los Fragmentos Amarillos se gastan en los **Artefactos**.
 
 ## Los capítulos
 
 Al completar una Carta por primera vez aparece su capítulo, y después se puede releer desde el mazo con **Leer el capítulo**. Los ocho capítulos cuentan, en orden, cómo el libro amarillo lleva hasta Carcosa y hasta el sueño de Azathoth.
+
+## Los Artefactos *(v0.24.1)*
+
+Están debajo del mazo, en la misma pestaña. Se compran con **Fragmentos Amarillos**, valen para siempre y aceleran sistemas concretos.
+
+| Artefacto | Efecto por nivel | Máximo | Costo |
+|---|---|---|---|
+| La Lámpara de Alhazred | Favor de los Elementales x1,5 | 5 | 5 · 1,6ⁿ |
+| La Llave de Plata | Puntos de Sueño x2 | 5 | 5 · 1,6ⁿ |
+| El Martillo de los Mi-Go | La Mina de Cristales va x1,5 más rápido | 5 | 6 · 1,7ⁿ |
+| El Astrolabio de Celaeno | Polvo Estelar x2 | 5 | 6 · 1,7ⁿ |
+| La Daga de Hali | Daño de Expedición x3 | 5 | 8 · 1,8ⁿ |
+| El Velo de Cassilda | Visiones ganadas +10 % | 5 | 10 · 2ⁿ |
+| El Broche del Signo | Fragmentos de las Cartas +25 % | 4 | 15 · 2ⁿ |
+
+Los costos se redondean hacia arriba: la Lámpara cuesta 5, 8, 13, 21 y 33 Fragmentos.
 
 ## Logros
 
@@ -46,4 +62,12 @@ Las Cartas traen **12 logros**:
 - abandonar una Carta;
 - completar con el pacto de Tulzscha o con el de Ubbo-Sathla;
 - completar en la Senda del Culto o en la Arcana;
+- uno secreto.
+
+Los Artefactos traen **11 logros** más *(v0.24.1)*:
+- tener 5, 20 y los 34 niveles;
+- tener los 7 Artefactos;
+- gastar 100 y 500 Fragmentos;
+- comprar con el pacto de Cthulhu o con el de Yog-Sothoth;
+- comprar en la Senda de la Mente o en la del Engranaje;
 - uno secreto.

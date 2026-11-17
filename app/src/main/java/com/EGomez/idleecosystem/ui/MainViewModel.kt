@@ -273,7 +273,8 @@ class MainViewModel @Inject constructor(
             next = economy.cardNext,
             completed = economy.cardsCompleted,
             fragments = economy.cardFragments,
-            transcendences = economy.cardTranscendences
+            transcendences = economy.cardTranscendences,
+            artifacts = economy.artifactLevels
         ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
@@ -630,6 +631,8 @@ class MainViewModel @Inject constructor(
     fun chooseCard(id: String?) = engine.chooseCard(id)
 
     fun abandonCard() = engine.abandonCard()
+
+    fun buyArtifact(id: String) = engine.buyArtifact(id)
 
     fun dismissCardChapter() = _uiState.update { it.copy(cardChapter = null) }
 

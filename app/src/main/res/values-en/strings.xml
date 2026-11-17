@@ -641,4 +641,7 @@
     <string name="cards_bonus_gained">Forever: %1$s</string>
     <string name="cards_fragments_gained">+%1$d Yellow Fragments</string>
     <string name="cards_chapter_ok">Keep reading</string>
+    <string name="artifacts_title">THE ARTIFACTS</string>
+    <string name="artifacts_hint">Bought with Yellow Fragments, they last forever and speed up specific systems.</string>
+    <string name="artifacts_cost">%1$d YF</string>
 </resources>

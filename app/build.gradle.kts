@@ -22,8 +22,8 @@ android {
         applicationId = "com.EGomez.idleecosystem"
         minSdk = 24
         targetSdk = 36
-        versionCode = 64
-        versionName = "0.24.0"
+        versionCode = 65
+        versionName = "0.24.1"
 
         // Nombre visible de la app (las builds de prueba lo reemplazan)
         manifestPlaceholders["appLabel"] = "@string/app_name"

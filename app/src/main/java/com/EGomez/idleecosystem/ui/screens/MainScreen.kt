@@ -376,6 +376,7 @@ fun MainScreen(
                             cardsUi = uiState.cardsUi,
                             onChooseCard = { viewModel.chooseCard(it) },
                             onAbandonCard = { viewModel.abandonCard() },
+                            onBuyArtifact = { viewModel.buyArtifact(it) },
                             onBuyVisionNode = { viewModel.buyVisionNode(it) },
                             onRespecVisions = { viewModel.respecVisions() },
                             onSummon = { viewModel.summon(it) },

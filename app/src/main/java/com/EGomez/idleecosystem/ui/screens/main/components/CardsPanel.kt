@@ -15,8 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
+import com.EGomez.idleecosystem.domain.logic.Artifact
+import com.EGomez.idleecosystem.domain.logic.Artifacts
 import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.logic.YellowCards
+import com.EGomez.idleecosystem.ui.components.GameIcons
+import com.EGomez.idleecosystem.ui.components.IconLabel
 import com.EGomez.idleecosystem.ui.i18n.tr
 
 /** El amarillo del Rey. */
@@ -30,7 +34,9 @@ data class CardsUi(
     val completed: Map<String, Int> = emptyMap(),
     val fragments: Int = 0,
     /** Trascendencias en este Despertar. */
-    val transcendences: Int = 0
+    val transcendences: Int = 0,
+    /** Artefacto -> nivel (v0.24.1). */
+    val artifacts: Map<String, Int> = emptyMap()
 )
 
 /** Una Carta recién completada, para el aviso con su capítulo. */
@@ -41,7 +47,7 @@ data class CardChapterNotice(val cardId: String, val firstTime: Boolean, val fra
  * próximo Despertar, y el mazo con sus Juramentos, su meta, su premio y su capítulo.
  */
 @Composable
-fun CardsPanel(ui: CardsUi, onChoose: (String?) -> Unit, onAbandon: () -> Unit) {
+fun CardsPanel(ui: CardsUi, onChoose: (String?) -> Unit, onAbandon: () -> Unit, onBuyArtifact: (String) -> Unit = {}) {
     val done = YellowCard.entries.filter { (ui.completed[it.id] ?: 0) > 0 }.toSet()
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(CARDS_PANEL_TAG)) {
         Surface(
@@ -100,6 +106,47 @@ fun CardsPanel(ui: CardsUi, onChoose: (String?) -> Unit, onAbandon: () -> Unit) 
         }
         Text(stringResource(R.string.cards_deck), color = KingYellow, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 12.dp))
         YellowCard.entries.forEach { card -> CardRow(card, ui, done, onChoose) }
+        // Los Artefactos (v0.24.1)
+        Text(stringResource(R.string.artifacts_title), color = KingYellow, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 14.dp))
+        Text(stringResource(R.string.artifacts_hint), color = Color.Gray, fontSize = 11.sp)
+        Artifact.entries.forEach { artifact -> ArtifactRow(artifact, ui.artifacts[artifact.id] ?: 0, ui.fragments, onBuyArtifact) }
+    }
+}
+
+@Composable
+private fun ArtifactRow(artifact: Artifact, level: Int, fragments: Int, onBuy: (String) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF16150B),
+        border = BorderStroke(1.dp, if (level > 0) KingYellow.copy(alpha = 0.6f) else Color(0xFF2E2B18)),
+        modifier = Modifier.fillMaxWidth().padding(top = 6.dp).testTag(ARTIFACT_TAG + artifact.id)
+    ) {
+        Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                IconLabel(
+                    GameIcons.ElderSeal,
+                    tr(artifact.title) + " · " + stringResource(R.string.lab_level, level, artifact.maxLevel),
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(tr(artifact.description), color = Color.LightGray, fontSize = 11.sp)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            if (artifact.isMaxed(level)) {
+                Text(stringResource(R.string.eternal_maxed), color = KingYellow, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            } else {
+                Button(
+                    onClick = { onBuy(artifact.id) },
+                    enabled = Artifacts.canBuy(artifact, level, fragments),
+                    colors = ButtonDefaults.buttonColors(containerColor = KingYellow, contentColor = Color.Black),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier.testTag(ARTIFACT_BUY_TAG + artifact.id)
+                ) {
+                    Text(stringResource(R.string.artifacts_cost, artifact.cost(level)), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
     }
 }
 
@@ -201,3 +248,5 @@ const val CARD_TAG = "card_"
 const val CARD_CHOOSE_TAG = "card_choose_"
 const val CARD_READ_TAG = "card_read_"
 const val CARD_CHAPTER_OK_TAG = "card_chapter_ok"
+const val ARTIFACT_TAG = "artifact_"
+const val ARTIFACT_BUY_TAG = "artifact_buy_"

@@ -1,6 +1,6 @@
 # Logros
 
-Hay **643 logros**: 113 originales y **530 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **654 logros**: 113 originales y **541 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -373,6 +373,16 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Ubbo-Sathla Baraja | Completa una Carta con el pacto de Ubbo-Sathla | +1 % |
 | La Carta del Culto | Completa una Carta recorriendo la Senda del Culto | +1 % |
 | Tarot Arcano | Completa una Carta recorriendo la Senda Arcana | +1 % |
+| Coleccionista de Carcosa | Ten 5 niveles de Artefactos | +1 % |
+| Gabinete de Curiosidades | Ten 20 niveles de Artefactos | +1 % |
+| Reliquias del Acto Final | Ten todos los Artefactos al máximo | +2 % |
+| La Vitrina Completa | Ten los 7 Artefactos | +1 % |
+| Fragmentos Gastados | Gasta 100 Fragmentos Amarillos en Artefactos | +1 % |
+| Un Precio Amarillo | Gasta 500 Fragmentos Amarillos en Artefactos | +2 % |
+| Lo que Duerme en R'lyeh | Compra un Artefacto con el pacto de Cthulhu | +1 % |
+| Llave de Todas las Puertas | Compra un Artefacto con el pacto de Yog-Sothoth | +1 % |
+| Objetos de la Mente | Compra un Artefacto recorriendo la Senda de la Mente | +1 % |
+| Mecanismos Prohibidos | Compra un Artefacto recorriendo la Senda del Engranaje | +1 % |
 
 ### Panteón
 
@@ -546,7 +556,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **42 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **43 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

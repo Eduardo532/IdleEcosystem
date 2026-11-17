@@ -14,7 +14,7 @@ Cada etapa termina en una **puerta**: una condición que debería cumplirse ante
 | 6 | v0.19 | Completar la segunda capa | Romper el Velo ✅, Hitos de Trascendencia ✅, Cuando las Estrellas Estén en Posición ✅, Bestiario ✅, Laboratorio de Miskatonic ✅ | Las 10 Pruebas tienen un objetivo final y Trascender se automatiza |
 | 7 | v0.20 | Profundidad de Trascender | El Sueño Profundo ✅, Cadena de Invocación ✅, Letargo ✅, Pruebas de Trascendencia (I–V) ✅ | Un ciclo de Trascender tiene un desafío largo propio |
 | 8 | v0.21 – v0.23 | Tercera capa: el Despertar | Despertar (Pruebas combinadas) ✅, Signos Antiguos y planetas ✅, Expediciones y Reliquias ✅, Cristales de Yuggoth ✅, los Cuatro Elementales ✅ | El Despertar abre minijuegos distintos que alimentan a las capas anteriores |
-| 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo ✅ (v0.24.0), Artefactos (v0.24.1), El Sueño de Azathoth (v0.25); actos con un final visible, interfaz narrativa, eventos con memoria, contenido oculto | El juego tiene un final visible |
+| 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo ✅ (v0.24.0), Artefactos ✅ (v0.24.1), El Sueño de Azathoth (v0.25); actos con un final visible, interfaz narrativa, eventos con memoria, contenido oculto | El juego tiene un final visible |
 
 ## Las capas como actos
 
@@ -64,7 +64,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | Mecánica | Inspiración | Idea |
 |---|---|---|
 | **Cartas del Rey de Amarillo** ✅ *v0.24.0* | Tarot | Desde el quinto Despertar con los cuatro Elementales: ocho Cartas (El Loco, La Torre, La Luna… El Rey de Amarillo), cada una con Juramentos que rigen un Despertar entero, una meta de Trascendencias, un bono permanente, Fragmentos Amarillos y un capítulo de la historia del acto final. Ver [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo). |
-| **Artefactos** | Artefactos | Convierten los recursos de las Cartas en bonos permanentes y aceleran sistemas concretos. |
+| **Artefactos** ✅ *v0.24.1* | Artefactos | Siete Artefactos que se compran con los Fragmentos Amarillos de las Cartas, valen para siempre y aceleran sistemas concretos: Favor, Sueño, la Mina, el Polvo Estelar, la Expedición, las Visiones y los propios Fragmentos. Ver [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo). |
 | **El Sueño de Azathoth** | Singularidad | La última capa: reinicia el Despertar y da Caos con un árbol propio. Despertar a Azathoth es el final visible del juego. |
 
 ### Mecánicas generales

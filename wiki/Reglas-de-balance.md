@@ -195,6 +195,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - Desde el quinto Despertar con los cuatro Elementales invocados alguna vez. La Carta elegida rige el Despertar siguiente con sus Juramentos (se suman a los jurados, sin repetir: `YellowCards.ruleOaths`). Se completa al Despertar con `Trascendencias del Despertar ≥ meta` (12 a 16, siempre más que las 10 que pide Despertar).
 - Primera vez: bono permanente (clic x100, producción x10, Sueño x3, Cordura x10, Polvo x5, Éter x5, Visiones x1,5, producción ^1,05) y Fragmentos (5 a 20); repetida: la mitad de los Fragmentos. El Rey pide las otras siete. *(Código: `YellowCards`, `YellowCard`; test: `YellowCardsTest`.)*
+- *(v0.24.1)* Artefactos con Fragmentos, costo `⌈base × crecimiento^nivel⌉` (34 niveles en total): Favor `1,5^n`, Sueño `2^n`, Mina `/1,5^n`, Polvo `2^n`, daño `3^n`, Visiones `1 + 0,1n`, Fragmentos de las Cartas `⌊base × (1 + 0,25n)⌋`. *(Código: `Artifacts`; test: `ArtifactsTest`.)*
 
 ## Consagrar edificios
 

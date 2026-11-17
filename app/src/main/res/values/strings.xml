@@ -642,4 +642,7 @@
     <string name="cards_bonus_gained">Para siempre: %1$s</string>
     <string name="cards_fragments_gained">+%1$d Fragmentos Amarillos</string>
     <string name="cards_chapter_ok">Seguir leyendo</string>
+    <string name="artifacts_title">LOS ARTEFACTOS</string>
+    <string name="artifacts_hint">Se compran con Fragmentos Amarillos, valen para siempre y aceleran sistemas concretos.</string>
+    <string name="artifacts_cost">%1$d FA</string>
 </resources>

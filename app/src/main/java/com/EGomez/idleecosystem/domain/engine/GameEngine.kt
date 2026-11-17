@@ -59,6 +59,8 @@ import com.EGomez.idleecosystem.domain.logic.VisionNode
 import com.EGomez.idleecosystem.domain.logic.Elemental
 import com.EGomez.idleecosystem.domain.logic.ElementalNode
 import com.EGomez.idleecosystem.domain.logic.Elementals
+import com.EGomez.idleecosystem.domain.logic.Artifact
+import com.EGomez.idleecosystem.domain.logic.Artifacts
 import com.EGomez.idleecosystem.domain.logic.CardBonus
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YellowCard
@@ -248,6 +250,8 @@ data class EconomyState(
     val cardsCompleted: Map<String, Int> = emptyMap(),
     val cardFragments: Int = 0,
     val cardTranscendences: Int = 0,
+    /** Los Artefactos (v0.24.1). */
+    val artifactLevels: Map<String, Int> = emptyMap(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -894,6 +898,8 @@ class GameEngine @Inject constructor(
         put(AchievementStat.REFINE_NODES, RefineNode.entries.count { refineLevel(it) > 0 })
         put(AchievementStat.ELEMENTAL_LEVELS, ElementalNode.entries.sumOf { elementalLevel(it) })
         put(AchievementStat.CARDS_DONE, completedCards().size)
+        put(AchievementStat.ARTIFACT_LEVELS, Artifact.entries.sumOf { artifactLevel(it) })
+        put(AchievementStat.ARTIFACTS_OWNED, Artifact.entries.count { artifactLevel(it) > 0 })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1602,7 +1608,8 @@ class GameEngine @Inject constructor(
 
     private fun addStardust(amount: Double) {
         if (amount <= 0.0) return
-        val add = BigDecimal.valueOf(amount * beastBonus(BeastKind.STARDUST) * Elementals.stardustMultiplier(el(ElementalNode.WHIRL)) * cardFactor(CardBonus.STARDUST))
+        val add = BigDecimal.valueOf(amount * beastBonus(BeastKind.STARDUST) * Elementals.stardustMultiplier(el(ElementalNode.WHIRL)) * cardFactor(CardBonus.STARDUST) *
+            Artifacts.stardustMultiplier(artifactLevel(Artifact.ASTROLABE)))
         statsManager.counters[AchievementStat.STARDUST] = statsManager.counter(AchievementStat.STARDUST).add(add)
         statsManager.count(AchievementStat.STARDUST_EARNED, add)
     }
@@ -1905,7 +1912,8 @@ class GameEngine @Inject constructor(
     private fun dreamGainNow(): Int = DeepSleep.gain(
         dreamCycleBest(), dreamPointsEarned(),
         DeepSleep.pointsMultiplier(dreamLevel(DreamNode.NIGHTGAUNTS)) * Awakening.dreamPointsMultiplier(visionLevel(VisionNode.DREAMER)) *
-            Elementals.dreamMultiplier(el(ElementalNode.SUNKEN)) * cardFactor(CardBonus.DREAM)
+            Elementals.dreamMultiplier(el(ElementalNode.SUNKEN)) * cardFactor(CardBonus.DREAM) *
+            Artifacts.dreamMultiplier(artifactLevel(Artifact.SILVER_KEY))
     )
 
     /** Se Trasciende desde el Sueño: paga los Puntos y anota los logros. Devuelve lo ganado. */
@@ -2187,7 +2195,8 @@ class GameEngine @Inject constructor(
         transcendences(), etherSinceAwakening(),
         Awakening.visionMultiplier(visionLevel(VisionNode.PROPHET)) * Oaths.visionMultiplier(activeOaths()) *
             signMultiplier(SignKind.EYE) * Expeditions.visionMultiplier(relicLevel(Relic.MIRROR)) *
-            Elementals.visionMultiplier(el(ElementalNode.RISING)) * cardFactor(CardBonus.VISIONS)
+            Elementals.visionMultiplier(el(ElementalNode.RISING)) * cardFactor(CardBonus.VISIONS) *
+            Artifacts.visionMultiplier(artifactLevel(Artifact.VEIL))
     )
 
     // ---- Juramentos (v0.21.1) ----
@@ -2454,7 +2463,8 @@ class GameEngine @Inject constructor(
     private fun expeditionDps(): Double = if (!expeditionRevealed()) 0.0
     else Expeditions.damagePerSecond(
         productionPerSecond,
-        Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)) * Elementals.damageMultiplier(el(ElementalNode.BLAZE))
+        Expeditions.damageMultiplier(relicLevel(Relic.MIRROR)) * Elementals.damageMultiplier(el(ElementalNode.BLAZE)) *
+            Artifacts.damageMultiplier(artifactLevel(Artifact.DAGGER))
     )
 
     /** El Oro que pagaría Despertar ahora, con el Oro de Khem (v0.23.0). */
@@ -2519,7 +2529,8 @@ class GameEngine @Inject constructor(
     private fun crystalMultiplier(): Double = YuggothCrystals.productionMultiplier(crystalPower(), refineLevel(RefineNode.CORE))
 
     private fun crystalSpawnSeconds(): Double =
-        YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS)) / Elementals.mineSpeed(el(ElementalNode.DRIFT))
+        YuggothCrystals.spawnSeconds(lustre(), refineLevel(RefineNode.DRILLS)) / Elementals.mineSpeed(el(ElementalNode.DRIFT)) /
+            Artifacts.mineSpeed(artifactLevel(Artifact.HAMMER))
 
     private fun crystalLustreGain(): Int =
         YuggothCrystals.lustreGain(crystalGrid(), refineLevel(RefineNode.FUNGAL) + el(ElementalNode.ABYSSAL))
@@ -2673,7 +2684,8 @@ class GameEngine @Inject constructor(
 
     private fun favor(elemental: Elemental): Double = statsManager.counter(AchievementStat.elementalFavor(elemental.id)).toDouble()
 
-    private fun favorRate(): Double = Elementals.favorPerSecond(productionPerSecond, el(ElementalNode.NORTH))
+    private fun favorRate(): Double =
+        Elementals.favorPerSecond(productionPerSecond, el(ElementalNode.NORTH)) * Artifacts.favorMultiplier(artifactLevel(Artifact.LAMP))
 
     /** [seconds] de Favor para el Elemental activo (también sin conexión). */
     private fun elementalTick(seconds: Double) {
@@ -2749,7 +2761,7 @@ class GameEngine @Inject constructor(
 
     private fun completeCard(card: YellowCard) {
         val firstTime = cardDoneCount(card) == 0
-        val fragments = YellowCards.fragmentsFor(card, firstTime)
+        val fragments = Artifacts.fragments(YellowCards.fragmentsFor(card, firstTime), artifactLevel(Artifact.BROOCH))
         statsManager.count(AchievementStat.cardDone(card.id))
         statsManager.count(AchievementStat.CARD_COMPLETIONS)
         if (fragments > 0) {
@@ -2774,6 +2786,30 @@ class GameEngine @Inject constructor(
             statsManager.counters[AchievementStat.CARD_NEXT] = BigDecimal(card.ordinal + 1)
         }
         publishEconomy()
+        requestSave()
+    }
+
+    private fun artifactLevel(artifact: Artifact): Int = statsManager.counter(AchievementStat.artifact(artifact.id)).toInt()
+
+    /** Sube un Artefacto con Fragmentos Amarillos (v0.24.1). */
+    fun buyArtifact(id: String) = post {
+        val artifact = Artifact.fromId(id) ?: return@post
+        if (!cardsRevealed()) return@post
+        val level = artifactLevel(artifact)
+        val points = cardFragments()
+        if (!Artifacts.canBuy(artifact, level, points)) return@post
+        val cost = artifact.cost(level)
+        val left = points - cost
+        statsManager.counters.remove(AchievementStat.CARD_FRAGMENTS)
+        if (left > 0) statsManager.counters[AchievementStat.CARD_FRAGMENTS] = BigDecimal(left)
+        // Gastar hasta el último Fragmento
+        else statsManager.flag(AchievementStat.FEAT_ARTIFACT_BROKE)
+        statsManager.counters[AchievementStat.artifact(artifact.id)] = BigDecimal(level + 1)
+        statsManager.count(AchievementStat.ARTIFACT_FRAGMENTS_SPENT, BigDecimal(cost))
+        statsManager.flag(AchievementStat.artifactWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.artifactPath(it.id)) }
+        soundManager.playSound(SoundType.BUY)
+        recalculate()
         requestSave()
     }
 
@@ -3595,6 +3631,7 @@ class GameEngine @Inject constructor(
             cardsCompleted = YellowCard.entries.associate { it.id to cardDoneCount(it) },
             cardFragments = cardFragments(),
             cardTranscendences = transcendences(),
+            artifactLevels = Artifact.entries.associate { it.id to artifactLevel(it) },
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

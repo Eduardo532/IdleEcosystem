@@ -1177,6 +1177,36 @@ class GameEngineTest {
     }
 
     @Test
+    fun `awakening azathoth is the ending and the game goes on`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(9))
+            count(AchievementStat.DESCENTS, BigDecimal.ONE)
+            counters[AchievementStat.cardDone("king")] = BigDecimal.ONE
+            counters[AchievementStat.AZATHOTH_CHAOS] = BigDecimal(70)
+            counters[AchievementStat.chaosNode("throne")] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canAwakenAzathoth }
+        assertEquals(60, before.eyeCost)
+        assertEquals(null, before.ending)
+
+        engine.awakenAzathoth()
+        val after = await(engine.economy) { it.azathothAwakenings == 1 }
+        assertEquals(10, after.chaos)
+        assertEquals(120, after.eyeCost)
+        assertFalse(after.canAwakenAzathoth)
+        assertEquals(1, after.ending!!.descents)
+        assertEquals(9, after.ending!!.awakenings)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.eyeWith("none"))))
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

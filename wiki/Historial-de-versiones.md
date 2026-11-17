@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.25.x *(en pruebas)*
 
 - **v0.25.0:** El Sueño de Azathoth, la cuarta y última capa. Con El Rey de Amarillo completado y 8 Despertares desde el último Descenso, Descender reinicia la capa Despertar (Visiones, su árbol, Juramentos, la Carta, la Expedición, los Cristales y el Favor) a cambio de Caos. El Caos compra el árbol del Caos, de siete nodos. Lo comprado en los minijuegos se conserva. 12 logros nuevos.
+- **v0.25.1:** Despertar a Azathoth, el final visible del juego. Con El Trono del Caos y 60 de Caos se abre el Ojo: un final a pantalla completa con el epílogo y el resumen de la partida. El juego sigue, con producción x1000 por cada vez que Azathoth despierta. 7 logros nuevos.
 
 ## v0.24.x *(en pruebas)*
 

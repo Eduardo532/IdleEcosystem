@@ -1102,6 +1102,50 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the eye of azathoth asks for confirmation and the ending lets you keep dreaming`() {
+        var awakened = 0
+        var read = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.DescentPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
+                        chaos = 70, canAwakenAzathoth = true, azathothAwakenings = 1, eyeCost = 60,
+                        ending = com.EGomez.idleecosystem.domain.logic.EndingSummary(3600, 100, 50, 9, 1, 8, 600, 677)
+                    ),
+                    onDescend = {},
+                    onBuyNode = {},
+                    onAwakenAzathoth = { awakened++ },
+                    onReadEnding = { read++ }
+                )
+            }
+        }
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EYE_TAG).performScrollTo().performClick()
+        assertEquals(0, awakened)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EYE_CONFIRM_TAG).performClick()
+        assertEquals(1, awakened)
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.EYE_READ_TAG).performScrollTo().performClick()
+        assertEquals(1, read)
+    }
+
+    @Test
+    fun `the ending shows the epilogue and the summary`() {
+        var closed = 0
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.components.EndingDialog(
+                com.EGomez.idleecosystem.domain.logic.EndingSummary(7380, 120, 60, 14, 2, 8, 600, 677),
+                onDismiss = { closed++ }
+            )
+        }
+        compose.onNodeWithText("AZATHOTH DESPIERTA").assertExists()
+        compose.onNodeWithText("Tiempo hasta el final: 2 h 3 min").performScrollTo().assertExists()
+        compose.onNodeWithText("Logros: 600 de 677").performScrollTo().assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ENDING_CONTINUE_TAG).performScrollTo().performClick()
+        assertEquals(1, closed)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

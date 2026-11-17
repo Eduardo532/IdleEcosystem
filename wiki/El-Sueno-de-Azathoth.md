@@ -1,4 +1,4 @@
-# El Sueño de Azathoth *(v0.25.0)*
+# El Sueño de Azathoth *(v0.25.0 – v0.25.1)*
 
 Es la **última capa de prestigio**, la cuarta. Azathoth, el sultán ciego del centro de todo, sueña el universo al son de flautas idiotas. **Descender** a su sueño reinicia la capa Despertar a cambio de **Caos**, que compra el **árbol del Caos**.
 
@@ -49,7 +49,17 @@ Cada nodo pide un nivel del indicado. Todo vale para siempre.
 | Los Planetas Danzantes | Puertas | Favor, velocidad de la Mina y daño de Expedición x2 | 3 | 6 · 2ⁿ |
 | El Trono del Caos | Ecos | Producción ^1,05 | 3 | 10 · 2ⁿ |
 
-Despertar a Azathoth, el final visible del juego, llega en la v0.25.1.
+## Despertar a Azathoth: el final *(v0.25.1)*
+
+Debajo del árbol, la tarjeta **El Ojo de Azathoth** guarda el final visible del juego.
+
+- **DESPERTAR A AZATHOTH** pide **El Trono del Caos** y **60 de Caos**. Pide confirmación.
+  - El camino mínimo cuesta 77 de Caos en total: Flautas, Caos Nuclear, Ecos y Trono (17), más el Ojo (60).
+- La primera vez se abre **el final**, a pantalla completa: el epílogo y el resumen de la partida.
+  - El resumen muestra el tiempo hasta el final, las Ascensiones, Trascendencias, Despertares y Descensos, las Cartas completadas y los logros.
+  - **Seguir soñando** lo cierra. **Leer el final** lo vuelve a abrir cuando quieras.
+- **No se pierde nada**: el juego sigue, con el **Ojo abierto**, que da producción **x1000** cada vez que Azathoth despierta.
+- Se puede volver a despertarlo; cada vez cuesta el doble (60, 120, 240…).
 
 ## Logros
 
@@ -59,4 +69,10 @@ El Sueño de Azathoth trae **12 logros**:
 - tener 4 y los 7 nodos del árbol;
 - Descender con el pacto de Azathoth o con el de Daoloth;
 - Descender en la Senda de la Mano o en la del Vacío;
+- uno secreto.
+
+Despertar a Azathoth trae **7 logros** más *(v0.25.1)*:
+- despertarlo 1 y 3 veces;
+- despertarlo con el pacto de Nyarlathotep o con el de Hastur;
+- despertarlo en la Senda del Sueño o en la de la Mente;
 - uno secreto.

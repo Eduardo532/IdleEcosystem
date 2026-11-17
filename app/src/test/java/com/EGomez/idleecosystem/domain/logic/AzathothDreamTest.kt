@@ -51,4 +51,30 @@ class AzathothDreamTest {
         assertEquals(1.05 * 1.05, AzathothDream.productionExponent(2), 1e-12)
         assertEquals(1, AzathothDream.requiredAwakenings(99))
     }
+
+    @Test
+    fun `awakening azathoth needs the throne and doubles its price`() {
+        assertEquals(listOf(60, 120, 240), (0 until 3).map { AzathothDream.eyeCost(it) })
+        assertFalse(AzathothDream.canAwakenAzathoth(throne = 0, chaos = 999, times = 0))
+        assertFalse(AzathothDream.canAwakenAzathoth(throne = 1, chaos = 59, times = 0))
+        assertTrue(AzathothDream.canAwakenAzathoth(throne = 1, chaos = 60, times = 0))
+        assertFalse(AzathothDream.canAwakenAzathoth(throne = 1, chaos = 60, times = 1))
+        assertEquals(1.0, AzathothDream.eyeMultiplier(0), 1e-12)
+        assertEquals(1e6, AzathothDream.eyeMultiplier(2), 1e-3)
+        assertTrue(AzathothDream.EPILOGUE.size >= 5)
+    }
+
+    @Test
+    fun `the ending is reachable from the flutes`() {
+        // El camino mínimo: Flautas, Caos Nuclear, Ecos, Trono y el Ojo
+        val path = listOf(ChaosNode.FLUTES, ChaosNode.NUCLEAR, ChaosNode.ECHOES, ChaosNode.THRONE)
+        var levels = emptyMap<String, Int>()
+        var spent = 0
+        path.forEach { node ->
+            assertTrue(node.id, AzathothDream.canBuy(node, levels, 999))
+            spent += node.cost(0)
+            levels = levels + (node.id to 1)
+        }
+        assertEquals(77, spent + AzathothDream.eyeCost(0))
+    }
 }

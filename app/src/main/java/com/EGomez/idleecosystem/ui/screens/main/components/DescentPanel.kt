@@ -10,12 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.EGomez.idleecosystem.R
 import com.EGomez.idleecosystem.domain.logic.AzathothDream
 import com.EGomez.idleecosystem.domain.logic.ChaosNode
+import com.EGomez.idleecosystem.domain.logic.EndingSummary
 import com.EGomez.idleecosystem.ui.components.GameIcons
 import com.EGomez.idleecosystem.ui.components.IconLabel
 import com.EGomez.idleecosystem.ui.i18n.tr
@@ -32,7 +38,12 @@ data class DescentUi(
     val awakeningsSince: Int = 0,
     val required: Int = AzathothDream.REQUIRED_AWAKENINGS,
     val kingCompleted: Boolean = false,
-    val levels: Map<String, Int> = emptyMap()
+    val levels: Map<String, Int> = emptyMap(),
+    /** Despertar a Azathoth (v0.25.1). */
+    val azathothAwakenings: Int = 0,
+    val eyeCost: Int = AzathothDream.EYE_BASE_COST,
+    val canAwakenAzathoth: Boolean = false,
+    val ending: EndingSummary? = null
 )
 
 /**
@@ -40,8 +51,15 @@ data class DescentUi(
  * botón con su confirmación y el árbol del Caos.
  */
 @Composable
-fun DescentPanel(ui: DescentUi, onDescend: () -> Unit, onBuyNode: (String) -> Unit) {
+fun DescentPanel(
+    ui: DescentUi,
+    onDescend: () -> Unit,
+    onBuyNode: (String) -> Unit,
+    onAwakenAzathoth: () -> Unit = {},
+    onReadEnding: () -> Unit = {}
+) {
     var confirming by remember { mutableStateOf(false) }
+    var confirmingEye by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp).testTag(DESCENT_PANEL_TAG)) {
         Surface(
             shape = RoundedCornerShape(12.dp),
@@ -91,6 +109,56 @@ fun DescentPanel(ui: DescentUi, onDescend: () -> Unit, onBuyNode: (String) -> Un
         }
         Text(stringResource(R.string.chaos_tree_title), color = ChaosColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 12.dp))
         ChaosNode.entries.forEach { node -> ChaosNodeRow(node, ui.levels, ui.chaos, onBuyNode) }
+        // El Ojo de Azathoth: el final (v0.25.1)
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFF0E0610),
+            border = BorderStroke(2.dp, if (ui.canAwakenAzathoth || ui.azathothAwakenings > 0) ChaosColor else Color(0xFF33203A)),
+            modifier = Modifier.fillMaxWidth().padding(top = 14.dp).testTag(EYE_PANEL_TAG)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(stringResource(R.string.eye_title), color = ChaosColor, fontSize = 12.sp, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.eye_hint), color = Color.LightGray, fontSize = 11.sp)
+                if (ui.azathothAwakenings > 0) {
+                    Text(stringResource(R.string.eye_done, ui.azathothAwakenings), color = Color(0xFF81C784), fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
+                }
+                Text(
+                    stringResource(R.string.eye_requires, ui.eyeCost),
+                    color = Color.Gray,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                Button(
+                    onClick = { confirmingEye = true },
+                    enabled = ui.canAwakenAzathoth,
+                    colors = ButtonDefaults.buttonColors(containerColor = ChaosColor, contentColor = Color.Black),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag(EYE_TAG)
+                ) {
+                    Text(stringResource(R.string.eye_button, ui.eyeCost), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                }
+                if (ui.ending != null) {
+                    TextButton(onClick = onReadEnding, modifier = Modifier.testTag(EYE_READ_TAG)) {
+                        Text(stringResource(R.string.eye_read), color = ChaosColor, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
+    if (confirmingEye) {
+        AlertDialog(
+            onDismissRequest = { confirmingEye = false },
+            title = { Text(stringResource(R.string.eye_confirm_title), color = ChaosColor) },
+            text = { Text(stringResource(R.string.eye_confirm_text, ui.eyeCost), color = Color.White, fontSize = 13.sp) },
+            confirmButton = {
+                TextButton(onClick = { confirmingEye = false; onAwakenAzathoth() }, modifier = Modifier.testTag(EYE_CONFIRM_TAG)) {
+                    Text(stringResource(R.string.eye_confirm), color = ChaosColor, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingEye = false }) { Text(stringResource(R.string.cancel), color = Color.Gray) }
+            },
+            containerColor = Color(0xFF1A0E1C)
+        )
     }
     if (confirming) {
         AlertDialog(
@@ -164,7 +232,58 @@ private fun ChaosNodeRow(node: ChaosNode, levels: Map<String, Int>, chaos: Int, 
     }
 }
 
+/**
+ * El final (v0.25.1): el epílogo y el resumen de la partida, a pantalla completa.
+ * "Seguir soñando" lo cierra y el juego continúa.
+ */
+@Composable
+fun EndingDialog(summary: EndingSummary, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Surface(color = Color(0xFF07030A), modifier = Modifier.fillMaxSize().testTag(ENDING_TAG)) {
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(stringResource(R.string.ending_title), color = ChaosColor, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                Spacer(modifier = Modifier.height(20.dp))
+                AzathothDream.EPILOGUE.forEach { paragraph ->
+                    Text(tr(paragraph), color = Color(0xFFEDE0F0), fontSize = 15.sp, fontStyle = FontStyle.Italic, modifier = Modifier.padding(bottom = 14.dp))
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(stringResource(R.string.ending_summary), color = ChaosColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                val hours = summary.playSeconds / 3600
+                val minutes = (summary.playSeconds % 3600) / 60
+                listOf(
+                    stringResource(R.string.ending_time, hours, minutes),
+                    stringResource(R.string.ending_ascensions, summary.ascensions),
+                    stringResource(R.string.ending_transcendences, summary.transcendences),
+                    stringResource(R.string.ending_awakenings, summary.awakenings),
+                    stringResource(R.string.ending_descents, summary.descents),
+                    stringResource(R.string.ending_cards, summary.cardsCompleted),
+                    stringResource(R.string.ending_achievements, summary.achievementsUnlocked, summary.achievementsTotal)
+                ).forEach { Text(it, color = Color.LightGray, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp)) }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(stringResource(R.string.ending_thanks), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.buttonColors(containerColor = ChaosColor, contentColor = Color.Black),
+                    modifier = Modifier.testTag(ENDING_CONTINUE_TAG)
+                ) {
+                    Text(stringResource(R.string.ending_continue), fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
 const val DESCENT_PANEL_TAG = "descent_panel"
+const val EYE_PANEL_TAG = "eye_panel"
+const val EYE_TAG = "eye_awaken"
+const val EYE_CONFIRM_TAG = "eye_confirm"
+const val EYE_READ_TAG = "eye_read"
+const val ENDING_TAG = "ending"
+const val ENDING_CONTINUE_TAG = "ending_continue"
 const val DESCENT_CHAOS_TAG = "descent_chaos"
 const val DESCEND_TAG = "descend"
 const val DESCEND_CONFIRM_TAG = "descend_confirm"

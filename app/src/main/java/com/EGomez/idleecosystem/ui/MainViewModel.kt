@@ -284,7 +284,11 @@ class MainViewModel @Inject constructor(
             awakeningsSince = economy.awakeningsSinceDescent,
             required = economy.descentRequired,
             kingCompleted = economy.kingCompleted,
-            levels = economy.chaosLevels
+            levels = economy.chaosLevels,
+            azathothAwakenings = economy.azathothAwakenings,
+            eyeCost = economy.eyeCost,
+            canAwakenAzathoth = economy.canAwakenAzathoth,
+            ending = economy.ending
         ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
@@ -389,6 +393,7 @@ class MainViewModel @Inject constructor(
                     _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
                 }
             }
+            is EngineEffect.AzathothAwakened -> if (effect.firstTime) _uiState.update { it.copy(showEnding = true) }
             is EngineEffect.Descended -> {
                 val chaos = effect.chaos
                 _uiState.update { it.copy(descentNotice = chaos) }
@@ -655,6 +660,12 @@ class MainViewModel @Inject constructor(
     fun descend() = engine.descend()
 
     fun buyChaosNode(id: String) = engine.buyChaosNode(id)
+
+    fun awakenAzathoth() = engine.awakenAzathoth()
+
+    fun showEnding() = _uiState.update { it.copy(showEnding = true) }
+
+    fun dismissEnding() = _uiState.update { it.copy(showEnding = false) }
 
     fun dismissCardChapter() = _uiState.update { it.copy(cardChapter = null) }
 

@@ -662,4 +662,24 @@
     <string name="descent_notice">You descended into the Dream of Azathoth: +%1$d Chaos</string>
     <string name="chaos_tree_title">THE CHAOS TREE</string>
     <string name="chaos_cost">%1$d C</string>
+    <string name="eye_title">THE EYE OF AZATHOTH</string>
+    <string name="eye_hint">Awakening Azathoth is the end of the game. Afterwards the game goes on, with the Eye open: production x1000 each time.</string>
+    <string name="eye_done">Azathoth has awoken %1$d times</string>
+    <string name="eye_requires">Requires The Throne of Chaos and %1$d Chaos.</string>
+    <string name="eye_button">AWAKEN AZATHOTH (%1$d Chaos)</string>
+    <string name="eye_read">Read the ending</string>
+    <string name="eye_confirm_title">Awaken Azathoth?</string>
+    <string name="eye_confirm_text">You spend %1$d Chaos. The dream ends, and with it, everything you know. You lose nothing from your game.</string>
+    <string name="eye_confirm">OPEN THE EYE</string>
+    <string name="ending_title">AZATHOTH AWAKES</string>
+    <string name="ending_summary">YOUR GAME</string>
+    <string name="ending_time">Time to the ending: %1$d h %2$d min</string>
+    <string name="ending_ascensions">Ascensions: %1$d</string>
+    <string name="ending_transcendences">Transcendences: %1$d</string>
+    <string name="ending_awakenings">Awakenings: %1$d</string>
+    <string name="ending_descents">Descents: %1$d</string>
+    <string name="ending_cards">Cards completed: %1$d of 8</string>
+    <string name="ending_achievements">Achievements: %1$d of %2$d</string>
+    <string name="ending_thanks">Thank you for playing Arcane Ecosystem.</string>
+    <string name="ending_continue">Keep dreaming</string>
 </resources>

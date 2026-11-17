@@ -663,4 +663,24 @@
     <string name="descent_notice">Descendiste al Sueño de Azathoth: +%1$d Caos</string>
     <string name="chaos_tree_title">EL ÁRBOL DEL CAOS</string>
     <string name="chaos_cost">%1$d C</string>
+    <string name="eye_title">EL OJO DE AZATHOTH</string>
+    <string name="eye_hint">Despertar a Azathoth es el final del juego. Después el juego sigue, con el Ojo abierto: producción x1000 cada vez.</string>
+    <string name="eye_done">Azathoth despertó %1$d veces</string>
+    <string name="eye_requires">Pide El Trono del Caos y %1$d de Caos.</string>
+    <string name="eye_button">DESPERTAR A AZATHOTH (%1$d Caos)</string>
+    <string name="eye_read">Leer el final</string>
+    <string name="eye_confirm_title">¿Despertar a Azathoth?</string>
+    <string name="eye_confirm_text">Gastas %1$d de Caos. El sueño termina, y con él, todo lo que conoces. No pierdes nada de tu partida.</string>
+    <string name="eye_confirm">ABRIR EL OJO</string>
+    <string name="ending_title">AZATHOTH DESPIERTA</string>
+    <string name="ending_summary">TU PARTIDA</string>
+    <string name="ending_time">Tiempo hasta el final: %1$d h %2$d min</string>
+    <string name="ending_ascensions">Ascensiones: %1$d</string>
+    <string name="ending_transcendences">Trascendencias: %1$d</string>
+    <string name="ending_awakenings">Despertares: %1$d</string>
+    <string name="ending_descents">Descensos: %1$d</string>
+    <string name="ending_cards">Cartas completadas: %1$d de 8</string>
+    <string name="ending_achievements">Logros: %1$d de %2$d</string>
+    <string name="ending_thanks">Gracias por jugar Ecosistema Arcano.</string>
+    <string name="ending_continue">Seguir soñando</string>
 </resources>

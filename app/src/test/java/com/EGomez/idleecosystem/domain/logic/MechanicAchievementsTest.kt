@@ -54,6 +54,7 @@ class MechanicAchievementsTest {
         "Expediciones y Reliquias" to { s -> s.stat?.let { it.startsWith("expedition") || it.startsWith("relic") || it == AchievementStat.FEAT_EXPEDITION_TAP } == true },
         "Cristales de Yuggoth" to { s -> s.stat?.let { it.startsWith("crystal") || it == AchievementStat.FEAT_CRYSTAL_UNIFORM } == true },
         "Los Cuatro Elementales" to { s -> s.stat?.let { it.startsWith("elemental") || it == AchievementStat.FEAT_ELEMENTAL_RIVAL } == true },
+        "Cartas del Rey de Amarillo" to { s -> s.stat?.let { it.startsWith("card") || it == AchievementStat.FEAT_CARD_HASTUR } == true },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

@@ -1018,6 +1018,41 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the yellow deck shows the card in play, chooses the next and reads chapters`() {
+        val chosen = mutableListOf<String?>()
+        var abandoned = 0
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.CardsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(
+                        active = "tower",
+                        completed = mapOf("fool" to 1),
+                        fragments = 5,
+                        transcendences = 12
+                    ),
+                    onChoose = { chosen += it },
+                    onAbandon = { abandoned++ }
+                )
+            }
+        }
+        compose.onNodeWithText("En juego: XVI · La Torre").assertExists()
+        compose.onNodeWithText("¡Meta cumplida! Despierta para completar la Carta.").assertExists()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CARD_ABANDON_TAG).performClick()
+        assertEquals(1, abandoned)
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CARD_CHOOSE_TAG + "moon").performScrollTo().performClick()
+        assertEquals(listOf<String?>("moon"), chosen)
+        // El Rey de Amarillo espera a las otras siete
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CARD_CHOOSE_TAG + "king").assertDoesNotExist()
+        compose.onNodeWithText("Pide completar las otras siete Cartas.").performScrollTo().assertExists()
+
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.CARD_READ_TAG + "fool").performScrollTo().performClick()
+        compose.onNodeWithText(com.EGomez.idleecosystem.domain.logic.YellowCard.FOOL.chapter).performScrollTo().assertExists()
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

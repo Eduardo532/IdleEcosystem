@@ -338,6 +338,13 @@ enum class TutorialStep(
         "Tras el tercer Despertar"
     ),
 
+    YELLOW_CARDS(
+        "yellow_cards",
+        "Las Cartas del Rey de Amarillo",
+        "Cinco veces despertaste y los cuatro Elementales te conocen. Ahora alguien te tiende un mazo amarillo. En la pestaña Cartas eliges una para tu próximo Despertar: durante todo ese Despertar rigen sus Juramentos. Si antes de volver a Despertar haces las Trascendencias que pide, la Carta se completa: da Fragmentos Amarillos y, la primera vez, un bono para siempre y un capítulo de la historia. El Rey de Amarillo espera a que completes las otras siete.",
+        "Tras el quinto Despertar, con los cuatro Elementales invocados"
+    ),
+
     EXPEDITIONS(
         "expeditions",
         "La Expedición",

@@ -123,6 +123,9 @@ data class GameUiState(
     /** Los Cristales de Yuggoth (v0.22.0). */
     val crystalsUi: com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi = com.EGomez.idleecosystem.ui.screens.main.components.CrystalsUi(),
     val elementalsUi: com.EGomez.idleecosystem.ui.screens.main.components.ElementalsUi = com.EGomez.idleecosystem.ui.screens.main.components.ElementalsUi(),
+    val cardsUi: com.EGomez.idleecosystem.ui.screens.main.components.CardsUi = com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(),
+    /** Una Carta del Rey de Amarillo recién completada, con su capítulo (v0.24.0). */
+    val cardChapter: com.EGomez.idleecosystem.ui.screens.main.components.CardChapterNotice? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

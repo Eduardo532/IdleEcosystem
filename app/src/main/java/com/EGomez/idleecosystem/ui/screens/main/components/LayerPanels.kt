@@ -72,6 +72,7 @@ fun MenuTab.title(): String = stringResource(
         MenuTab.EXPEDITION -> R.string.tab_expedition
         MenuTab.CRYSTALS -> R.string.tab_crystals
         MenuTab.ELEMENTALS -> R.string.tab_elementals
+        MenuTab.CARDS -> R.string.tab_cards
         MenuTab.DREAM -> R.string.tab_dream
         MenuTab.CHAIN -> R.string.tab_chain
         MenuTab.LETHARGY -> R.string.tab_lethargy

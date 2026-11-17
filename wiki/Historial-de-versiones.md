@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.24.x *(en pruebas)*
+
+- **v0.24.0:** Las Cartas del Rey de Amarillo, primera mecánica del arco final. Desde el quinto Despertar con los cuatro Elementales invocados, se elige una Carta para el próximo Despertar; durante todo ese Despertar rigen sus Juramentos. Con las Trascendencias que pide, se completa al volver a Despertar: da un bono permanente, Fragmentos Amarillos y un capítulo de la historia. Ocho Cartas, la última El Rey de Amarillo. 12 logros nuevos.
+
 ## v0.23.0 · "Los Cuatro Elementales" *(oficial, 17 nov 2026)*
 
 Octava etapa del Roadmap, cierre: el cuarto minijuego del Despertar. La etapa 8 queda completa.

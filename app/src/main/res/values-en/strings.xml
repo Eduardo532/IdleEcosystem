@@ -620,4 +620,25 @@
     <string name="elementals_active">SUMMONED</string>
     <string name="elementals_dormant">Dormant: this tree has no effect until you summon it.</string>
     <string name="elementals_cost">%1$d F</string>
+    <string name="tab_cards">Cards</string>
+    <string name="cards_title">THE CARDS OF THE KING IN YELLOW</string>
+    <string name="cards_hint">Choose a Card for your next Awakening: its Oaths rule that whole Awakening. Make the Transcendences it asks for before you Awaken again and it is completed.</string>
+    <string name="cards_fragments">FRAGMENTS</string>
+    <string name="cards_none_active">No Card in play this Awakening.</string>
+    <string name="cards_active">In play: %1$s · %2$s</string>
+    <string name="cards_progress">Transcendences this Awakening: %1$d/%2$d</string>
+    <string name="cards_reached">Goal reached! Awaken to complete the Card.</string>
+    <string name="cards_awaken_to_complete">It is completed when you Awaken, if you reached the goal.</string>
+    <string name="cards_abandon">Abandon the Card</string>
+    <string name="cards_deck">THE DECK</string>
+    <string name="cards_done_times">Completed %1$d times</string>
+    <string name="cards_king_locked">Requires completing the other seven Cards.</string>
+    <string name="cards_goal">Goal: %1$d Transcendences in the Card\'s Awakening.</string>
+    <string name="cards_reward">Reward: %1$s (the first time) · %2$d Fragments (%3$d when repeated)</string>
+    <string name="cards_choose">CHOOSE</string>
+    <string name="cards_chosen">Chosen for the next Awakening</string>
+    <string name="cards_read">Read the chapter</string>
+    <string name="cards_bonus_gained">Forever: %1$s</string>
+    <string name="cards_fragments_gained">+%1$d Yellow Fragments</string>
+    <string name="cards_chapter_ok">Keep reading</string>
 </resources>

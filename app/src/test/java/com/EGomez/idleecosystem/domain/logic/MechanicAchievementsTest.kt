@@ -61,6 +61,9 @@ class MechanicAchievementsTest {
                 it.startsWith("descent") || it.startsWith("chaos_") || it.startsWith("chaos.") || it == AchievementStat.FEAT_DESCENT_DREAMING
             } == true
         },
+        "Despertar a Azathoth" to { s ->
+            s.stat?.let { it.startsWith("eye_") || it == AchievementStat.AZATHOTH_AWAKENINGS || it == AchievementStat.FEAT_EYE_KING } == true
+        },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

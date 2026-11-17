@@ -31,6 +31,18 @@ enum class ChaosNode(
     }
 }
 
+/** El resumen de la partida que muestra el final (v0.25.1). */
+data class EndingSummary(
+    val playSeconds: Long,
+    val ascensions: Int,
+    val transcendences: Int,
+    val awakenings: Int,
+    val descents: Int,
+    val cardsCompleted: Int,
+    val achievementsUnlocked: Int,
+    val achievementsTotal: Int
+)
+
 /**
  * El Sueño de Azathoth (v0.25.0): la última capa. Con El Rey de Amarillo completado y
  * suficientes Despertares en el Descenso, Descender reinicia la capa Despertar (Visiones,
@@ -66,4 +78,27 @@ object AzathothDream {
     fun etherMultiplier(nuclear: Int): Double = 10.0.pow(nuclear)
     fun dancersMultiplier(dancers: Int): Double = 2.0.pow(dancers)
     fun productionExponent(throne: Int): Double = 1.05.pow(throne)
+
+    // ------------------------------------------------ Despertar a Azathoth (v0.25.1)
+
+    /** Caos que cuesta Despertar a Azathoth la primera vez; cada vez siguiente, el doble. */
+    const val EYE_BASE_COST = 60
+
+    fun eyeCost(times: Int): Int = EYE_BASE_COST * 2.0.pow(times).toInt()
+
+    /** Pide El Trono del Caos y el Caos que cuesta. */
+    fun canAwakenAzathoth(throne: Int, chaos: Int, times: Int): Boolean = throne > 0 && chaos >= eyeCost(times)
+
+    /** El Ojo Abierto: producción x1000 por cada vez que Azathoth despertó. */
+    fun eyeMultiplier(times: Int): Double = 1000.0.pow(times)
+
+    /** El epílogo, en párrafos. */
+    val EPILOGUE: List<String> = listOf(
+        "Todo empezó con unas Notas Desordenadas y una idea que no te dejaba dormir.",
+        "Ascendiste y la Cordura se volvió moneda. Trascendiste y el Éter te mostró las estrellas. Despertaste, y los dioses te pusieron nombre.",
+        "Jugaste las Cartas del Rey de Amarillo hasta el final del segundo acto. Descendiste al sueño del sultán ciego, una y otra vez, hasta que las flautas aprendieron tu ritmo.",
+        "Entonces abriste el Ojo.",
+        "Azathoth despierta. El universo, que solo era su sueño, se deshace como niebla al sol. No hay grito, ni fuego, ni silencio: solo una pregunta enorme mirándote desde el centro de todo.",
+        "Y tú, que fuiste parte del sueño, descubres que sigues aquí. Quizás porque alguien tiene que volver a soñarlo."
+    )
 }

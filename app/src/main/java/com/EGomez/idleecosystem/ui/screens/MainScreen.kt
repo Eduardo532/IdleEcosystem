@@ -380,6 +380,8 @@ fun MainScreen(
                             descentUi = uiState.descentUi,
                             onDescend = { viewModel.descend() },
                             onBuyChaosNode = { viewModel.buyChaosNode(it) },
+                            onAwakenAzathoth = { viewModel.awakenAzathoth() },
+                            onReadEnding = { viewModel.showEnding() },
                             onBuyVisionNode = { viewModel.buyVisionNode(it) },
                             onRespecVisions = { viewModel.respecVisions() },
                             onSummon = { viewModel.summon(it) },
@@ -616,6 +618,12 @@ fun MainScreen(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                     )
+                }
+            }
+
+            if (uiState.showEnding) {
+                uiState.descentUi.ending?.let { summary ->
+                    com.EGomez.idleecosystem.ui.screens.main.components.EndingDialog(summary, onDismiss = { viewModel.dismissEnding() })
                 }
             }
 

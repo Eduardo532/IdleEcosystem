@@ -298,6 +298,14 @@ object AchievementStat {
     const val DESCENT_WITH_PREFIX = "descent_with."
     const val DESCENT_PATH_PREFIX = "descent_path."
     const val FEAT_DESCENT_DREAMING = "feat.descent_dreaming"
+
+    // Despertar a Azathoth (v0.25.1)
+    const val AZATHOTH_AWAKENINGS = "azathoth_awakenings"
+    /** Segundos de juego cuando Azathoth despertó por primera vez. */
+    const val FINAL_PLAY_TIME = "final_play_time"
+    const val EYE_WITH_PREFIX = "eye_with."
+    const val EYE_PATH_PREFIX = "eye_path."
+    const val FEAT_EYE_KING = "feat.eye_king"
     /** Niveles de la Senda que vinieron del ciclo anterior (Senda Eterna): no se reembolsan. */
     const val CYCLE_PATH_KEPT = "cycle_path_kept"
     /** Trascender con exactamente las 40 Ascensiones de El Atajo. */
@@ -533,6 +541,8 @@ object AchievementStat {
     fun chaosNode(id: String) = CHAOS_NODE_PREFIX + id
     fun descentWith(pactId: String) = DESCENT_WITH_PREFIX + pactId
     fun descentPath(pathId: String) = DESCENT_PATH_PREFIX + pathId
+    fun eyeWith(pactId: String) = EYE_WITH_PREFIX + pactId
+    fun eyePath(pathId: String) = EYE_PATH_PREFIX + pathId
     fun engraved(runeId: String) = ENGRAVE_PREFIX + runeId
 
     fun trial(trialId: String) = TRIAL_PREFIX + trialId
@@ -563,6 +573,7 @@ object AchievementStat {
         CARD_NEXT, CARD_ACTIVE, CARD_COMPLETIONS, CARD_ABANDONS, CARD_FRAGMENTS, CARD_FRAGMENTS_EARNED, FEAT_CARD_HASTUR,
         ARTIFACT_FRAGMENTS_SPENT, FEAT_ARTIFACT_BROKE,
         DESCENTS, AZATHOTH_CHAOS, CHAOS_EARNED, MAX_CHAOS_GAIN, DESCENT_AWAKEN_BASE, FEAT_DESCENT_DREAMING,
+        AZATHOTH_AWAKENINGS, FINAL_PLAY_TIME, FEAT_EYE_KING,
         StatisticsManager.RUN_CLICKS, StatisticsManager.RUN_EVENTS, StatisticsManager.RUN_ECHOES,
         StatisticsManager.RUN_RUNES, StatisticsManager.RUN_OFFLINE, StatisticsManager.RUN_RITUALS
     )
@@ -583,7 +594,7 @@ object AchievementStat {
         ELEMENTAL_FAVOR_PREFIX, ELEMENTAL_NODE_PREFIX, ELEMENTAL_WITH_PREFIX, ELEMENTAL_PATH_PREFIX,
         ELEMENTAL_SUMMONED_PREFIX, CARD_DONE_PREFIX, CARD_WITH_PREFIX, CARD_PATH_PREFIX,
         ARTIFACT_PREFIX, ARTIFACT_WITH_PREFIX, ARTIFACT_PATH_PREFIX,
-        CHAOS_NODE_PREFIX, DESCENT_WITH_PREFIX, DESCENT_PATH_PREFIX,
+        CHAOS_NODE_PREFIX, DESCENT_WITH_PREFIX, DESCENT_PATH_PREFIX, EYE_WITH_PREFIX, EYE_PATH_PREFIX,
         CONSECRATED_PREFIX, CONSECRATED_WITH_PREFIX, MASTERY_PREFIX,
         MUTATION_SEEN_PREFIX, MUTATION_WITH_PREFIX, MUTATION_PATH_PREFIX, MUTATION_TRIAL_PREFIX)
 

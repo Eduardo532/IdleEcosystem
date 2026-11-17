@@ -1,6 +1,6 @@
 # Logros
 
-Hay **666 logros**: 113 originales y **553 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **673 logros**: 113 originales y **560 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -394,6 +394,12 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Daoloth Desgarra | Desciende con el pacto de Daoloth | +1 % |
 | La Mano que Cae | Desciende recorriendo la Senda de la Mano | +1 % |
 | Vacío sobre Vacío | Desciende recorriendo la Senda del Vacío | +1 % |
+| El Final del Sueño | Despierta a Azathoth | +1 % |
+| El Sueño se Repite | Despierta a Azathoth 3 veces | +2 % |
+| El Mensajero Cumple | Despierta a Azathoth con el pacto de Nyarlathotep | +1 % |
+| El Rey Abdica | Despierta a Azathoth con el pacto de Hastur | +1 % |
+| Soñar el Despertar | Despierta a Azathoth recorriendo la Senda del Sueño | +1 % |
+| La Mente Despierta | Despierta a Azathoth recorriendo la Senda de la Mente | +1 % |
 
 ### Panteón
 
@@ -567,7 +573,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **44 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **45 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

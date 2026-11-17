@@ -129,6 +129,8 @@ data class GameUiState(
     val descentUi: com.EGomez.idleecosystem.ui.screens.main.components.DescentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(),
     /** Caos ganado al Descender, para el aviso (v0.25.0). */
     val descentNotice: Int? = null,
+    /** El final a pantalla completa (v0.25.1). */
+    val showEnding: Boolean = false,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

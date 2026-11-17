@@ -64,6 +64,7 @@ import com.EGomez.idleecosystem.domain.logic.Artifacts
 import com.EGomez.idleecosystem.domain.logic.AzathothDream
 import com.EGomez.idleecosystem.domain.logic.CardBonus
 import com.EGomez.idleecosystem.domain.logic.ChaosNode
+import com.EGomez.idleecosystem.domain.logic.EndingSummary
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.logic.YellowCards
@@ -264,6 +265,11 @@ data class EconomyState(
     val descentRequired: Int = AzathothDream.REQUIRED_AWAKENINGS,
     val kingCompleted: Boolean = false,
     val chaosLevels: Map<String, Int> = emptyMap(),
+    /** Despertar a Azathoth (v0.25.1). */
+    val azathothAwakenings: Int = 0,
+    val eyeCost: Int = AzathothDream.EYE_BASE_COST,
+    val canAwakenAzathoth: Boolean = false,
+    val ending: EndingSummary? = null,
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -352,6 +358,8 @@ sealed interface EngineEffect {
     data class CardCompleted(val cardId: String, val firstTime: Boolean, val fragments: Int) : EngineEffect
     /** Se Descendió al Sueño de Azathoth (v0.25.0). */
     data class Descended(val chaos: Int) : EngineEffect
+    /** Azathoth despertó: el final del juego (v0.25.1). */
+    data class AzathothAwakened(val firstTime: Boolean) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -2893,6 +2901,45 @@ class GameEngine @Inject constructor(
         requestSave(replace = true)
     }
 
+    private fun azathothAwakenings(): Int = statsManager.counter(AchievementStat.AZATHOTH_AWAKENINGS).toInt()
+
+    private fun canAwakenAzathoth(): Boolean =
+        descentRevealed() && AzathothDream.canAwakenAzathoth(chaosLevel(ChaosNode.THRONE), chaos(), azathothAwakenings())
+
+    private fun endingSummary(): EndingSummary = EndingSummary(
+        playSeconds = statsManager.counter(AchievementStat.FINAL_PLAY_TIME).toLong(),
+        ascensions = statsManager.totalPrestiges,
+        transcendences = lifetimeTranscendences(),
+        awakenings = awakenings(),
+        descents = descents(),
+        cardsCompleted = completedCards().size,
+        achievementsUnlocked = achievementManager.availableAchievements.count { it.isUnlocked },
+        achievementsTotal = achievementManager.availableAchievements.size
+    )
+
+    /**
+     * Despertar a Azathoth (v0.25.1): el final visible del juego. Cuesta Caos y pide El Trono
+     * del Caos. La primera vez muestra el epílogo; cada vez deja abierto el Ojo (producción
+     * x1000) y la siguiente cuesta el doble. El juego sigue.
+     */
+    fun awakenAzathoth() = post {
+        if (!canAwakenAzathoth()) return@post
+        val times = azathothAwakenings()
+        val left = chaos() - AzathothDream.eyeCost(times)
+        statsManager.counters.remove(AchievementStat.AZATHOTH_CHAOS)
+        if (left > 0) statsManager.counters[AchievementStat.AZATHOTH_CHAOS] = BigDecimal(left)
+        statsManager.count(AchievementStat.AZATHOTH_AWAKENINGS)
+        statsManager.flag(AchievementStat.eyeWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.eyePath(it.id)) }
+        // El último acto: con El Rey de Amarillo en juego
+        if (activeCard() == YellowCard.KING) statsManager.flag(AchievementStat.FEAT_EYE_KING)
+        if (times == 0) statsManager.counters[AchievementStat.FINAL_PLAY_TIME] = BigDecimal(statsManager.totalPlayTimeSeconds)
+        soundManager.playSound(SoundType.ACHIEVEMENT)
+        _effects.trySend(EngineEffect.AzathothAwakened(firstTime = times == 0))
+        recalculate()
+        requestSave(replace = true)
+    }
+
     /** Sube un nodo del árbol del Caos. */
     fun buyChaosNode(id: String) = post {
         val node = ChaosNode.fromId(id) ?: return@post
@@ -3539,6 +3586,7 @@ class GameEngine @Inject constructor(
             .multiply(BigDecimal.valueOf(Elementals.productionMultiplier(el(ElementalNode.EMBER))))
             .multiply(BigDecimal.valueOf(cardFactor(CardBonus.PRODUCTION)))
             .multiply(BigDecimal.valueOf(AzathothDream.productionMultiplier(chaosLevel(ChaosNode.FLUTES))))
+            .multiply(BigDecimal.valueOf(AzathothDream.eyeMultiplier(azathothAwakenings())))
 
         // Potenciadores temporales (evento + rituales + runas): se SUMAN entre sí.
         // Los permanentes se siguen multiplicando.
@@ -3760,6 +3808,10 @@ class GameEngine @Inject constructor(
             descentRequired = AzathothDream.requiredAwakenings(chaosLevel(ChaosNode.GATES)),
             kingCompleted = kingCompleted(),
             chaosLevels = ChaosNode.entries.associate { it.id to chaosLevel(it) },
+            azathothAwakenings = azathothAwakenings(),
+            eyeCost = AzathothDream.eyeCost(azathothAwakenings()),
+            canAwakenAzathoth = canAwakenAzathoth(),
+            ending = if (azathothAwakenings() > 0) endingSummary() else null,
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

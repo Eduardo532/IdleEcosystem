@@ -201,6 +201,7 @@ Un ritual más caro **nunca rinde menos por Eco** que uno más barato:
 
 - Aparece con la primera Carta completada. Descender pide El Rey de Amarillo y `8 − Puertas` Despertares desde el último Descenso; da `2 × (Despertares − mínimo + 1) + 2·Ecos` de Caos. Reinicia la capa Despertar (Visiones, su árbol, Juramentos, Carta, Expedición en curso y Oro, cuadrícula y Lustre, Favor) y todo lo que reinicia un Despertar; la cuenta total de Despertares no se toca, así que nada abierto se cierra.
 - Árbol del Caos (`ChaosNode`, costo `⌈base × 2^nivel⌉`): producción `100^n`, Visiones `2^n`, Éter `10^n`, mínimo `−n`, Caos `+2n`, Favor, Mina y daño `2^n`, producción `^(1,05^n)`. *(Código: `AzathothDream`; test: `AzathothDreamTest`.)*
+- *(v0.25.1)* Despertar a Azathoth: pide El Trono del Caos y `60 × 2^veces` de Caos (el camino mínimo al primero cuesta 77); cada vez, producción x1000 para siempre. No reinicia nada.
 
 ## Consagrar edificios
 

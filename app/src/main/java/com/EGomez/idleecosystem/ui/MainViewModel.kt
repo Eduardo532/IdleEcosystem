@@ -268,6 +268,13 @@ class MainViewModel @Inject constructor(
             levels = economy.elementalLevels,
             favorPerSecond = economy.favorPerSecond
         ),
+        cardsUi = com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(
+            active = economy.cardActive,
+            next = economy.cardNext,
+            completed = economy.cardsCompleted,
+            fragments = economy.cardFragments,
+            transcendences = economy.cardTranscendences
+        ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
             dealt = economy.expeditionDealt,
@@ -370,6 +377,9 @@ class MainViewModel @Inject constructor(
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
                 }
+            }
+            is EngineEffect.CardCompleted -> _uiState.update {
+                it.copy(cardChapter = com.EGomez.idleecosystem.ui.screens.main.components.CardChapterNotice(effect.cardId, effect.firstTime, effect.fragments))
             }
             is EngineEffect.TrialCompleted -> {
                 val trial = effect.trial
@@ -616,6 +626,12 @@ class MainViewModel @Inject constructor(
     fun setElemental(id: String?) = engine.setElemental(id)
 
     fun buyElementalNode(id: String) = engine.buyElementalNode(id)
+
+    fun chooseCard(id: String?) = engine.chooseCard(id)
+
+    fun abandonCard() = engine.abandonCard()
+
+    fun dismissCardChapter() = _uiState.update { it.copy(cardChapter = null) }
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

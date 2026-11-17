@@ -30,6 +30,7 @@ import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
 import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
@@ -1045,6 +1046,51 @@ class GameEngineTest {
         await(engine.economy) { it.activeElemental == null }
         assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.ELEMENTAL_SWITCHES)))
         assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.elementalWith("none"))))
+    }
+
+    @Test
+    fun `a yellow card rules its awakening and completes on the next one`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.AWAKENINGS, BigDecimal(5))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+            listOf("cthugha", "ithaqua", "cthulhu", "nyarlathotep").forEach {
+                counters[AchievementStat.elementalSummoned(it)] = BigDecimal.ONE
+            }
+            // El Loco en juego, con sus 12 Trascendencias hechas; La Torre elegida
+            counters[AchievementStat.CARD_ACTIVE] = BigDecimal(YellowCard.FOOL.ordinal + 1)
+            counters[AchievementStat.CARD_NEXT] = BigDecimal(YellowCard.TOWER.ordinal + 1)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.cardsRevealed && it.canAwaken }
+        assertTrue(MenuTab.CARDS in before.menuUnlocks.tabs)
+        assertEquals("fool", before.cardActive)
+        assertEquals(12, before.cardTranscendences)
+
+        engine.awaken()
+        val after = await(engine.economy) { it.cardActive == "tower" }
+        assertEquals(1, after.cardsCompleted["fool"])
+        assertEquals(5, after.cardFragments)
+        assertEquals(null, after.cardNext)
+
+        // El Rey no se puede elegir sin las otras siete; La Luna sí
+        engine.chooseCard("king")
+        engine.chooseCard("moon")
+        assertEquals("moon", await(engine.economy) { it.cardNext != null }.cardNext)
+
+        engine.abandonCard()
+        await(engine.economy) { it.cardActive == null }
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.CARD_ABANDONS)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.cardWith("none"))))
     }
 
     @Test

@@ -621,4 +621,25 @@
     <string name="elementals_active">INVOCADO</string>
     <string name="elementals_dormant">Dormido: este árbol no hace efecto hasta que lo invoques.</string>
     <string name="elementals_cost">%1$d F</string>
+    <string name="tab_cards">Cartas</string>
+    <string name="cards_title">LAS CARTAS DEL REY DE AMARILLO</string>
+    <string name="cards_hint">Elige una Carta para tu próximo Despertar: sus Juramentos rigen todo ese Despertar. Haz las Trascendencias que pide antes de volver a Despertar y se completa.</string>
+    <string name="cards_fragments">FRAGMENTOS</string>
+    <string name="cards_none_active">Ninguna Carta en juego en este Despertar.</string>
+    <string name="cards_active">En juego: %1$s · %2$s</string>
+    <string name="cards_progress">Trascendencias en este Despertar: %1$d/%2$d</string>
+    <string name="cards_reached">¡Meta cumplida! Despierta para completar la Carta.</string>
+    <string name="cards_awaken_to_complete">Se completa al Despertar, si llegaste a la meta.</string>
+    <string name="cards_abandon">Abandonar la Carta</string>
+    <string name="cards_deck">EL MAZO</string>
+    <string name="cards_done_times">Completada %1$d veces</string>
+    <string name="cards_king_locked">Pide completar las otras siete Cartas.</string>
+    <string name="cards_goal">Meta: %1$d Trascendencias en el Despertar de la Carta.</string>
+    <string name="cards_reward">Premio: %1$s (la primera vez) · %2$d Fragmentos (%3$d al repetirla)</string>
+    <string name="cards_choose">ELEGIR</string>
+    <string name="cards_chosen">Elegida para el próximo Despertar</string>
+    <string name="cards_read">Leer el capítulo</string>
+    <string name="cards_bonus_gained">Para siempre: %1$s</string>
+    <string name="cards_fragments_gained">+%1$d Fragmentos Amarillos</string>
+    <string name="cards_chapter_ok">Seguir leyendo</string>
 </resources>

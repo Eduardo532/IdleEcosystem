@@ -609,4 +609,16 @@
     <string name="refine_confirm_gain">Ganas %1$d de Esencia de los Mi-Go.</string>
     <string name="refine_confirm_loses">Pierdes %1$d de Lustre y todos los cristales de la cuadrícula. El árbol de refinado no se pierde.</string>
     <string name="refine_confirm">REFINAR</string>
+    <string name="tab_elementals">Elementales</string>
+    <string name="elementals_title">LOS CUATRO ELEMENTALES</string>
+    <string name="elementals_hint">Invoca a un Elemental: junta Favor con el tiempo y su Favor compra su árbol. Solo uno está invocado a la vez, y solo su árbol hace efecto.</string>
+    <string name="elementals_rate">%1$s invocado · +%2$s Favor por minuto</string>
+    <string name="elementals_none">Ningún Elemental invocado.</string>
+    <string name="elementals_tree">ÁRBOL DE %1$s</string>
+    <string name="elementals_favor">Favor: %1$s</string>
+    <string name="elementals_summon">INVOCAR</string>
+    <string name="elementals_dismiss">Despedir</string>
+    <string name="elementals_active">INVOCADO</string>
+    <string name="elementals_dormant">Dormido: este árbol no hace efecto hasta que lo invoques.</string>
+    <string name="elementals_cost">%1$d F</string>
 </resources>

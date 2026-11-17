@@ -262,6 +262,12 @@ class MainViewModel @Inject constructor(
             essenceGain = economy.crystalEssenceGain,
             refineLevels = economy.refineLevels
         ),
+        elementalsUi = com.EGomez.idleecosystem.ui.screens.main.components.ElementalsUi(
+            active = economy.activeElemental,
+            favor = economy.elementalFavor,
+            levels = economy.elementalLevels,
+            favorPerSecond = economy.favorPerSecond
+        ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
             dealt = economy.expeditionDealt,
@@ -606,6 +612,10 @@ class MainViewModel @Inject constructor(
     fun buyRefineNode(id: String) = engine.buyRefineNode(id)
 
     fun respecRefine() = engine.respecRefine()
+
+    fun setElemental(id: String?) = engine.setElemental(id)
+
+    fun buyElementalNode(id: String) = engine.buyElementalNode(id)
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

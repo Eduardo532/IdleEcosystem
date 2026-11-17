@@ -55,6 +55,7 @@ class MechanicAchievementsTest {
         "Cristales de Yuggoth" to { s -> s.stat?.let { it.startsWith("crystal") || it == AchievementStat.FEAT_CRYSTAL_UNIFORM } == true },
         "Los Cuatro Elementales" to { s -> s.stat?.let { it.startsWith("elemental") || it == AchievementStat.FEAT_ELEMENTAL_RIVAL } == true },
         "Cartas del Rey de Amarillo" to { s -> s.stat?.let { it.startsWith("card") || it == AchievementStat.FEAT_CARD_HASTUR } == true },
+        "Artefactos" to { s -> s.stat?.let { it.startsWith("artifact") || it == AchievementStat.FEAT_ARTIFACT_BROKE } == true },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.24.x *(en pruebas)*
 
 - **v0.24.0:** Las Cartas del Rey de Amarillo, primera mecánica del arco final. Desde el quinto Despertar con los cuatro Elementales invocados, se elige una Carta para el próximo Despertar; durante todo ese Despertar rigen sus Juramentos. Con las Trascendencias que pide, se completa al volver a Despertar: da un bono permanente, Fragmentos Amarillos y un capítulo de la historia. Ocho Cartas, la última El Rey de Amarillo. 12 logros nuevos.
+- **v0.24.1:** Los Artefactos. Siete objetos del acto final que se compran con Fragmentos Amarillos y aceleran sistemas concretos: la Lámpara de Alhazred (Favor), la Llave de Plata (Sueño), el Martillo de los Mi-Go (Mina), el Astrolabio de Celaeno (Polvo Estelar), la Daga de Hali (Expedición), el Velo de Cassilda (Visiones) y el Broche del Signo (Fragmentos). 11 logros nuevos.
 
 ## v0.23.0 · "Los Cuatro Elementales" *(oficial, 17 nov 2026)*
 

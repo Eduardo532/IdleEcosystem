@@ -1053,6 +1053,27 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `artifacts are bought with yellow fragments`() {
+        val bought = mutableListOf<String>()
+        compose.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+            ) {
+                com.EGomez.idleecosystem.ui.screens.main.components.CardsPanel(
+                    com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(fragments = 6, artifacts = mapOf("dagger" to 5)),
+                    onChoose = {},
+                    onAbandon = {},
+                    onBuyArtifact = { bought += it }
+                )
+            }
+        }
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ARTIFACT_BUY_TAG + "veil").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ARTIFACT_BUY_TAG + "dagger").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.components.ARTIFACT_BUY_TAG + "lamp").performScrollTo().performClick()
+        assertEquals(listOf("lamp"), bought)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

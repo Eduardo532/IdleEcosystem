@@ -183,6 +183,17 @@ object ContentTranslations {
         "Los Cristales de Yuggoth" to "The Crystals of Yuggoth",
         "En tu segundo Despertar trajiste piedras de Yuggoth que crecen solas. En la pestaña Cristales, la Mina deja un cristal en una casilla vacía cada pocos segundos. Toca un cristal y después otro del mismo grado para fusionarlos en uno mayor. El Poder de los cristales multiplica tu producción. Con un cristal de grado 5 puedes Pulir: la cuadrícula se vacía a cambio de Lustre, que hace los cristales más fuertes y la Mina más rápida." to "On your second Awakening you brought back stones from Yuggoth that grow by themselves. In the Crystals tab, the Mine drops a crystal in an empty cell every few seconds. Tap a crystal and then another of the same tier to fuse them into a bigger one. The crystals' Power multiplies your production. With a tier 5 crystal you can Polish: the grid empties in exchange for Lustre, which makes crystals stronger and the Mine faster.",
         "Tras el segundo Despertar" to "After the second Awakening",
+        // Los Artefactos (v0.24.1)
+        "La Lámpara de Alhazred" to "The Lamp of Alhazred",
+        "Favor de los Elementales x1,5 por nivel." to "Elemental Favor x1.5 per level.",
+        "La Llave de Plata" to "The Silver Key",
+        "El Martillo de los Mi-Go" to "The Mi-Go Hammer",
+        "El Astrolabio de Celaeno" to "The Astrolabe of Celaeno",
+        "La Daga de Hali" to "The Dagger of Hali",
+        "El Velo de Cassilda" to "Cassilda's Veil",
+        "Visiones ganadas +10 % por nivel." to "Visions gained +10% per level.",
+        "El Broche del Signo" to "The Brooch of the Sign",
+        "Fragmentos Amarillos de las Cartas +25 % por nivel." to "Yellow Fragments from Cards +25% per level.",
         // Las Cartas del Rey de Amarillo (v0.24.0)
         "El Loco" to "The Fool",
         "La Torre" to "The Tower",

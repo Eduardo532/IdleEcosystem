@@ -1094,6 +1094,39 @@ class GameEngineTest {
     }
 
     @Test
+    fun `yellow fragments buy artifacts`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(5))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(50))
+            listOf("cthugha", "ithaqua", "cthulhu", "nyarlathotep").forEach {
+                counters[AchievementStat.elementalSummoned(it)] = BigDecimal.ONE
+            }
+            counters[AchievementStat.CARD_FRAGMENTS] = BigDecimal(13)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.cardsRevealed && it.cardFragments == 13 }
+
+        // La Lámpara: 5 y después 8, hasta el último Fragmento
+        engine.buyArtifact("lamp")
+        val first = await(engine.economy) { it.artifactLevels["lamp"] == 1 }
+        assertEquals(8, first.cardFragments)
+        engine.buyArtifact("lamp")
+        val second = await(engine.economy) { it.artifactLevels["lamp"] == 2 }
+        assertEquals(0, second.cardFragments)
+        // Sin Fragmentos no se compra
+        engine.buyArtifact("veil")
+        assertEquals(0, await(engine.economy) { true }.artifactLevels["veil"])
+        assertEquals(0, BigDecimal(13).compareTo(stats.counter(AchievementStat.ARTIFACT_FRAGMENTS_SPENT)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.FEAT_ARTIFACT_BROKE)))
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

@@ -525,6 +525,7 @@
     <string name="ttrials_mastered">Passed on all five levels.</string>
     <string name="ttrials_notice">You passed %1$s</string>
     <string name="tab_cycles">Cycles</string>
+    <string name="tab_mysteries">Mysteries</string>
     <string name="beast_new">NEW</string>
     <string name="bestiary_new_count">%1$d new</string>
     <string name="bulk_buy_label">Buy:</string>

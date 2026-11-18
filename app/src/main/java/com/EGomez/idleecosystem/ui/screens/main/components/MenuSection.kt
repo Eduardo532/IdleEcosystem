@@ -478,7 +478,7 @@ fun MenuSection(
                     MenuTab.CARDS -> item { CardsPanel(cardsUi, onChooseCard, onAbandonCard, onBuyArtifact) }
                     MenuTab.DESCENT -> item { DescentPanel(descentUi, onDescend, onBuyChaosNode, onAwakenAzathoth, onReadEnding) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
-                    MenuTab.CYCLES -> Unit
+                    MenuTab.CYCLES, MenuTab.MYSTERIES -> Unit
                 }
             }
 

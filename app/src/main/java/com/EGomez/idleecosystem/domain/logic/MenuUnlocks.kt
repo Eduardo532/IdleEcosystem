@@ -32,6 +32,8 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     TTRIALS("ttrials", MenuLayer.TRANSCENDENCE),
     AWAKEN("awaken", MenuLayer.AWAKENING),
     VISIONS("visions", MenuLayer.AWAKENING),
+    /** Grupo (v0.25.2): no tiene contenido propio; reúne los cuatro minijuegos del Despertar. */
+    MYSTERIES("mysteries", MenuLayer.AWAKENING),
     SIGNS("signs", MenuLayer.AWAKENING),
     EXPEDITION("expedition", MenuLayer.AWAKENING),
     CRYSTALS("crystals", MenuLayer.AWAKENING),
@@ -42,17 +44,21 @@ enum class MenuTab(val id: String, val layer: MenuLayer) {
     /**
      * La pestaña bajo la que se agrupa (v0.20.4): Mutaciones va dentro de Éter y los cuatro
      * desafíos de ciclo dentro de Ciclos, para que la capa Trascendencia tenga solo cuatro
-     * pestañas arriba.
+     * pestañas arriba. En la v0.25.2, Visiones va dentro de Despertar y los cuatro minijuegos
+     * dentro de Misterios: la capa Despertar queda con tres pestañas (Despertar, Misterios y
+     * Cartas).
      */
     val group: MenuTab?
         get() = when (this) {
             MUTATIONS -> ETHER
             DREAM, CHAIN, LETHARGY, TTRIALS -> CYCLES
+            VISIONS -> AWAKEN
+            SIGNS, EXPEDITION, CRYSTALS, ELEMENTALS -> MYSTERIES
             else -> null
         }
 
     /** Un grupo sin contenido propio: abrirlo abre su primera pestaña. */
-    val isGroupOnly: Boolean get() = this == CYCLES
+    val isGroupOnly: Boolean get() = this == CYCLES || this == MYSTERIES
 
     companion object {
         fun fromId(id: String?): MenuTab? = entries.firstOrNull { it.id == id }
@@ -121,7 +127,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
         val ALL = MenuUnlocks(MenuTab.entries.toSet())
 
         /** Investigación nunca se anuncia como nueva (es la de siempre), ni Ciclos (es un grupo). */
-        val NEVER_NEW = setOf(MenuTab.RESEARCH, MenuTab.CYCLES)
+        val NEVER_NEW = setOf(MenuTab.RESEARCH, MenuTab.CYCLES, MenuTab.MYSTERIES)
 
         fun compute(
             reveal: SystemReveal,
@@ -170,6 +176,7 @@ data class MenuUnlocks(val tabs: Set<MenuTab> = setOf(MenuTab.RESEARCH)) {
             if (expeditionRevealed) tabs += MenuTab.EXPEDITION
             if (crystalsRevealed) tabs += MenuTab.CRYSTALS
             if (elementalsRevealed) tabs += MenuTab.ELEMENTALS
+            if (signsRevealed || expeditionRevealed || crystalsRevealed || elementalsRevealed) tabs += MenuTab.MYSTERIES
             if (cardsRevealed) tabs += MenuTab.CARDS
             if (descentRevealed) tabs += MenuTab.DESCENT
             return MenuUnlocks(tabs)

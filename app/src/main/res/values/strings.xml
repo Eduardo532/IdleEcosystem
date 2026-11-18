@@ -526,6 +526,7 @@
     <string name="ttrials_mastered">Superada en los cinco niveles.</string>
     <string name="ttrials_notice">Superaste %1$s</string>
     <string name="tab_cycles">Ciclos</string>
+    <string name="tab_mysteries">Misterios</string>
     <string name="beast_new">NUEVA</string>
     <string name="bestiary_new_count">%1$d nuevas</string>
     <string name="bulk_buy_label">Comprar:</string>

@@ -26,15 +26,18 @@ El menú de abajo agrupa las pestañas en **capas**, una por cada nivel de prest
 | | | ↳ Ciclos › Letargo | Trascender por quinta vez |
 | | | ↳ Ciclos › Desafíos | Trascender por sexta vez |
 | **Despertar** | amarillo pálido (Visiones) | Despertar | llegar a 10 Trascendencias en total *(v0.21.0)* |
-| | | Visiones | ídem |
-| | | Signos | el primer Despertar *(v0.21.2)* |
-| | | Expedición | el primer Despertar *(v0.21.3)* |
-| | | Cristales | el segundo Despertar *(v0.22.0)* |
-| | | Elementales | el tercer Despertar *(v0.23.0)* |
+| | | ↳ Despertar › Visiones | ídem |
+| | | Misterios | el primer Despertar (con su primer minijuego) *(v0.25.2)* |
+| | | ↳ Misterios › Signos | el primer Despertar *(v0.21.2)* |
+| | | ↳ Misterios › Expedición | el primer Despertar *(v0.21.3)* |
+| | | ↳ Misterios › Cristales | el segundo Despertar *(v0.22.0)* |
+| | | ↳ Misterios › Elementales | el tercer Despertar *(v0.23.0)* |
 | | | Cartas | el quinto Despertar, con los cuatro Elementales invocados *(v0.24.0)* |
 | **Caos** | magenta (Caos) | Descenso | completar la primera Carta del Rey de Amarillo *(v0.25.0)* |
 
 **Grupos *(v0.20.4)*:** para que la capa Trascendencia no tenga ocho pestañas apretadas, arriba se ven solo cuatro: **Éter**, **Estrellas**, **Laboratorio** y **Ciclos**. Mutaciones va dentro de Éter, y Sueño, Cadena, Letargo y Desafíos van dentro de Ciclos. Debajo de la fila de pestañas aparece una fila de chips con las pestañas del grupo. Ciclos no tiene contenido propio: abre la primera pestaña con algo nuevo, o la primera del grupo. El punto dorado de algo nuevo se ve en el chip y también en la pestaña del grupo.
+
+*(v0.25.2)* La capa Despertar se agrupa igual y queda con tres pestañas: **Despertar** (con Visiones dentro), **Misterios** (Signos, Expedición, Cristales y Elementales) y **Cartas**. Misterios no tiene contenido propio: abre el primer minijuego con algo nuevo, o Signos.
 
 Un sistema descubierto no vuelve a esconderse, ni al Ascender ni al Trascender.
 

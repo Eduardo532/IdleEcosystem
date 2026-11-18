@@ -48,6 +48,16 @@ class ContentTranslationsTest {
             com.EGomez.idleecosystem.domain.logic.SignRarity.entries.map { it.title } +
             com.EGomez.idleecosystem.domain.logic.Planet.entries.map { it.title },
         "Reliquias" to com.EGomez.idleecosystem.domain.logic.Relic.entries.flatMap { listOf(it.title, it.description) },
+        // El arco final (v0.24 – v0.26)
+        "Cartas" to com.EGomez.idleecosystem.domain.logic.YellowCard.entries.flatMap { listOf(it.title, it.chapter, it.bonus.description) },
+        "Artefactos" to com.EGomez.idleecosystem.domain.logic.Artifact.entries.flatMap { listOf(it.title, it.description) },
+        "Árbol del Caos" to com.EGomez.idleecosystem.domain.logic.ChaosNode.entries.flatMap { listOf(it.title, it.description) },
+        "Epílogo" to com.EGomez.idleecosystem.domain.logic.AzathothDream.EPILOGUE,
+        "Elementales" to com.EGomez.idleecosystem.domain.logic.Elemental.entries.map { it.element } +
+            com.EGomez.idleecosystem.domain.logic.ElementalNode.entries.flatMap { listOf(it.title, it.description) },
+        "Crónica" to com.EGomez.idleecosystem.domain.logic.ChronicleAct.entries.map { it.title } +
+            com.EGomez.idleecosystem.domain.logic.ChronicleChapter.entries.flatMap { listOf(it.title, it.text) } +
+            com.EGomez.idleecosystem.domain.logic.ChronicleAppendix.entries.flatMap { listOf(it.title, it.text) },
         "Bestiario" to com.EGomez.idleecosystem.domain.logic.Bestiary.beasts.flatMap { listOf(it.name, it.lore) } +
             com.EGomez.idleecosystem.domain.logic.Bestiary.domains.flatMap { listOf(it.title, it.description) } +
             com.EGomez.idleecosystem.domain.logic.BeastRarity.entries.map { it.title }

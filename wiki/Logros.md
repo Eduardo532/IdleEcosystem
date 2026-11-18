@@ -1,6 +1,6 @@
 # Logros
 
-Hay **683 logros**: 113 originales y **570 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **692 logros**: 113 originales y **579 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -409,6 +409,14 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Abhoth Corrige | Escribe un capítulo de la Crónica con el pacto de Abhoth | +1 % |
 | Escriba del Culto | Escribe un capítulo de la Crónica recorriendo la Senda del Culto | +1 % |
 | Páginas del Vacío | Escribe un capítulo de la Crónica recorriendo la Senda del Vacío | +1 % |
+| Algo que Recordar | Ten 5 memorias de tus decisiones en los eventos | +1 % |
+| Memoria de Elefante | Ten 15 memorias de tus decisiones en los eventos | +2 % |
+| Una Historia Cerrada | Termina una de las historias con memoria | +1 % |
+| Tres Historias Cerradas | Termina las tres historias con memoria | +2 % |
+| Nug Recuerda | Toma una decisión que el juego recuerde con el pacto de Nug | +1 % |
+| R'lyeh Recuerda | Toma una decisión que el juego recuerde con el pacto de Cthulhu | +1 % |
+| Memoria Arcana | Toma una decisión que el juego recuerde recorriendo la Senda Arcana | +1 % |
+| La Mano que Escribe | Toma una decisión que el juego recuerde recorriendo la Senda de la Mano | +1 % |
 
 ### Panteón
 
@@ -582,7 +590,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **46 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **47 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

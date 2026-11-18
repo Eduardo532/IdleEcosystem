@@ -139,6 +139,41 @@ enum class ChronicleChapter(
     }
 }
 
+/**
+ * El Apéndice de la Crónica (v0.26.1): contenido oculto. Páginas que no cuentan para el
+ * final ni se anuncian; aparecen al cerrar las historias de los eventos con memoria.
+ */
+enum class ChronicleAppendix(val id: String, val title: String, val text: String, val memories: List<String>) {
+    ULTHAR(
+        "ulthar", "Los Gatos de Ulthar",
+        "Los gatos de Ulthar no olvidan a quien les dio de comer. Hay un asiento con tu nombre en su consejo, en la cara oculta de la luna, y una ley nueva: a ti tampoco se te puede hacer daño.",
+        listOf(RandomEventManager.CATS_END)
+    ),
+    ULTHAR_LAW(
+        "ulthar_law", "La Ley de Ulthar",
+        "En Ulthar no se puede matar a un gato. Tú no mataste a ninguno; solo espantaste a uno. Desde entonces, cada gato del mundo te mira un segundo de más, por si acaso.",
+        listOf(RandomEventManager.CATS_BITTER)
+    ),
+    WHISPERER(
+        "whisperer", "El que Susurra en la Oscuridad",
+        "Las cartas del profesor Wilmarth terminaron en un cilindro que zumba. Los Mi-Go no se llevaron su cuerpo: se llevaron su mente, y la guardaron para que siguiera escribiendo. Algún día, quizás, te escriba a ti.",
+        listOf(RandomEventManager.LETTERS_END)
+    ),
+    DEEP(
+        "deep", "Bajo el Arrecife",
+        "El huésped empapado era un Profundo, y su gente no olvida una puerta abierta ni una cerrada. En Y'ha-nthlei guardan para ti un lugar junto a los que vuelven al mar.",
+        listOf(RandomEventManager.GUEST_END)
+    ),
+    UNTOLD(
+        "untold", "Lo que No Se Contó",
+        "Un gato, una mente en un cilindro y un hombre del mar vieron toda tu historia desde afuera. Esta es su versión: no eras tú quien soñaba, ni Azathoth. Eran ellos, los testigos, quienes te soñaban a ti, para que alguien llegara al final.",
+        listOf(RandomEventManager.WITNESSES)
+    );
+
+    /** Si las memorias ya escribieron esta página. */
+    fun isWritten(memories: Set<String>): Boolean = memories.any { it in this.memories }
+}
+
 object Chronicle {
     /** Los capítulos que [value] ya permite escribir y que aún no están en [written]. */
     fun newChapters(written: Set<String>, value: (String) -> BigDecimal): List<ChronicleChapter> =
@@ -151,6 +186,9 @@ object Chronicle {
 
     /** Un acto se ve desde que tiene un capítulo escrito. */
     fun isActStarted(act: ChronicleAct, written: Set<String>): Boolean = chaptersOf(act).any { it.id in written }
+
+    /** Las páginas del Apéndice que las memorias ya escribieron. */
+    fun appendix(memories: Set<String>): List<ChronicleAppendix> = ChronicleAppendix.entries.filter { it.isWritten(memories) }
 
     /** Fracción de la Crónica escrita: el camino hacia el final. */
     fun progress(written: Set<String>): Float =

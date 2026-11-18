@@ -135,6 +135,7 @@ data class GameUiState(
     val showEnding: Boolean = false,
     /** La Crónica (v0.26.0): capítulos escritos y el aviso del último. */
     val chronicle: Set<String> = emptySet(),
+    val chronicleAppendix: Set<String> = emptySet(),
     val chapterNotice: String? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),

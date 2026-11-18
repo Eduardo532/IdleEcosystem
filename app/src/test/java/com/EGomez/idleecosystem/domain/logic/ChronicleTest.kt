@@ -54,4 +54,16 @@ class ChronicleTest {
         assertNull(manager.currentStep.value)
         assertTrue(TutorialStep.WELCOME.id in manager.completedSteps.value)
     }
+
+    @Test
+    fun `the hidden appendix is written by the stories with memory`() {
+        assertTrue(Chronicle.appendix(emptySet()).isEmpty())
+        assertEquals(listOf(ChronicleAppendix.ULTHAR), Chronicle.appendix(setOf(RandomEventManager.CATS_END, RandomEventManager.CATS_FED)))
+        assertEquals(
+            listOf(ChronicleAppendix.WHISPERER, ChronicleAppendix.DEEP, ChronicleAppendix.UNTOLD),
+            Chronicle.appendix(setOf(RandomEventManager.LETTERS_END, RandomEventManager.GUEST_END, RandomEventManager.WITNESSES))
+        )
+        // El Apéndice no cuenta para el final
+        assertEquals(0f, Chronicle.progress(ChronicleAppendix.entries.map { it.id }.toSet()), 1e-6f)
+    }
 }

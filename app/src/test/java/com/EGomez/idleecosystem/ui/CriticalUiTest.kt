@@ -1164,6 +1164,29 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the appendix appears only with its hidden pages`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.ChronicleDialog(
+                written = setOf("first_note"),
+                onDismiss = {},
+                appendix = setOf("whisperer")
+            )
+        }
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.CHRONICLE_APPENDIX_TAG).performScrollTo().assertExists()
+        compose.onNodeWithText("El que Susurra en la Oscuridad").assertExists()
+        compose.onNodeWithText("Bajo el Arrecife").assertDoesNotExist()
+    }
+
+    @Test
+    fun `an event with memory says that it remembers`() {
+        val event = com.EGomez.idleecosystem.domain.logic.RandomEventManager().getEvent("evt_mem_cats_fed")!!
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.EventDialog(event = event, resultText = null, onOptionSelected = {})
+        }
+        compose.onNodeWithText("Este encuentro recuerda tus decisiones.").assertExists()
+    }
+
+    @Test
     fun `settings list the seen tutorials to see them again`() {
         val replayed = mutableListOf<String>()
         compose.setContent {

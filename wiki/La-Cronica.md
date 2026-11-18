@@ -45,6 +45,10 @@ La Crónica trae **10 logros**:
 - escribir un capítulo en la Senda del Culto o en la del Vacío;
 - uno secreto.
 
+## El Apéndice *(v0.26.1)*
+
+Debajo del quinto acto puede aparecer un **Apéndice**: «Lo que la Crónica calla». Es contenido oculto: no se anuncia, no cuenta para los veinte capítulos ni para el final, y solo aparece cuando tiene su primera página. Sus páginas se escriben al cerrar las [historias con memoria](Eventos) de los eventos. Hay una más, la última, para quien las cierre todas.
+
 ## Volver a ver los tutoriales
 
 En **Opciones › Tutoriales** están, por su título, los tutoriales que ya aparecieron. Al tocar uno se cierran las Opciones y se vuelve a mostrar, aunque los tutoriales estén apagados. Los que todavía no aparecieron no se listan, para no adelantar nada.

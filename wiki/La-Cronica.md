@@ -47,4 +47,4 @@ La Crónica trae **10 logros**:
 
 ## Volver a ver los tutoriales
 
-En **Opciones › Tutoriales** están los tutoriales que ya aparecieron, con lo que los hizo aparecer. Al tocar uno se cierran las Opciones y se vuelve a mostrar, aunque los tutoriales estén apagados. Los que todavía no aparecieron no se listan, para no adelantar nada.
+En **Opciones › Tutoriales** están, por su título, los tutoriales que ya aparecieron. Al tocar uno se cierran las Opciones y se vuelve a mostrar, aunque los tutoriales estén apagados. Los que todavía no aparecieron no se listan, para no adelantar nada.

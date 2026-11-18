@@ -167,10 +167,7 @@ fun SettingsDialog(
                             ) {
                                 Icon(Icons.Default.School, contentDescription = null, tint = AncientGold, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(tr(step.title), color = Color.White, fontSize = 14.sp)
-                                    Text(tr(step.triggerDescription), color = Color.Gray, fontSize = 11.sp)
-                                }
+                                Text(tr(step.title), color = Color.White, fontSize = 14.sp, modifier = Modifier.weight(1f))
                             }
                         }
                     }

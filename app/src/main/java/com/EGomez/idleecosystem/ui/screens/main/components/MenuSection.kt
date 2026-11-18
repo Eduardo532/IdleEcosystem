@@ -156,6 +156,15 @@ fun MenuSection(
     elementalsUi: ElementalsUi = ElementalsUi(),
     onSummonElemental: (String?) -> Unit = {},
     onBuyElementalNode: (String) -> Unit = {},
+    cardsUi: CardsUi = CardsUi(),
+    onChooseCard: (String?) -> Unit = {},
+    onAbandonCard: () -> Unit = {},
+    onBuyArtifact: (String) -> Unit = {},
+    descentUi: DescentUi = DescentUi(),
+    onDescend: () -> Unit = {},
+    onBuyChaosNode: (String) -> Unit = {},
+    onAwakenAzathoth: () -> Unit = {},
+    onReadEnding: () -> Unit = {},
     onBuyVisionNode: (String) -> Unit = {},
     onRespecVisions: () -> Unit = {},
     onSummon: (Int) -> Unit = {},
@@ -466,8 +475,10 @@ fun MenuSection(
                     MenuTab.EXPEDITION -> item { ExpeditionPanel(expeditionUi, onStrikeExpedition, onBuyRelic) }
                     MenuTab.CRYSTALS -> item { CrystalsPanel(crystalsUi, onMergeCrystals, onMergeAllCrystals, onPolishCrystals, onRefineCrystals, onBuyRefineNode, onRespecRefine) }
                     MenuTab.ELEMENTALS -> item { ElementalsPanel(elementalsUi, onSummonElemental, onBuyElementalNode) }
+                    MenuTab.CARDS -> item { CardsPanel(cardsUi, onChooseCard, onAbandonCard, onBuyArtifact) }
+                    MenuTab.DESCENT -> item { DescentPanel(descentUi, onDescend, onBuyChaosNode, onAwakenAzathoth, onReadEnding) }
                     // Un grupo nunca se muestra solo: resolve() abre su primera pestaña
-                    MenuTab.CYCLES -> Unit
+                    MenuTab.CYCLES, MenuTab.MYSTERIES -> Unit
                 }
             }
 

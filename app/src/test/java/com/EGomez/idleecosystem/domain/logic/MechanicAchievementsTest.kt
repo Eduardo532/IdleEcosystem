@@ -54,6 +54,16 @@ class MechanicAchievementsTest {
         "Expediciones y Reliquias" to { s -> s.stat?.let { it.startsWith("expedition") || it.startsWith("relic") || it == AchievementStat.FEAT_EXPEDITION_TAP } == true },
         "Cristales de Yuggoth" to { s -> s.stat?.let { it.startsWith("crystal") || it == AchievementStat.FEAT_CRYSTAL_UNIFORM } == true },
         "Los Cuatro Elementales" to { s -> s.stat?.let { it.startsWith("elemental") || it == AchievementStat.FEAT_ELEMENTAL_RIVAL } == true },
+        "Cartas del Rey de Amarillo" to { s -> s.stat?.let { it.startsWith("card") || it == AchievementStat.FEAT_CARD_HASTUR } == true },
+        "Artefactos" to { s -> s.stat?.let { it.startsWith("artifact") || it == AchievementStat.FEAT_ARTIFACT_BROKE } == true },
+        "El Sueño de Azathoth" to { s ->
+            s.stat?.let {
+                it.startsWith("descent") || it.startsWith("chaos_") || it.startsWith("chaos.") || it == AchievementStat.FEAT_DESCENT_DREAMING
+            } == true
+        },
+        "Despertar a Azathoth" to { s ->
+            s.stat?.let { it.startsWith("eye_") || it == AchievementStat.AZATHOTH_AWAKENINGS || it == AchievementStat.FEAT_EYE_KING } == true
+        },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

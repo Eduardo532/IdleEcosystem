@@ -38,6 +38,7 @@ fun MenuLayer.color(): Color = when (this) {
     MenuLayer.ASCENSION -> SanityRose
     MenuLayer.TRANSCENDENCE -> EtherColor
     MenuLayer.AWAKENING -> VisionColor
+    MenuLayer.CHAOS -> ChaosColor
 }
 
 @Composable
@@ -47,6 +48,7 @@ fun MenuLayer.title(): String = stringResource(
         MenuLayer.ASCENSION -> R.string.layer_ascension
         MenuLayer.TRANSCENDENCE -> R.string.layer_transcendence
         MenuLayer.AWAKENING -> R.string.layer_awakening
+        MenuLayer.CHAOS -> R.string.layer_chaos
     }
 )
 
@@ -66,12 +68,15 @@ fun MenuTab.title(): String = stringResource(
         MenuTab.BESTIARY -> R.string.tab_bestiary
         MenuTab.LAB -> R.string.tab_lab
         MenuTab.CYCLES -> R.string.tab_cycles
+        MenuTab.MYSTERIES -> R.string.tab_mysteries
         MenuTab.AWAKEN -> R.string.tab_awaken
         MenuTab.VISIONS -> R.string.tab_visions
         MenuTab.SIGNS -> R.string.tab_signs
         MenuTab.EXPEDITION -> R.string.tab_expedition
         MenuTab.CRYSTALS -> R.string.tab_crystals
         MenuTab.ELEMENTALS -> R.string.tab_elementals
+        MenuTab.CARDS -> R.string.tab_cards
+        MenuTab.DESCENT -> R.string.tab_descent
         MenuTab.DREAM -> R.string.tab_dream
         MenuTab.CHAIN -> R.string.tab_chain
         MenuTab.LETHARGY -> R.string.tab_lethargy

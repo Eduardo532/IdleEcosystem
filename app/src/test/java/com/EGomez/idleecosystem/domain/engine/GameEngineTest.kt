@@ -29,7 +29,9 @@ import com.EGomez.idleecosystem.domain.logic.UpgradeManager
 import com.EGomez.idleecosystem.domain.model.Pact
 import com.EGomez.idleecosystem.domain.model.Trial
 import com.EGomez.idleecosystem.domain.model.Mutation
+import com.EGomez.idleecosystem.domain.logic.MenuLayer
 import com.EGomez.idleecosystem.domain.logic.MenuTab
+import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.model.TidePhase
 import com.EGomez.idleecosystem.domain.logic.FullSaveData
 import com.EGomez.idleecosystem.domain.logic.BuildingSaveModel
@@ -1045,6 +1047,163 @@ class GameEngineTest {
         await(engine.economy) { it.activeElemental == null }
         assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.ELEMENTAL_SWITCHES)))
         assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.elementalWith("none"))))
+    }
+
+    @Test
+    fun `a yellow card rules its awakening and completes on the next one`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            totalPrestiges = 50
+            count(AchievementStat.AWAKENINGS, BigDecimal(5))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+            count(AchievementStat.ETHER_EARNED, BigDecimal(1000))
+            count(AchievementStat.CYCLE_SANITY, BigDecimal(10_000))
+            counters[AchievementStat.ttrial("silence")] = BigDecimal(5)
+            listOf("cthugha", "ithaqua", "cthulhu", "nyarlathotep").forEach {
+                counters[AchievementStat.elementalSummoned(it)] = BigDecimal.ONE
+            }
+            // El Loco en juego, con sus 12 Trascendencias hechas; La Torre elegida
+            counters[AchievementStat.CARD_ACTIVE] = BigDecimal(YellowCard.FOOL.ordinal + 1)
+            counters[AchievementStat.CARD_NEXT] = BigDecimal(YellowCard.TOWER.ordinal + 1)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.cardsRevealed && it.canAwaken }
+        assertTrue(MenuTab.CARDS in before.menuUnlocks.tabs)
+        assertEquals("fool", before.cardActive)
+        assertEquals(12, before.cardTranscendences)
+
+        engine.awaken()
+        val after = await(engine.economy) { it.cardActive == "tower" }
+        assertEquals(1, after.cardsCompleted["fool"])
+        assertEquals(5, after.cardFragments)
+        assertEquals(null, after.cardNext)
+
+        // El Rey no se puede elegir sin las otras siete; La Luna sí
+        engine.chooseCard("king")
+        engine.chooseCard("moon")
+        assertEquals("moon", await(engine.economy) { it.cardNext != null }.cardNext)
+
+        engine.abandonCard()
+        await(engine.economy) { it.cardActive == null }
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.CARD_ABANDONS)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.cardWith("none"))))
+    }
+
+    @Test
+    fun `yellow fragments buy artifacts`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(5))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(50))
+            listOf("cthugha", "ithaqua", "cthulhu", "nyarlathotep").forEach {
+                counters[AchievementStat.elementalSummoned(it)] = BigDecimal.ONE
+            }
+            counters[AchievementStat.CARD_FRAGMENTS] = BigDecimal(13)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        await(engine.economy) { it.cardsRevealed && it.cardFragments == 13 }
+
+        // La Lámpara: 5 y después 8, hasta el último Fragmento
+        engine.buyArtifact("lamp")
+        val first = await(engine.economy) { it.artifactLevels["lamp"] == 1 }
+        assertEquals(8, first.cardFragments)
+        engine.buyArtifact("lamp")
+        val second = await(engine.economy) { it.artifactLevels["lamp"] == 2 }
+        assertEquals(0, second.cardFragments)
+        // Sin Fragmentos no se compra
+        engine.buyArtifact("veil")
+        assertEquals(0, await(engine.economy) { true }.artifactLevels["veil"])
+        assertEquals(0, BigDecimal(13).compareTo(stats.counter(AchievementStat.ARTIFACT_FRAGMENTS_SPENT)))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.FEAT_ARTIFACT_BROKE)))
+    }
+
+    @Test
+    fun `descending resets the awakening layer for chaos and keeps the minigames`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(9))
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(90))
+            counters[AchievementStat.cardDone("king")] = BigDecimal.ONE
+            counters[AchievementStat.VISIONS] = BigDecimal(50)
+            counters[AchievementStat.VISION_NODE_PREFIX + "prophet"] = BigDecimal(2)
+            counters[AchievementStat.crystal(0)] = BigDecimal(4)
+            counters[AchievementStat.CRYSTAL_LUSTRE] = BigDecimal(7)
+            counters[AchievementStat.EXPEDITION_GOLD] = BigDecimal(30)
+            counters[AchievementStat.elementalFavor("cthulhu")] = BigDecimal(12)
+            counters[AchievementStat.relic("crown")] = BigDecimal(2)
+            counters[AchievementStat.artifact("lamp")] = BigDecimal(1)
+            counters[AchievementStat.refineNode("drills")] = BigDecimal(1)
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.descentRevealed && it.canDescend }
+        assertTrue(MenuTab.DESCENT in before.menuUnlocks.tabs)
+        assertTrue(MenuLayer.CHAOS in before.menuUnlocks.layers)
+        // 9 Despertares, pide 8: 2 × 2
+        assertEquals(4, before.chaosGain)
+
+        engine.descend()
+        val after = await(engine.economy) { it.descents == 1 }
+        assertEquals(4, after.chaos)
+        assertEquals(0, after.awakeningsSinceDescent)
+        assertFalse(after.canDescend)
+        assertEquals(0, after.visions)
+        assertEquals(0, after.crystalLustre)
+        assertEquals(0, stats.counter(AchievementStat.VISION_NODE_PREFIX + "prophet").signum())
+        assertEquals(0, stats.counter(AchievementStat.EXPEDITION_GOLD).signum())
+        assertEquals(0, stats.counter(AchievementStat.elementalFavor("cthulhu")).signum())
+        // Los minijuegos conservan lo comprado
+        assertEquals(0, BigDecimal(2).compareTo(stats.counter(AchievementStat.relic("crown"))))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.artifact("lamp"))))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.refineNode("drills"))))
+
+        engine.buyChaosNode("flutes")
+        val bought = await(engine.economy) { it.chaosLevels["flutes"] == 1 }
+        assertEquals(3, bought.chaos)
+    }
+
+    @Test
+    fun `awakening azathoth is the ending and the game goes on`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal(9))
+            count(AchievementStat.DESCENTS, BigDecimal.ONE)
+            counters[AchievementStat.cardDone("king")] = BigDecimal.ONE
+            counters[AchievementStat.AZATHOTH_CHAOS] = BigDecimal(70)
+            counters[AchievementStat.chaosNode("throne")] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val before = await(engine.economy) { it.canAwakenAzathoth }
+        assertEquals(60, before.eyeCost)
+        assertEquals(null, before.ending)
+
+        engine.awakenAzathoth()
+        val after = await(engine.economy) { it.azathothAwakenings == 1 }
+        assertEquals(10, after.chaos)
+        assertEquals(120, after.eyeCost)
+        assertFalse(after.canAwakenAzathoth)
+        assertEquals(1, after.ending!!.descents)
+        assertEquals(9, after.ending!!.awakenings)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.eyeWith("none"))))
     }
 
     @Test

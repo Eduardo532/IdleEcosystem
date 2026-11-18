@@ -2,6 +2,19 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.25.2 · "El Sueño de Azathoth" *(oficial, 17 nov 2026)*
+
+Novena etapa del Roadmap, primera parte: la última capa y el final visible del juego. Esta oficial incluye también la línea 0.24 (Cartas del Rey de Amarillo y Artefactos), que no tuvo oficial propia.
+
+- **v0.25.0:** El Sueño de Azathoth, la cuarta y última capa. Con El Rey de Amarillo completado y 8 Despertares desde el último Descenso, Descender reinicia la capa Despertar (Visiones, su árbol, Juramentos, la Carta, la Expedición, los Cristales y el Favor) a cambio de Caos. El Caos compra el árbol del Caos, de siete nodos. Lo comprado en los minijuegos se conserva. 12 logros nuevos.
+- **v0.25.1:** Despertar a Azathoth, el final visible del juego. Con El Trono del Caos y 60 de Caos se abre el Ojo: un final a pantalla completa con el epílogo y el resumen de la partida. El juego sigue, con producción x1000 por cada vez que Azathoth despierta. 7 logros nuevos.
+- **v0.25.2:** La capa Despertar se agrupa como la de Trascendencia: arriba quedan Despertar (con Visiones dentro), Misterios (Signos, Expedición, Cristales y Elementales) y Cartas.
+
+## v0.24.x *(incluida en la oficial v0.25.2)*
+
+- **v0.24.0:** Las Cartas del Rey de Amarillo, primera mecánica del arco final. Desde el quinto Despertar con los cuatro Elementales invocados, se elige una Carta para el próximo Despertar; durante todo ese Despertar rigen sus Juramentos. Con las Trascendencias que pide, se completa al volver a Despertar: da un bono permanente, Fragmentos Amarillos y un capítulo de la historia. Ocho Cartas, la última El Rey de Amarillo. 12 logros nuevos.
+- **v0.24.1:** Los Artefactos. Siete objetos del acto final que se compran con Fragmentos Amarillos y aceleran sistemas concretos: la Lámpara de Alhazred (Favor), la Llave de Plata (Sueño), el Martillo de los Mi-Go (Mina), el Astrolabio de Celaeno (Polvo Estelar), la Daga de Hali (Expedición), el Velo de Cassilda (Visiones) y el Broche del Signo (Fragmentos). 11 logros nuevos.
+
 ## v0.23.0 · "Los Cuatro Elementales" *(oficial, 17 nov 2026)*
 
 Octava etapa del Roadmap, cierre: el cuarto minijuego del Despertar. La etapa 8 queda completa.

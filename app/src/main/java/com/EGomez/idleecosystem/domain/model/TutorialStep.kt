@@ -338,6 +338,20 @@ enum class TutorialStep(
         "Tras el tercer Despertar"
     ),
 
+    YELLOW_CARDS(
+        "yellow_cards",
+        "Las Cartas del Rey de Amarillo",
+        "Cinco veces despertaste y los cuatro Elementales te conocen. Ahora alguien te tiende un mazo amarillo. En la pestaña Cartas eliges una para tu próximo Despertar: durante todo ese Despertar rigen sus Juramentos. Si antes de volver a Despertar haces las Trascendencias que pide, la Carta se completa: da Fragmentos Amarillos y, la primera vez, un bono para siempre y un capítulo de la historia. El Rey de Amarillo espera a que completes las otras siete.",
+        "Tras el quinto Despertar, con los cuatro Elementales invocados"
+    ),
+
+    AZATHOTH_DREAM(
+        "azathoth_dream",
+        "El Sueño de Azathoth",
+        "Completaste una Carta y el mazo te mostró lo que hay detrás: Azathoth, el sultán ciego del centro de todo, sueña el universo al son de flautas idiotas. En la pestaña Descenso, cuando completes El Rey de Amarillo y hayas Despertado ocho veces desde el último Descenso, podrás Descender a su sueño: la capa Despertar vuelve a empezar (Visiones, su árbol, los Juramentos, la Expedición, los Cristales y el Favor) a cambio de Caos, que compra el árbol del Caos. Lo que compraste en los minijuegos se conserva.",
+        "Tras completar la primera Carta del Rey de Amarillo"
+    ),
+
     EXPEDITIONS(
         "expeditions",
         "La Expedición",

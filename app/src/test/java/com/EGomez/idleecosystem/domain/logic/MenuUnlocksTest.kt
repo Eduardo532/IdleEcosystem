@@ -72,9 +72,33 @@ class MenuUnlocksTest {
     @Test
     fun `the awakening layer brings its two tabs`() {
         val awake = MenuUnlocks.compute(SystemReveal(), 60, 0, false, true, true, awakeningRevealed = true)
-        assertEquals(listOf(MenuTab.AWAKEN, MenuTab.VISIONS), awake.topTabsOf(MenuLayer.AWAKENING))
+        // Visiones va dentro de Despertar (v0.25.2)
+        assertEquals(listOf(MenuTab.AWAKEN), awake.topTabsOf(MenuLayer.AWAKENING))
+        assertEquals(listOf(MenuTab.AWAKEN, MenuTab.VISIONS), awake.choicesOf(MenuTab.AWAKEN))
         assertTrue(MenuLayer.AWAKENING in awake.layers)
         assertFalse(MenuLayer.AWAKENING in compute(transcend = true).layers)
+    }
+
+    @Test
+    fun `the awakening layer shows three tabs and groups the minigames`() {
+        val all = MenuUnlocks.ALL
+        assertEquals(listOf(MenuTab.AWAKEN, MenuTab.MYSTERIES, MenuTab.CARDS), all.topTabsOf(MenuLayer.AWAKENING))
+        assertEquals(
+            listOf(MenuTab.SIGNS, MenuTab.EXPEDITION, MenuTab.CRYSTALS, MenuTab.ELEMENTALS),
+            all.choicesOf(MenuTab.MYSTERIES)
+        )
+        // Misterios no tiene contenido: abre su primera pestaña, o la nueva
+        assertEquals(MenuTab.SIGNS, all.resolve(MenuTab.MYSTERIES))
+        assertEquals(MenuTab.CRYSTALS, all.entryOf(MenuTab.MYSTERIES, setOf(MenuTab.CRYSTALS)))
+        assertTrue(MenuTab.MYSTERIES in MenuUnlocks.NEVER_NEW)
+
+        // Con el primer Despertar aparecen Signos y Expedición dentro de Misterios
+        val first = MenuUnlocks.compute(
+            SystemReveal(), 60, 0, false, true, true,
+            awakeningRevealed = true, signsRevealed = true, expeditionRevealed = true
+        )
+        assertEquals(listOf(MenuTab.AWAKEN, MenuTab.MYSTERIES), first.topTabsOf(MenuLayer.AWAKENING))
+        assertEquals(listOf(MenuTab.SIGNS, MenuTab.EXPEDITION), first.choicesOf(MenuTab.MYSTERIES))
     }
 
     @Test

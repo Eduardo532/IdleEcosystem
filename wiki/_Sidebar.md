@@ -26,6 +26,8 @@
 - [Expediciones y Reliquias](Expediciones)
 - [Cristales de Yuggoth](Cristales-de-Yuggoth)
 - [Los Cuatro Elementales](Los-Cuatro-Elementales)
+- [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo)
+- [El Sueño de Azathoth](El-Sueno-de-Azathoth)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

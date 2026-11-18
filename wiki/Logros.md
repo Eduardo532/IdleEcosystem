@@ -1,6 +1,6 @@
 # Logros
 
-Hay **631 logros**: 113 originales y **518 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **673 logros**: 113 originales y **560 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -362,6 +362,44 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | La Cabra y los Cuatro | Invoca un Elemental con el pacto de Shub-Niggurath | +1 % |
 | Viento del Vacío | Invoca un Elemental recorriendo la Senda del Vacío | +1 % |
 | Soñar con los Elementos | Invoca un Elemental recorriendo la Senda del Sueño | +1 % |
+| Robar una Carta | Completa una Carta del Rey de Amarillo | +1 % |
+| Medio Mazo | Completa 4 Cartas del Rey de Amarillo distintas | +1 % |
+| El Mazo Completo | Completa las 8 Cartas del Rey de Amarillo | +2 % |
+| Barajar de Nuevo | Completa Cartas del Rey de Amarillo 15 veces | +1 % |
+| Polvo Amarillo | Gana 50 Fragmentos Amarillos en total | +1 % |
+| Tesoro de Carcosa | Gana 150 Fragmentos Amarillos en total | +2 % |
+| Cerrar el Libro | Abandona una Carta del Rey de Amarillo | +1 % |
+| Tulzscha Reparte | Completa una Carta con el pacto de Tulzscha | +1 % |
+| Ubbo-Sathla Baraja | Completa una Carta con el pacto de Ubbo-Sathla | +1 % |
+| La Carta del Culto | Completa una Carta recorriendo la Senda del Culto | +1 % |
+| Tarot Arcano | Completa una Carta recorriendo la Senda Arcana | +1 % |
+| Coleccionista de Carcosa | Ten 5 niveles de Artefactos | +1 % |
+| Gabinete de Curiosidades | Ten 20 niveles de Artefactos | +1 % |
+| Reliquias del Acto Final | Ten todos los Artefactos al máximo | +2 % |
+| La Vitrina Completa | Ten los 7 Artefactos | +1 % |
+| Fragmentos Gastados | Gasta 100 Fragmentos Amarillos en Artefactos | +1 % |
+| Un Precio Amarillo | Gasta 500 Fragmentos Amarillos en Artefactos | +2 % |
+| Lo que Duerme en R'lyeh | Compra un Artefacto con el pacto de Cthulhu | +1 % |
+| Llave de Todas las Puertas | Compra un Artefacto con el pacto de Yog-Sothoth | +1 % |
+| Objetos de la Mente | Compra un Artefacto recorriendo la Senda de la Mente | +1 % |
+| Mecanismos Prohibidos | Compra un Artefacto recorriendo la Senda del Engranaje | +1 % |
+| Caer en el Sueño | Desciende al Sueño de Azathoth | +1 % |
+| Hijo del Caos | Desciende 5 veces | +1 % |
+| Sultán Ciego | Desciende 10 veces | +2 % |
+| Puñado de Caos | Gana 25 de Caos en total | +1 % |
+| Mar de Caos | Gana 150 de Caos en total | +2 % |
+| Raíces en el Vacío | Ten 4 nodos del árbol del Caos | +1 % |
+| El Árbol Ciego | Ten los 7 nodos del árbol del Caos | +2 % |
+| Azathoth Sueña Contigo | Desciende con el pacto de Azathoth | +1 % |
+| Daoloth Desgarra | Desciende con el pacto de Daoloth | +1 % |
+| La Mano que Cae | Desciende recorriendo la Senda de la Mano | +1 % |
+| Vacío sobre Vacío | Desciende recorriendo la Senda del Vacío | +1 % |
+| El Final del Sueño | Despierta a Azathoth | +1 % |
+| El Sueño se Repite | Despierta a Azathoth 3 veces | +2 % |
+| El Mensajero Cumple | Despierta a Azathoth con el pacto de Nyarlathotep | +1 % |
+| El Rey Abdica | Despierta a Azathoth con el pacto de Hastur | +1 % |
+| Soñar el Despertar | Despierta a Azathoth recorriendo la Senda del Sueño | +1 % |
+| La Mente Despierta | Despierta a Azathoth recorriendo la Senda de la Mente | +1 % |
 
 ### Panteón
 
@@ -535,7 +573,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **41 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **45 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

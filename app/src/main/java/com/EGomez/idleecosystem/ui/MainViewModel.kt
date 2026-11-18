@@ -268,6 +268,28 @@ class MainViewModel @Inject constructor(
             levels = economy.elementalLevels,
             favorPerSecond = economy.favorPerSecond
         ),
+        cardsUi = com.EGomez.idleecosystem.ui.screens.main.components.CardsUi(
+            active = economy.cardActive,
+            next = economy.cardNext,
+            completed = economy.cardsCompleted,
+            fragments = economy.cardFragments,
+            transcendences = economy.cardTranscendences,
+            artifacts = economy.artifactLevels
+        ),
+        descentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
+            chaos = economy.chaos,
+            chaosGain = economy.chaosGain,
+            canDescend = economy.canDescend,
+            descents = economy.descents,
+            awakeningsSince = economy.awakeningsSinceDescent,
+            required = economy.descentRequired,
+            kingCompleted = economy.kingCompleted,
+            levels = economy.chaosLevels,
+            azathothAwakenings = economy.azathothAwakenings,
+            eyeCost = economy.eyeCost,
+            canAwakenAzathoth = economy.canAwakenAzathoth,
+            ending = economy.ending
+        ),
         expeditionUi = com.EGomez.idleecosystem.ui.screens.main.components.ExpeditionUi(
             level = economy.expeditionLevel,
             dealt = economy.expeditionDealt,
@@ -370,6 +392,18 @@ class MainViewModel @Inject constructor(
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
                 }
+            }
+            is EngineEffect.AzathothAwakened -> if (effect.firstTime) _uiState.update { it.copy(showEnding = true) }
+            is EngineEffect.Descended -> {
+                val chaos = effect.chaos
+                _uiState.update { it.copy(descentNotice = chaos) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.descentNotice == chaos) it.copy(descentNotice = null) else it }
+                }
+            }
+            is EngineEffect.CardCompleted -> _uiState.update {
+                it.copy(cardChapter = com.EGomez.idleecosystem.ui.screens.main.components.CardChapterNotice(effect.cardId, effect.firstTime, effect.fragments))
             }
             is EngineEffect.TrialCompleted -> {
                 val trial = effect.trial
@@ -616,6 +650,24 @@ class MainViewModel @Inject constructor(
     fun setElemental(id: String?) = engine.setElemental(id)
 
     fun buyElementalNode(id: String) = engine.buyElementalNode(id)
+
+    fun chooseCard(id: String?) = engine.chooseCard(id)
+
+    fun abandonCard() = engine.abandonCard()
+
+    fun buyArtifact(id: String) = engine.buyArtifact(id)
+
+    fun descend() = engine.descend()
+
+    fun buyChaosNode(id: String) = engine.buyChaosNode(id)
+
+    fun awakenAzathoth() = engine.awakenAzathoth()
+
+    fun showEnding() = _uiState.update { it.copy(showEnding = true) }
+
+    fun dismissEnding() = _uiState.update { it.copy(showEnding = false) }
+
+    fun dismissCardChapter() = _uiState.update { it.copy(cardChapter = null) }
 
     fun buyVisionNode(id: String) = engine.buyVisionNode(id)
 

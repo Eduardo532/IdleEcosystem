@@ -373,6 +373,15 @@ fun MainScreen(
                             elementalsUi = uiState.elementalsUi,
                             onSummonElemental = { viewModel.setElemental(it) },
                             onBuyElementalNode = { viewModel.buyElementalNode(it) },
+                            cardsUi = uiState.cardsUi,
+                            onChooseCard = { viewModel.chooseCard(it) },
+                            onAbandonCard = { viewModel.abandonCard() },
+                            onBuyArtifact = { viewModel.buyArtifact(it) },
+                            descentUi = uiState.descentUi,
+                            onDescend = { viewModel.descend() },
+                            onBuyChaosNode = { viewModel.buyChaosNode(it) },
+                            onAwakenAzathoth = { viewModel.awakenAzathoth() },
+                            onReadEnding = { viewModel.showEnding() },
                             onBuyVisionNode = { viewModel.buyVisionNode(it) },
                             onRespecVisions = { viewModel.respecVisions() },
                             onSummon = { viewModel.summon(it) },
@@ -612,6 +621,16 @@ fun MainScreen(
                 }
             }
 
+            if (uiState.showEnding) {
+                uiState.descentUi.ending?.let { summary ->
+                    com.EGomez.idleecosystem.ui.screens.main.components.EndingDialog(summary, onDismiss = { viewModel.dismissEnding() })
+                }
+            }
+
+            uiState.cardChapter?.let { notice ->
+                com.EGomez.idleecosystem.ui.screens.main.components.CardChapterDialog(notice, onDismiss = { viewModel.dismissCardChapter() })
+            }
+
             uiState.awakenNotice?.let { visions ->
                 Surface(
                     color = Color(0xFF1C1B10),
@@ -625,6 +644,26 @@ fun MainScreen(
                     Text(
                         stringResource(R.string.awaken_notice, visions),
                         color = com.EGomez.idleecosystem.ui.screens.main.components.VisionColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                    )
+                }
+            }
+
+            uiState.descentNotice?.let { chaos ->
+                Surface(
+                    color = Color(0xFF1A0E1C),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, com.EGomez.idleecosystem.ui.screens.main.components.ChaosColor),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 140.dp)
+                        .zIndex(6f)
+                ) {
+                    Text(
+                        stringResource(R.string.descent_notice, chaos),
+                        color = com.EGomez.idleecosystem.ui.screens.main.components.ChaosColor,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)

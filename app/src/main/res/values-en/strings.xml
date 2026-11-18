@@ -177,6 +177,10 @@
     <string name="settings_display_sub">Particles, floating text and numbers</string>
     <string name="settings_game">Game</string>
     <string name="settings_game_sub">Tutorial and statistics</string>
+    <string name="settings_tutorials">Tutorials</string>
+    <string name="settings_tutorials_sub">See again the ones you have already seen</string>
+    <string name="tutorials_replay_hint">Tap a tutorial to see it again. Only the ones that have appeared are listed.</string>
+    <string name="tutorials_none">No tutorial has appeared yet.</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_sub">Español / English</string>
     <string name="settings_save">Save</string>
@@ -683,4 +687,10 @@
     <string name="ending_achievements">Achievements: %1$d of %2$d</string>
     <string name="ending_thanks">Thank you for playing Arcane Ecosystem.</string>
     <string name="ending_continue">Keep dreaming</string>
+    <string name="chronicle_title">The Chronicle</string>
+    <string name="chronicle_progress">Chapters written: %1$d of %2$d. The last page is the ending.</string>
+    <string name="chronicle_act">Act %1$s</string>
+    <string name="chronicle_unknown">Not yet written</string>
+    <string name="chronicle_blank">· · · (a blank line)</string>
+    <string name="chronicle_notice">New chapter in the Chronicle: %1$s</string>
 </resources>

@@ -81,6 +81,8 @@ Con la capa Ascensión descubierta, abajo del menú queda siempre la **barra de 
 - **Multiplicadores de compra** (x1 a x100, HITO y MAX): al tener 5 edificios en total, o desde la primera Ascensión.
 - **Estadísticas** (icono de la barra superior): con el Grimorio.
 - **Logros** (botón de la barra superior): con el primer logro.
+- **La Crónica** (libro de la barra superior) *(v0.26.0)*: con su primer capítulo. Cuenta la partida en cinco actos; cada capítulo nuevo avisa arriba. Ver [La Crónica](La-Cronica).
+- **Opciones › Tutoriales** *(v0.26.0)*: los tutoriales que ya aparecieron, para volver a verlos.
 
 ## Runas más claras
 

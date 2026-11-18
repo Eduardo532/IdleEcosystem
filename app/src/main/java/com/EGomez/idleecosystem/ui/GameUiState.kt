@@ -58,6 +58,8 @@ data class GameUiState(
     // SISTEMA DE TUTORIAL (NUEVO)
     val currentTutorialStep: TutorialStep? = null,
     val isTutorialEnabled: Boolean = true,
+    /** Ids de los tutoriales ya vistos (v0.26.0). */
+    val completedTutorials: Set<String> = emptySet(),
 
     // Eventos y Logros
     val currentEvent: RandomEvent? = null,
@@ -131,6 +133,9 @@ data class GameUiState(
     val descentNotice: Int? = null,
     /** El final a pantalla completa (v0.25.1). */
     val showEnding: Boolean = false,
+    /** La Crónica (v0.26.0): capítulos escritos y el aviso del último. */
+    val chronicle: Set<String> = emptySet(),
+    val chapterNotice: String? = null,
     /** Bestiario (v0.19.8). */
     val bestiaryUi: com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi = com.EGomez.idleecosystem.ui.screens.main.components.BestiaryUi(),
     val veilPressing: Boolean = false,

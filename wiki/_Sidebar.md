@@ -28,6 +28,7 @@
 - [Los Cuatro Elementales](Los-Cuatro-Elementales)
 - [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo)
 - [El Sueño de Azathoth](El-Sueno-de-Azathoth)
+- [La Crónica](La-Cronica)
 - [Medidor de Locura](Medidor-de-Locura)
 - [Fases de la Marea](Marea)
 - [Trascender](Trascender)

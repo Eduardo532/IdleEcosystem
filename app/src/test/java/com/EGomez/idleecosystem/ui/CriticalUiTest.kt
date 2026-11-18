@@ -1146,6 +1146,42 @@ class CriticalUiTest {
     }
 
     @Test
+    fun `the chronicle shows written chapters and hides the acts not started`() {
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.ChronicleDialog(
+                written = setOf("first_note", "knocking"),
+                onDismiss = {}
+            )
+        }
+        compose.onNodeWithText("Capítulos escritos: 2 de 20. La última página es el final.").assertExists()
+        compose.onNodeWithText("Acto I · Las Notas Desordenadas").assertExists()
+        compose.onNodeWithText("La Primera Nota").assertExists()
+        compose.onNodeWithText(com.EGomez.idleecosystem.domain.logic.ChronicleChapter.KNOCKING.text).assertExists()
+        // Lo que aún no se escribió no se adelanta
+        compose.onNodeWithText("Acto V · Aún sin escribir").performScrollTo().assertExists()
+        compose.onNodeWithText("El Sueño del Sultán Ciego", substring = true).assertDoesNotExist()
+        compose.onNodeWithText(com.EGomez.idleecosystem.domain.logic.ChronicleChapter.WINDOW.text).assertDoesNotExist()
+    }
+
+    @Test
+    fun `settings list the seen tutorials to see them again`() {
+        val replayed = mutableListOf<String>()
+        compose.setContent {
+            com.EGomez.idleecosystem.ui.screens.main.dialogs.SettingsDialog(
+                uiState = com.EGomez.idleecosystem.ui.GameUiState(completedTutorials = setOf("welcome", "menu_intro")),
+                onDismiss = {}, onStatsClick = {}, onToggleMusic = {}, onToggleSfx = {}, onToggleParticles = {},
+                onToggleFloatingText = {}, onNotationSelected = {}, onLanguageSelected = {}, onExportClick = {},
+                onImportClick = {}, onCancelImport = {}, onPasteClick = {}, onHardResetClick = {}, onToggleTutorial = {},
+                onReplayTutorial = { replayed += it }
+            )
+        }
+        compose.onNodeWithText("Tutoriales").performScrollTo().performClick()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.TUTORIAL_REPLAY_TAG + "first_building").assertDoesNotExist()
+        compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.TUTORIAL_REPLAY_TAG + "menu_intro").performScrollTo().performClick()
+        assertEquals(listOf("menu_intro"), replayed)
+    }
+
+    @Test
     fun `the vision tree buys from the root and refunds`() {
         val bought = mutableListOf<String>()
         var respecs = 0

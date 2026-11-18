@@ -148,6 +148,9 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             engine.isTutorialEnabled.collect { enabled -> _uiState.update { it.copy(isTutorialEnabled = enabled) } }
         }
+        viewModelScope.launch {
+            engine.completedTutorials.collect { ids -> _uiState.update { it.copy(completedTutorials = ids) } }
+        }
         if (!GameEngine.DEBUG_RUNES) {
             viewModelScope.launch {
                 engine.currentRune.collect { rune -> _uiState.update { it.copy(activeRune = rune) } }
@@ -276,6 +279,7 @@ class MainViewModel @Inject constructor(
             transcendences = economy.cardTranscendences,
             artifacts = economy.artifactLevels
         ),
+        chronicle = economy.chronicle,
         descentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
             chaos = economy.chaos,
             chaosGain = economy.chaosGain,
@@ -391,6 +395,14 @@ class MainViewModel @Inject constructor(
                 viewModelScope.launch {
                     delay(TRIAL_NOTICE_MS)
                     _uiState.update { if (it.awakenNotice == visions) it.copy(awakenNotice = null) else it }
+                }
+            }
+            is EngineEffect.ChapterWritten -> {
+                val id = effect.chapterId
+                _uiState.update { it.copy(chapterNotice = id) }
+                viewModelScope.launch {
+                    delay(TRIAL_NOTICE_MS)
+                    _uiState.update { if (it.chapterNotice == id) it.copy(chapterNotice = null) else it }
                 }
             }
             is EngineEffect.AzathothAwakened -> if (effect.firstTime) _uiState.update { it.copy(showEnding = true) }
@@ -521,6 +533,8 @@ class MainViewModel @Inject constructor(
     fun dismissTutorial() = engine.dismissTutorial()
 
     fun toggleTutorial(enabled: Boolean) = engine.setTutorialEnabled(enabled)
+
+    fun replayTutorial(id: String) = engine.replayTutorial(id)
 
     fun onMenuTabSelected(tab: MenuTab) = engine.onMenuTabSelected(tab)
 
@@ -662,6 +676,8 @@ class MainViewModel @Inject constructor(
     fun buyChaosNode(id: String) = engine.buyChaosNode(id)
 
     fun awakenAzathoth() = engine.awakenAzathoth()
+
+    fun noteChronicleOpened() = engine.noteChronicleOpened()
 
     fun showEnding() = _uiState.update { it.copy(showEnding = true) }
 

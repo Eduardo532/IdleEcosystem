@@ -1,5 +1,13 @@
 package com.EGomez.idleecosystem.ui.screens.main.dialogs
 
+import androidx.compose.ui.platform.testTag
+
+import com.EGomez.idleecosystem.ui.i18n.tr
+
+import com.EGomez.idleecosystem.domain.model.TutorialStep
+
+import androidx.compose.material.icons.filled.School
+
 import androidx.compose.ui.res.stringResource
 import com.EGomez.idleecosystem.R
 import android.content.ClipData
@@ -53,6 +61,7 @@ enum class SettingsSection(@StringRes val titleRes: Int, @StringRes val subtitle
     DISPLAY(R.string.settings_display, R.string.settings_display_sub, Icons.Default.Visibility),
     LANGUAGE(R.string.settings_language, R.string.settings_language_sub, Icons.Default.Language),
     GAME(R.string.settings_game, R.string.settings_game_sub, Icons.Default.SportsEsports),
+    TUTORIALS(R.string.settings_tutorials, R.string.settings_tutorials_sub, Icons.Default.School),
     SAVE(R.string.settings_save, R.string.settings_save_sub, Icons.Default.Save),
     DANGER(R.string.settings_danger, R.string.settings_danger_sub, Icons.Default.Warning)
 }
@@ -80,7 +89,8 @@ fun SettingsDialog(
     onCancelImport: () -> Unit,
     onPasteClick: (String) -> Unit,
     onHardResetClick: () -> Unit,
-    onToggleTutorial: (Boolean) -> Unit
+    onToggleTutorial: (Boolean) -> Unit,
+    onReplayTutorial: (String) -> Unit = {}
 ) {
     // Se recuerda al girar la pantalla
     var section by rememberSaveable { mutableStateOf<SettingsSection?>(null) }
@@ -137,6 +147,28 @@ fun SettingsDialog(
                             Icon(Icons.Default.Info, contentDescription = null, tint = AncientGold, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(stringResource(R.string.view_stats), color = Color.White)
+                        }
+                    }
+                    SettingsSection.TUTORIALS -> {
+                        val seen = TutorialStep.entries.filter { it.id in uiState.completedTutorials }
+                        Text(stringResource(R.string.tutorials_replay_hint), color = Color.LightGray, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (seen.isEmpty()) {
+                            Text(stringResource(R.string.tutorials_none), color = Color.Gray, fontSize = 13.sp)
+                        }
+                        seen.forEach { step ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onReplayTutorial(step.id) }
+                                    .padding(vertical = 8.dp)
+                                    .testTag(TUTORIAL_REPLAY_TAG + step.id),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.School, contentDescription = null, tint = AncientGold, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(tr(step.title), color = Color.White, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                     SettingsSection.SAVE -> SaveSection(uiState, onExportClick, onImportClick, onCancelImport, onPasteClick)
@@ -332,3 +364,5 @@ private fun SavePreviewCard(title: String, accent: Color, date: String, money: S
 }
 
 private const val CLIP_LABEL = "IdleEcosystem"
+
+const val TUTORIAL_REPLAY_TAG = "tutorial_replay_"

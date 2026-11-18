@@ -64,6 +64,9 @@ import com.EGomez.idleecosystem.domain.logic.Artifacts
 import com.EGomez.idleecosystem.domain.logic.AzathothDream
 import com.EGomez.idleecosystem.domain.logic.CardBonus
 import com.EGomez.idleecosystem.domain.logic.ChaosNode
+import com.EGomez.idleecosystem.domain.logic.Chronicle
+import com.EGomez.idleecosystem.domain.logic.ChronicleAct
+import com.EGomez.idleecosystem.domain.logic.ChronicleChapter
 import com.EGomez.idleecosystem.domain.logic.EndingSummary
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YellowCard
@@ -270,6 +273,8 @@ data class EconomyState(
     val eyeCost: Int = AzathothDream.EYE_BASE_COST,
     val canAwakenAzathoth: Boolean = false,
     val ending: EndingSummary? = null,
+    /** La Crónica (v0.26.0): los capítulos escritos. */
+    val chronicle: Set<String> = emptySet(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -360,6 +365,8 @@ sealed interface EngineEffect {
     data class Descended(val chaos: Int) : EngineEffect
     /** Azathoth despertó: el final del juego (v0.25.1). */
     data class AzathothAwakened(val firstTime: Boolean) : EngineEffect
+    /** Se escribió un capítulo de la Crónica (v0.26.0). */
+    data class ChapterWritten(val chapterId: String) : EngineEffect
     /** La Locura llegó a 100: la mente colapsó. */
     object MadnessCollapse : EngineEffect
 }
@@ -486,6 +493,8 @@ class GameEngine @Inject constructor(
     val activeRuneBuffs: StateFlow<List<RuneBuff>> = runeManager.activeBuffs
     val tutorialStep: StateFlow<TutorialStep?> = tutorialManager.currentStep
     val isTutorialEnabled: StateFlow<Boolean> = tutorialManager.isTutorialEnabled
+    /** Los tutoriales ya vistos, para volver a verlos desde Opciones (v0.26.0). */
+    val completedTutorials: StateFlow<Set<String>> = tutorialManager.completedSteps
 
     /** Arranca el motor dentro del ámbito de quien lo usa (el ViewModel). */
     fun start(scope: CoroutineScope) {
@@ -924,6 +933,9 @@ class GameEngine @Inject constructor(
         put(AchievementStat.ARTIFACTS_OWNED, Artifact.entries.count { artifactLevel(it) > 0 })
         put(AchievementStat.CHAOS_LEVELS, ChaosNode.entries.sumOf { chaosLevel(it) })
         put(AchievementStat.CHAOS_NODES, ChaosNode.entries.count { chaosLevel(it) > 0 })
+        val written = writtenChapters()
+        put(AchievementStat.CHRONICLE_CHAPTERS, written.size)
+        put(AchievementStat.CHRONICLE_ACTS, ChronicleAct.entries.count { Chronicle.isActComplete(it, written) })
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1114,6 +1126,11 @@ class GameEngine @Inject constructor(
     fun setTutorialEnabled(enabled: Boolean) = post {
         tutorialManager.setTutorialEnabled(enabled)
         requestSave()
+    }
+
+    /** Vuelve a mostrar un tutorial ya visto (v0.26.0). */
+    fun replayTutorial(id: String) = post {
+        TutorialStep.entries.firstOrNull { it.id == id }?.let { tutorialManager.replayStep(it) }
     }
 
     fun onMenuTabSelected(tab: MenuTab) = post {
@@ -1402,7 +1419,10 @@ class GameEngine @Inject constructor(
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
         buildingManager.checkUnlocks(knowledge)
-        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings, achievementContext())
+        val context = achievementContext()
+        // Un capítulo nuevo cambia las estadísticas de la Crónica: se vuelven a calcular
+        val checked = if (writeChronicle(context)) achievementContext() else context
+        val newUnlocks = achievementManager.checkAchievements(knowledge, buildingManager.availableBuildings, checked)
         if (newUnlocks.isNotEmpty()) {
             // Cada logro paga Sellos Antiguos (los secretos, más)
             addSeals(newUnlocks.sumOf { if (it.isSecret) Bestiary.SEALS_PER_SECRET else Bestiary.SEALS_PER_ACHIEVEMENT }, multiplied = false)
@@ -2940,6 +2960,28 @@ class GameEngine @Inject constructor(
         requestSave(replace = true)
     }
 
+    // =====================================================================
+    // LA CRÓNICA (v0.26.0)
+    // =====================================================================
+
+    private fun writtenChapters(): Set<String> =
+        ChronicleChapter.entries.filter { statsManager.counter(AchievementStat.chronicle(it.id)).signum() > 0 }.map { it.id }.toSet()
+
+    /** Escribe los capítulos que ya se ganaron; avisa del último. */
+    private fun writeChronicle(context: AchievementContext): Boolean {
+        val fresh = Chronicle.newChapters(writtenChapters()) { context.value(it) }
+        if (fresh.isEmpty()) return false
+        fresh.forEach { statsManager.flag(AchievementStat.chronicle(it.id)) }
+        statsManager.flag(AchievementStat.chronicleWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.chroniclePath(it.id)) }
+        _effects.trySend(EngineEffect.ChapterWritten(fresh.last().id))
+        requestSave()
+        return true
+    }
+
+    /** Se abrió la Crónica (para su logro secreto). */
+    fun noteChronicleOpened() = post { statsManager.count(AchievementStat.CHRONICLE_OPENS) }
+
     /** Sube un nodo del árbol del Caos. */
     fun buyChaosNode(id: String) = post {
         val node = ChaosNode.fromId(id) ?: return@post
@@ -3812,6 +3854,7 @@ class GameEngine @Inject constructor(
             eyeCost = AzathothDream.eyeCost(azathothAwakenings()),
             canAwakenAzathoth = canAwakenAzathoth(),
             ending = if (azathothAwakenings() > 0) endingSummary() else null,
+            chronicle = writtenChapters(),
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

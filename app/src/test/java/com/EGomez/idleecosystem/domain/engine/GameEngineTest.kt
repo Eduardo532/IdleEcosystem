@@ -1207,6 +1207,30 @@ class GameEngineTest {
     }
 
     @Test
+    fun `the chronicle writes its chapters once and for good`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            count(AchievementStat.AWAKENINGS, BigDecimal.ONE)
+            count(AchievementStat.TRANSCENDENCES, BigDecimal(12))
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val economy = await(engine.economy) { "eyes" in it.chronicle }
+        assertTrue("ether" in economy.chronicle)
+        assertFalse("eye" in economy.chronicle)
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.chronicle("eyes"))))
+        assertEquals(0, BigDecimal.ONE.compareTo(stats.counter(AchievementStat.chronicleWith("none"))))
+
+        engine.noteChronicleOpened()
+        eventually { stats.counter(AchievementStat.CHRONICLE_OPENS).takeIf { it.signum() > 0 } }
+        Unit
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

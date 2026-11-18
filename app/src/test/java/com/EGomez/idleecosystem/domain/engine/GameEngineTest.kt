@@ -1227,6 +1227,7 @@ class GameEngineTest {
 
         engine.noteChronicleOpened()
         eventually { stats.counter(AchievementStat.CHRONICLE_OPENS).takeIf { it.signum() > 0 } }
+        Unit
     }
 
     @Test

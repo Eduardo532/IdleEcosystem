@@ -1175,7 +1175,7 @@ class CriticalUiTest {
                 onReplayTutorial = { replayed += it }
             )
         }
-        compose.onNodeWithText("Tutoriales").performClick()
+        compose.onNodeWithText("Tutoriales").performScrollTo().performClick()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.TUTORIAL_REPLAY_TAG + "first_building").assertDoesNotExist()
         compose.onNodeWithTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.TUTORIAL_REPLAY_TAG + "menu_intro").performScrollTo().performClick()
         assertEquals(listOf("menu_intro"), replayed)

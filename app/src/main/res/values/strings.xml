@@ -178,6 +178,10 @@
     <string name="settings_display_sub">Partículas, texto flotante y números</string>
     <string name="settings_game">Juego</string>
     <string name="settings_game_sub">Tutorial y estadísticas</string>
+    <string name="settings_tutorials">Tutoriales</string>
+    <string name="settings_tutorials_sub">Vuelve a ver los que ya aparecieron</string>
+    <string name="tutorials_replay_hint">Toca un tutorial para volver a verlo. Solo están los que ya aparecieron.</string>
+    <string name="tutorials_none">Todavía no apareció ningún tutorial.</string>
     <string name="settings_language">Idioma</string>
     <string name="settings_language_sub">Español / English</string>
     <string name="settings_save">Partida</string>
@@ -684,4 +688,10 @@
     <string name="ending_achievements">Logros: %1$d de %2$d</string>
     <string name="ending_thanks">Gracias por jugar Ecosistema Arcano.</string>
     <string name="ending_continue">Seguir soñando</string>
+    <string name="chronicle_title">La Crónica</string>
+    <string name="chronicle_progress">Capítulos escritos: %1$d de %2$d. La última página es el final.</string>
+    <string name="chronicle_act">Acto %1$s</string>
+    <string name="chronicle_unknown">Aún sin escribir</string>
+    <string name="chronicle_blank">· · · (un renglón en blanco)</string>
+    <string name="chronicle_notice">Nuevo capítulo en la Crónica: %1$s</string>
 </resources>

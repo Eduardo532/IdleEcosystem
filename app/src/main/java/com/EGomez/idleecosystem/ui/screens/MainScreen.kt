@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -122,6 +123,7 @@ fun MainScreen(
         var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
         var showHardResetConfirmation by rememberSaveable { mutableStateOf(false) }
         var showStatisticsDialog by rememberSaveable { mutableStateOf(false) }
+        var showChronicleDialog by rememberSaveable { mutableStateOf(false) }
         var showAscendConfirmation by rememberSaveable { mutableStateOf(false) }
         var showAutomationDialog by rememberSaveable { mutableStateOf(false) }
         var showAttentionDialog by rememberSaveable { mutableStateOf(false) }
@@ -207,6 +209,8 @@ fun MainScreen(
                         // Las estadísticas aparecen con el Grimorio; los logros, con el primero
                         showStats = uiState.menuUnlocks.has(MenuTab.GRIMOIRE),
                         showAchievements = achievements.any { it.isUnlocked },
+                        showChronicle = uiState.chronicle.isNotEmpty(),
+                        onChronicleClick = { showChronicleDialog = true; viewModel.noteChronicleOpened() },
                         onSettingsClick = { showSettingsDialog = true },
                         onStatsClick = { showStatisticsDialog = true },
                         onAchievementsClick = { showAchievementsDialog = true }
@@ -475,6 +479,13 @@ fun MainScreen(
                 uiState.lastUnlockedAchievement?.let { AchievementPopup(achievement = it) }
             }
 
+            if (showChronicleDialog) {
+                com.EGomez.idleecosystem.ui.screens.main.dialogs.ChronicleDialog(
+                    written = uiState.chronicle,
+                    onDismiss = { showChronicleDialog = false }
+                )
+            }
+
             if (showStatisticsDialog) {
                 // Se recolecta solo con el diálogo abierto: no recompone la pantalla principal
                 val statistics by viewModel.statisticsState.collectAsStateWithLifecycle()
@@ -546,7 +557,8 @@ fun MainScreen(
                     onCancelImport = { viewModel.clearExportString() },
                     onPasteClick = { viewModel.onPasteSaveClicked(it) },
                     onHardResetClick = { showHardResetConfirmation = true },
-                    onToggleTutorial = { viewModel.toggleTutorial(it) }
+                    onToggleTutorial = { viewModel.toggleTutorial(it) },
+                    onReplayTutorial = { id -> showSettingsDialog = false; viewModel.replayTutorial(id) }
                 )
             }
 
@@ -648,6 +660,29 @@ fun MainScreen(
                         fontSize = 13.sp,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                     )
+                }
+            }
+
+            uiState.chapterNotice?.let { id ->
+                com.EGomez.idleecosystem.domain.logic.ChronicleChapter.fromId(id)?.let { chapter ->
+                    Surface(
+                        color = Color(0xFF1B1710),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, com.EGomez.idleecosystem.ui.screens.main.dialogs.ChroniclePaper),
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 190.dp)
+                            .zIndex(6f)
+                            .clickable { showChronicleDialog = true; viewModel.noteChronicleOpened() }
+                    ) {
+                        Text(
+                            stringResource(R.string.chronicle_notice, com.EGomez.idleecosystem.ui.i18n.tr(chapter.title)),
+                            color = com.EGomez.idleecosystem.ui.screens.main.dialogs.ChroniclePaper,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                        )
+                    }
                 }
             }
 

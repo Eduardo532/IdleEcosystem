@@ -83,6 +83,17 @@ class TutorialManager @Inject constructor() {
         }
     }
 
+    /**
+     * Vuelve a mostrar un tutorial ya visto (v0.26.0, desde Opciones), aunque los
+     * tutoriales estén apagados. Si hay otro en pantalla, pasa primero en la cola.
+     */
+    fun replayStep(step: TutorialStep) {
+        if (!_completedSteps.value.contains(step.id)) return
+        if (_currentStep.value == step) return
+        tutorialQueue.remove(step)
+        if (_currentStep.value == null) _currentStep.value = step else tutorialQueue.addFirst(step)
+    }
+
     fun setTutorialEnabled(enabled: Boolean) {
         _isTutorialEnabled.value = enabled
         if (!enabled) {

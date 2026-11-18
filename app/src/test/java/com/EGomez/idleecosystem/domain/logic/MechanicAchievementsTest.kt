@@ -64,6 +64,7 @@ class MechanicAchievementsTest {
         "Despertar a Azathoth" to { s ->
             s.stat?.let { it.startsWith("eye_") || it == AchievementStat.AZATHOTH_AWAKENINGS || it == AchievementStat.FEAT_EYE_KING } == true
         },
+        "La Crónica" to { s -> s.stat?.startsWith("chronicle") == true },
         "Refinar" to { s ->
             s.stat?.let {
                 it.startsWith("refine") || it == AchievementStat.FEAT_REFINE_EXACT ||

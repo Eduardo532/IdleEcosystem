@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Settings
@@ -41,6 +42,9 @@ fun MainTopBar(
     /** Interfaz por capas (v0.19.0): las estadísticas y los logros aparecen al descubrirse. */
     showStats: Boolean = true,
     showAchievements: Boolean = true,
+    /** La Crónica (v0.26.0): aparece con su primer capítulo. */
+    showChronicle: Boolean = false,
+    onChronicleClick: () -> Unit = {},
     onSettingsClick: () -> Unit,
     onStatsClick: () -> Unit,
     onAchievementsClick: () -> Unit
@@ -71,6 +75,18 @@ fun MainTopBar(
                 if (showStats) {
                     IconButton(onClick = onStatsClick, modifier = Modifier.testTag(STATS_BUTTON_TAG)) {
                         Icon(Icons.Default.Assessment, stringResource(R.string.cd_statistics), tint = AncientGold)
+                    }
+                }
+                if (showChronicle) {
+                    IconButton(
+                        onClick = onChronicleClick,
+                        modifier = Modifier.testTag(com.EGomez.idleecosystem.ui.screens.main.dialogs.CHRONICLE_BUTTON_TAG)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            stringResource(R.string.chronicle_title),
+                            tint = com.EGomez.idleecosystem.ui.screens.main.dialogs.ChroniclePaper
+                        )
                     }
                 }
             }

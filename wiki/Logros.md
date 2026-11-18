@@ -1,6 +1,6 @@
 # Logros
 
-Hay **673 logros**: 113 originales y **560 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
+Hay **683 logros**: 113 originales y **570 de las mecánicas nuevas** *(v0.17)*. Se abren con el botón de la copa, arriba a la derecha.
 
 - **Cada logro da un bono permanente** a toda la producción. Los bonos se multiplican entre sí.
 - **Los logros no se pierden al Ascender.** Solo el reinicio total los borra.
@@ -400,6 +400,15 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | El Rey Abdica | Despierta a Azathoth con el pacto de Hastur | +1 % |
 | Soñar el Despertar | Despierta a Azathoth recorriendo la Senda del Sueño | +1 % |
 | La Mente Despierta | Despierta a Azathoth recorriendo la Senda de la Mente | +1 % |
+| Primeras Páginas | Escribe 5 capítulos de la Crónica | +1 % |
+| Media Crónica | Escribe 10 capítulos de la Crónica | +1 % |
+| La Crónica Completa | Escribe los 20 capítulos de la Crónica | +2 % |
+| Fin del Primer Acto | Completa un acto de la Crónica | +1 % |
+| Cinco Actos | Completa los 5 actos de la Crónica | +2 % |
+| Yeb Dicta | Escribe un capítulo de la Crónica con el pacto de Yeb | +1 % |
+| Abhoth Corrige | Escribe un capítulo de la Crónica con el pacto de Abhoth | +1 % |
+| Escriba del Culto | Escribe un capítulo de la Crónica recorriendo la Senda del Culto | +1 % |
+| Páginas del Vacío | Escribe un capítulo de la Crónica recorriendo la Senda del Vacío | +1 % |
 
 ### Panteón
 
@@ -573,7 +582,7 @@ Los logros **de un pacto** solo avanzan durante una vida con ese dios (y los com
 | Engranajes Lentos | Termina una vida en la Senda del Engranaje con la mutación Tiempo Espeso | +1 % |
 | Vigilia Soñada | Termina una vida en la Senda del Sueño con la mutación Fragmentos Lúcidos | +1 % |
 
-Además hay **45 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
+Además hay **46 logros secretos nuevos**, con hazañas como Ascender de formas poco comunes.
 
 ## Próxima meta *(v0.14)*
 

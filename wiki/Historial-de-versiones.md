@@ -2,6 +2,10 @@
 
 Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando una línea está probada, sale como **versión oficial**. Las notas completas de cada versión están en [Releases](https://github.com/Eduardo532/IdleEcosystem/releases).
 
+## v0.26.x *(en pruebas)*
+
+- **v0.26.0:** La Crónica. La partida contada en cinco actos (uno por capa) y veinte capítulos que se escriben solos al llegar a hitos, del primer edificio a Despertar a Azathoth. Se abre con el libro de la barra superior; cada capítulo nuevo avisa y la barra muestra el camino hacia el final. Además, Opciones › Tutoriales permite volver a ver los tutoriales que ya aparecieron. 10 logros nuevos.
+
 ## v0.25.2 · "El Sueño de Azathoth" *(oficial, 17 nov 2026)*
 
 Novena etapa del Roadmap, primera parte: la última capa y el final visible del juego. Esta oficial incluye también la línea 0.24 (Cartas del Rey de Amarillo y Artefactos), que no tuvo oficial propia.

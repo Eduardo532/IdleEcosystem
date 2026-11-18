@@ -693,4 +693,6 @@
     <string name="chronicle_unknown">Not yet written</string>
     <string name="chronicle_blank">· · · (a blank line)</string>
     <string name="chronicle_notice">New chapter in the Chronicle: %1$s</string>
+    <string name="chronicle_appendix">Appendix · What the Chronicle keeps silent</string>
+    <string name="event_remembers">This encounter remembers your choices.</string>
 </resources>

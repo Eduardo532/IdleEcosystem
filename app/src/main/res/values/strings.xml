@@ -694,4 +694,6 @@
     <string name="chronicle_unknown">Aún sin escribir</string>
     <string name="chronicle_blank">· · · (un renglón en blanco)</string>
     <string name="chronicle_notice">Nuevo capítulo en la Crónica: %1$s</string>
+    <string name="chronicle_appendix">Apéndice · Lo que la Crónica calla</string>
+    <string name="event_remembers">Este encuentro recuerda tus decisiones.</string>
 </resources>

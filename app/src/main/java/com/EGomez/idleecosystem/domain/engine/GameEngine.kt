@@ -67,7 +67,9 @@ import com.EGomez.idleecosystem.domain.logic.ChaosNode
 import com.EGomez.idleecosystem.domain.logic.Chronicle
 import com.EGomez.idleecosystem.domain.logic.ChronicleAct
 import com.EGomez.idleecosystem.domain.logic.ChronicleChapter
+import com.EGomez.idleecosystem.domain.model.EventProgress
 import com.EGomez.idleecosystem.domain.logic.EndingSummary
+import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.logic.RefineNode
 import com.EGomez.idleecosystem.domain.logic.YellowCard
 import com.EGomez.idleecosystem.domain.logic.YellowCards
@@ -275,6 +277,8 @@ data class EconomyState(
     val ending: EndingSummary? = null,
     /** La Crónica (v0.26.0): los capítulos escritos. */
     val chronicle: Set<String> = emptySet(),
+    /** El Apéndice de la Crónica (v0.26.1): páginas ocultas ya escritas. */
+    val chronicleAppendix: Set<String> = emptySet(),
     /** Cuando las Estrellas Estén en Posición (v0.19.7). */
     val stars: Double = 0.0,
     val stardust: Double = 0.0,
@@ -775,6 +779,7 @@ class GameEngine @Inject constructor(
 
     fun chooseEventOption(optionIndex: Int) = post {
         val option = eventScheduler.choose(optionIndex, System.currentTimeMillis()) ?: return@post
+        rememberChoice(option.memories)
         option.effects.forEach { effect ->
             when (effect.type) {
                 EffectType.ADD_KNOWLEDGE_PERCENT -> {
@@ -936,6 +941,10 @@ class GameEngine @Inject constructor(
         val written = writtenChapters()
         put(AchievementStat.CHRONICLE_CHAPTERS, written.size)
         put(AchievementStat.CHRONICLE_ACTS, ChronicleAct.entries.count { Chronicle.isActComplete(it, written) })
+        val memories = memories()
+        put(AchievementStat.MEMORIES, memories.size)
+        put(AchievementStat.MEMORY_ARCS, RandomEventManager.ARC_ENDINGS.values.count { ends -> ends.any { it in memories } })
+        put(AchievementStat.APPENDIX_PAGES, Chronicle.appendix(memories).size)
         put(AchievementStat.STAR_LEVELS, StarUpgrade.entries.sumOf { starLevel(it) })
         val beasts = beastLevels()
         put(AchievementStat.BEASTS_SEEN, beasts.count { it.value > 0 })
@@ -1414,7 +1423,7 @@ class GameEngine @Inject constructor(
         triggerDepthTutorials()
         runAutomation()
 
-        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)?.let { onEventShown() }
+        eventScheduler.tick(now, knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges, eventProgress())?.let { onEventShown() }
 
         // Desbloqueos, logros y recálculo completo: una vez por segundo. Las acciones
         // del jugador siguen recalculando al instante.
@@ -1472,7 +1481,7 @@ class GameEngine @Inject constructor(
                     }
                     is RuneReward.SanityBonus -> applySanityPercent(reward.percent)
                     is RuneReward.TriggerRandomEvent -> {
-                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges)
+                        eventScheduler.trigger(System.currentTimeMillis(), knowledge, prestigeManager.residualSanity, statsManager.totalPrestiges, eventProgress())
                             ?.let { onEventShown() }
                     }
                 }
@@ -2979,6 +2988,26 @@ class GameEngine @Inject constructor(
         return true
     }
 
+    // =====================================================================
+    // EVENTOS CON MEMORIA (v0.26.1)
+    // =====================================================================
+
+    /** Las decisiones que el juego recuerda para siempre. */
+    private fun memories(): Set<String> =
+        statsManager.counters.keys.filter { it.startsWith(AchievementStat.MEMORY_PREFIX) }
+            .map { it.removePrefix(AchievementStat.MEMORY_PREFIX) }.toSet()
+
+    private fun eventProgress(): EventProgress = EventProgress(memories(), lifetimeTranscendences(), awakenings())
+
+    private fun rememberChoice(keys: List<String>) {
+        val fresh = keys.filter { statsManager.counter(AchievementStat.memory(it)).signum() == 0 }
+        if (fresh.isEmpty()) return
+        fresh.forEach { statsManager.flag(AchievementStat.memory(it)) }
+        statsManager.flag(AchievementStat.memoryWith(activePact.id))
+        MadnessPaths.active(prestigeShopManager.upgrades)?.let { statsManager.flag(AchievementStat.memoryPath(it.id)) }
+        requestSave()
+    }
+
     /** Se abrió la Crónica (para su logro secreto). */
     fun noteChronicleOpened() = post { statsManager.count(AchievementStat.CHRONICLE_OPENS) }
 
@@ -3855,6 +3884,7 @@ class GameEngine @Inject constructor(
             canAwakenAzathoth = canAwakenAzathoth(),
             ending = if (azathothAwakenings() > 0) endingSummary() else null,
             chronicle = writtenChapters(),
+            chronicleAppendix = com.EGomez.idleecosystem.domain.logic.Chronicle.appendix(memories()).map { it.id }.toSet(),
             crystalNextSpawn = (crystalSpawnSeconds() - statsManager.counter(AchievementStat.CRYSTAL_TIMER).toDouble()).coerceAtLeast(0.0),
             stars = starCount(),
             stardust = statsManager.counter(AchievementStat.STARDUST).toDouble(),

@@ -32,7 +32,7 @@ val ChroniclePaper = Color(0xFFE8D9B0)
  * blanco. Arriba, el camino hacia el final.
  */
 @Composable
-fun ChronicleDialog(written: Set<String>, onDismiss: () -> Unit) {
+fun ChronicleDialog(written: Set<String>, onDismiss: () -> Unit, appendix: Set<String> = emptySet()) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier.fillMaxWidth(0.95f).fillMaxHeight(0.85f).testTag(CHRONICLE_TAG),
@@ -52,6 +52,24 @@ fun ChronicleDialog(written: Set<String>, onDismiss: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(6.dp).testTag(CHRONICLE_PROGRESS_TAG)
                 )
                 ChronicleAct.entries.forEach { act -> ActSection(act, written) }
+                // El Apéndice (v0.26.1): contenido oculto, solo si ya hay alguna página
+                val pages = com.EGomez.idleecosystem.domain.logic.ChronicleAppendix.entries.filter { it.id in appendix }
+                if (pages.isNotEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = Color(0xFF120F0A),
+                        border = BorderStroke(1.dp, Color(0xFF8D6E63)),
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp).testTag(CHRONICLE_APPENDIX_TAG)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(stringResource(R.string.chronicle_appendix), color = Color(0xFFBCAAA4), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            pages.forEach { page ->
+                                Text(tr(page.title), color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 10.dp))
+                                Text(tr(page.text), color = ChroniclePaper, fontSize = 13.sp, fontStyle = FontStyle.Italic, modifier = Modifier.padding(top = 2.dp))
+                            }
+                        }
+                    }
+                }
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                     Text(stringResource(R.string.close), color = ChroniclePaper)
                 }
@@ -104,3 +122,4 @@ const val CHRONICLE_TAG = "chronicle"
 const val CHRONICLE_PROGRESS_TAG = "chronicle_progress"
 const val CHRONICLE_ACT_TAG = "chronicle_act_"
 const val CHRONICLE_BUTTON_TAG = "chronicle_button"
+const val CHRONICLE_APPENDIX_TAG = "chronicle_appendix"

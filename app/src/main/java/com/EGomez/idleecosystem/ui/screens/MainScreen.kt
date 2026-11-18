@@ -482,7 +482,8 @@ fun MainScreen(
             if (showChronicleDialog) {
                 com.EGomez.idleecosystem.ui.screens.main.dialogs.ChronicleDialog(
                     written = uiState.chronicle,
-                    onDismiss = { showChronicleDialog = false }
+                    onDismiss = { showChronicleDialog = false },
+                    appendix = uiState.chronicleAppendix
                 )
             }
 

@@ -280,6 +280,7 @@ class MainViewModel @Inject constructor(
             artifacts = economy.artifactLevels
         ),
         chronicle = economy.chronicle,
+        chronicleAppendix = economy.chronicleAppendix,
         descentUi = com.EGomez.idleecosystem.ui.screens.main.components.DescentUi(
             chaos = economy.chaos,
             chaosGain = economy.chaosGain,

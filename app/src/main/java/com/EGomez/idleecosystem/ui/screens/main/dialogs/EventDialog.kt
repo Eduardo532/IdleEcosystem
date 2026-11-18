@@ -60,6 +60,16 @@ fun EventDialog(
             },
             text = {
                 Column {
+                    // Eventos con memoria (v0.26.1): avisan que recuerdan
+                    if (event.remembers) {
+                        Text(
+                            androidx.compose.ui.res.stringResource(com.EGomez.idleecosystem.R.string.event_remembers),
+                            color = AncientGold,
+                            fontSize = 11.sp,
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                    }
                     Text(tr(event.description), color = Color.LightGray, fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(24.dp))
 

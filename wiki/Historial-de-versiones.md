@@ -5,6 +5,7 @@ Cada día de desarrollo publica una versión de prueba (Alpha o Beta). Cuando un
 ## v0.26.x *(en pruebas)*
 
 - **v0.26.0:** La Crónica. La partida contada en cinco actos (uno por capa) y veinte capítulos que se escriben solos al llegar a hitos, del primer edificio a Despertar a Azathoth. Se abre con el libro de la barra superior; cada capítulo nuevo avisa y la barra muestra el camino hacia el final. Además, Opciones › Tutoriales permite volver a ver los tutoriales que ya aparecieron. 10 logros nuevos.
+- **v0.26.1:** Eventos con memoria y contenido oculto. Tres historias de eventos recuerdan para siempre tus decisiones y cambian según ellas, de la Ascensión al Despertar. Al cerrarlas se escriben páginas ocultas en el Apéndice de la Crónica, y hay un encuentro secreto para quien cierre las tres. Con esto la etapa 9 queda completa. 9 logros nuevos.
 
 ## v0.25.2 · "El Sueño de Azathoth" *(oficial, 17 nov 2026)*
 

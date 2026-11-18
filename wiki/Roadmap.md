@@ -14,7 +14,7 @@ Cada etapa termina en una **puerta**: una condición que debería cumplirse ante
 | 6 | v0.19 | Completar la segunda capa | Romper el Velo ✅, Hitos de Trascendencia ✅, Cuando las Estrellas Estén en Posición ✅, Bestiario ✅, Laboratorio de Miskatonic ✅ | Las 10 Pruebas tienen un objetivo final y Trascender se automatiza |
 | 7 | v0.20 | Profundidad de Trascender | El Sueño Profundo ✅, Cadena de Invocación ✅, Letargo ✅, Pruebas de Trascendencia (I–V) ✅ | Un ciclo de Trascender tiene un desafío largo propio |
 | 8 | v0.21 – v0.23 | Tercera capa: el Despertar | Despertar (Pruebas combinadas) ✅, Signos Antiguos y planetas ✅, Expediciones y Reliquias ✅, Cristales de Yuggoth ✅, los Cuatro Elementales ✅ | El Despertar abre minijuegos distintos que alimentan a las capas anteriores |
-| 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo ✅ (v0.24.0), Artefactos ✅ (v0.24.1), El Sueño de Azathoth ✅ (v0.25.0), Despertar a Azathoth ✅ (v0.25.1), actos con un final visible e interfaz narrativa ✅ (la Crónica, v0.26.0); eventos con memoria y contenido oculto (v0.26.1) | El juego tiene un final visible |
+| 9 | v0.24 → v1.0 | El arco final | Cartas del Rey de Amarillo ✅ (v0.24.0), Artefactos ✅ (v0.24.1), El Sueño de Azathoth ✅ (v0.25.0), Despertar a Azathoth ✅ (v0.25.1), actos con un final visible e interfaz narrativa ✅ (la Crónica, v0.26.0); eventos con memoria y contenido oculto ✅ (v0.26.1) | El juego tiene un final visible |
 
 ## Las capas como actos
 
@@ -67,6 +67,7 @@ Cada capa de prestigio es un acto de la historia, con su narrativa y su cierre:
 | **Artefactos** ✅ *v0.24.1* | Artefactos | Siete Artefactos que se compran con los Fragmentos Amarillos de las Cartas, valen para siempre y aceleran sistemas concretos: Favor, Sueño, la Mina, el Polvo Estelar, la Expedición, las Visiones y los propios Fragmentos. Ver [Cartas del Rey de Amarillo](Cartas-del-Rey-de-Amarillo). |
 | **El Sueño de Azathoth** ✅ *v0.25.0 – v0.25.1* | Singularidad | La última capa: Descender reinicia el Despertar y da Caos, que compra el árbol del Caos (7 nodos). Despertar a Azathoth es el final visible: epílogo, resumen de la partida y el juego sigue con el Ojo abierto. Ver [El Sueño de Azathoth](El-Sueno-de-Azathoth). |
 | **La Crónica** ✅ *v0.26.0* | Narrativa | Los actos con un final visible y la interfaz narrativa: la partida contada en cinco actos (uno por capa) y veinte capítulos que se escriben solos al llegar a hitos, con una barra hacia el final y avisos de cada capítulo nuevo. Ver [La Crónica](La-Cronica). |
+| **Eventos con memoria y contenido oculto** ✅ *v0.26.1* | Narrativa | Tres historias de eventos que recuerdan para siempre tus decisiones y cambian según ellas, de la Ascensión al Despertar; al cerrarlas se escriben páginas ocultas en el Apéndice de la Crónica, y hay un encuentro secreto para quien cierre las tres. Ver [Eventos](Eventos). |
 
 ### Mecánicas generales
 

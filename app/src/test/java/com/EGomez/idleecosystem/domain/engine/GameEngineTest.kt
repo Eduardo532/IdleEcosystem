@@ -1231,6 +1231,23 @@ class GameEngineTest {
     }
 
     @Test
+    fun `memories write the hidden appendix`() = runBlocking {
+        val saved = StatisticsManager().apply {
+            counters[AchievementStat.memory("cats_end")] = BigDecimal.ONE
+            counters[AchievementStat.memory("guest_end")] = BigDecimal.ONE
+        }.getEntityForSave()
+        engine.importSave(
+            FullSaveData(
+                knowledge = BigDecimal(100), sanity = BigDecimal.ZERO, echoes = BigDecimal.ZERO,
+                buildings = emptyList(), upgrades = emptyList(), achievements = emptyList(),
+                prestigeUpgrades = emptyList(), timestamp = 0L, statistics = saved
+            )
+        )
+        val economy = await(engine.economy) { it.chronicleAppendix.isNotEmpty() }
+        assertEquals(setOf("ulthar", "deep"), economy.chronicleAppendix)
+    }
+
+    @Test
     fun `the expedition fights horrors, pays gold on awakening and gold buys relics`() = runBlocking {
         val saved = StatisticsManager().apply {
             totalPrestiges = 50

@@ -3,6 +3,7 @@ package com.EGomez.idleecosystem.domain.engine
 import com.EGomez.idleecosystem.domain.logic.RandomEventManager
 import com.EGomez.idleecosystem.domain.model.EffectType
 import com.EGomez.idleecosystem.domain.model.EventOption
+import com.EGomez.idleecosystem.domain.model.EventProgress
 import com.EGomez.idleecosystem.domain.model.RandomEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,10 +58,16 @@ class EventScheduler @Inject constructor(
      * Avanza un segundo de juego.
      * @return el evento que acaba de aparecer, o null.
      */
-    fun tick(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
+    fun tick(
+        nowMillis: Long,
+        knowledge: BigDecimal,
+        sanity: BigDecimal,
+        ascensions: Int = 0,
+        progress: EventProgress = EventProgress()
+    ): RandomEvent? {
         updateBuff(nowMillis)
         if (_state.value.currentEvent == null && nowMillis >= nextEventAtMillis) {
-            return trigger(nowMillis, knowledge, sanity, ascensions)
+            return trigger(nowMillis, knowledge, sanity, ascensions, progress)
         }
         return null
     }
@@ -69,12 +76,18 @@ class EventScheduler @Inject constructor(
      * Muestra un evento ahora (también lo usa la Runa de Visión).
      * @return el evento mostrado, o null si ya había uno o ninguno cumple su condición.
      */
-    fun trigger(nowMillis: Long, knowledge: BigDecimal, sanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
+    fun trigger(
+        nowMillis: Long,
+        knowledge: BigDecimal,
+        sanity: BigDecimal,
+        ascensions: Int = 0,
+        progress: EventProgress = EventProgress()
+    ): RandomEvent? {
         // La Runa de Visión podía reemplazar un evento que el jugador estaba leyendo
         if (_state.value.currentEvent != null) return null
         // Una cadena abierta tiene prioridad sobre el azar
         val event = pendingFollowUp?.also { pendingFollowUp = null }
-            ?: randomEventManager.getRandomEvent(knowledge, sanity, ascensions)
+            ?: randomEventManager.getRandomEvent(knowledge, sanity, ascensions, progress)
         if (event == null) {
             scheduleNext(nowMillis)
             return null

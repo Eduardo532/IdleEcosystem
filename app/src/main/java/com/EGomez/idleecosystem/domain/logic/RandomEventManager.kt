@@ -3,6 +3,7 @@ package com.EGomez.idleecosystem.domain.logic
 import com.EGomez.idleecosystem.domain.model.EffectType
 import com.EGomez.idleecosystem.domain.model.EventEffect
 import com.EGomez.idleecosystem.domain.model.EventOption
+import com.EGomez.idleecosystem.domain.model.EventProgress
 import com.EGomez.idleecosystem.domain.model.RandomEvent
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -429,12 +430,14 @@ class RandomEventManager @Inject constructor() {
                     text = "Dejarlo pasar",
                     flavorResult = "Se sienta junto al fuego sin decir palabra.",
                     effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
-                    followUpEventId = "evt_chain_guest_2"
+                    followUpEventId = "evt_chain_guest_2",
+                    memories = listOf(GUEST_WELCOMED)
                 ),
                 EventOption(
                     text = "Cerrar la puerta",
                     flavorResult = "Escuchas pasos alejándose... hacia el mar.",
-                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0))
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    memories = listOf(GUEST_SHUT)
                 )
             ),
             weight = 6,
@@ -522,8 +525,339 @@ class RandomEventManager @Inject constructor() {
             weight = 3,
             condition = { _, sanity -> sanity.signum() > 0 },
             minAscensions = 5
-        )
+        ),
+
+        // ========================================================================
+        // EVENTOS CON MEMORIA (v0.26.1): recuerdan tus decisiones de otras vidas
+        // ========================================================================
+
+        RandomEvent(
+            id = "evt_mem_cats_1",
+            title = "Un Gato en el Umbral",
+            description = "Un gato negro te mira desde el umbral, como si ya te conociera. No maúlla. Espera.",
+            options = listOf(
+                EventOption(
+                    text = "Darle de comer",
+                    flavorResult = "Come despacio, sin dejar de mirarte. Al irse, deja una pluma que no es de ningún pájaro.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.05)),
+                    memories = listOf(CATS_FED)
+                ),
+                EventOption(
+                    text = "Espantarlo",
+                    flavorResult = "Se va sin prisa. En el barro, sus huellas siguen caminando un rato después.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.03)),
+                    memories = listOf(CATS_SCARED)
+                )
+            ),
+            weight = 8,
+            minAscensions = 2,
+            forbids = listOf(CATS_FED, CATS_SCARED)
+        ),
+        RandomEvent(
+            id = "evt_mem_cats_fed",
+            title = "Los Gatos Vuelven",
+            description = "Ahora son siete. El primero, el negro, te reconoce y trae a los demás. Dejan regalos en tu escritorio que no son de este mundo.",
+            options = listOf(
+                EventOption(
+                    text = "Aceptar los regalos",
+                    flavorResult = "Un hueso de luna, una llave sin puerta, un sueño atado con un hilo. Todo sirve.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 5.0, durationSeconds = 60)),
+                    memories = listOf(CATS_GIFTS)
+                ),
+                EventOption(
+                    text = "Seguirlos",
+                    flavorResult = "Te llevan por calles que no estaban en tu ciudad. Vuelves con la cabeza llena.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.20)),
+                    memories = listOf(CATS_FOLLOWED)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(CATS_FED),
+            forbids = listOf(CATS_GIFTS, CATS_FOLLOWED),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_cats_scared",
+            title = "Ojos en la Oscuridad",
+            description = "Cada noche hay más ojos en tu ventana. No parpadean. Recuerdas al gato negro que espantaste.",
+            options = listOf(
+                EventOption(
+                    text = "Pedir perdón con leche",
+                    flavorResult = "A la mañana el plato está vacío y los ojos se han ido. Casi todos.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.05)),
+                    memories = listOf(CATS_FORGIVEN)
+                ),
+                EventOption(
+                    text = "Cerrar las cortinas",
+                    flavorResult = "Los ojos siguen ahí, del otro lado de la tela. Lo sabes.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    memories = listOf(CATS_ENEMIES)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(CATS_SCARED),
+            forbids = listOf(CATS_FORGIVEN, CATS_ENEMIES),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_cats_council",
+            title = "El Consejo de Ulthar",
+            description = "Los gatos de Ulthar te reciben en su consejo, en la cara oculta de la luna. Recuerdan cada gesto tuyo, y hoy votan en tu favor.",
+            options = listOf(
+                EventOption(
+                    text = "Escuchar",
+                    flavorResult = "Hablan de los dioses como de ratones. Por un rato, tú también.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 10.0, durationSeconds = 120)),
+                    memories = listOf(CATS_END)
+                ),
+                EventOption(
+                    text = "Hablar",
+                    flavorResult = "Les cuentas lo que sabes. Te corrigen tres veces, con amabilidad.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.30)),
+                    memories = listOf(CATS_END)
+                )
+            ),
+            weight = 8,
+            requiresAny = listOf(CATS_GIFTS, CATS_FOLLOWED, CATS_FORGIVEN),
+            forbids = listOf(CATS_END),
+            minAwakenings = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_cats_vengeance",
+            title = "Ulthar no Olvida",
+            description = "En Ulthar una ley antigua prohíbe matar gatos. Nadie dijo nada de espantarlos. Pero ellos lo recuerdan, y hoy vienen todos.",
+            options = listOf(
+                EventOption(
+                    text = "Aceptar su juicio",
+                    flavorResult = "Te arañan una vez cada uno. Al final, el negro se sienta en tu regazo. Es una tregua.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.03)),
+                    memories = listOf(CATS_BITTER)
+                ),
+                EventOption(
+                    text = "Huir",
+                    flavorResult = "Corres toda la noche. Al amanecer estás en tu cuarto, y el gato negro duerme en tu silla.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    memories = listOf(CATS_BITTER)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(CATS_ENEMIES),
+            forbids = listOf(CATS_BITTER),
+            minAwakenings = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_letters_1",
+            title = "Una Carta de Arkham",
+            description = "El profesor Wilmarth, de la Universidad de Miskatonic, te escribe: leyó tus notas en una revista que no recuerdas haber publicado, y quiere saber más.",
+            options = listOf(
+                EventOption(
+                    text = "Responder con todo",
+                    flavorResult = "Le escribes veinte páginas. Su respuesta llega antes de que envíes la tuya.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.08)),
+                    memories = listOf(LETTERS_ANSWERED)
+                ),
+                EventOption(
+                    text = "Quemar la carta",
+                    flavorResult = "El papel tarda demasiado en arder. Las letras se resisten.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.03)),
+                    memories = listOf(LETTERS_BURNED)
+                )
+            ),
+            weight = 8,
+            minAscensions = 3,
+            forbids = listOf(LETTERS_ANSWERED, LETTERS_BURNED)
+        ),
+        RandomEvent(
+            id = "evt_mem_letters_answered",
+            title = "La Segunda Carta",
+            description = "Wilmarth te agradece. En las colinas de Vermont hay unos seres que vienen de Yuggoth, y ahora le escriben con su letra. Te pide que no le escribas más.",
+            options = listOf(
+                EventOption(
+                    text = "Escribirle igual",
+                    flavorResult = "Tu carta vuelve sin abrir, pero con algo adentro que no es tuyo.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 4.0, durationSeconds = 60)),
+                    memories = listOf(LETTERS_INSISTED)
+                ),
+                EventOption(
+                    text = "Respetar su deseo",
+                    flavorResult = "Guardas su carta en un cajón. A veces, de noche, la oyes doblarse sola.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.05)),
+                    memories = listOf(LETTERS_RESPECTED)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(LETTERS_ANSWERED),
+            forbids = listOf(LETTERS_INSISTED, LETTERS_RESPECTED),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_letters_burned",
+            title = "Cenizas que Escriben",
+            description = "Las cenizas de aquella carta de Arkham que quemaste forman frases en tu chimenea. La letra es del profesor.",
+            options = listOf(
+                EventOption(
+                    text = "Leerlas",
+                    flavorResult = "Dicen lo que la carta decía, y un poco más.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.15)),
+                    memories = listOf(LETTERS_ASHES)
+                ),
+                EventOption(
+                    text = "Barrerlas",
+                    flavorResult = "La escoba deja surcos con forma de firma.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    memories = listOf(LETTERS_SWEPT)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(LETTERS_BURNED),
+            forbids = listOf(LETTERS_ASHES, LETTERS_SWEPT),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_letters_cylinder",
+            title = "El Cilindro",
+            description = "Llega un paquete sin remitente desde Vermont: un cilindro de metal que zumba. Dentro, una voz que conoces por carta dice tu nombre.",
+            options = listOf(
+                EventOption(
+                    text = "Hablar con la voz",
+                    flavorResult = "Wilmarth, o lo que queda de él, te cuenta Yuggoth con todo detalle.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 8.0, durationSeconds = 90)),
+                    memories = listOf(LETTERS_END)
+                ),
+                EventOption(
+                    text = "Enterrarlo",
+                    flavorResult = "Lo entierras bajo el roble. El zumbido sigue, más bajo, todas las noches.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.08)),
+                    memories = listOf(LETTERS_END)
+                )
+            ),
+            weight = 8,
+            requiresAny = listOf(LETTERS_INSISTED, LETTERS_RESPECTED, LETTERS_ASHES),
+            forbids = listOf(LETTERS_END),
+            minAwakenings = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_guest_tide",
+            title = "La Marea Recuerda",
+            description = "La marea sube hasta tu puerta y deja conchas con forma de ojo. El huésped empapado al que diste refugio dejó una dirección escrita con sal: Innsmouth.",
+            options = listOf(
+                EventOption(
+                    text = "Ir a Innsmouth",
+                    flavorResult = "El pueblo huele a pescado y a secreto. Te tratan como a un pariente.",
+                    effects = listOf(EventEffect(EffectType.ADD_KNOWLEDGE_PERCENT, 0.20)),
+                    memories = listOf(GUEST_INNSMOUTH)
+                ),
+                EventOption(
+                    text = "Guardar las conchas",
+                    flavorResult = "Si te acercas una al oído, oyes una canción que ya conoces.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 4.0, durationSeconds = 60)),
+                    memories = listOf(GUEST_SHELLS)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(GUEST_WELCOMED),
+            forbids = listOf(GUEST_INNSMOUTH, GUEST_SHELLS),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_guest_knock",
+            title = "Golpes desde el Mar",
+            description = "Alguien golpea tu puerta de noche. Huele a sal. Es el hombre empapado al que le cerraste la puerta, pero ya no parece un hombre.",
+            options = listOf(
+                EventOption(
+                    text = "Abrir esta vez",
+                    flavorResult = "Entra, gotea, se sienta. No dice nada de la otra vez.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.05)),
+                    memories = listOf(GUEST_SECOND_CHANCE)
+                ),
+                EventOption(
+                    text = "Atrancar la puerta",
+                    flavorResult = "Los golpes siguen hasta el amanecer. La madera queda húmeda para siempre.",
+                    effects = listOf(EventEffect(EffectType.NOTHING, 0.0)),
+                    memories = listOf(GUEST_BARRED)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(GUEST_SHUT),
+            forbids = listOf(GUEST_SECOND_CHANCE, GUEST_BARRED),
+            minTranscendences = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_guest_deep",
+            title = "Y'ha-nthlei",
+            description = "Te invitan bajo el Arrecife del Diablo, a la ciudad de los Profundos. Recuerdan quién les abrió la puerta.",
+            options = listOf(
+                EventOption(
+                    text = "Bajar",
+                    flavorResult = "Respiras agua por primera vez. No es tan distinto.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 10.0, durationSeconds = 120)),
+                    memories = listOf(GUEST_END)
+                ),
+                EventOption(
+                    text = "Prometer volver",
+                    flavorResult = "Te dejan ir. Saben que vas a cumplir.",
+                    effects = listOf(EventEffect(EffectType.ADD_SANITY_PERCENT, 0.10)),
+                    memories = listOf(GUEST_END)
+                )
+            ),
+            weight = 8,
+            requiresAny = listOf(GUEST_INNSMOUTH, GUEST_SHELLS, GUEST_SECOND_CHANCE),
+            forbids = listOf(GUEST_END),
+            minAwakenings = 1
+        ),
+        RandomEvent(
+            id = "evt_mem_witnesses",
+            title = "Los Tres Testigos",
+            description = "Un gato negro, un profesor que ya no tiene cuerpo y un hombre que huele a sal llaman a tu puerta a la vez. Vienen a contarte cómo termina todo.",
+            options = listOf(
+                EventOption(
+                    text = "Escucharlos",
+                    flavorResult = "Cada uno cuenta una parte. Juntas, son la historia que la Crónica no escribió.",
+                    effects = listOf(EventEffect(EffectType.GLOBAL_BUFF, 20.0, durationSeconds = 300)),
+                    memories = listOf(WITNESSES)
+                )
+            ),
+            weight = 8,
+            requiresAll = listOf(LETTERS_END, GUEST_END),
+            requiresAny = listOf(CATS_END, CATS_BITTER),
+            forbids = listOf(WITNESSES),
+            minAwakenings = 3
+        ),
     )
+
+    companion object {
+        // Las memorias de los eventos (v0.26.1), guardadas como "memory.<clave>"
+        const val CATS_FED = "cats_fed"
+        const val CATS_SCARED = "cats_scared"
+        const val CATS_GIFTS = "cats_gifts"
+        const val CATS_FOLLOWED = "cats_followed"
+        const val CATS_FORGIVEN = "cats_forgiven"
+        const val CATS_ENEMIES = "cats_enemies"
+        const val CATS_END = "cats_end"
+        const val CATS_BITTER = "cats_bitter"
+        const val LETTERS_ANSWERED = "letters_answered"
+        const val LETTERS_BURNED = "letters_burned"
+        const val LETTERS_INSISTED = "letters_insisted"
+        const val LETTERS_RESPECTED = "letters_respected"
+        const val LETTERS_ASHES = "letters_ashes"
+        const val LETTERS_SWEPT = "letters_swept"
+        const val LETTERS_END = "letters_end"
+        const val GUEST_WELCOMED = "guest_welcomed"
+        const val GUEST_SHUT = "guest_shut"
+        const val GUEST_INNSMOUTH = "guest_innsmouth"
+        const val GUEST_SHELLS = "guest_shells"
+        const val GUEST_SECOND_CHANCE = "guest_second_chance"
+        const val GUEST_BARRED = "guest_barred"
+        const val GUEST_END = "guest_end"
+        const val WITNESSES = "witnesses"
+
+        /** Las tres historias con memoria y lo que las cierra. */
+        val ARC_ENDINGS: Map<String, List<String>> = mapOf(
+            "cats" to listOf(CATS_END, CATS_BITTER),
+            "letters" to listOf(LETTERS_END),
+            "guest" to listOf(GUEST_END)
+        )
+    }
 
     /** Un evento por id (las continuaciones de cadena se piden así). */
     fun getEvent(id: String): RandomEvent? = events.find { it.id == id }
@@ -532,11 +866,17 @@ class RandomEventManager @Inject constructor() {
     fun allEvents(): List<RandomEvent> = events
 
     // AHORA RECIBE EL ESTADO PARA FILTRAR
-    fun getRandomEvent(currentKnowledge: BigDecimal, currentSanity: BigDecimal, ascensions: Int = 0): RandomEvent? {
+    fun getRandomEvent(
+        currentKnowledge: BigDecimal,
+        currentSanity: BigDecimal,
+        ascensions: Int = 0,
+        progress: EventProgress = EventProgress()
+    ): RandomEvent? {
         // 1. Filtramos por la condición de cada evento. Las continuaciones de cadena
         //    nunca salen al azar, y las Memorias esperan sus Ascensiones.
         val validEvents = events.filter {
-            !it.isFollowUp && ascensions >= it.minAscensions && it.condition(currentKnowledge, currentSanity)
+            !it.isFollowUp && ascensions >= it.minAscensions && it.allows(progress) &&
+                it.condition(currentKnowledge, currentSanity)
         }
 
         if (validEvents.isEmpty()) return null
